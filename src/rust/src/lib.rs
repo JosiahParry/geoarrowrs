@@ -1,13 +1,20 @@
-pub mod ffi; 
+pub mod ffi;
+pub mod length;
 
-use std::io::{BufReader};
-
+use std::io::BufReader;
+use arrow::{
+    array::RecordBatchReader,
+    ffi::{FFI_ArrowArray, FFI_ArrowSchema},
+    ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream},
+};
 use extendr_api::prelude::*;
-use arrow::{array::{ RecordBatchReader}, ffi::{FFI_ArrowArray, FFI_ArrowSchema}, ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream}};
 use geoarrow::table::Table;
 
 #[extendr]
-pub fn read_ffi_array_schema(array: ExternalPtr<FFI_ArrowArray>, schema: ExternalPtr<FFI_ArrowSchema>) -> List {
+pub fn read_ffi_array_schema(
+    array: ExternalPtr<FFI_ArrowArray>,
+    schema: ExternalPtr<FFI_ArrowSchema>,
+) -> List {
     list!(array, schema)
 }
 
@@ -17,14 +24,15 @@ fn read_ffi_stream(x: ExternalPtr<FFI_ArrowArrayStream>) -> ExternalPtr<FFI_Arro
 }
 
 #[extendr]
-fn read_ffi_geoarrow_tbl(mut x: ExternalPtr<FFI_ArrowArrayStream>) -> ExternalPtr<FFI_ArrowArrayStream> {
-    
+fn read_ffi_geoarrow_tbl(
+    mut x: ExternalPtr<FFI_ArrowArrayStream>,
+) -> ExternalPtr<FFI_ArrowArrayStream> {
     let s = unsafe { ArrowArrayStreamReader::from_raw(&mut *x) }.unwrap();
     let schema = s.schema();
 
     let mut produced_batches = vec![];
     for batch in s {
-         produced_batches.push(batch.unwrap());
+        produced_batches.push(batch.unwrap());
     }
     let res = Table::try_new(produced_batches, schema).unwrap();
 
@@ -32,7 +40,6 @@ fn read_ffi_geoarrow_tbl(mut x: ExternalPtr<FFI_ArrowArrayStream>) -> ExternalPt
 
     ExternalPtr::new(FFI_ArrowArrayStream::new(out))
 }
-
 
 #[extendr]
 fn read_geojson_(path: &str, batch_size: Option<usize>) -> ExternalPtr<FFI_ArrowArrayStream> {
@@ -45,11 +52,14 @@ fn read_geojson_(path: &str, batch_size: Option<usize>) -> ExternalPtr<FFI_Arrow
     ExternalPtr::new(FFI_ArrowArrayStream::new(out))
 }
 
+
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod geoarrowrs;
+    use length;
     fn read_ffi_array_schema;
     fn read_ffi_stream;
     fn read_ffi_geoarrow_tbl;
