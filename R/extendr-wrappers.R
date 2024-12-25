@@ -7,7 +7,7 @@
 #   .Call("wrap__make_naro_wrappers", use_symbols = TRUE, package_name = "naro")
 
 #' @usage NULL
-#' @useDynLib naro, .registration = TRUE
+#' @useDynLib geoarrowrs, .registration = TRUE
 NULL
 
 read_ffi_array_schema <- function(array, schema) .Call(wrap__read_ffi_array_schema, array, schema)

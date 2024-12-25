@@ -1,3 +1,6 @@
+mod point;
+pub use point::*; 
+
 use arrow::{
     array::RecordBatchReader,
     ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream},

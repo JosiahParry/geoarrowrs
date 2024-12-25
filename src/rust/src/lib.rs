@@ -45,11 +45,6 @@ fn read_geojson_(path: &str, batch_size: Option<usize>) -> ExternalPtr<FFI_Arrow
     ExternalPtr::new(FFI_ArrowArrayStream::new(out))
 }
 
-#[extendr]
-fn throw_error_test() {
-    throw_r_error("This is an error message");
-    panic!("this is unreachable");
-}
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -59,5 +54,4 @@ extendr_module! {
     fn read_ffi_stream;
     fn read_ffi_geoarrow_tbl;
     fn read_geojson_;
-    fn throw_error_test;
 }
