@@ -1,9 +1,9 @@
 pub mod ffi; 
 
-use std::io::{BufRead, BufReader};
+use std::io::{BufReader};
 
 use extendr_api::prelude::*;
-use arrow::{array::{Array, Int32Array, RecordBatch, RecordBatchReader}, ffi::{from_ffi, to_ffi, FFI_ArrowArray, FFI_ArrowSchema}, ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream}};
+use arrow::{array::{ RecordBatchReader}, ffi::{FFI_ArrowArray, FFI_ArrowSchema}, ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream}};
 use geoarrow::table::Table;
 
 #[extendr]
