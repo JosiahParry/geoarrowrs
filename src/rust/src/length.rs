@@ -8,13 +8,13 @@ use geoarrow::{algorithm::geo::EuclideanLength, NativeArray};
 
 #[extendr]
 pub fn length_euclidean_(
-    mut array: ExternalPtr<&mut FFI_ArrowArray>,
+    mut array: ExternalPtr<FFI_ArrowArray>,
     schema: ExternalPtr<FFI_ArrowSchema>,
 ) -> Result<List> {
-    // We leak the pointer so that the arrow array still exists even after cloning.
-    // let ba = Box::new(array.clone());
-    // let leaked = Box::leak(ba);
-    let array = unsafe { FFI_ArrowArray::from_raw(&mut **array) };
+    // We leak the pointer so that the arrow array still exists even after
+    let ba = Box::new(array.clone());
+    let leaked = Box::leak(ba);
+    let array = unsafe { FFI_ArrowArray::from_raw(&mut *array) };
     let res = try_to_native_dyn_array(array, schema.as_ref()).unwrap();
     let lens = res.as_ref().euclidean_length().unwrap();
     let (a, s) = to_ffi(&lens.into_data()).unwrap();

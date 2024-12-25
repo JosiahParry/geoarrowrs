@@ -4,7 +4,7 @@
 
 #
 # This file was created with the following call:
-#   .Call("wrap__make_naro_wrappers", use_symbols = TRUE, package_name = "naro")
+#   .Call("wrap__make_geoarrowrs_wrappers", use_symbols = TRUE, package_name = "geoarrowrs")
 
 #' @usage NULL
 #' @useDynLib geoarrowrs, .registration = TRUE
@@ -18,7 +18,7 @@ read_ffi_geoarrow_tbl <- function(x) .Call(wrap__read_ffi_geoarrow_tbl, x)
 
 read_geojson_ <- function(path, batch_size) .Call(wrap__read_geojson_, path, batch_size)
 
-throw_error_test <- function() invisible(.Call(wrap__throw_error_test))
+length_euclidean_ <- function(array, schema) .Call(wrap__length_euclidean_, array, schema)
 
 
 # nolint end
