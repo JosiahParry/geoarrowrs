@@ -1,0 +1,15 @@
+[package]
+name = 'geoarrowrs'
+publish = false
+version = '0.1.0'
+edition = '2021'
+
+[lib]
+crate-type = [ 'staticlib' ]
+name = 'geoarrowrs'
+
+[dependencies]
+extendr-api = '*'
+arrow = { version = "53.0.0", features = ["ffi"] }
+geoarrow = "0.4.0-beta.3"
+
