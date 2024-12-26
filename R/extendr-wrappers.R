@@ -20,5 +20,7 @@ read_geojson_ <- function(path, batch_size) .Call(wrap__read_geojson_, path, bat
 
 length_euclidean_ <- function(array, schema) .Call(wrap__length_euclidean_, array, schema)
 
+length_euclidean_stream <- function(array) invisible(.Call(wrap__length_euclidean_stream, array))
+
 
 # nolint end

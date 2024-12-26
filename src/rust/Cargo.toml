@@ -9,7 +9,8 @@ crate-type = [ 'staticlib' ]
 name = 'geoarrowrs'
 
 [dependencies]
-extendr-api = '*'
+extendr-api = "0.7.1"
+# extendr-api = { git = "https://github.com/extendr/extendr" }
 arrow = { version = "53.0.0", features = ["ffi"] }
 geoarrow = "0.4.0-beta.3"
 

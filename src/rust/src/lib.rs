@@ -19,7 +19,8 @@ pub fn read_ffi_array_schema(
 }
 
 #[extendr]
-fn read_ffi_stream(x: ExternalPtr<FFI_ArrowArrayStream>) -> ExternalPtr<FFI_ArrowArrayStream> {
+fn read_ffi_stream(mut x: ExternalPtr<FFI_ArrowArrayStream>) -> ExternalPtr<FFI_ArrowArrayStream> {
+    let _ = unsafe {ArrowArrayStreamReader::from_raw(&mut * x)}.unwrap();
     x
 }
 
