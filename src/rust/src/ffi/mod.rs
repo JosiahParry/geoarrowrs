@@ -58,13 +58,12 @@ impl TryFrom<Robj> for GeoTable {
     }
 }
 
-impl TryFrom<GeoTable> for Robj {
-    type Error = Error;
-    fn try_from(value: GeoTable) -> Result<Self, Self::Error> {
+impl From<GeoTable> for Robj {
+    fn from(value: GeoTable) -> Self {
         let out = value.0.into_record_batch_reader();
         let mut ptr = ExternalPtr::new(FFI_ArrowArrayStream::new(out)).into_robj();
-        ptr.set_class(["geotable", "nanoarrow_array_stream"])?;
-        Ok(ptr)
+        ptr.set_class(["geotable", "nanoarrow_array_stream"]).expect("failed to set class");
+        ptr
     }
 }
 

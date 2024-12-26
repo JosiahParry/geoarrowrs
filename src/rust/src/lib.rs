@@ -1,7 +1,8 @@
 pub mod ffi;
 pub mod length;
+pub mod io;
+pub mod algorithm;
 
-use std::io::BufReader;
 use arrow::{
     array::RecordBatchReader,
     ffi::{FFI_ArrowArray, FFI_ArrowSchema},
@@ -42,18 +43,6 @@ fn read_ffi_geoarrow_tbl(
     ExternalPtr::new(FFI_ArrowArrayStream::new(out))
 }
 
-#[extendr]
-fn read_geojson_(path: &str, batch_size: Option<usize>) -> ExternalPtr<FFI_ArrowArrayStream> {
-    let f = std::fs::File::open(path).unwrap();
-    let r = BufReader::new(f);
-    let res = geoarrow::io::geojson::read_geojson(r, batch_size).unwrap();
-    rprintln!("{res:?}");
-    let out = res.into_record_batch_reader();
-
-    ExternalPtr::new(FFI_ArrowArrayStream::new(out))
-}
-
-
 
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
@@ -61,8 +50,8 @@ fn read_geojson_(path: &str, batch_size: Option<usize>) -> ExternalPtr<FFI_Arrow
 extendr_module! {
     mod geoarrowrs;
     use length;
+    use io;
     fn read_ffi_array_schema;
     fn read_ffi_stream;
     fn read_ffi_geoarrow_tbl;
-    fn read_geojson_;
 }
