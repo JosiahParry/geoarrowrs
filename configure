@@ -4,7 +4,8 @@
 
 # Set CRAN_FLAGS based on the NOT_CRAN value
 if [ "${NOT_CRAN}" != "true" ] && [ -f ./src/rust/vendor.tar.xz ]; then
-  export CRAN_FLAGS="-j 2 --offline"
+  # export CRAN_FLAGS="-j 2 --offline"
+  export CRAN_FLAGS="--offline"
 else
   export CRAN_FLAGS=""
 fi

@@ -1,16 +1,19 @@
-pub mod ffi;
-pub mod length;
-pub mod io;
 pub mod algorithm;
+pub mod ffi;
+pub mod io;
+pub mod length;
 
 use std::sync::Arc;
 
 use arrow::{
-    array::{RecordBatch, RecordBatchIterator, RecordBatchReader}, datatypes::Schema, ffi::{to_ffi, FFI_ArrowArray, FFI_ArrowSchema}, ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream}
+    array::{RecordBatch, RecordBatchIterator, RecordBatchReader},
+    datatypes::Schema,
+    ffi::{FFI_ArrowArray, FFI_ArrowSchema},
+    ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream},
 };
 use extendr_api::prelude::*;
 use ffi::GeoTable;
-use geoarrow::{chunked_array::ChunkedNativeArrayDyn, table::Table};
+use geoarrow::table::Table;
 
 #[extendr]
 pub fn read_ffi_array_schema(
@@ -22,7 +25,7 @@ pub fn read_ffi_array_schema(
 
 #[extendr]
 fn read_ffi_stream(mut x: ExternalPtr<FFI_ArrowArrayStream>) -> ExternalPtr<FFI_ArrowArrayStream> {
-    let _ = unsafe {ArrowArrayStreamReader::from_raw(&mut * x)}.unwrap();
+    let _ = unsafe { ArrowArrayStreamReader::from_raw(&mut *x) }.unwrap();
     x
 }
 
@@ -49,7 +52,6 @@ fn read_ffi_geoarrow_tbl(
     ExternalPtr::new(FFI_ArrowArrayStream::new(out))
 }
 
-
 #[extendr]
 fn get_geometry_from_table(x: GeoTable) -> ExternalPtr<FFI_ArrowArrayStream> {
     let res = x.0.geometry_column(None).unwrap();
@@ -62,12 +64,14 @@ fn get_geometry_from_table(x: GeoTable) -> ExternalPtr<FFI_ArrowArrayStream> {
         let rb = RecordBatch::try_new(schema.clone(), vec![arr]);
         vecs.push(rb);
     }
+
     let rbi = RecordBatchIterator::new(vecs, schema);
     let stream = FFI_ArrowArrayStream::new(Box::new(rbi));
     let mut out = ExternalPtr::new(stream);
     out.set_class(["nanoarrow_array_stream"]).unwrap();
     out
-} 
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.

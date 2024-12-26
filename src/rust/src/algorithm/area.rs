@@ -5,7 +5,7 @@ use geoarrow::{algorithm::geo::Area, NativeArray};
 use crate::ffi::{try_to_native_dyn_array, GeoTable};
 
 #[extendr]
-pub fn area_euclidean_(
+pub fn area_euclidean_unsigned_(
     mut array: ExternalPtr<FFI_ArrowArray>,
     schema: ExternalPtr<FFI_ArrowSchema>,
 ) -> Result<List> {
