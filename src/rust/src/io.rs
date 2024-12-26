@@ -23,7 +23,7 @@ fn read_geojson_lines_(path: &str, batch_size: Option<usize>) -> GeoTable {
 fn read_flatgeobuf_(path: &str) -> GeoTable {
   let f = std::fs::File::open(path).unwrap();
   let mut r = BufReader::new(f);
-  let res = geoarrow::io::flatgeobuf::read_flatgeobuf(r, geoarrow::io::flatgeobuf::FlatGeobufReaderOptions::default());
+  let res = geoarrow::io::flatgeobuf::read_flatgeobuf(&mut r, geoarrow::io::flatgeobuf::FlatGeobufReaderOptions::default()).unwrap();
   GeoTable(res)
 }
 
