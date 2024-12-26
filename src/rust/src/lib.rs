@@ -67,7 +67,7 @@ fn get_geometry_from_table(x: GeoTable) -> ExternalPtr<FFI_ArrowArrayStream> {
     let mut out = ExternalPtr::new(stream);
     out.set_class(["nanoarrow_array_stream"]).unwrap();
     out
-}
+} 
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.

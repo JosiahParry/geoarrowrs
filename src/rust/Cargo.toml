@@ -14,3 +14,6 @@ extendr-api = "0.7.1"
 arrow = { version = "53.3.0", features = ["ffi"], default-features = false}
 geoarrow = { version = "0.4.0-beta.3", features = ["flatgeobuf"] }
 
+# [profile.release]
+# codegen-units = 1
+# lto = true
