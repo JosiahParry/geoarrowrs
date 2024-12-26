@@ -16,9 +16,17 @@ read_ffi_stream <- function(x) .Call(wrap__read_ffi_stream, x)
 
 read_ffi_geoarrow_tbl <- function(x) .Call(wrap__read_ffi_geoarrow_tbl, x)
 
-read_geojson_ <- function(path, batch_size) .Call(wrap__read_geojson_, path, batch_size)
+round_trip_geotable <- function(x) .Call(wrap__round_trip_geotable, x)
+
+get_geometry_from_table <- function(x) .Call(wrap__get_geometry_from_table, x)
 
 length_euclidean_ <- function(array, schema) .Call(wrap__length_euclidean_, array, schema)
+
+read_geojson_ <- function(path, batch_size) .Call(wrap__read_geojson_, path, batch_size)
+
+read_geojson_lines_ <- function(path, batch_size) .Call(wrap__read_geojson_lines_, path, batch_size)
+
+read_flatgeobuf_ <- function(path) .Call(wrap__read_flatgeobuf_, path)
 
 
 # nolint end
