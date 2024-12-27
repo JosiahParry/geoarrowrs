@@ -1,14 +1,10 @@
 use extendr_api::prelude::*;
-use geoarrow::{
-    io::{
-        flatgeobuf::{self, FlatGeobufReaderOptions},
-        parquet::{
-            write_geoparquet, GeoParquetReaderOptions, GeoParquetRecordBatchReaderBuilder,
-            GeoParquetWriterOptions,
-        },
-        shapefile::ShapefileReaderOptions,
+use geoarrow::io::{
+    flatgeobuf::FlatGeobufReaderOptions,
+    parquet::{
+        write_geoparquet, GeoParquetReaderOptions, GeoParquetRecordBatchReaderBuilder,
+        GeoParquetWriterOptions,
     },
-    scalar::{Coord, Rect},
 };
 use parquet::{basic::Compression, file::properties::WriterProperties};
 use std::io::BufReader;
@@ -204,18 +200,33 @@ fn read_geoparquet_(
 }
 
 #[extendr]
-fn write_geoparquet_(x: GeoTable, path: &str) -> Result<()> {
+fn write_geoparquet_(x: GeoTable, path: &str, overwrite: bool) -> Result<()> {
     use std::io::BufWriter;
+
+    if !path.ends_with(".geoparquet") {
+        return Err(Error::Other(String::from(
+            "The file path must have a .geoparquet extension",
+        )));
+    }
 
     // TODO enable customizing writer properties
     let parquet_props = WriterProperties::builder()
         .set_compression(Compression::SNAPPY)
         .build();
 
-    let f = std::fs::File::create_new(path).map_err(|e| Error::Other(e.to_string()))?;
+    let file = match overwrite {
+        true => {
+            let f = std::fs::File::create(path).map_err(|e| Error::Other(e.to_string()))?;
+            f
+        }
+        false => {
+            let f = std::fs::File::create_new(path).map_err(|e| Error::Other(e.to_string()))?;
+            f
+        }
+    };
 
     let batches = x.0.into_record_batch_reader();
-    let writer = BufWriter::new(f);
+    let writer = BufWriter::new(file);
     let mut opts = GeoParquetWriterOptions::default();
     opts.writer_properties = Some(parquet_props);
 

@@ -2,6 +2,7 @@ pub mod algorithm;
 pub mod ffi;
 pub mod io;
 pub mod length;
+pub mod table;
 
 use std::sync::Arc;
 
@@ -99,6 +100,7 @@ extendr_module! {
     mod geoarrowrs;
     use length;
     use io;
+    use table;
     fn read_ffi_array_schema;
     fn read_ffi_stream;
     fn read_ffi_geoarrow_tbl;

@@ -2,6 +2,16 @@ devtools::load_all()
 
 res <- read_geojson_("inst/extdata/osm-edinburgh-central.geojson", 6809)
 
+tictoc::tic()
+read_geojson_(
+  "/Users/josiahparry/Downloads/Maryland.geojson", NA
+)
+tictoc::toc()
+
+tictoc::tic()
+sf::st_read("/Users/josiahparry/Downloads/Maryland.geojson")
+tictoc::toc()
+
 sf::st_write(osm_edinburgh_central, "inst/extdata/osm-edinburgh-central.fgb")
 sf::st_write(osm_edinburgh_central, "inst/extdata/shp/osm-edinburgh-central.shp")
 
@@ -57,3 +67,6 @@ stream <- osm_edinburgh_central |>
   dplyr::mutate(geometry = as_geoarrow_vctr(geometry)) |>
   arrow::as_arrow_table() |>
   as_nanoarrow_array_stream()
+
+write_geoparquet_(stream, "inst/extdata/tst.geoparquet")
+read_geoparquet_("inst/extdata/tst.geoparquet", NA, NULL, NA, NA, NULL)
