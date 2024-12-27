@@ -29,7 +29,11 @@ read_geojson_ <- function(path, batch_size) .Call(wrap__read_geojson_, path, bat
 read_geojson_lines_ <- function(path, batch_size) .Call(wrap__read_geojson_lines_, path, batch_size)
 
 #' @export
-read_flatgeobuf_ <- function(path) .Call(wrap__read_flatgeobuf_, path)
+read_flatgeobuf_ <- function(path, bbox) .Call(wrap__read_flatgeobuf_, path, bbox)
+
+read_shapefile_ <- function(path) .Call(wrap__read_shapefile_, path)
+
+read_geoparquet_ <- function(path, batch_size, bbox, limit, offset, row_groups) .Call(wrap__read_geoparquet_, path, batch_size, bbox, limit, offset, row_groups)
 
 
 # nolint end

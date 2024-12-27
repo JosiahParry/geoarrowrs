@@ -12,9 +12,14 @@ name = 'geoarrowrs'
 extendr-api = "0.7.1"
 # extendr-api = { git = "https://github.com/extendr/extendr" }
 arrow = { version = "53.3.0", features = ["ffi"], default-features = false}
-geoarrow = { version = "0.4.0-beta.3", features = ["flatgeobuf"] }
+parquet = { version = "53.3.0", default-features = true }
+# brotli = {version = "7.0"}
+geoarrow = { version = "0.4.0-beta.3", features = ["flatgeobuf", "parquet"] }
+
 libR-sys = "*"
+geo-types = "*"
 
 # [profile.release]
 # codegen-units = 1
+
 # lto = true
