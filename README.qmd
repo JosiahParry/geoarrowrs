@@ -1,0 +1,34 @@
+---
+format: gfm
+---
+
+# geoarrowrs
+
+`{geoarrowrs}` provides R bindings to the geoarrow-rs Rust crate. They are in a very early stage. 
+
+Right now file readers for flatgeobuf, geojson, and shapefiles have been implemented. GeoParquet reader is on the near horizon. Afterwards the geoarrow algorithms and spatial indices will be implemented.
+
+## Usage
+
+The flatgeobuf reader is approximately 4 times faster than `sf` in this use case. 
+
+```{r}
+library(geoarrow)
+library(geoarrowrs)
+
+# get the file path
+fp <- system.file("extdata", "osm-edinburgh-central.fgb", package = "geoarrowrs")
+
+# read the flatgeobuf file
+stream <- read_flatgeobuf_(fp)
+stream
+
+# convert to a record batch reader
+reader <- arrow::as_record_batch_reader(stream)
+reader 
+
+# convert to sf 
+sf::st_as_sf(reader) |> 
+    dplyr::glimpse()
+```
+

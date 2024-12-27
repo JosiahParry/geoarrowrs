@@ -76,9 +76,7 @@ impl From<GeoChunks> for Robj {
             .map(|i| Rint::from(i as i32))
             .collect::<Integers>();
 
-        eprintln!("\noffsets calculated");
         let field = inner.extension_field();
-        eprintln!("\nfound extension field ");
 
         let mut ffi_schema = ExternalPtr::new(
             FFI_ArrowSchema::try_from(&field)
@@ -89,13 +87,10 @@ impl From<GeoChunks> for Robj {
             .set_class(["nanoarrow_schema"])
             .expect("Failed to set nanoarrow_schema class");
 
-        eprintln!("\nffi_schema created");
-
         let chunk_ptrs = inner
             .chunks()
             .into_iter()
             .map(|chunk| {
-                eprintln!("\n casting as array ref");
                 let schema = FFI_ArrowSchema::try_from(&chunk.extension_field()).unwrap();
                 let chunk = chunk.clone().to_array_ref();
 
@@ -109,15 +104,15 @@ impl From<GeoChunks> for Robj {
                     .expect("Failed to set nanoarrow_array class");
 
                 let mut schema_ptr = ExternalPtr::new(schema);
-                schema_ptr.set_class(["nanoarrow_schema"]).unwrap();
+                schema_ptr
+                    .set_class(["nanoarrow_schema"])
+                    .expect("Failed to set nanoarrow_schema class");
 
                 // set the pointer
                 unsafe { libR_sys::R_SetExternalPtrTag(ptr.get(), schema_ptr.get()) };
                 ptr
             })
             .collect::<List>();
-
-        eprintln!("\ncollected chunks");
 
         container
             .set_attrib("chunks", chunk_ptrs)
