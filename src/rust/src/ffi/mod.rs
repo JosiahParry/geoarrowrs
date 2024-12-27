@@ -64,7 +64,7 @@ impl From<GeoChunks> for Robj {
         let inner = value.0;
 
         let n = inner.len();
-        let mut container = Integers::from_iter((1..n).into_iter().map(|i| Rint::from(i as i32)));
+        let mut container = Integers::from_iter((1..=n).into_iter().map(|i| Rint::from(i as i32)));
 
         let offsets_raw = inner.map(|i| i.len());
 
@@ -96,21 +96,23 @@ impl From<GeoChunks> for Robj {
             .into_iter()
             .map(|chunk| {
                 eprintln!("\n casting as array ref");
+                let schema = FFI_ArrowSchema::try_from(&chunk.extension_field()).unwrap();
                 let chunk = chunk.clone().to_array_ref();
-
-                eprintln!("\n casting as array ref");
 
                 let it = chunk.to_data();
                 // let ffi = FFI_ArrowArray::new(&it);
+                let (array, _) = to_ffi(&it).expect("Failed to cast array to FFI_ArrowArray");
+                rprintln!("{schema:?}");
 
-                let (array, schema) = to_ffi(&it).expect("Failed to cast array to FFI_ArrowArray");
                 let mut ptr = ExternalPtr::new(array);
-                let schema_ptr = ExternalPtr::new(schema);
-
-                let tagged = unsafe { libR_sys::R_SetExternalPtrTag(ptr.get(), schema_ptr.get()) };
-
                 ptr.set_class(["nanoarrow_array"])
                     .expect("Failed to set nanoarrow_array class");
+
+                let mut schema_ptr = ExternalPtr::new(schema);
+                schema_ptr.set_class(["nanoarrow_schema"]).unwrap();
+
+                // set the pointer
+                unsafe { libR_sys::R_SetExternalPtrTag(ptr.get(), schema_ptr.get()) };
                 ptr
             })
             .collect::<List>();

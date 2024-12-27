@@ -13,11 +13,12 @@ g <- xx$geom |>
   sf::st_cast("LINESTRING") |>
   geoarrow::as_geoarrow_vctr()
 
-attributes(g)
 
 h <- chunks_from_geoarrow_vctr(g)
 h
 g
 
 
+nanoarrow_array_set_schema(attr(h, "chunks")[[1]], attr(h, "schema"))
 attributes(h)
+h
