@@ -2,11 +2,15 @@ use extendr_api::prelude::*;
 use geoarrow::{
     io::{
         flatgeobuf::{self, FlatGeobufReaderOptions},
-        parquet::{GeoParquetReaderOptions, GeoParquetRecordBatchReaderBuilder},
+        parquet::{
+            write_geoparquet, GeoParquetReaderOptions, GeoParquetRecordBatchReaderBuilder,
+            GeoParquetWriterOptions,
+        },
         shapefile::ShapefileReaderOptions,
     },
     scalar::{Coord, Rect},
 };
+use parquet::{basic::Compression, file::properties::WriterProperties};
 use std::io::BufReader;
 
 use crate::ffi::GeoTable;
@@ -199,6 +203,27 @@ fn read_geoparquet_(
     Ok(GeoTable(table))
 }
 
+#[extendr]
+fn write_geoparquet_(x: GeoTable, path: &str) -> Result<()> {
+    use std::io::BufWriter;
+
+    // TODO enable customizing writer properties
+    let parquet_props = WriterProperties::builder()
+        .set_compression(Compression::SNAPPY)
+        .build();
+
+    let f = std::fs::File::create_new(path).map_err(|e| Error::Other(e.to_string()))?;
+
+    let batches = x.0.into_record_batch_reader();
+    let writer = BufWriter::new(f);
+    let mut opts = GeoParquetWriterOptions::default();
+    opts.writer_properties = Some(parquet_props);
+
+    write_geoparquet(batches, writer, &opts).map_err(|e| Error::Other(e.to_string()))?;
+
+    Ok(())
+}
+
 extendr_module! {
   mod io;
   fn read_geojson_;
@@ -206,4 +231,5 @@ extendr_module! {
   fn read_flatgeobuf_;
   fn read_shapefile_;
   fn read_geoparquet_;
+  fn write_geoparquet_;
 }

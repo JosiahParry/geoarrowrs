@@ -35,5 +35,7 @@ read_shapefile_ <- function(path) .Call(wrap__read_shapefile_, path)
 
 read_geoparquet_ <- function(path, batch_size, bbox, limit, offset, row_groups) .Call(wrap__read_geoparquet_, path, batch_size, bbox, limit, offset, row_groups)
 
+write_geoparquet_ <- function(x, path) .Call(wrap__write_geoparquet_, x, path)
+
 
 # nolint end

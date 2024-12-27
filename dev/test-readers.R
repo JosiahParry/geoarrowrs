@@ -29,7 +29,6 @@ bench::mark(
 
 
 
-
 library(geoarrow)
 
 bench::mark(
@@ -49,3 +48,12 @@ read_flatgeobuf_(
 ) |>
   arrow::as_arrow_table() |>
   sf::st_as_sf()
+
+
+
+# geoparquet writer
+stream <- osm_edinburgh_central |>
+  as_tibble() |>
+  dplyr::mutate(geometry = as_geoarrow_vctr(geometry)) |>
+  arrow::as_arrow_table() |>
+  as_nanoarrow_array_stream()
