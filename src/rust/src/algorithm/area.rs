@@ -1,8 +1,11 @@
-use arrow::{array::Array, ffi::{to_ffi, FFI_ArrowArray, FFI_ArrowSchema}};
+use arrow::{
+    array::Array,
+    ffi::{to_ffi, FFI_ArrowArray, FFI_ArrowSchema},
+};
 use extendr_api::prelude::*;
 use geoarrow::{algorithm::geo::Area, NativeArray};
 
-use crate::ffi::{try_to_native_dyn_array, GeoTable};
+use crate::ffi::try_to_native_dyn_array;
 
 #[extendr]
 pub fn area_euclidean_unsigned_(
@@ -16,7 +19,6 @@ pub fn area_euclidean_unsigned_(
     let (a, s) = to_ffi(&area.into_data()).unwrap();
     Ok(list!(ExternalPtr::new(a), ExternalPtr::new(s)))
 }
-
 
 extendr_module! {
     mod area;

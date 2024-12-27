@@ -682,6 +682,7 @@ dependencies = [
  "arrow",
  "extendr-api",
  "geoarrow",
+ "libR-sys",
 ]
 
 [[package]]

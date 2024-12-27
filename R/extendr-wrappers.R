@@ -20,6 +20,8 @@ round_trip_geotable <- function(x) .Call(wrap__round_trip_geotable, x)
 
 get_geometry_from_table <- function(x) .Call(wrap__get_geometry_from_table, x)
 
+chunks_from_geoarrow_vctr <- function(x) invisible(.Call(wrap__chunks_from_geoarrow_vctr, x))
+
 length_euclidean_ <- function(array, schema) .Call(wrap__length_euclidean_, array, schema)
 
 read_geojson_ <- function(path, batch_size) .Call(wrap__read_geojson_, path, batch_size)

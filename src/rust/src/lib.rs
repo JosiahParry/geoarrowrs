@@ -12,7 +12,7 @@ use arrow::{
     ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream},
 };
 use extendr_api::prelude::*;
-use ffi::GeoTable;
+use ffi::{GeoChunks, GeoTable};
 use geoarrow::table::Table;
 
 #[extendr]
@@ -25,12 +25,32 @@ pub fn read_ffi_array_schema(
 
 #[extendr]
 fn read_ffi_stream(mut x: ExternalPtr<FFI_ArrowArrayStream>) -> ExternalPtr<FFI_ArrowArrayStream> {
-    let _ = unsafe { ArrowArrayStreamReader::from_raw(&mut *x) }.unwrap();
-    x
+    let res = unsafe { ArrowArrayStreamReader::from_raw(&mut *x) }.unwrap();
+
+    let schema = res.schema();
+
+    let mut produced_batches = vec![];
+    for batch in res {
+        produced_batches.push(batch);
+    }
+
+    let mut out = ExternalPtr::new(FFI_ArrowArrayStream::new(Box::new(
+        RecordBatchIterator::new(produced_batches, schema),
+    )));
+
+    out.set_class(["nanoarrow_array_stream"]).unwrap();
+
+    out
 }
 
 #[extendr]
 fn round_trip_geotable(x: GeoTable) -> GeoTable {
+    x
+}
+
+#[extendr]
+fn chunks_from_geoarrow_vctr(x: GeoChunks) -> GeoChunks {
+    rprintln!("{x:#?}");
     x
 }
 
@@ -84,4 +104,5 @@ extendr_module! {
     fn read_ffi_geoarrow_tbl;
     fn round_trip_geotable;
     fn get_geometry_from_table;
+    fn chunks_from_geoarrow_vctr;
 }
