@@ -8,10 +8,9 @@ use crate::{
 
 #[extendr]
 pub fn bounding_rect_(x: GeoChunks) -> Result<GeoChunksGeneric<RectArray>> {
-    let inner = x.0.bounding_rect().handle_error()?;
-    Ok(GeoChunksGeneric(inner))
+    Ok(GeoChunksGeneric(x.0.bounding_rect().handle_error()?))
 }
 extendr_module! {
     mod bounding_rect;
-
+    fn bounding_rect_;
 }

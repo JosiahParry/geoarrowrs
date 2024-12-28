@@ -216,6 +216,7 @@ impl<'a> TryFrom<&'a Robj> for GeoChunks {
                 let array = FFI_ArrowArray::empty();
 
                 // Use nanoarrow-r to convert: we should figure out how to do this in Rust
+                // FIXME see https://github.com/apache/arrow-nanoarrow/blob/2d5276a5feed4f4139e4993e88f6dc62a4f1cb27/r/src/array.h#L80
                 let c_array_ptr = &array as *const FFI_ArrowArray as usize;
                 let _ = nanoarrow_export(&ci, c_array_ptr.to_string())?;
 
