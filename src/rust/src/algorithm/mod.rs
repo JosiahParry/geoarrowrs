@@ -12,6 +12,8 @@ mod chaikin_smoothing;
 pub use chaikin_smoothing::*;
 mod concave_hull;
 pub use concave_hull::*;
+mod contains;
+pub use contains::*;
 
 extendr_api::extendr_module! {
     mod algorithm;
@@ -22,4 +24,5 @@ extendr_api::extendr_module! {
     use centroid;
     use concave_hull;
     use length;
+    use contains;
 }

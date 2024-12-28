@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use arrow::{
-    array::{Array, ArrowPrimitiveType, PrimitiveArray},
+    array::{Array, BooleanArray},
     datatypes::Field,
     ffi::{to_ffi, FFI_ArrowSchema},
 };
@@ -9,10 +9,10 @@ use extendr_api::prelude::*;
 use geoarrow::chunked_array::ChunkedArray;
 
 #[derive(Debug, Clone)]
-pub struct PrimitiveChunks<T: ArrowPrimitiveType>(pub ChunkedArray<PrimitiveArray<T>>);
+pub struct BooleanChunks(pub ChunkedArray<BooleanArray>);
 
-impl<T: ArrowPrimitiveType> From<PrimitiveChunks<T>> for Robj {
-    fn from(value: PrimitiveChunks<T>) -> Self {
+impl From<BooleanChunks> for Robj {
+    fn from(value: BooleanChunks) -> Self {
         let inner = value.0;
         let dt = inner.data_type().clone();
         let f = Arc::new(Field::new("arrow_res", dt, true));
@@ -80,5 +80,3 @@ impl<T: ArrowPrimitiveType> From<PrimitiveChunks<T>> for Robj {
         container.into()
     }
 }
-
-
