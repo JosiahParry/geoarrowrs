@@ -1,10 +1,10 @@
 mod primitives;
 pub use primitives::*;
-mod length;
-pub use length::*;
+mod generic;
+pub use generic::*;
 
 use arrow::{
-    array::{make_array, RecordBatchReader},
+    array::{make_array, Array, RecordBatchReader},
     datatypes::Field,
     ffi::{from_ffi, to_ffi, FFI_ArrowArray, FFI_ArrowSchema},
     ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream},
