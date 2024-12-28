@@ -6,8 +6,6 @@ format: gfm
 
 `{geoarrowrs}` provides R bindings to the geoarrow-rs Rust crate. They are in a very early stage. 
 
-Right now file readers for flatgeobuf, geojson, and shapefiles have been implemented. GeoParquet reader is on the near horizon. Afterwards the geoarrow algorithms and spatial indices will be implemented.
-
 ## Usage
 
 The flatgeobuf reader is approximately 4 times faster than `sf` in this use case. 
@@ -32,6 +30,25 @@ sf::st_as_sf(reader) |>
     dplyr::glimpse()
 ```
 
+## Readers
+
+- [x] FlatGeoBuf
+- [x] GeoJson
+- [x] GeoJsonLines
+- [x] GeoParquet ⚠️ Not all options implemented
+- [x] Shapefile
+- [ ] wkb - going to defer to `geoarrow-r`
+- [ ] wkt - going to defer to `geoarrow-r`
+
+## Writers 
+
+- [ ] FlatGeoBuf
+- [ ] GeoJson
+- [ ] GeoJsonLines
+- [x] GeoParquet ⚠️ Not all options implemented
+- [ ] Shapefile
+- [ ] wkb - going to defer to `geoarrow-r`
+- [ ] wkt - going to defer to `geoarrow-r`
 
 ## Algorithm Implmenetations: 
 
@@ -72,3 +89,29 @@ sf::st_as_sf(reader) |>
 - [ ] Translate
 - [x] VincentyLength
 - [ ] Within
+
+### Native 
+
+- [ ] Binary
+- [ ] Cast
+- [ ] Concatenate
+- [ ] Downcast
+- [ ] DowncastTable
+- [ ] Explode
+- [ ] ExplodeTable
+- [ ] MapChunks
+- [ ] MapCoords
+- [ ] Rechunk
+- [ ] Take
+- [ ] TotalBounds
+- [ ] TypeIds
+- [ ] Unary
+- [ ] UnaryPoint
+
+### rstar
+
+- [ ] RTree
+
+### geo_index
+
+- [ ] RTree

@@ -4,10 +4,6 @@
 `{geoarrowrs}` provides R bindings to the geoarrow-rs Rust crate. They
 are in a very early stage.
 
-Right now file readers for flatgeobuf, geojson, and shapefiles have been
-implemented. GeoParquet reader is on the near horizon. Afterwards the
-geoarrow algorithms and spatial indices will be implemented.
-
 ## Usage
 
 The flatgeobuf reader is approximately 4 times faster than `sf` in this
@@ -76,19 +72,88 @@ sf::st_as_sf(reader) |>
     $ other_tags <chr> NA, NA, "\"layer\"=>\"-1\",\"tunnel\"=>\"yes\"", "\"surface…
     $ geometry   <MULTILINESTRING> MULTILINESTRING ((-3.1523 5..., MULTILINESTRING…
 
+## Readers
+
+- [x] FlatGeoBuf
+- [x] GeoJson
+- [x] GeoJsonLines
+- [x] GeoParquet ⚠️ Not all options implemented
+- [x] Shapefile
+- [ ] wkb - going to defer to `geoarrow-r`
+- [ ] wkt - going to defer to `geoarrow-r`
+
+## Writers
+
+- [ ] FlatGeoBuf
+- [ ] GeoJson
+- [ ] GeoJsonLines
+- [x] GeoParquet ⚠️ Not all options implemented
+- [ ] Shapefile
+- [ ] wkb - going to defer to `geoarrow-r`
+- [ ] wkt - going to defer to `geoarrow-r`
+
 ## Algorithm Implmenetations:
 
 ### Geo
 
-Traits - \[ \] AffineOps - \[x\] Area - \[x\] BoundingRect - \[x\]
-Center - \[x\] Centroid - \[x\] ChaikinSmoothing - \[x\]
-ChamberlainDuquetteArea - \[x\] ConcaveHull - \[x\] Contains - \[ \]
-ConvexHull - \[ \] Densify - \[\] EuclideanDistance - \[x\]
-EuclideanLength - \[ \] FrechetDistance - \[ \]
-FrechetDistanceLineString - \[x\] GeodesicArea - \[x\] GeodesicLength -
-\[ \] HasDimensions - \[x\] HaversineLength - \[ \] InteriorPoint - \[
-\] Intersects - \[ \] LineInterpolatePoint - \[ \] LineLocatePoint - \[
-\] LineLocatePointScalar - \[ \] MinimumRotatedRect - \[ \]
-RemoveRepeatedPoints - \[ \] Rotate - \[ \] Scale - \[ \] Simplify - \[
-\] SimplifyVw - \[ \] SimplifyVwPreserve - \[ \] Skew - \[ \]
-Translate - \[x\] VincentyLength - \[ \] Within
+- [ ] AffineOps
+- [x] Area
+- [x] BoundingRect
+- [x] Center
+- [x] Centroid
+- [x] ChaikinSmoothing
+- [x] ChamberlainDuquetteArea
+- [x] ConcaveHull
+- [x] Contains
+- [ ] ConvexHull
+- [ ] Densify
+- \[\] EuclideanDistance
+- [x] EuclideanLength
+- [ ] FrechetDistance
+- [ ] FrechetDistanceLineString
+- [x] GeodesicArea
+- [x] GeodesicLength
+- [ ] HasDimensions
+- [x] HaversineLength
+- [ ] InteriorPoint
+- [ ] Intersects
+- [ ] LineInterpolatePoint
+- [ ] LineLocatePoint
+- [ ] LineLocatePointScalar
+- [ ] MinimumRotatedRect
+- [ ] RemoveRepeatedPoints
+- [ ] Rotate
+- [ ] Scale
+- [ ] Simplify
+- [ ] SimplifyVw
+- [ ] SimplifyVwPreserve
+- [ ] Skew
+- [ ] Translate
+- [x] VincentyLength
+- [ ] Within
+
+### Native
+
+- [ ] Binary
+- [ ] Cast
+- [ ] Concatenate
+- [ ] Downcast
+- [ ] DowncastTable
+- [ ] Explode
+- [ ] ExplodeTable
+- [ ] MapChunks
+- [ ] MapCoords
+- [ ] Rechunk
+- [ ] Take
+- [ ] TotalBounds
+- [ ] TypeIds
+- [ ] Unary
+- [ ] UnaryPoint
+
+### rstar
+
+- [ ] RTree
+
+### geo_index
+
+- [ ] RTree
