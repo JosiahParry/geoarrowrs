@@ -24,44 +24,6 @@ use std::borrow::Cow;
 #[derive(Debug, Clone)]
 pub struct GeoChunks(pub ChunkedGeometryArray<NativeArrayDyn>);
 
-impl TryFrom<Robj> for GeoChunks {
-    type Error = Error;
-
-    fn try_from(value: Robj) -> Result<Self> {
-        let chunks_list = List::try_from(
-            value
-                .get_attrib("chunks")
-                .ok_or(Error::Other(String::from("Expected `chunks` attribute")))?,
-        )?;
-
-        let schema = value
-            .get_attrib("schema")
-            .ok_or(Error::Other(String::from("Expected `schema` attribute")))?;
-
-        // Fetch the FFI Schema
-        let ffi_schema: ExternalPtr<FFI_ArrowSchema> = schema.try_into()?;
-
-        let array_chunks: Vec<NativeArrayDyn> = chunks_list
-            .into_iter()
-            .map(|(_, ci)| {
-                let mut ptr = ExternalPtr::<FFI_ArrowArray>::try_from(ci).map_err(|_| {
-                    Error::Other(String::from(
-                        "Failed to convert chunk to ExternalPtr<FFI_ArrowArray>",
-                    ))
-                })?;
-
-                let res = unsafe { FFI_ArrowArray::from_raw(ptr.addr_mut()) };
-
-                try_to_native_dyn_array(res, &ffi_schema).map_err(|e| Error::Other(e.to_string()))
-            })
-            .collect::<Result<Vec<_>>>()?; // Collect results or propagate error
-
-        let res = ChunkedGeometryArray::new(array_chunks);
-
-        Ok(Self(res))
-    }
-}
-
 impl From<GeoChunks> for Robj {
     fn from(value: GeoChunks) -> Self {
         let inner = value.0;
@@ -135,6 +97,135 @@ impl From<GeoChunks> for Robj {
         container.into()
     }
 }
+
+impl From<&GeoChunks> for Robj {
+    fn from(value: &GeoChunks) -> Self {
+        let inner = value.0.clone();
+
+        let n = inner.len();
+        let mut container = Integers::from_iter((1..=n).into_iter().map(|i| Rint::from(i as i32)));
+
+        let offsets_raw = inner.map(|i| i.len());
+
+        let mut offsets = vec![0];
+        offsets.extend(offsets_raw);
+
+        let offsets = offsets
+            .into_iter()
+            .map(|i| Rint::from(i as i32))
+            .collect::<Integers>();
+
+        let field = inner.extension_field();
+
+        let mut ffi_schema = ExternalPtr::new(
+            FFI_ArrowSchema::try_from(&field)
+                .expect("Failed to create `FFI_ArrowSchema` from `GeoChunks`"),
+        );
+
+        ffi_schema
+            .set_class(["nanoarrow_schema"])
+            .expect("Failed to set nanoarrow_schema class");
+
+        let chunk_ptrs = inner
+            .chunks()
+            .into_iter()
+            .map(|chunk| {
+                let schema = FFI_ArrowSchema::try_from(&chunk.extension_field()).unwrap();
+                let chunk = chunk.clone().to_array_ref();
+
+                let it = chunk.to_data();
+                // let ffi = FFI_ArrowArray::new(&it);
+                let (array, _) = to_ffi(&it).expect("Failed to cast array to FFI_ArrowArray");
+
+                let mut ptr = ExternalPtr::new(array);
+                ptr.set_class(["nanoarrow_array"])
+                    .expect("Failed to set nanoarrow_array class");
+
+                let mut schema_ptr = ExternalPtr::new(schema);
+                schema_ptr
+                    .set_class(["nanoarrow_schema"])
+                    .expect("Failed to set nanoarrow_schema class");
+
+                // set the pointer
+                unsafe { libR_sys::R_SetExternalPtrTag(ptr.get(), schema_ptr.get()) };
+                ptr
+            })
+            .collect::<List>();
+
+        container
+            .set_attrib("chunks", chunk_ptrs)
+            .expect("Failed to set `chunks` attribute");
+
+        container
+            .set_attrib("schema", ffi_schema)
+            .expect("Failed to set FFI_ArrowSchema to Robj");
+
+        container
+            .set_class(["geoarrow_vctr", "nanoarrow_vctr"])
+            .expect("faield to set geoarrow_vctr class");
+
+        container
+            .set_attrib("offsets", offsets)
+            .expect("Failed to set offsets");
+
+        container.into()
+    }
+}
+
+impl<'a> TryFrom<&'a Robj> for GeoChunks {
+    type Error = Error;
+
+    fn try_from(value: &'a Robj) -> Result<Self> {
+        // Access the `chunks` attribute from the referenced Robj
+        let chunks_list = List::try_from(
+            value
+                .get_attrib("chunks")
+                .ok_or(Error::Other(String::from("Expected `chunks` attribute")))?,
+        )?;
+
+        // Access the `schema` attribute from the referenced Robj
+        let schema = value
+            .get_attrib("schema")
+            .ok_or(Error::Other(String::from("Expected `schema` attribute")))?;
+
+        // Fetch the FFI Schema from the schema attribute
+        let ffi_schema: ExternalPtr<FFI_ArrowSchema> = schema.try_into()?;
+
+        // Convert each chunk into a native array
+        let array_chunks: Vec<NativeArrayDyn> = chunks_list
+            .into_iter()
+            .map(|(_, ci)| {
+                // Convert each chunk to an ExternalPtr<FFI_ArrowArray>
+                let mut ptr = ExternalPtr::<FFI_ArrowArray>::try_from(ci).map_err(|_| {
+                    Error::Other(String::from(
+                        "Failed to convert chunk to ExternalPtr<FFI_ArrowArray>",
+                    ))
+                })?;
+
+                // Convert the FFI ArrowArray to a native array
+                let res = unsafe { FFI_ArrowArray::from_raw(ptr.addr_mut()) };
+
+                // Convert to a native dynamic array using the schema
+                try_to_native_dyn_array(res, &ffi_schema).map_err(|e| Error::Other(e.to_string()))
+            })
+            .collect::<Result<Vec<_>>>()?; // Collect results or propagate errors
+
+        // Create a new ChunkedGeometryArray from the converted arrays
+        let res = ChunkedGeometryArray::new(array_chunks);
+
+        Ok(Self(res))
+    }
+}
+
+impl TryFrom<Robj> for GeoChunks {
+    type Error = Error;
+
+    fn try_from(value: Robj) -> Result<Self> {
+        // Delegate the implementation to `TryFrom<&Robj>`
+        GeoChunks::try_from(&value)
+    }
+}
+
 pub struct GeoTable(pub Table);
 
 impl From<Table> for GeoTable {
