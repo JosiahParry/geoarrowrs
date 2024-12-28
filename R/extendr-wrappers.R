@@ -22,8 +22,6 @@ get_geometry_from_table <- function(x) .Call(wrap__get_geometry_from_table, x)
 
 chunks_from_geoarrow_vctr <- function(x) .Call(wrap__chunks_from_geoarrow_vctr, x)
 
-length_euclidean_ <- function(array, schema) .Call(wrap__length_euclidean_, array, schema)
-
 read_geojson_ <- function(path, batch_size) .Call(wrap__read_geojson_, path, batch_size)
 
 read_geojson_lines_ <- function(path, batch_size) .Call(wrap__read_geojson_lines_, path, batch_size)
@@ -41,7 +39,23 @@ downcast_ <- function(x) .Call(wrap__downcast_, x)
 
 area_euclidean_unsigned_ <- function(x) .Call(wrap__area_euclidean_unsigned_, x)
 
+area_euclidean_signed_ <- function(x) .Call(wrap__area_euclidean_signed_, x)
+
 area_geodesic_unsigned_ <- function(x) .Call(wrap__area_geodesic_unsigned_, x)
+
+area_geodesic_signed_ <- function(x) .Call(wrap__area_geodesic_signed_, x)
+
+area_chamberlain_duquette_signed_ <- function(x) .Call(wrap__area_chamberlain_duquette_signed_, x)
+
+area_chamberlain_duquette_unsigned_ <- function(x) .Call(wrap__area_chamberlain_duquette_unsigned_, x)
+
+length_haversine_ <- function(x) .Call(wrap__length_haversine_, x)
+
+length_euclidean_ <- function(x) .Call(wrap__length_euclidean_, x)
+
+length_geodesic_ <- function(x) .Call(wrap__length_geodesic_, x)
+
+length_vincenty_ <- function(x) .Call(wrap__length_vincenty_, x)
 
 
 # nolint end

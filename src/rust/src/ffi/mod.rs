@@ -174,6 +174,14 @@ impl From<&GeoChunks> for Robj {
     }
 }
 
+pub fn nanoarrow_export(source: &Robj, dest: String) -> Result<Robj> {
+    R!("nanoarrow::nanoarrow_pointer_export")
+        .expect("`nanoarrow` must be installed")
+        .as_function()
+        .expect("`nanoarrow_pointer_export()` must be available")
+        .call(pairlist!(source, dest))
+}
+
 impl<'a> TryFrom<&'a Robj> for GeoChunks {
     type Error = Error;
 
@@ -198,14 +206,21 @@ impl<'a> TryFrom<&'a Robj> for GeoChunks {
             .into_iter()
             .map(|(_, ci)| {
                 // Convert each chunk to an ExternalPtr<FFI_ArrowArray>
-                let mut ptr = ExternalPtr::<FFI_ArrowArray>::try_from(ci).map_err(|_| {
-                    Error::Other(String::from(
-                        "Failed to convert chunk to ExternalPtr<FFI_ArrowArray>",
-                    ))
-                })?;
+                // let mut ptr = ExternalPtr::<FFI_ArrowArray>::try_from(ci).map_err(|_| {
+                //     Error::Other(String::from(
+                //         "Failed to convert chunk to ExternalPtr<FFI_ArrowArray>",
+                //     ))
+                // })?;
+
+                // create the array container
+                let array = FFI_ArrowArray::empty();
+
+                // Use nanoarrow-r to convert: we should figure out how to do this in Rust
+                let c_array_ptr = &array as *const FFI_ArrowArray as usize;
+                let _ = nanoarrow_export(&ci, c_array_ptr.to_string())?;
 
                 // Convert the FFI ArrowArray to a native array
-                let res = unsafe { FFI_ArrowArray::from_raw(ptr.addr_mut()) };
+                let res = array;
 
                 // Convert to a native dynamic array using the schema
                 try_to_native_dyn_array(res, &ffi_schema).map_err(|e| Error::Other(e.to_string()))
