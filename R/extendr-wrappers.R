@@ -35,7 +35,13 @@ read_shapefile_ <- function(path) .Call(wrap__read_shapefile_, path)
 
 read_geoparquet_ <- function(path, batch_size, bbox, limit, offset, row_groups) .Call(wrap__read_geoparquet_, path, batch_size, bbox, limit, offset, row_groups)
 
-write_geoparquet_ <- function(x, path) .Call(wrap__write_geoparquet_, x, path)
+write_geoparquet_ <- function(x, path, overwrite) .Call(wrap__write_geoparquet_, x, path, overwrite)
+
+downcast_ <- function(x) .Call(wrap__downcast_, x)
+
+area_euclidean_unsigned_ <- function(x) .Call(wrap__area_euclidean_unsigned_, x)
+
+area_geodesic_unsigned_ <- function(x) .Call(wrap__area_geodesic_unsigned_, x)
 
 
 # nolint end

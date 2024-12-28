@@ -14,7 +14,7 @@ use arrow::{
 };
 use extendr_api::prelude::*;
 use ffi::{GeoChunks, GeoTable};
-use geoarrow::table::Table;
+use geoarrow::{error::GeoArrowError, table::Table};
 
 #[extendr]
 pub fn read_ffi_array_schema(
@@ -93,6 +93,19 @@ fn get_geometry_from_table(x: GeoTable) -> ExternalPtr<FFI_ArrowArrayStream> {
     out
 }
 
+pub trait HandleError<T> {
+    fn handle_error(self) -> Result<T>;
+}
+
+impl<T, U> HandleError<T> for std::result::Result<T, U>
+where
+    U: std::error::Error,
+{
+    fn handle_error(self) -> std::result::Result<T, Error> {
+        self.map_err(|e| Error::Other(e.to_string()))
+    }
+}
+
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
@@ -101,6 +114,7 @@ extendr_module! {
     use length;
     use io;
     use table;
+    use algorithm;
     fn read_ffi_array_schema;
     fn read_ffi_stream;
     fn read_ffi_geoarrow_tbl;

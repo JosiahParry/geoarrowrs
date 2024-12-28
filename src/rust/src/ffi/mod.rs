@@ -1,5 +1,8 @@
+mod primitives;
+pub use primitives::*;
+
 use arrow::{
-    array::{make_array, ArrowPrimitiveType, OffsetSizeTrait, RecordBatchReader},
+    array::{make_array, RecordBatchReader},
     datatypes::Field,
     ffi::{from_ffi, to_ffi, FFI_ArrowArray, FFI_ArrowSchema},
     ffi_stream::{ArrowArrayStreamReader, FFI_ArrowArrayStream},
@@ -14,7 +17,7 @@ use geoarrow::{
     chunked_array::ChunkedGeometryArray,
     error::GeoArrowError,
     table::Table,
-    ArrayBase, NativeArray,
+    ArrayBase,
 };
 use std::borrow::Cow;
 
@@ -97,7 +100,6 @@ impl From<GeoChunks> for Robj {
                 let it = chunk.to_data();
                 // let ffi = FFI_ArrowArray::new(&it);
                 let (array, _) = to_ffi(&it).expect("Failed to cast array to FFI_ArrowArray");
-                rprintln!("{schema:?}");
 
                 let mut ptr = ExternalPtr::new(array);
                 ptr.set_class(["nanoarrow_array"])

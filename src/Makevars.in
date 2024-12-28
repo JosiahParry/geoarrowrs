@@ -19,7 +19,9 @@ VENDOR_DIR = $(CURDIR)/vendor
 #
 # When the NOT_CRAN flag is *not* set, the vendor.tar.xz, if present,
 # is unzipped and used for offline compilation.
-$(STATLIB):
+FINGERPRINT = $(shell find $(TARGET_DIR)/debug/.fingerprint -type f)
+
+$(STATLIB): $(FINGERPRINT)
 
 	# Check if NOT_CRAN is false and unzip vendor.tar.xz if so
 	if [ "$(NOT_CRAN)" != "true" ]; then \

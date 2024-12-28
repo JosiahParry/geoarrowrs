@@ -2,11 +2,21 @@ devtools::load_all()
 
 res <- read_geojson_("inst/extdata/osm-edinburgh-central.geojson", 6809)
 
+
 tictoc::tic()
-read_geojson_(
+res <- read_geojson_(
   "/Users/josiahparry/Downloads/Maryland.geojson", NA
 )
+
+r2 <- arrow::as_arrow_table(res)
+r <-
+downcast_(as_nanoarrow_array_stream(r2)) |> 
+  sf::st_as_sf()
 tictoc::toc()
+
+system.time({
+  res <- downcast_(res)
+})
 
 tictoc::tic()
 sf::st_read("/Users/josiahparry/Downloads/Maryland.geojson")
@@ -54,7 +64,8 @@ bench::mark(
 # bbox range read
 read_flatgeobuf_(
   "inst/extdata/osm-edinburgh-central.fgb",
-  c(-3.2081305, 55.9500772, -3.1885133, 55.9534548)
+  # c(-3.2081305, 55.9500772, -3.1885133, 55.9534548)
+  NA_real_
 ) |>
   arrow::as_arrow_table() |>
   sf::st_as_sf()

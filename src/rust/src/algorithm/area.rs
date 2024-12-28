@@ -1,25 +1,29 @@
-use arrow::{
-    array::Array,
-    ffi::{to_ffi, FFI_ArrowArray, FFI_ArrowSchema},
-};
+use arrow::datatypes::Float64Type;
 use extendr_api::prelude::*;
-use geoarrow::{algorithm::geo::Area, NativeArray};
+use geoarrow::algorithm::geo::{Area, GeodesicArea};
 
-use crate::ffi::try_to_native_dyn_array;
+use crate::{
+    ffi::{GeoChunks, PrimitiveChunks},
+    HandleError,
+};
 
 #[extendr]
-pub fn area_euclidean_unsigned_(
-    mut array: ExternalPtr<FFI_ArrowArray>,
-    schema: ExternalPtr<FFI_ArrowSchema>,
-) -> Result<List> {
-    let array = unsafe { FFI_ArrowArray::from_raw(&mut *array) };
-    let res = try_to_native_dyn_array(array, schema.as_ref()).unwrap();
+pub fn area_euclidean_unsigned_(x: GeoChunks) -> Result<PrimitiveChunks<Float64Type>> {
+    let y = x.clone();
+    let unsigned_area = y.0.unsigned_area().handle_error()?;
+    let res = PrimitiveChunks(unsigned_area);
+    Ok(res)
+}
 
-    let area = res.as_ref().unsigned_area().unwrap();
-    let (a, s) = to_ffi(&area.into_data()).unwrap();
-    Ok(list!(ExternalPtr::new(a), ExternalPtr::new(s)))
+#[extendr]
+pub fn area_geodesic_unsigned_(x: GeoChunks) -> Result<PrimitiveChunks<Float64Type>> {
+    Ok(PrimitiveChunks(
+        x.0.geodesic_area_unsigned().handle_error()?,
+    ))
 }
 
 extendr_module! {
     mod area;
+    fn area_euclidean_unsigned_;
+    fn area_geodesic_unsigned_;
 }

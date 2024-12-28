@@ -1,15 +1,17 @@
+use crate::{ffi::GeoTable, HandleError};
 use extendr_api::prelude::*;
-use geoarrow::io::{
-    flatgeobuf::FlatGeobufReaderOptions,
-    parquet::{
-        write_geoparquet, GeoParquetReaderOptions, GeoParquetRecordBatchReaderBuilder,
-        GeoParquetWriterOptions,
+use geoarrow::{
+    algorithm::native::DowncastTable,
+    io::{
+        flatgeobuf::FlatGeobufReaderOptions,
+        parquet::{
+            write_geoparquet, GeoParquetReaderOptions, GeoParquetRecordBatchReaderBuilder,
+            GeoParquetWriterOptions,
+        },
     },
 };
 use parquet::{basic::Compression, file::properties::WriterProperties};
 use std::io::BufReader;
-
-use crate::ffi::GeoTable;
 
 #[extendr]
 fn read_geojson_(path: &str, batch_size: Option<usize>) -> Result<GeoTable> {
@@ -35,10 +37,10 @@ fn process_bbox(bbox: Doubles) -> Option<(f64, f64, f64, f64)> {
     let mut res_bbox_iter = bbox.into_iter().take(4).map(|i| i.inner());
 
     Some((
-        res_bbox_iter.next().unwrap(),
-        res_bbox_iter.next().unwrap(),
-        res_bbox_iter.next().unwrap(),
-        res_bbox_iter.next().unwrap(),
+        res_bbox_iter.next().or(None)?,
+        res_bbox_iter.next().or(None)?,
+        res_bbox_iter.next().or(None)?,
+        res_bbox_iter.next().or(None)?,
     ))
 }
 
@@ -58,7 +60,10 @@ fn read_flatgeobuf_(path: &str, bbox: Doubles) -> Result<GeoTable> {
     let opts = process_fgb_opts(bbox);
     let f = std::fs::File::open(path).map_err(|e| Error::Other(e.to_string()))?;
     let mut r = BufReader::new(f);
-    let res = read_flatgeobuf(&mut r, opts).map_err(|e| Error::Other(e.to_string()))?;
+    let res = read_flatgeobuf(&mut r, opts)
+        .handle_error()?
+        .downcast()
+        .handle_error()?;
     Ok(GeoTable(res))
 }
 
@@ -108,10 +113,12 @@ fn read_shapefile_(path: &str) -> Result<GeoTable> {
     };
 
     opts.crs = prj_content;
+    let res = read_shapefile(shp_reader, dbf_reader, opts)
+        .handle_error()?
+        .downcast()
+        .handle_error()?;
 
-    Ok(GeoTable(
-        read_shapefile(shp_reader, dbf_reader, opts).map_err(|e| Error::Other(e.to_string()))?,
-    ))
+    Ok(GeoTable(res))
 }
 
 fn process_row_groups(row_groups: Robj) -> Option<Vec<usize>> {
@@ -189,12 +196,14 @@ fn read_geoparquet_(
     let f = std::fs::File::open(path).map_err(|e| Error::Other(e.to_string()))?;
     let reader =
         GeoParquetRecordBatchReaderBuilder::try_new_with_options(f, Default::default(), opts)
-            .map_err(|e| Error::Other(e.to_string()))?
+            .handle_error()?
             .build()
             .map_err(|e| Error::Other(e.to_string()))?;
     let table = reader
         .read_table()
-        .map_err(|e| Error::Other(e.to_string()))?;
+        .handle_error()?
+        .downcast()
+        .handle_error()?;
 
     Ok(GeoTable(table))
 }
