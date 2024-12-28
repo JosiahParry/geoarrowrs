@@ -14,6 +14,13 @@ mod concave_hull;
 pub use concave_hull::*;
 mod contains;
 pub use contains::*;
+mod convex_hull;
+pub use convex_hull::*;
+pub mod densify;
+pub mod has_dimensions;
+pub mod interior_point;
+pub mod minimum_rotated_rect;
+pub mod remove_repeated_points;
 
 extendr_api::extendr_module! {
     mod algorithm;
@@ -23,6 +30,12 @@ extendr_api::extendr_module! {
     use center;
     use centroid;
     use concave_hull;
+    use convex_hull;
+    use densify;
     use length;
     use contains;
+    use has_dimensions;
+    use interior_point;
+    use minimum_rotated_rect;
+    use remove_repeated_points;
 }

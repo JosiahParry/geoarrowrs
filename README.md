@@ -92,7 +92,7 @@ sf::st_as_sf(reader) |>
 - [ ] wkb - going to defer to `geoarrow-r`
 - [ ] wkt - going to defer to `geoarrow-r`
 
-## Algorithm Implmenetations:
+## Algorithm Implementations:
 
 ### Geo
 
@@ -105,23 +105,23 @@ sf::st_as_sf(reader) |>
 - [x] ChamberlainDuquetteArea
 - [x] ConcaveHull
 - [x] Contains
-- [ ] ConvexHull
-- [ ] Densify
-- \[\] EuclideanDistance
+- [x] ConvexHull
+- [x] Densify
+- [ ] EuclideanDistance
 - [x] EuclideanLength
 - [ ] FrechetDistance
 - [ ] FrechetDistanceLineString
 - [x] GeodesicArea
 - [x] GeodesicLength
-- [ ] HasDimensions
+- [x] HasDimensions
 - [x] HaversineLength
-- [ ] InteriorPoint
+- [x] InteriorPoint
 - [ ] Intersects
 - [ ] LineInterpolatePoint
 - [ ] LineLocatePoint
 - [ ] LineLocatePointScalar
-- [ ] MinimumRotatedRect
-- [ ] RemoveRepeatedPoints
+- [x] MinimumRotatedRect
+- [x] RemoveRepeatedPoints
 - [ ] Rotate
 - [ ] Scale
 - [ ] Simplify
