@@ -75,3 +75,20 @@ sf::st_as_sf(reader) |>
     $ z_order    <int> 0, 0, -20, 0, 0, 0, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
     $ other_tags <chr> NA, NA, "\"layer\"=>\"-1\",\"tunnel\"=>\"yes\"", "\"surface…
     $ geometry   <MULTILINESTRING> MULTILINESTRING ((-3.1523 5..., MULTILINESTRING…
+
+## Algorithm Implmenetations:
+
+### Geo
+
+Traits - \[ \] AffineOps - \[x\] Area - \[x\] BoundingRect - \[x\]
+Center - \[x\] Centroid - \[x\] ChaikinSmoothing - \[x\]
+ChamberlainDuquetteArea - \[x\] ConcaveHull - \[x\] Contains - \[ \]
+ConvexHull - \[ \] Densify - \[\] EuclideanDistance - \[x\]
+EuclideanLength - \[ \] FrechetDistance - \[ \]
+FrechetDistanceLineString - \[x\] GeodesicArea - \[x\] GeodesicLength -
+\[ \] HasDimensions - \[x\] HaversineLength - \[ \] InteriorPoint - \[
+\] Intersects - \[ \] LineInterpolatePoint - \[ \] LineLocatePoint - \[
+\] LineLocatePointScalar - \[ \] MinimumRotatedRect - \[ \]
+RemoveRepeatedPoints - \[ \] Rotate - \[ \] Scale - \[ \] Simplify - \[
+\] SimplifyVw - \[ \] SimplifyVwPreserve - \[ \] Skew - \[ \]
+Translate - \[x\] VincentyLength - \[ \] Within

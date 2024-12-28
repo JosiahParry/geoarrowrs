@@ -57,5 +57,7 @@ length_geodesic_ <- function(x) .Call(wrap__length_geodesic_, x)
 
 length_vincenty_ <- function(x) .Call(wrap__length_vincenty_, x)
 
+bounding_rect_ <- function(x) .Call(wrap__bounding_rect_, x)
+
 
 # nolint end

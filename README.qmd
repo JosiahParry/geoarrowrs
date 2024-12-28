@@ -32,3 +32,43 @@ sf::st_as_sf(reader) |>
     dplyr::glimpse()
 ```
 
+
+## Algorithm Implmenetations: 
+
+### Geo
+
+- [ ] AffineOps
+- [x] Area
+- [x] BoundingRect
+- [x] Center
+- [x] Centroid
+- [x] ChaikinSmoothing
+- [x] ChamberlainDuquetteArea
+- [x] ConcaveHull
+- [x] Contains
+- [ ] ConvexHull
+- [ ] Densify
+- [] EuclideanDistance
+- [x] EuclideanLength
+- [ ] FrechetDistance
+- [ ] FrechetDistanceLineString
+- [x] GeodesicArea
+- [x] GeodesicLength
+- [ ] HasDimensions
+- [x] HaversineLength
+- [ ] InteriorPoint
+- [ ] Intersects
+- [ ] LineInterpolatePoint
+- [ ] LineLocatePoint
+- [ ] LineLocatePointScalar
+- [ ] MinimumRotatedRect
+- [ ] RemoveRepeatedPoints
+- [ ] Rotate
+- [ ] Scale
+- [ ] Simplify
+- [ ] SimplifyVw
+- [ ] SimplifyVwPreserve
+- [ ] Skew
+- [ ] Translate
+- [x] VincentyLength
+- [ ] Within
