@@ -1,5 +1,7 @@
 mod primitives;
 pub use primitives::*;
+mod length;
+pub use length::*;
 
 use arrow::{
     array::{make_array, RecordBatchReader},
@@ -281,11 +283,13 @@ pub fn try_to_native_dyn_array(
     array: FFI_ArrowArray,
     schema: &FFI_ArrowSchema,
 ) -> std::result::Result<NativeArrayDyn, GeoArrowError> {
+    let array = Box::leak(Box::new(array));
+    let array = unsafe { FFI_ArrowArray::from_raw(array) };
+
     let data = unsafe { from_ffi(array, &schema)? };
     let a = make_array(data);
     let field = Field::try_from(schema)?;
 
-    // let nda = NativeArrayDyn::from_arrow_array(&a, &field)?;
     let nda = NativeArrayDyn::from_arrow_array(&a, &field);
     let nda = match nda {
         Ok(r) => r,
@@ -299,8 +303,6 @@ pub fn try_to_native_dyn_array(
             return Err(GeoArrowError::NotYetImplemented(
                 "Found a WKB/WKT array. This is not yet supported in geoarrow-rs".to_string(),
             ));
-            // let res = GeometryArray::try_from(serialized_array.into_array_ref().as_ref())?;
-            // NativeArrayDyn::new(Arc::new(res))
         }
     };
 

@@ -1,7 +1,6 @@
 pub mod algorithm;
 pub mod ffi;
 pub mod io;
-pub mod length;
 pub mod table;
 
 use std::sync::Arc;
@@ -14,7 +13,7 @@ use arrow::{
 };
 use extendr_api::prelude::*;
 use ffi::{GeoChunks, GeoTable};
-use geoarrow::{error::GeoArrowError, table::Table};
+use geoarrow::table::Table;
 
 #[extendr]
 pub fn read_ffi_array_schema(
@@ -111,7 +110,6 @@ where
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod geoarrowrs;
-    use length;
     use io;
     use table;
     use algorithm;
