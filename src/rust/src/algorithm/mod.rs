@@ -1,3 +1,4 @@
+pub mod affine_ops;
 pub mod area;
 pub mod bounding_rect;
 pub mod center;
@@ -17,28 +18,35 @@ pub mod line_locate_point;
 pub mod minimum_rotated_rect;
 pub mod remove_repeated_points;
 pub mod rotate;
+pub mod scale;
 pub mod simplify;
+pub mod skew;
+pub mod translate;
 
 extendr_api::extendr_module! {
     mod algorithm;
+    use affine_ops;
     use area;
     use bounding_rect;
-    use chaikin_smoothing;
     use center;
     use centroid;
+    use chaikin_smoothing;
     use concave_hull;
-    use convex_hull;
     use contains;
+    use convex_hull;
     use densify;
     use euclidean_distance;
     use frechet_distance;
-    use length;
     use has_dimensions;
     use interior_point;
+    use length;
     use line_interpolate_point;
     use line_locate_point;
     use minimum_rotated_rect;
     use remove_repeated_points;
     use rotate;
+    use scale;
     use simplify;
+    use skew;
+    use translate;
 }
