@@ -745,6 +745,7 @@ version = "0.1.0"
 dependencies = [
  "arrow",
  "extendr-api",
+ "geo",
  "geo-types",
  "geoarrow",
  "libR-sys",

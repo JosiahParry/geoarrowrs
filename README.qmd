@@ -6,29 +6,6 @@ format: gfm
 
 `{geoarrowrs}` provides R bindings to the geoarrow-rs Rust crate. They are in a very early stage. 
 
-## Usage
-
-The flatgeobuf reader is approximately 4 times faster than `sf` in this use case. 
-
-```{r}
-library(geoarrow)
-library(geoarrowrs)
-
-# get the file path
-fp <- system.file("extdata", "osm-edinburgh-central.fgb", package = "geoarrowrs")
-
-# read the flatgeobuf file
-stream <- read_flatgeobuf_(fp)
-stream
-
-# convert to a record batch reader
-reader <- arrow::as_record_batch_reader(stream)
-reader 
-
-# convert to sf 
-sf::st_as_sf(reader) |> 
-    dplyr::glimpse()
-```
 
 ## Readers
 
@@ -65,10 +42,10 @@ sf::st_as_sf(reader) |>
 - [x] Contains
 - [x] ConvexHull
 - [x] Densify - ⚠️ TODO allow an array to densify
-- [ ] EuclideanDistance
+- [x] EuclideanDistance ⚠️ TODO dense matrix for distance
 - [x] EuclideanLength
-- [ ] FrechetDistance
-- [ ] FrechetDistanceLineString
+- [x] FrechetDistance ⚠️ TODO dense matrix for distance
+- [ ] FrechetDistanceLineString - TODO i beleive this is for distance to a single other line
 - [x] GeodesicArea - ⚠️ TODO geodesic_perimeter
 - [x] GeodesicLength
 - [x] HasDimensions
@@ -76,11 +53,11 @@ sf::st_as_sf(reader) |>
 - [x] InteriorPoint
 - [ ] Intersects
 - [x] LineInterpolatePoint
-- [ ] LineLocatePoint
-- [ ] LineLocatePointScalar
+- [x] LineLocatePoint
+- [ ] LineLocatePointScalar - I'm unsure what this does
 - [x] MinimumRotatedRect
 - [x] RemoveRepeatedPoints
-- [ ] Rotate
+- [x] Rotate - ⚠️ missing `rotate_around_point()` unsure how to handle scalar
 - [ ] Scale
 - [x] Simplify - ⚠️ TODO allow array for epsilon
 - [x] SimplifyVw - ⚠️ TODO allow array for epsilon

@@ -49,6 +49,26 @@ area_chamberlain_duquette_signed_ <- function(x) .Call(wrap__area_chamberlain_du
 
 area_chamberlain_duquette_unsigned_ <- function(x) .Call(wrap__area_chamberlain_duquette_unsigned_, x)
 
+bounding_rect_ <- function(x) .Call(wrap__bounding_rect_, x)
+
+chaikin_smoothing_ <- function(x, n_iterations) .Call(wrap__chaikin_smoothing_, x, n_iterations)
+
+center_ <- function(x) .Call(wrap__center_, x)
+
+centroid_ <- function(x) .Call(wrap__centroid_, x)
+
+concave_hull_ <- function(x, concavity) .Call(wrap__concave_hull_, x, concavity)
+
+convex_hull_ <- function(x) .Call(wrap__convex_hull_, x)
+
+contains_ <- function(x, y) .Call(wrap__contains_, x, y)
+
+within_ <- function(x, y) .Call(wrap__within_, x, y)
+
+densify_ <- function(x, max_distance) .Call(wrap__densify_, x, max_distance)
+
+distance_euclidean_pairwise_ <- function(x, y) .Call(wrap__distance_euclidean_pairwise_, x, y)
+
 length_haversine_ <- function(x) .Call(wrap__length_haversine_, x)
 
 length_euclidean_ <- function(x) .Call(wrap__length_euclidean_, x)
@@ -57,7 +77,23 @@ length_geodesic_ <- function(x) .Call(wrap__length_geodesic_, x)
 
 length_vincenty_ <- function(x) .Call(wrap__length_vincenty_, x)
 
-bounding_rect_ <- function(x) .Call(wrap__bounding_rect_, x)
+has_dimensions_ <- function(x) .Call(wrap__has_dimensions_, x)
+
+interior_point_ <- function(x) .Call(wrap__interior_point_, x)
+
+line_interpolate_point_ <- function(x, fraction) .Call(wrap__line_interpolate_point_, x, fraction)
+
+line_locate_point_ <- function(x, y) .Call(wrap__line_locate_point_, x, y)
+
+minimum_rotated_rect_ <- function(x) .Call(wrap__minimum_rotated_rect_, x)
+
+remove_repeated_points_ <- function(x) .Call(wrap__remove_repeated_points_, x)
+
+simplify_ <- function(x, epsilon) .Call(wrap__simplify_, x, epsilon)
+
+simplify_vw_ <- function(x, epsilon) .Call(wrap__simplify_vw_, x, epsilon)
+
+simplify_vw_preserve_ <- function(x, epsilon) .Call(wrap__simplify_vw_preserve_, x, epsilon)
 
 
 # nolint end

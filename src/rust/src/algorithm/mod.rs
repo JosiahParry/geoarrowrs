@@ -8,6 +8,7 @@ pub mod contains;
 pub mod convex_hull;
 pub mod densify;
 pub mod euclidean_distance;
+pub mod frechet_distance;
 pub mod has_dimensions;
 pub mod interior_point;
 pub mod length;
@@ -15,6 +16,7 @@ pub mod line_interpolate_point;
 pub mod line_locate_point;
 pub mod minimum_rotated_rect;
 pub mod remove_repeated_points;
+pub mod rotate;
 pub mod simplify;
 
 extendr_api::extendr_module! {
@@ -29,6 +31,7 @@ extendr_api::extendr_module! {
     use contains;
     use densify;
     use euclidean_distance;
+    use frechet_distance;
     use length;
     use has_dimensions;
     use interior_point;
@@ -36,5 +39,6 @@ extendr_api::extendr_module! {
     use line_locate_point;
     use minimum_rotated_rect;
     use remove_repeated_points;
+    use rotate;
     use simplify;
 }
