@@ -1,26 +1,21 @@
-mod area;
-pub use area::*;
-mod length;
-pub use length::*;
-mod bounding_rect;
-pub use bounding_rect::*;
-mod center;
-pub use center::*;
-mod centroid;
-pub use centroid::*;
-mod chaikin_smoothing;
-pub use chaikin_smoothing::*;
-mod concave_hull;
-pub use concave_hull::*;
-mod contains;
-pub use contains::*;
-mod convex_hull;
-pub use convex_hull::*;
+pub mod area;
+pub mod bounding_rect;
+pub mod center;
+pub mod centroid;
+pub mod chaikin_smoothing;
+pub mod concave_hull;
+pub mod contains;
+pub mod convex_hull;
 pub mod densify;
+pub mod euclidean_distance;
 pub mod has_dimensions;
 pub mod interior_point;
+pub mod length;
+pub mod line_interpolate_point;
+pub mod line_locate_point;
 pub mod minimum_rotated_rect;
 pub mod remove_repeated_points;
+pub mod simplify;
 
 extendr_api::extendr_module! {
     mod algorithm;
@@ -31,11 +26,15 @@ extendr_api::extendr_module! {
     use centroid;
     use concave_hull;
     use convex_hull;
-    use densify;
-    use length;
     use contains;
+    use densify;
+    use euclidean_distance;
+    use length;
     use has_dimensions;
     use interior_point;
+    use line_interpolate_point;
+    use line_locate_point;
     use minimum_rotated_rect;
     use remove_repeated_points;
+    use simplify;
 }

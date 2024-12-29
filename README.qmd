@@ -61,34 +61,34 @@ sf::st_as_sf(reader) |>
 - [x] Centroid
 - [x] ChaikinSmoothing
 - [x] ChamberlainDuquetteArea
-- [x] ConcaveHull
+- [x] ConcaveHull - ⚠️ TODO allow an array of concavity 
 - [x] Contains
 - [x] ConvexHull
-- [x] Densify
+- [x] Densify - ⚠️ TODO allow an array to densify
 - [ ] EuclideanDistance
 - [x] EuclideanLength
 - [ ] FrechetDistance
 - [ ] FrechetDistanceLineString
-- [x] GeodesicArea
+- [x] GeodesicArea - ⚠️ TODO geodesic_perimeter
 - [x] GeodesicLength
 - [x] HasDimensions
 - [x] HaversineLength
 - [x] InteriorPoint
 - [ ] Intersects
-- [ ] LineInterpolatePoint
+- [x] LineInterpolatePoint
 - [ ] LineLocatePoint
 - [ ] LineLocatePointScalar
 - [x] MinimumRotatedRect
 - [x] RemoveRepeatedPoints
 - [ ] Rotate
 - [ ] Scale
-- [ ] Simplify
-- [ ] SimplifyVw
-- [ ] SimplifyVwPreserve
+- [x] Simplify - ⚠️ TODO allow array for epsilon
+- [x] SimplifyVw - ⚠️ TODO allow array for epsilon
+- [x] SimplifyVwPreserve - ⚠️ TODO allow array for epsilon
 - [ ] Skew
 - [ ] Translate
 - [x] VincentyLength
-- [ ] Within
+- [x] Within
 
 ### Native 
 

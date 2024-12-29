@@ -19,7 +19,7 @@ VENDOR_DIR = $(CURDIR)/vendor
 #
 # When the NOT_CRAN flag is *not* set, the vendor.tar.xz, if present,
 # is unzipped and used for offline compilation.
-FINGERPRINT = $(shell find $(TARGET_DIR)/debug/.fingerprint -type f)
+FINGERPRINT = $(shell find $(TARGET_DIR)/release/.fingerprint -type f)
 
 $(STATLIB): $(FINGERPRINT)
 
