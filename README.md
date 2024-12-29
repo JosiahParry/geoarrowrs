@@ -49,22 +49,57 @@ are in a very early stage.
 - [x] HasDimensions
 - [x] HaversineLength
 - [x] InteriorPoint
-- [ ] Intersects
+- [ ] Intersects - ⚠️ not provided by geoarrow-rs yet
 - [x] LineInterpolatePoint
 - [x] LineLocatePoint
 - [ ] LineLocatePointScalar - I’m unsure what this does
 - [x] MinimumRotatedRect
 - [x] RemoveRepeatedPoints
 - [x] Rotate - ⚠️ missing `rotate_around_point()` unsure how to handle
-  scalar
-- [ ] Scale
+  scalar geometry
+- [x] Scale - ⚠️ missing `scale_around_point()` unsure how to handle
+  scalar geometry
 - [x] Simplify - ⚠️ TODO allow array for epsilon
 - [x] SimplifyVw - ⚠️ TODO allow array for epsilon
 - [x] SimplifyVwPreserve - ⚠️ TODO allow array for epsilon
-- [ ] Skew
-- [ ] Translate
+- [x] Skew - ⚠️ TODO missing `skew_around_point()` idk how to handle
+  scalar geometry
+- [x] Translate
 - [x] VincentyLength
 - [x] Within
+
+------------------------------------------------------------------------
+
+Other traits that are missing from geoarrow-rs and I think should be
+implemented there then ported to this package. This is not a complete
+listing of the missing traits from geo.
+
+- [ ] Kernel
+- [ ] ClosestPoint
+- [ ] CrossTrackDistance
+- [ ] DensifyHaversine
+- [ ] Extremes
+- [ ] KNearestConcaveHull
+- [ ] Geodesic::Bearing
+- [ ] Geodesic::Distance
+- [ ] Geodesic::Destination
+- [ ] Geodesic::InterpolatePoint
+- [ ] Haversine::Bearing
+- [ ] Haversine::Destination
+- [ ] Haversine::Distance
+- [ ] Haversine::InterpolatePoint
+- [ ] Rhumb::Bearing
+- [ ] Rhumb::Destination
+- [ ] Rhumb::Distance
+- [ ] Rhumb::InterpolatePoint
+- [ ] LineStringSegmentize
+- [ ] LineStringSegmentizeHaversine
+- [ ] Orient
+- [ ] OutlierDetection
+- [ ] TriangulateEarcut
+- [ ] TriangulateSpade
+- [ ] IsConvex
+- [ ] Winding
 
 ### Native
 

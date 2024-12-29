@@ -67,6 +67,38 @@ format: gfm
 - [x] VincentyLength
 - [x] Within
 
+---- 
+
+Other traits that are missing from geoarrow-rs and I think should be implemented there then ported to this package. This is not a complete listing of the missing traits from geo.
+
+- [ ] Kernel
+- [ ] ClosestPoint
+- [ ] CrossTrackDistance
+- [ ] DensifyHaversine
+- [ ] Extremes
+- [ ] KNearestConcaveHull
+- [ ] Geodesic::Bearing
+- [ ] Geodesic::Distance
+- [ ] Geodesic::Destination
+- [ ] Geodesic::InterpolatePoint
+- [ ] Haversine::Bearing
+- [ ] Haversine::Destination
+- [ ] Haversine::Distance
+- [ ] Haversine::InterpolatePoint
+- [ ] Rhumb::Bearing
+- [ ] Rhumb::Destination
+- [ ] Rhumb::Distance
+- [ ] Rhumb::InterpolatePoint
+- [ ] LineStringSegmentize
+- [ ] LineStringSegmentizeHaversine
+- [ ] Orient
+- [ ] OutlierDetection
+- [ ] TriangulateEarcut
+- [ ] TriangulateSpade
+- [ ] IsConvex
+- [ ] Winding
+
+
 ### Native 
 
 - [ ] Binary
