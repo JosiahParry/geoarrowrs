@@ -16,6 +16,7 @@ pub mod length;
 pub mod line_interpolate_point;
 pub mod line_locate_point;
 pub mod minimum_rotated_rect;
+pub mod native;
 pub mod remove_repeated_points;
 pub mod rotate;
 pub mod scale;
@@ -43,6 +44,7 @@ extendr_api::extendr_module! {
     use line_interpolate_point;
     use line_locate_point;
     use minimum_rotated_rect;
+    use native;
     use remove_repeated_points;
     use rotate;
     use scale;

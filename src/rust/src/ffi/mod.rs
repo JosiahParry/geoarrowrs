@@ -27,6 +27,7 @@ use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
 pub struct GeoChunks(pub ChunkedGeometryArray<NativeArrayDyn>);
+// pub struct GeoChunks(pub ChunkedNativeArrayDyn);
 
 impl From<GeoChunks> for Robj {
     fn from(value: GeoChunks) -> Self {
@@ -230,6 +231,9 @@ impl<'a> TryFrom<&'a Robj> for GeoChunks {
             })
             .collect::<Result<Vec<_>>>()?; // Collect results or propagate errors
 
+        // i may wnat to use ChunkedNativeArrayDyn later on
+        // let x = array_chunks.iter().map(|i| i.as_ref()).collect::<Vec<_>>();
+        // let res = ChunkedNativeArrayDyn::from_geoarrow_chunks(x.as_slice()).handle_error()?;
         // Create a new ChunkedGeometryArray from the converted arrays
         let res = ChunkedGeometryArray::new(array_chunks);
 

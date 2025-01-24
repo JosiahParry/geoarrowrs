@@ -1,4 +1,5 @@
 pub mod algorithm;
+pub mod contiguity;
 pub mod ffi;
 pub mod io;
 pub mod table;
@@ -113,6 +114,7 @@ extendr_module! {
     use io;
     use table;
     use algorithm;
+    use contiguity;
     fn read_ffi_array_schema;
     fn read_ffi_stream;
     fn read_ffi_geoarrow_tbl;

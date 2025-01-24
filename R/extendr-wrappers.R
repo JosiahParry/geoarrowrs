@@ -51,23 +51,29 @@ area_chamberlain_duquette_unsigned_ <- function(x) .Call(wrap__area_chamberlain_
 
 bounding_rect_ <- function(x) .Call(wrap__bounding_rect_, x)
 
-chaikin_smoothing_ <- function(x, n_iterations) .Call(wrap__chaikin_smoothing_, x, n_iterations)
-
 center_ <- function(x) .Call(wrap__center_, x)
 
 centroid_ <- function(x) .Call(wrap__centroid_, x)
 
-concave_hull_ <- function(x, concavity) .Call(wrap__concave_hull_, x, concavity)
+chaikin_smoothing_ <- function(x, n_iterations) .Call(wrap__chaikin_smoothing_, x, n_iterations)
 
-convex_hull_ <- function(x) .Call(wrap__convex_hull_, x)
+concave_hull_ <- function(x, concavity) .Call(wrap__concave_hull_, x, concavity)
 
 contains_ <- function(x, y) .Call(wrap__contains_, x, y)
 
 within_ <- function(x, y) .Call(wrap__within_, x, y)
 
+convex_hull_ <- function(x) .Call(wrap__convex_hull_, x)
+
 densify_ <- function(x, max_distance) .Call(wrap__densify_, x, max_distance)
 
 distance_euclidean_pairwise_ <- function(x, y) .Call(wrap__distance_euclidean_pairwise_, x, y)
+
+frechet_distance_pairwise_ <- function(x, y) .Call(wrap__frechet_distance_pairwise_, x, y)
+
+has_dimensions_ <- function(x) .Call(wrap__has_dimensions_, x)
+
+interior_point_ <- function(x) .Call(wrap__interior_point_, x)
 
 length_haversine_ <- function(x) .Call(wrap__length_haversine_, x)
 
@@ -77,23 +83,39 @@ length_geodesic_ <- function(x) .Call(wrap__length_geodesic_, x)
 
 length_vincenty_ <- function(x) .Call(wrap__length_vincenty_, x)
 
-has_dimensions_ <- function(x) .Call(wrap__has_dimensions_, x)
-
-interior_point_ <- function(x) .Call(wrap__interior_point_, x)
-
 line_interpolate_point_ <- function(x, fraction) .Call(wrap__line_interpolate_point_, x, fraction)
 
 line_locate_point_ <- function(x, y) .Call(wrap__line_locate_point_, x, y)
 
 minimum_rotated_rect_ <- function(x) .Call(wrap__minimum_rotated_rect_, x)
 
+type_ids_ <- function(x) .Call(wrap__type_ids_, x)
+
+type_ids_unique_ <- function(x) .Call(wrap__type_ids_unique_, x)
+
 remove_repeated_points_ <- function(x) .Call(wrap__remove_repeated_points_, x)
+
+rotate_around_centroid_ <- function(x, degrees) .Call(wrap__rotate_around_centroid_, x, degrees)
+
+rotate_around_center_ <- function(x, degrees) .Call(wrap__rotate_around_center_, x, degrees)
+
+scale_ <- function(x, scale_factor) .Call(wrap__scale_, x, scale_factor)
+
+scale_xy_ <- function(x, x_factor, y_factor) .Call(wrap__scale_xy_, x, x_factor, y_factor)
 
 simplify_ <- function(x, epsilon) .Call(wrap__simplify_, x, epsilon)
 
 simplify_vw_ <- function(x, epsilon) .Call(wrap__simplify_vw_, x, epsilon)
 
 simplify_vw_preserve_ <- function(x, epsilon) .Call(wrap__simplify_vw_preserve_, x, epsilon)
+
+skew_ <- function(x, degrees) .Call(wrap__skew_, x, degrees)
+
+skew_xy_ <- function(x, degrees_x, degrees_y) .Call(wrap__skew_xy_, x, degrees_x, degrees_y)
+
+translate_ <- function(x, x_offset, y_offset) .Call(wrap__translate_, x, x_offset, y_offset)
+
+contiguity <- function(geoms) .Call(wrap__contiguity, geoms)
 
 
 # nolint end
