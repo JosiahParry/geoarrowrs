@@ -1,0 +1,30 @@
+[package]
+name = "geoarrowrs"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["rlib", "staticlib"]
+name = "geoarrowrs"
+
+[[bin]]
+name = "document"
+path = "document.rs"
+
+[dependencies]
+anyhow = "1.0.102"
+arrow = "58.3.0"
+arrow_extendr = {path = "/Users/josiahparry/github/rust/arrow-extendr",features = ["arrow", "geoarrow-08"]}
+extendr-api = { version = "*", features = ["either"] }
+geo = "0.33.1"
+geo-traits = { version = "0.3.0" }
+geoarrow = { version = "0.8.0" }
+geoarrow-array = "0.8.0"
+geoarrow-flatgeobuf = "0.8.0"
+geoarrow-geojson = "0.8.0"
+# shapefile = { version = "0.8.0", features = ["geo-traits"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
