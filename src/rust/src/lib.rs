@@ -1,9 +1,12 @@
 use arrow::array::{ArrayData, Float64Array};
 use arrow_extendr::{FromArrowRobj, geoarrow::GeoArrowVctr};
 use extendr_api::prelude::*;
-use geoarrow::array::{LineStringArray, PointArray};
+use geoarrow::array::{
+    LineStringArray, MultiLineStringArray, MultiPolygonArray, PointArray, PolygonArray,
+};
 
 pub(crate) mod bearing;
+pub(crate) mod densify;
 pub(crate) mod destination;
 pub(crate) mod distance;
 pub(crate) mod interpolate_line;
@@ -20,12 +23,43 @@ fn as_point_chunks(x: Robj) -> extendr_api::Result<Vec<PointArray>> {
     }
 }
 
+fn as_polygon_chunks(x: Robj) -> extendr_api::Result<Vec<PolygonArray>> {
+    if let Ok(vctr) = GeoArrowVctr::try_from(&x) {
+        vctr.as_polygon_chunks()
+            .map_err(|e| Error::Other(e.to_string()))
+    } else {
+        let arr = PolygonArray::from_arrow_robj(&x).map_err(|e| Error::Other(e.to_string()))?;
+        Ok(vec![arr])
+    }
+}
+
+fn as_multipolygon_chunks(x: Robj) -> extendr_api::Result<Vec<MultiPolygonArray>> {
+    if let Ok(vctr) = GeoArrowVctr::try_from(&x) {
+        vctr.as_multipolygon_chunks()
+            .map_err(|e| Error::Other(e.to_string()))
+    } else {
+        let arr =
+            MultiPolygonArray::from_arrow_robj(&x).map_err(|e| Error::Other(e.to_string()))?;
+        Ok(vec![arr])
+    }
+}
+
 fn as_linestring_chunks(x: Robj) -> extendr_api::Result<Vec<LineStringArray>> {
     if let Ok(vctr) = GeoArrowVctr::try_from(&x) {
         vctr.as_linestring_chunks()
             .map_err(|e| Error::Other(e.to_string()))
     } else {
         let arr = LineStringArray::from_arrow_robj(&x).map_err(|e| Error::Other(e.to_string()))?;
+        Ok(vec![arr])
+    }
+}
+fn as_multilinestring_chunks(x: Robj) -> extendr_api::Result<Vec<MultiLineStringArray>> {
+    if let Ok(vctr) = GeoArrowVctr::try_from(&x) {
+        vctr.as_multilinestring_chunks()
+            .map_err(|e| Error::Other(e.to_string()))
+    } else {
+        let arr =
+            MultiLineStringArray::from_arrow_robj(&x).map_err(|e| Error::Other(e.to_string()))?;
         Ok(vec![arr])
     }
 }
