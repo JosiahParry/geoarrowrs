@@ -1,11 +1,11 @@
+use crate::as_linestring_chunks;
 use arrow::array::Float64Builder;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::{Euclidean, Geodesic, Haversine, Length, Rhumb};
 use geo_traits::to_geo::ToGeoLineString;
 use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, LineStringArray};
-
-use crate::as_linestring_chunks;
+mod vicenty_length;
 
 #[extendr]
 fn length_euclidean(x: Robj) -> extendr_api::Result<Robj> {
@@ -105,4 +105,5 @@ extendr_module! {
     fn length_haversine;
     fn length_geodesic;
     fn length_rhumb;
+    use vicenty_length;
 }
