@@ -16,6 +16,8 @@ pub(crate) mod distance;
 pub(crate) mod interpolate_line;
 pub(crate) mod interpolate_point;
 pub(crate) mod length;
+pub(crate) mod misc;
+pub(crate) mod simplify;
 
 fn as_point_chunks(x: Robj) -> extendr_api::Result<Vec<PointArray>> {
     if let Ok(vctr) = GeoArrowVctr::try_from(&x) {
@@ -104,4 +106,6 @@ extendr_module! {
     use length;
     use bearing;
     use destination;
+    use simplify;
+    use misc;
 }
