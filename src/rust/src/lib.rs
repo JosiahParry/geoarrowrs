@@ -10,6 +10,7 @@ use geoarrow_array::GeoArrowArray;
 
 pub(crate) mod area;
 pub(crate) mod bearing;
+pub(crate) mod boundary;
 pub(crate) mod densify;
 pub(crate) mod destination;
 pub(crate) mod distance;
@@ -108,4 +109,5 @@ extendr_module! {
     use destination;
     use simplify;
     use misc;
+    use boundary;
 }

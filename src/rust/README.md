@@ -109,12 +109,12 @@ LinesIter: Iterate over lines of a geometry
 
 ## Miscellaneous
 
-- Buffer: Create a new geometry whose boundary is offset the specified distance from the input.
-- Centroid: Calculate the centroid of a geometry
-- ChaikinSmoothing: Smoothen LineString, Polygon, MultiLineString and MultiPolygon using Chaikin’s algorithm
+- ✅ Buffer: Create a new geometry whose boundary is offset the specified distance from the input.
+- ✅ Centroid: Calculate the centroid of a geometry
+- ✅ ChaikinSmoothing: Smoothen LineString, Polygon, MultiLineString and MultiPolygon using Chaikin’s algorithm
 - [proj]: Project geometries with the proj crate (requires the proj feature)
-- LineStringSegmentize: Segment a LineString into n segments
-- LineStringSegmentizeHaversine: Segment a LineString using Haversine distance
+- ✅ LineStringSegmentize: Segment a LineString into n segments
+- ✅ LineStringSegmentizeHaversine: Segment a LineString using Haversine distance
 - [Transform]: Transform a geometry using Proj
-- RemoveRepeatedPoints: Remove repeated points from a geometry
+- ✅ RemoveRepeatedPoints: Remove repeated points from a geometry
 - Validation: Checks if the geometry is well formed. Some algorithms may not work correctly with invalid geometries

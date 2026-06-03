@@ -5,6 +5,62 @@
 #' @useDynLib geoarrowrs, .registration = TRUE
 NULL
 
-distance_euclidean <- function(origin, dest) .Call(wrap__distance_euclidean, origin, dest)
+signed_area <- function(x) .Call(wrap__signed_area, x)
+
+unsigned_area <- function(x) .Call(wrap__unsigned_area, x)
+
+signed_area_cd <- function(x) .Call(wrap__signed_area_cd, x)
+
+unsigned_area_cd <- function(x) .Call(wrap__unsigned_area_cd, x)
+
+signed_area_geodesic <- function(x) .Call(wrap__signed_area_geodesic, x)
+
+unsigned_area_geodesic <- function(x) .Call(wrap__unsigned_area_geodesic, x)
+
+perimeter_signed_geodesic <- function(x) .Call(wrap__perimeter_signed_geodesic, x)
+
+perimeter_unsigned_geodesic <- function(x) .Call(wrap__perimeter_unsigned_geodesic, x)
+
+dist_euclidean_pairwise <- function(origin, dest) .Call(wrap__dist_euclidean_pairwise, origin, dest)
+
+dist_haversine_pairwise <- function(origin, dest) .Call(wrap__dist_haversine_pairwise, origin, dest)
+
+dist_geodesic_pairwise <- function(origin, dest) .Call(wrap__dist_geodesic_pairwise, origin, dest)
+
+dist_rhumb_pairwise <- function(origin, dest) .Call(wrap__dist_rhumb_pairwise, origin, dest)
+
+dist_hausdorff_pairwise <- function(origin, dest) .Call(wrap__dist_hausdorff_pairwise, origin, dest)
+
+dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__dist_vincenty_pairwise, origin, dest)
+
+dist_frechet_pairwise <- function(origin, dest) .Call(wrap__dist_frechet_pairwise, origin, dest)
+
+length_euclidean <- function(x) .Call(wrap__length_euclidean, x)
+
+length_haversine <- function(x) .Call(wrap__length_haversine, x)
+
+length_geodesic <- function(x) .Call(wrap__length_geodesic, x)
+
+length_rhumb <- function(x) .Call(wrap__length_rhumb, x)
+
+length_vincenty <- function(x) .Call(wrap__length_vincenty, x)
+
+bearing_euclidean <- function(origin, dest) .Call(wrap__bearing_euclidean, origin, dest)
+
+bearing_haversine <- function(origin, dest) .Call(wrap__bearing_haversine, origin, dest)
+
+bearing_geodesic <- function(origin, dest) .Call(wrap__bearing_geodesic, origin, dest)
+
+bearing_rhumb <- function(origin, dest) .Call(wrap__bearing_rhumb, origin, dest)
+
+dest_rhumb <- function(origin, bearing, distance) .Call(wrap__dest_rhumb, origin, bearing, distance)
+
+simplify <- function(geometry, epsilon) .Call(wrap__simplify, geometry, epsilon)
+
+simplify_vw <- function(geometry, epsilon) .Call(wrap__simplify_vw, geometry, epsilon)
+
+simplify_vw_preserve <- function(geometry, epsilon) .Call(wrap__simplify_vw_preserve, geometry, epsilon)
+
+remove_repeated_points <- function(geometry) .Call(wrap__remove_repeated_points, geometry)
 
 # nolint end
