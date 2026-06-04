@@ -13,6 +13,19 @@ use crate::{
     try_float_array,
 };
 
+/// Simplify geometries using the topology-preserving Visvalingam-Whyatt algorithm
+///
+/// Like `simplify_vw()` but preserves topology by preventing self-intersections
+/// during simplification. Accepts linestrings, multilinestrings, polygons, and
+/// multipolygons.
+///
+/// @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+/// @param epsilon the simplification tolerance; length 1 or the same length as `geometry`
+/// @returns a GeoArrow array of the same geometry type as the input
+/// @export
+/// @rdname simplify_vw
+/// @family simplify
+/// @references [SimplifyVwPreserve](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwPreserve.html)
 #[extendr]
 fn simplify_vw_preserve(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
     let eps = try_float_array(epsilon, "epsilon")?;

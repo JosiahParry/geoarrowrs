@@ -15,9 +15,20 @@ use geoarrow::{
 };
 use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
-#[extendr]
-/// @param geometry a (multi)polygon or (multi)linestring
+/// Add intermediate points to geometries so no segment exceeds a maximum length
+///
+/// Densifies linestrings, multilinestrings, polygons, and multipolygons by
+/// inserting additional points along each segment until no segment exceeds
+/// `max_segment_length`. The metric determines how segment length is measured.
+///
+/// @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+/// @param max_segment_length the maximum segment length; either length 1 or the same length as `geometry`
 /// @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+/// @returns a GeoArrow array of the same geometry type as the input
+/// @export
+/// @family densify
+/// @references [Densifiable](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html)
+#[extendr]
 fn densify(geometry: Robj, max_segment_length: Robj, metric: &str) -> extendr_api::Result<Robj> {
     let msl = try_float_array(max_segment_length, "max_segment_length")?;
 

@@ -7,6 +7,21 @@ use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, PointArray};
 
 use crate::as_point_chunks;
 
+/// Compute the bearing between pairs of points
+///
+/// Calculate the bearing in degrees from `origin` to `dest` for each pair of
+/// points. Bearing is measured clockwise from north (0 degrees) to 360 degrees.
+/// These functions differ in the metric space used for the calculation.
+///
+/// @param origin a GeoArrow point array of origin points
+/// @param dest a GeoArrow point array of destination points
+/// @returns a double vector of bearing values in degrees
+/// @export
+/// @rdname bearing
+/// @family bearing
+/// @references
+///   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 // TODO: use rayon with min chunk size of 4096
 #[extendr]
 fn bearing_euclidean(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
@@ -33,6 +48,12 @@ fn bearing_euclidean_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: 
     }
 }
 
+/// @export
+/// @rdname bearing
+/// @family bearing
+/// @references
+///   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
 fn bearing_haversine(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -58,6 +79,12 @@ fn bearing_haversine_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: 
     }
 }
 
+/// @export
+/// @rdname bearing
+/// @family bearing
+/// @references
+///   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
 fn bearing_geodesic(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -83,6 +110,12 @@ fn bearing_geodesic_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &
     }
 }
 
+/// @export
+/// @rdname bearing
+/// @family bearing
+/// @references
+///   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
 fn bearing_rhumb(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;

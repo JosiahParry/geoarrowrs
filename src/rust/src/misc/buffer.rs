@@ -10,6 +10,22 @@ use geoarrow_array::GeoArrowArrayAccessor;
 
 use crate::{as_geometry_chunks, try_float_array};
 
+/// Buffer geometries by a given distance
+///
+/// Expands each geometry outward by `distance` to produce a multipolygon.
+/// Line cap and join styles control the shape of the buffer at endpoints and
+/// corners.
+///
+/// @param geometry a GeoArrow geometry array
+/// @param distance a numeric vector of buffer distances; length 1 or the same length as `geometry`
+/// @param line_cap one of `"round"`, `"square"`, or `"butt"`
+/// @param line_join one of `"round"`, `"miter"`, or `"bevel"`
+/// @param miter_limit the miter limit used when `line_join` is `"miter"`
+/// @param round_segments the number of segments used to approximate curves when `line_cap` or `line_join` is `"round"`
+/// @returns a GeoArrow multipolygon array
+/// @export
+/// @family misc
+/// @references [Buffer](https://docs.rs/geo/latest/geo/algorithm/buffer/trait.Buffer.html)
 #[extendr]
 fn buffer(
     geometry: Robj,

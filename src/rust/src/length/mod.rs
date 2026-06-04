@@ -7,6 +7,20 @@ use geo_traits::to_geo::ToGeoLineString;
 use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, LineStringArray};
 mod vicenty_length;
 
+/// Compute the length of linestrings
+///
+/// These functions calculate the total length of each linestring using
+/// different metric spaces. Use the geodesic or haversine variants for
+/// geographic coordinates, and euclidean for projected coordinates.
+///
+/// @param x a GeoArrow linestring array
+/// @returns a double vector of length values
+/// @export
+/// @rdname length
+/// @family length
+/// @references
+///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 #[extendr]
 fn length_euclidean(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
@@ -30,6 +44,12 @@ fn length_euclidean_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
     }
 }
 
+/// @export
+/// @rdname length
+/// @family length
+/// @references
+///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
 fn length_haversine(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
@@ -53,6 +73,12 @@ fn length_haversine_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
     }
 }
 
+/// @export
+/// @rdname length
+/// @family length
+/// @references
+///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
 fn length_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
@@ -76,6 +102,12 @@ fn length_geodesic_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
     }
 }
 
+/// @export
+/// @rdname length
+/// @family length
+/// @references
+///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
 fn length_rhumb(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;

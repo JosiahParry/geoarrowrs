@@ -9,6 +9,18 @@ use geoarrow::array::{
 
 use crate::{as_linestring_chunks, as_multilinestring_chunks};
 
+/// Compute the Vincenty length of linestrings or multilinestrings
+///
+/// Calculates the geodesic length of each linestring or multilinestring using
+/// the Vincenty formula on an ellipsoidal model of the earth. Returns `NA`
+/// if the algorithm fails to converge. Results are in meters.
+///
+/// @param x a GeoArrow linestring or multilinestring array
+/// @returns a double vector of length values in meters
+/// @export
+/// @rdname length
+/// @family length
+/// @references [VincentyLength](https://docs.rs/geo/latest/geo/algorithm/vincenty_length/trait.VincentyLength.html)
 #[extendr]
 fn length_vincenty(x: Robj) -> extendr_api::Result<Robj> {
     if let Ok(chunks) = as_linestring_chunks(x.clone()) {

@@ -11,6 +11,20 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
 use crate::as_linestring_chunks;
 
+/// Split linestrings into a given number of equal-length segments
+///
+/// Divides each linestring into `segment_count` segments of equal length,
+/// returning a multilinestring. Returns `NA` if segmentation fails.
+/// `line_segmentize_haversine()` uses the Haversine formula for geographic
+/// coordinates; `line_segmentize()` uses planar Euclidean distance.
+///
+/// @param geometry a GeoArrow linestring array
+/// @param segment_count the number of segments to split each linestring into; must be greater than 0
+/// @returns a GeoArrow multilinestring array
+/// @export
+/// @rdname line_segmentize
+/// @family misc
+/// @references [LineStringSegmentize](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentize.html)
 #[extendr]
 fn line_segmentize(geometry: Robj, segment_count: i32) -> extendr_api::Result<Robj> {
     if segment_count <= 0 {
@@ -44,6 +58,10 @@ fn line_segmentize(geometry: Robj, segment_count: i32) -> extendr_api::Result<Ro
     bldr.finish().into_arrow_robj()
 }
 
+/// @export
+/// @rdname line_segmentize
+/// @family misc
+/// @references [LineStringSegmentizeHaversine](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentizeHaversine.html)
 #[extendr]
 fn line_segmentize_haversine(geometry: Robj, segment_count: i32) -> extendr_api::Result<Robj> {
     if segment_count <= 0 {

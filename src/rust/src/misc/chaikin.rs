@@ -12,6 +12,18 @@ use crate::{
     as_linestring_chunks, as_multilinestring_chunks, as_multipolygon_chunks, as_polygon_chunks,
 };
 
+/// Smooth geometries using the Chaikin algorithm
+///
+/// Applies Chaikin's corner-cutting algorithm for the given number of iterations
+/// to produce smoother curves. Accepts linestrings, multilinestrings, polygons,
+/// and multipolygons.
+///
+/// @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+/// @param n_iterations the number of smoothing iterations to apply; must be greater than 0
+/// @returns a GeoArrow array of the same geometry type as the input
+/// @export
+/// @family misc
+/// @references [ChaikinSmoothing](https://docs.rs/geo/latest/geo/algorithm/chaikin_smoothing/trait.ChaikinSmoothing.html)
 #[extendr]
 fn chaikin_smoothing(geometry: Robj, n_iterations: i32) -> extendr_api::Result<Robj> {
     if n_iterations <= 0 {

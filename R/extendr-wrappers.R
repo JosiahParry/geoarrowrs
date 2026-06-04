@@ -5,62 +5,397 @@
 #' @useDynLib geoarrowrs, .registration = TRUE
 NULL
 
+#' Compute the signed and unsigned planar area of geometries
+#'
+#' `signed_area()` returns positive values for counter-clockwise winding and
+#' negative values for clockwise winding. `unsigned_area()` always returns a
+#' non-negative value.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a double vector of area values in the units of the coordinate system
+#' @export
+#' @rdname area
+#' @family area
+#' @references [Area](https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html)
 signed_area <- function(x) .Call(wrap__signed_area, x)
 
+#' @export
+#' @rdname area
+#' @family area
+#' @references [Area](https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html)
 unsigned_area <- function(x) .Call(wrap__unsigned_area, x)
 
+#' Compute the signed and unsigned area using the Chamberlain-Duquette algorithm
+#'
+#' These functions use the Chamberlain-Duquette formula, which is suitable for
+#' geographic coordinates on a sphere. Results are in square meters.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a double vector of area values in square meters
+#' @export
+#' @rdname area_cd
+#' @family area
+#' @references [ChamberlainDuquetteArea](https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html)
 signed_area_cd <- function(x) .Call(wrap__signed_area_cd, x)
 
+#' @export
+#' @rdname area_cd
+#' @family area
+#' @references [ChamberlainDuquetteArea](https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html)
 unsigned_area_cd <- function(x) .Call(wrap__unsigned_area_cd, x)
 
+#' Compute the signed and unsigned geodesic area and perimeter of geometries
+#'
+#' These functions use the geodesic formula for computing area and perimeter on
+#' an ellipsoidal model of the earth. Results are in square meters for area and
+#' meters for perimeter.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a double vector of area values in square meters, or perimeter values in meters
+#' @export
+#' @rdname area_geodesic
+#' @family area
+#' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 signed_area_geodesic <- function(x) .Call(wrap__signed_area_geodesic, x)
 
+#' @export
+#' @rdname area_geodesic
+#' @family area
+#' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 unsigned_area_geodesic <- function(x) .Call(wrap__unsigned_area_geodesic, x)
 
+#' @export
+#' @rdname area_geodesic
+#' @family area
+#' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 perimeter_signed_geodesic <- function(x) .Call(wrap__perimeter_signed_geodesic, x)
 
+#' @export
+#' @rdname area_geodesic
+#' @family area
+#' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 perimeter_unsigned_geodesic <- function(x) .Call(wrap__perimeter_unsigned_geodesic, x)
 
+#' Compute pairwise distances between points
+#'
+#' Calculate the distance between each pair of points in `origin` and `dest`.
+#' These functions differ in the metric space used for the calculation.
+#'
+#' @param origin a GeoArrow point array of origin points
+#' @param dest a GeoArrow point array of destination points
+#' @returns a double vector of distance values
+#' @export
+#' @rdname dist_pairwise
+#' @family distance
+#' @references
+#'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 dist_euclidean_pairwise <- function(origin, dest) .Call(wrap__dist_euclidean_pairwise, origin, dest)
 
+#' @export
+#' @rdname dist_pairwise
+#' @family distance
+#' @references
+#'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 dist_haversine_pairwise <- function(origin, dest) .Call(wrap__dist_haversine_pairwise, origin, dest)
 
+#' @export
+#' @rdname dist_pairwise
+#' @family distance
+#' @references
+#'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 dist_geodesic_pairwise <- function(origin, dest) .Call(wrap__dist_geodesic_pairwise, origin, dest)
 
+#' @export
+#' @rdname dist_pairwise
+#' @family distance
+#' @references
+#'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 dist_rhumb_pairwise <- function(origin, dest) .Call(wrap__dist_rhumb_pairwise, origin, dest)
 
+#' Compute the pairwise Hausdorff distance between geometries
+#'
+#' The Hausdorff distance measures how far two geometries are from each other
+#' by taking the maximum of all minimum distances between points on the two shapes.
+#'
+#' @param origin a GeoArrow geometry array
+#' @param dest a GeoArrow geometry array
+#' @returns a double vector of Hausdorff distance values
+#' @export
+#' @family distance
+#' @references [HausdorffDistance](https://docs.rs/geo/latest/geo/algorithm/hausdorff_distance/trait.HausdorffDistance.html)
 dist_hausdorff_pairwise <- function(origin, dest) .Call(wrap__dist_hausdorff_pairwise, origin, dest)
 
+#' Compute the pairwise Vincenty distance between points
+#'
+#' The Vincenty formula computes the geodesic distance between two points on
+#' an ellipsoidal model of the earth. Returns `NA` if the algorithm fails to
+#' converge.
+#'
+#' @param origin a GeoArrow point array of origin points
+#' @param dest a GeoArrow point array of destination points
+#' @returns a double vector of distance values in meters
+#' @export
+#' @family distance
+#' @references [VincentyDistance](https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html)
 dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__dist_vincenty_pairwise, origin, dest)
 
+#' Compute the pairwise Frechet distance between linestrings
+#'
+#' The Frechet distance measures the similarity between two curves by
+#' considering the location and ordering of points along each curve.
+#' Uses the Euclidean metric.
+#'
+#' @param origin a GeoArrow linestring array
+#' @param dest a GeoArrow linestring array
+#' @returns a double vector of Frechet distance values
+#' @export
+#' @family distance
+#' @references [FrechetDistance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html)
 dist_frechet_pairwise <- function(origin, dest) .Call(wrap__dist_frechet_pairwise, origin, dest)
 
+#' Compute the length of linestrings
+#'
+#' These functions calculate the total length of each linestring using
+#' different metric spaces. Use the geodesic or haversine variants for
+#' geographic coordinates, and euclidean for projected coordinates.
+#'
+#' @param x a GeoArrow linestring array
+#' @returns a double vector of length values
+#' @export
+#' @rdname length
+#' @family length
+#' @references
+#'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 length_euclidean <- function(x) .Call(wrap__length_euclidean, x)
 
+#' @export
+#' @rdname length
+#' @family length
+#' @references
+#'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 length_haversine <- function(x) .Call(wrap__length_haversine, x)
 
+#' @export
+#' @rdname length
+#' @family length
+#' @references
+#'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 length_geodesic <- function(x) .Call(wrap__length_geodesic, x)
 
+#' @export
+#' @rdname length
+#' @family length
+#' @references
+#'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 length_rhumb <- function(x) .Call(wrap__length_rhumb, x)
 
+#' Compute the Vincenty length of linestrings or multilinestrings
+#'
+#' Calculates the geodesic length of each linestring or multilinestring using
+#' the Vincenty formula on an ellipsoidal model of the earth. Returns `NA`
+#' if the algorithm fails to converge. Results are in meters.
+#'
+#' @param x a GeoArrow linestring or multilinestring array
+#' @returns a double vector of length values in meters
+#' @export
+#' @rdname length
+#' @family length
+#' @references [VincentyLength](https://docs.rs/geo/latest/geo/algorithm/vincenty_length/trait.VincentyLength.html)
 length_vincenty <- function(x) .Call(wrap__length_vincenty, x)
 
+#' Compute the bearing between pairs of points
+#'
+#' Calculate the bearing in degrees from `origin` to `dest` for each pair of
+#' points. Bearing is measured clockwise from north (0 degrees) to 360 degrees.
+#' These functions differ in the metric space used for the calculation.
+#'
+#' @param origin a GeoArrow point array of origin points
+#' @param dest a GeoArrow point array of destination points
+#' @returns a double vector of bearing values in degrees
+#' @export
+#' @rdname bearing
+#' @family bearing
+#' @references
+#'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 bearing_euclidean <- function(origin, dest) .Call(wrap__bearing_euclidean, origin, dest)
 
+#' @export
+#' @rdname bearing
+#' @family bearing
+#' @references
+#'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 bearing_haversine <- function(origin, dest) .Call(wrap__bearing_haversine, origin, dest)
 
+#' @export
+#' @rdname bearing
+#' @family bearing
+#' @references
+#'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 bearing_geodesic <- function(origin, dest) .Call(wrap__bearing_geodesic, origin, dest)
 
+#' @export
+#' @rdname bearing
+#' @family bearing
+#' @references
+#'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
+#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 bearing_rhumb <- function(origin, dest) .Call(wrap__bearing_rhumb, origin, dest)
 
 dest_rhumb <- function(origin, bearing, distance) .Call(wrap__dest_rhumb, origin, bearing, distance)
 
+#' Simplify geometries using the Ramer-Douglas-Peucker algorithm
+#'
+#' Reduces the number of points in each geometry by removing vertices that
+#' deviate less than `epsilon` from the simplified path. Accepts linestrings,
+#' multilinestrings, polygons, and multipolygons.
+#'
+#' @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+#' @param epsilon the simplification tolerance; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family simplify
+#' @references [Simplify](https://docs.rs/geo/latest/geo/algorithm/simplify/trait.Simplify.html)
 simplify <- function(geometry, epsilon) .Call(wrap__simplify, geometry, epsilon)
 
+#' Simplify geometries using the Visvalingam-Whyatt algorithm
+#'
+#' Reduces the number of points in each geometry by removing vertices whose
+#' effective area is below `epsilon`. Accepts linestrings, multilinestrings,
+#' polygons, and multipolygons.
+#'
+#' @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+#' @param epsilon the simplification tolerance; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @rdname simplify_vw
+#' @family simplify
+#' @references [SimplifyVw](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVw.html)
 simplify_vw <- function(geometry, epsilon) .Call(wrap__simplify_vw, geometry, epsilon)
 
+#' Simplify geometries using the topology-preserving Visvalingam-Whyatt algorithm
+#'
+#' Like `simplify_vw()` but preserves topology by preventing self-intersections
+#' during simplification. Accepts linestrings, multilinestrings, polygons, and
+#' multipolygons.
+#'
+#' @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+#' @param epsilon the simplification tolerance; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @rdname simplify_vw
+#' @family simplify
+#' @references [SimplifyVwPreserve](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwPreserve.html)
 simplify_vw_preserve <- function(geometry, epsilon) .Call(wrap__simplify_vw_preserve, geometry, epsilon)
 
+#' Buffer geometries by a given distance
+#'
+#' Expands each geometry outward by `distance` to produce a multipolygon.
+#' Line cap and join styles control the shape of the buffer at endpoints and
+#' corners.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @param distance a numeric vector of buffer distances; length 1 or the same length as `geometry`
+#' @param line_cap one of `"round"`, `"square"`, or `"butt"`
+#' @param line_join one of `"round"`, `"miter"`, or `"bevel"`
+#' @param miter_limit the miter limit used when `line_join` is `"miter"`
+#' @param round_segments the number of segments used to approximate curves when `line_cap` or `line_join` is `"round"`
+#' @returns a GeoArrow multipolygon array
+#' @export
+#' @family misc
+#' @references [Buffer](https://docs.rs/geo/latest/geo/algorithm/buffer/trait.Buffer.html)
+buffer <- function(geometry, distance, line_cap, line_join, miter_limit, round_segments) .Call(wrap__buffer, geometry, distance, line_cap, line_join, miter_limit, round_segments)
+
+#' Compute the centroid of geometries
+#'
+#' Returns the centroid point of each geometry. Returns `NA` for empty geometries.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a GeoArrow point array
+#' @export
+#' @family misc
+#' @references [Centroid](https://docs.rs/geo/latest/geo/algorithm/centroid/trait.Centroid.html)
+centroid <- function(x) .Call(wrap__centroid, x)
+
+#' Smooth geometries using the Chaikin algorithm
+#'
+#' Applies Chaikin's corner-cutting algorithm for the given number of iterations
+#' to produce smoother curves. Accepts linestrings, multilinestrings, polygons,
+#' and multipolygons.
+#'
+#' @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+#' @param n_iterations the number of smoothing iterations to apply; must be greater than 0
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family misc
+#' @references [ChaikinSmoothing](https://docs.rs/geo/latest/geo/algorithm/chaikin_smoothing/trait.ChaikinSmoothing.html)
+chaikin_smoothing <- function(geometry, n_iterations) .Call(wrap__chaikin_smoothing, geometry, n_iterations)
+
+#' Remove repeated consecutive points from geometries
+#'
+#' Removes consecutive duplicate coordinates from each geometry. Accepts
+#' linestrings, multilinestrings, polygons, and multipolygons.
+#'
+#' @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family misc
+#' @references [RemoveRepeatedPoints](https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html)
 remove_repeated_points <- function(geometry) .Call(wrap__remove_repeated_points, geometry)
+
+#' Split linestrings into a given number of equal-length segments
+#'
+#' Divides each linestring into `segment_count` segments of equal length,
+#' returning a multilinestring. Returns `NA` if segmentation fails.
+#' `line_segmentize_haversine()` uses the Haversine formula for geographic
+#' coordinates; `line_segmentize()` uses planar Euclidean distance.
+#'
+#' @param geometry a GeoArrow linestring array
+#' @param segment_count the number of segments to split each linestring into; must be greater than 0
+#' @returns a GeoArrow multilinestring array
+#' @export
+#' @rdname line_segmentize
+#' @family misc
+#' @references [LineStringSegmentize](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentize.html)
+line_segmentize <- function(geometry, segment_count) .Call(wrap__line_segmentize, geometry, segment_count)
+
+#' @export
+#' @rdname line_segmentize
+#' @family misc
+#' @references [LineStringSegmentizeHaversine](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentizeHaversine.html)
+line_segmentize_haversine <- function(geometry, segment_count) .Call(wrap__line_segmentize_haversine, geometry, segment_count)
+
+#' Compute the axis-aligned bounding rectangle of geometries
+#'
+#' Returns the smallest axis-aligned rectangle that contains each geometry.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a GeoArrow rect array
+#' @export
+#' @family boundary
+#' @references [BoundingRect](https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html)
+bounding_rect <- function(x) .Call(wrap__bounding_rect, x)
+
+#' Compute the minimum rotated bounding rectangle of geometries
+#'
+#' Returns the smallest rectangle of arbitrary rotation that contains each
+#' geometry, as a polygon array.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a GeoArrow polygon array
+#' @export
+#' @family boundary
+#' @references [MinimumRotatedRect](https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html)
+minimum_rotated_rect <- function(x) .Call(wrap__minimum_rotated_rect, x)
 
 # nolint end

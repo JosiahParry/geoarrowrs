@@ -10,6 +10,15 @@ use geoarrow_array::GeoArrowArrayAccessor;
 
 use crate::as_geometry_chunks;
 
+/// Compute the centroid of geometries
+///
+/// Returns the centroid point of each geometry. Returns `NA` for empty geometries.
+///
+/// @param x a GeoArrow geometry array
+/// @returns a GeoArrow point array
+/// @export
+/// @family misc
+/// @references [Centroid](https://docs.rs/geo/latest/geo/algorithm/centroid/trait.Centroid.html)
 #[extendr]
 fn centroid(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;

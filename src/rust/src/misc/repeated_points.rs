@@ -12,6 +12,16 @@ use crate::{
     as_linestring_chunks, as_multilinestring_chunks, as_multipolygon_chunks, as_polygon_chunks,
 };
 
+/// Remove repeated consecutive points from geometries
+///
+/// Removes consecutive duplicate coordinates from each geometry. Accepts
+/// linestrings, multilinestrings, polygons, and multipolygons.
+///
+/// @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+/// @returns a GeoArrow array of the same geometry type as the input
+/// @export
+/// @family misc
+/// @references [RemoveRepeatedPoints](https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html)
 #[extendr]
 fn remove_repeated_points(geometry: Robj) -> extendr_api::Result<Robj> {
     if let Ok(chunks) = as_linestring_chunks(geometry.clone()) {

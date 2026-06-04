@@ -1,3 +1,4 @@
+use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::{
     Geodesic, MultiPoint, Rhumb,
@@ -12,13 +13,27 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
 use crate::{as_point_chunks, try_float_array};
 
+/// Interpolate a point at a given distance between two points
+///
+/// Returns the point located at `distance` along the path from `start` to `end`.
+/// The metric determines how distance is measured.
+///
+/// @param start a GeoArrow point array of start points
+/// @param end a GeoArrow point array of end points
+/// @param distance a numeric vector of distances; length 1 or the same length as `start`
+/// @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+/// @returns a GeoArrow point array
+/// @export
+/// @rdname interpolate_between
+/// @family interpolate
+/// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #[extendr]
 fn point_at_distance_between(
     start: Robj,
     end: Robj,
     distance: Robj,
     metric: &str,
-) -> extendr_api::Result<()> {
+) -> extendr_api::Result<Robj> {
     let start_chunks = as_point_chunks(start)?;
     let end_chunks = as_point_chunks(end)?;
     let distance = try_float_array(distance, "distance")?;
@@ -57,9 +72,25 @@ fn point_at_distance_between(
         }
     }
 
-    Ok(())
+    let res = bldr.finish();
+    res.into_arrow_robj()
 }
 
+/// Interpolate a point at a given ratio between two points
+///
+/// Returns the point located at `ratio` of the way from `start` to `end`,
+/// where 0.0 is the start and 1.0 is the end. The metric determines how
+/// the interpolation is computed.
+///
+/// @param start a GeoArrow point array of start points
+/// @param end a GeoArrow point array of end points
+/// @param ratio a numeric vector of ratios between 0 and 1; length 1 or the same length as `start`
+/// @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+/// @returns a GeoArrow point array
+/// @export
+/// @rdname interpolate_between
+/// @family interpolate
+/// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #[extendr]
 fn point_at_ratio_between(
     start: Robj,
@@ -107,6 +138,20 @@ fn point_at_ratio_between(
     Ok(())
 }
 
+/// Generate points at regular intervals along the line between two points
+///
+/// Returns a multipoint array where each element contains all points spaced
+/// at most `max_distance` apart along the path from `start` to `end`.
+///
+/// @param start a GeoArrow point array of start points
+/// @param end a GeoArrow point array of end points
+/// @param max_distance the maximum spacing between generated points
+/// @param include_ends whether to include the start and end points in the output
+/// @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+/// @returns a GeoArrow multipoint array
+/// @export
+/// @family interpolate
+/// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #[extendr]
 fn points_along_line(
     start: Robj,
@@ -114,7 +159,7 @@ fn points_along_line(
     max_distance: f64,
     include_ends: bool,
     metric: &str,
-) -> extendr_api::Result<()> {
+) -> extendr_api::Result<Robj> {
     let start_chunks = as_point_chunks(start)?;
     let end_chunks = as_point_chunks(end)?;
 
@@ -161,5 +206,6 @@ fn points_along_line(
         }
     }
 
-    Ok(())
+    let res = bldr.finish();
+    res.into_arrow_robj()
 }

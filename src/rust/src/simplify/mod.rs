@@ -18,6 +18,18 @@ use crate::{
     try_float_array,
 };
 
+/// Simplify geometries using the Ramer-Douglas-Peucker algorithm
+///
+/// Reduces the number of points in each geometry by removing vertices that
+/// deviate less than `epsilon` from the simplified path. Accepts linestrings,
+/// multilinestrings, polygons, and multipolygons.
+///
+/// @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+/// @param epsilon the simplification tolerance; length 1 or the same length as `geometry`
+/// @returns a GeoArrow array of the same geometry type as the input
+/// @export
+/// @family simplify
+/// @references [Simplify](https://docs.rs/geo/latest/geo/algorithm/simplify/trait.Simplify.html)
 #[extendr]
 fn simplify(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
     let eps = try_float_array(epsilon, "epsilon")?;

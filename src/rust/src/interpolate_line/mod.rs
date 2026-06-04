@@ -1,3 +1,4 @@
+use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::{
     Geodesic, Rhumb,
@@ -72,6 +73,21 @@ impl From<WhereFrom> for Robj {
     }
 }
 
+/// Interpolate a point along a linestring
+///
+/// Returns the point at a given ratio or distance along each linestring,
+/// measured from either the start or end. The metric determines how distance
+/// is calculated.
+///
+/// @param line a GeoArrow linestring array
+/// @param value a numeric vector of ratio or distance values; length 1 or the same length as `line`
+/// @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+/// @param measure one of `"ratio"` or `"distance"`
+/// @param from one of `"start"` or `"end"`
+/// @returns a GeoArrow point array
+/// @export
+/// @family interpolate
+/// @references [InterpolateLine](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html)
 #[extendr]
 fn interpolate_point(
     line: Robj,
@@ -79,7 +95,7 @@ fn interpolate_point(
     metric: &str,
     measure: &str,
     from: WhereFrom,
-) -> extendr_api::Result<()> {
+) -> extendr_api::Result<Robj> {
     let line_chunks = as_linestring_chunks(line)?;
     let value = try_float_array(value, "value")?;
 
@@ -141,5 +157,6 @@ fn interpolate_point(
         }
     }
 
-    Ok(())
+    let res = bldr.finish();
+    res.into_arrow_robj()
 }

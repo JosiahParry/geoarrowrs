@@ -10,6 +10,15 @@ use geoarrow_array::GeoArrowArrayAccessor;
 
 use crate::as_geometry_chunks;
 
+/// Compute the axis-aligned bounding rectangle of geometries
+///
+/// Returns the smallest axis-aligned rectangle that contains each geometry.
+///
+/// @param x a GeoArrow geometry array
+/// @returns a GeoArrow rect array
+/// @export
+/// @family boundary
+/// @references [BoundingRect](https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html)
 #[extendr]
 fn bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -35,13 +44,21 @@ fn bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
     bldr.finish().into_arrow_robj()
 }
 
+/// Compute the minimum rotated bounding rectangle of geometries
+///
+/// Returns the smallest rectangle of arbitrary rotation that contains each
+/// geometry, as a polygon array.
+///
+/// @param x a GeoArrow geometry array
+/// @returns a GeoArrow polygon array
+/// @export
+/// @family boundary
+/// @references [MinimumRotatedRect](https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html)
 #[extendr]
 fn minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
-    let n = chunks.iter().map(|c| c.len()).sum();
     let metadata = chunks[0].data_type().metadata().clone();
     let mut bldr = PolygonBuilder::new(PolygonType::new(Dimension::XY, metadata));
-    bldr.reserve(n);
 
     for chunk in &chunks {
         let arr = chunk

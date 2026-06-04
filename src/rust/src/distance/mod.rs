@@ -12,6 +12,20 @@ use geoarrow::array::{
 
 use crate::{as_geometry_chunks, as_linestring_chunks, as_point_chunks};
 
+/// Compute pairwise distances between points
+///
+/// Calculate the distance between each pair of points in `origin` and `dest`.
+/// These functions differ in the metric space used for the calculation.
+///
+/// @param origin a GeoArrow point array of origin points
+/// @param dest a GeoArrow point array of destination points
+/// @returns a double vector of distance values
+/// @export
+/// @rdname dist_pairwise
+/// @family distance
+/// @references
+///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 // TODO: use rayon with min chunk size of 4096
 #[extendr]
 fn dist_euclidean_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
@@ -38,6 +52,12 @@ fn dist_euclidean_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
     }
 }
 
+/// @export
+/// @rdname dist_pairwise
+/// @family distance
+/// @references
+///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
 fn dist_haversine_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -63,6 +83,12 @@ fn dist_haversine_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
     }
 }
 
+/// @export
+/// @rdname dist_pairwise
+/// @family distance
+/// @references
+///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
 fn dist_geodesic_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -88,6 +114,12 @@ fn dist_geodesic_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
     }
 }
 
+/// @export
+/// @rdname dist_pairwise
+/// @family distance
+/// @references
+///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
+///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
 fn dist_rhumb_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -113,6 +145,17 @@ fn dist_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointA
     }
 }
 
+/// Compute the pairwise Hausdorff distance between geometries
+///
+/// The Hausdorff distance measures how far two geometries are from each other
+/// by taking the maximum of all minimum distances between points on the two shapes.
+///
+/// @param origin a GeoArrow geometry array
+/// @param dest a GeoArrow geometry array
+/// @returns a double vector of Hausdorff distance values
+/// @export
+/// @family distance
+/// @references [HausdorffDistance](https://docs.rs/geo/latest/geo/algorithm/hausdorff_distance/trait.HausdorffDistance.html)
 #[extendr]
 fn dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_geometry_chunks(origin)?;
@@ -146,6 +189,18 @@ fn dist_hausdorff_impl(bldr: &mut Float64Builder, origin: &GeometryArray, dest: 
     }
 }
 
+/// Compute the pairwise Vincenty distance between points
+///
+/// The Vincenty formula computes the geodesic distance between two points on
+/// an ellipsoidal model of the earth. Returns `NA` if the algorithm fails to
+/// converge.
+///
+/// @param origin a GeoArrow point array of origin points
+/// @param dest a GeoArrow point array of destination points
+/// @returns a double vector of distance values in meters
+/// @export
+/// @family distance
+/// @references [VincentyDistance](https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html)
 #[extendr]
 fn dist_vincenty_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -173,6 +228,18 @@ fn dist_vincenty_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
     }
 }
 
+/// Compute the pairwise Frechet distance between linestrings
+///
+/// The Frechet distance measures the similarity between two curves by
+/// considering the location and ordering of points along each curve.
+/// Uses the Euclidean metric.
+///
+/// @param origin a GeoArrow linestring array
+/// @param dest a GeoArrow linestring array
+/// @returns a double vector of Frechet distance values
+/// @export
+/// @family distance
+/// @references [FrechetDistance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html)
 #[extendr]
 fn dist_frechet_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_linestring_chunks(origin)?;
