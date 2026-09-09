@@ -160,3 +160,8 @@ fn interpolate_point(
     let res = bldr.finish();
     res.into_arrow_robj()
 }
+
+extendr_module! {
+    mod interpolate_line;
+    fn interpolate_point;
+}

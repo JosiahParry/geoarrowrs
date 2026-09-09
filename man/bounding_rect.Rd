@@ -19,7 +19,10 @@ Returns the smallest axis-aligned rectangle that contains each geometry.
 \href{https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html}{BoundingRect}
 }
 \seealso{
-Other boundary: 
-\code{\link{minimum_rotated_rect}()}
+Other boundary:
+\code{\link[=concave_hull]{concave_hull()}},
+\code{\link[=convex_hull]{convex_hull()}},
+\code{\link[=extremes]{extremes()}},
+\code{\link[=minimum_rotated_rect]{minimum_rotated_rect()}}
 }
 \concept{boundary}

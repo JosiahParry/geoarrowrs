@@ -19,10 +19,10 @@ Returns the centroid point of each geometry. Returns \code{NA} for empty geometr
 \href{https://docs.rs/geo/latest/geo/algorithm/centroid/trait.Centroid.html}{Centroid}
 }
 \seealso{
-Other misc: 
-\code{\link{buffer}()},
-\code{\link{chaikin_smoothing}()},
-\code{\link{line_segmentize}()},
-\code{\link{remove_repeated_points}()}
+Other misc:
+\code{\link[=buffer]{buffer()}},
+\code{\link[=chaikin_smoothing]{chaikin_smoothing()}},
+\code{\link[=line_segmentize]{line_segmentize()}},
+\code{\link[=remove_repeated_points]{remove_repeated_points()}}
 }
 \concept{misc}

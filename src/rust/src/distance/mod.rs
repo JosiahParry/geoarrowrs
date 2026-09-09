@@ -5,12 +5,10 @@ use geo::{
     Distance, Euclidean, Geodesic, HausdorffDistance, Haversine, Rhumb, VincentyDistance,
     line_measures::FrechetDistance,
 };
-use geo_traits::to_geo::{ToGeoGeometry, ToGeoLineString, ToGeoPoint};
-use geoarrow::array::{
-    GeoArrowArray, GeoArrowArrayAccessor, GeometryArray, LineStringArray, PointArray,
-};
+use geo_traits::to_geo::{ToGeoLineString, ToGeoPoint};
+use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, LineStringArray, PointArray};
 
-use crate::{as_geometry_chunks, as_linestring_chunks, as_point_chunks};
+use crate::{as_geo_geometries, as_geometry_chunks, as_linestring_chunks, as_point_chunks};
 
 /// Compute pairwise distances between points
 ///
@@ -164,29 +162,17 @@ fn dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        let orig_arr = orig
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        let dst_arr = dst
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        dist_hausdorff_impl(&mut bldr, orig_arr, dst_arr);
+        let origin = as_geo_geometries(orig.as_ref())?;
+        let dest = as_geo_geometries(dst.as_ref())?;
+        for (x, y) in origin.into_iter().zip(dest) {
+            match (x, y) {
+                (Some(x), Some(y)) => bldr.append_value(x.hausdorff_distance(&y)),
+                _ => bldr.append_null(),
+            }
+        }
     }
 
     bldr.finish().into_arrow_robj()
-}
-
-fn dist_hausdorff_impl(bldr: &mut Float64Builder, origin: &GeometryArray, dest: &GeometryArray) {
-    for (xi, yi) in origin.iter().zip(dest.iter()) {
-        if let (Some(Ok(x)), Some(Ok(y))) = (xi, yi) {
-            let dist = x.to_geometry().hausdorff_distance(&y.to_geometry());
-            bldr.append_value(dist);
-        } else {
-            bldr.append_null();
-        }
-    }
 }
 
 /// Compute the pairwise Vincenty distance between points

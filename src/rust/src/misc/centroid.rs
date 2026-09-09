@@ -1,14 +1,13 @@
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::Centroid;
-use geo_traits::to_geo::ToGeoGeometry;
 use geoarrow::{
-    array::{GeometryArray, PointBuilder},
+    array::PointBuilder,
     datatypes::{Dimension, PointType},
 };
-use geoarrow_array::GeoArrowArrayAccessor;
+use geoarrow_array::GeoArrowArray;
 
-use crate::as_geometry_chunks;
+use crate::{as_geo_geometries, as_geometry_chunks};
 
 /// Compute the centroid of geometries
 ///
@@ -28,18 +27,10 @@ fn centroid(x: Robj) -> extendr_api::Result<Robj> {
     bldr.reserve(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                match val.to_geometry().centroid() {
-                    Some(pt) => bldr.push_point(Some(&pt)),
-                    None => bldr.push_point(None::<&geo::Point<f64>>),
-                }
-            } else {
-                bldr.push_point(None::<&geo::Point<f64>>);
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            match geom.and_then(|g| g.centroid()) {
+                Some(pt) => bldr.push_point(Some(&pt)),
+                None => bldr.push_point(None::<&geo::Point<f64>>),
             }
         }
     }

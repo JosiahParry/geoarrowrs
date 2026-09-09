@@ -31,10 +31,10 @@ corners.
 \href{https://docs.rs/geo/latest/geo/algorithm/buffer/trait.Buffer.html}{Buffer}
 }
 \seealso{
-Other misc: 
-\code{\link{centroid}()},
-\code{\link{chaikin_smoothing}()},
-\code{\link{line_segmentize}()},
-\code{\link{remove_repeated_points}()}
+Other misc:
+\code{\link[=centroid]{centroid()}},
+\code{\link[=chaikin_smoothing]{chaikin_smoothing()}},
+\code{\link[=line_segmentize]{line_segmentize()}},
+\code{\link[=remove_repeated_points]{remove_repeated_points()}}
 }
 \concept{misc}

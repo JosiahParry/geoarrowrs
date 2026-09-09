@@ -29,16 +29,10 @@ coordinates; \code{line_segmentize()} uses planar Euclidean distance.
 \href{https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentizeHaversine.html}{LineStringSegmentizeHaversine}
 }
 \seealso{
-Other misc: 
-\code{\link{buffer}()},
-\code{\link{centroid}()},
-\code{\link{chaikin_smoothing}()},
-\code{\link{remove_repeated_points}()}
-
-Other misc: 
-\code{\link{buffer}()},
-\code{\link{centroid}()},
-\code{\link{chaikin_smoothing}()},
-\code{\link{remove_repeated_points}()}
+Other misc:
+\code{\link[=buffer]{buffer()}},
+\code{\link[=centroid]{centroid()}},
+\code{\link[=chaikin_smoothing]{chaikin_smoothing()}},
+\code{\link[=remove_repeated_points]{remove_repeated_points()}}
 }
 \concept{misc}

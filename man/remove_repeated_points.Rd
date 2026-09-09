@@ -20,10 +20,10 @@ linestrings, multilinestrings, polygons, and multipolygons.
 \href{https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html}{RemoveRepeatedPoints}
 }
 \seealso{
-Other misc: 
-\code{\link{buffer}()},
-\code{\link{centroid}()},
-\code{\link{chaikin_smoothing}()},
-\code{\link{line_segmentize}()}
+Other misc:
+\code{\link[=buffer]{buffer()}},
+\code{\link[=centroid]{centroid()}},
+\code{\link[=chaikin_smoothing]{chaikin_smoothing()}},
+\code{\link[=line_segmentize]{line_segmentize()}}
 }
 \concept{misc}

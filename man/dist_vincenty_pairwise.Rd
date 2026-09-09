@@ -23,9 +23,9 @@ converge.
 \href{https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html}{VincentyDistance}
 }
 \seealso{
-Other distance: 
-\code{\link{dist_euclidean_pairwise}()},
-\code{\link{dist_frechet_pairwise}()},
-\code{\link{dist_hausdorff_pairwise}()}
+Other distance:
+\code{\link[=dist_euclidean_pairwise]{dist_euclidean_pairwise()}},
+\code{\link[=dist_frechet_pairwise]{dist_frechet_pairwise()}},
+\code{\link[=dist_hausdorff_pairwise]{dist_hausdorff_pairwise()}}
 }
 \concept{distance}

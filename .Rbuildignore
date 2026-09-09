@@ -3,3 +3,8 @@
 ^src/rust/target$
 ^src/Makevars$
 ^src/Makevars\.win$
+CLAUDE.md
+justfile
+NEWS.md
+.pre-commit-config.yaml
+.claude/

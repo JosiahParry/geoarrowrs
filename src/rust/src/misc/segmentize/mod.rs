@@ -1,7 +1,7 @@
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::{LineStringSegmentize, LineStringSegmentizeHaversine};
 use geo::MultiLineString;
+use geo::{LineStringSegmentize, LineStringSegmentizeHaversine};
 use geo_traits::to_geo::ToGeoLineString;
 use geoarrow::{
     array::MultiLineStringBuilder,

@@ -22,9 +22,9 @@ by taking the maximum of all minimum distances between points on the two shapes.
 \href{https://docs.rs/geo/latest/geo/algorithm/hausdorff_distance/trait.HausdorffDistance.html}{HausdorffDistance}
 }
 \seealso{
-Other distance: 
-\code{\link{dist_euclidean_pairwise}()},
-\code{\link{dist_frechet_pairwise}()},
-\code{\link{dist_vincenty_pairwise}()}
+Other distance:
+\code{\link[=dist_euclidean_pairwise]{dist_euclidean_pairwise()}},
+\code{\link[=dist_frechet_pairwise]{dist_frechet_pairwise()}},
+\code{\link[=dist_vincenty_pairwise]{dist_vincenty_pairwise()}}
 }
 \concept{distance}

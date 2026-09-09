@@ -23,9 +23,9 @@ Uses the Euclidean metric.
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html}{FrechetDistance}
 }
 \seealso{
-Other distance: 
-\code{\link{dist_euclidean_pairwise}()},
-\code{\link{dist_hausdorff_pairwise}()},
-\code{\link{dist_vincenty_pairwise}()}
+Other distance:
+\code{\link[=dist_euclidean_pairwise]{dist_euclidean_pairwise()}},
+\code{\link[=dist_hausdorff_pairwise]{dist_hausdorff_pairwise()}},
+\code{\link[=dist_vincenty_pairwise]{dist_vincenty_pairwise()}}
 }
 \concept{distance}

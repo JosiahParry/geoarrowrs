@@ -34,10 +34,7 @@ multipolygons.
 \href{https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwPreserve.html}{SimplifyVwPreserve}
 }
 \seealso{
-Other simplify: 
-\code{\link{simplify}()}
-
-Other simplify: 
-\code{\link{simplify}()}
+Other simplify:
+\code{\link[=simplify]{simplify()}}
 }
 \concept{simplify}

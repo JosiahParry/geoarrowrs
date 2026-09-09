@@ -36,20 +36,8 @@ meters for perimeter.
 \href{https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html}{GeodesicArea}
 }
 \seealso{
-Other area: 
-\code{\link{signed_area}()},
-\code{\link{signed_area_cd}()}
-
-Other area: 
-\code{\link{signed_area}()},
-\code{\link{signed_area_cd}()}
-
-Other area: 
-\code{\link{signed_area}()},
-\code{\link{signed_area_cd}()}
-
-Other area: 
-\code{\link{signed_area}()},
-\code{\link{signed_area_cd}()}
+Other area:
+\code{\link[=signed_area]{signed_area()}},
+\code{\link[=signed_area_cd]{signed_area_cd()}}
 }
 \concept{area}

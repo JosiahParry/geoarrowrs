@@ -23,7 +23,7 @@ multilinestrings, polygons, and multipolygons.
 \href{https://docs.rs/geo/latest/geo/algorithm/simplify/trait.Simplify.html}{Simplify}
 }
 \seealso{
-Other simplify: 
-\code{\link{simplify_vw}()}
+Other simplify:
+\code{\link[=simplify_vw]{simplify_vw()}}
 }
 \concept{simplify}

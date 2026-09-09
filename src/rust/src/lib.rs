@@ -1,24 +1,30 @@
 use std::sync::Arc;
 
-use arrow::array::{ArrayData, Float64Array};
+use arrow::array::{ArrayData, Float64Array, Float64Builder};
 use arrow_extendr::{FromArrowRobj, geoarrow::GeoArrowVctr};
 use extendr_api::prelude::*;
 use geoarrow::array::{
-    LineStringArray, MultiLineStringArray, MultiPolygonArray, PointArray, PolygonArray,
+    LineStringArray, MultiLineStringArray, MultiPointArray, MultiPolygonArray, PointArray,
+    PolygonArray,
 };
 use geoarrow_array::GeoArrowArray;
 
+pub(crate) mod affine;
 pub(crate) mod area;
 pub(crate) mod bearing;
 pub(crate) mod boundary;
+pub(crate) mod cast;
+pub(crate) mod convert;
 pub(crate) mod densify;
 pub(crate) mod destination;
 pub(crate) mod distance;
 pub(crate) mod interpolate_line;
 pub(crate) mod interpolate_point;
+pub(crate) mod io;
 pub(crate) mod length;
 pub(crate) mod misc;
 pub(crate) mod simplify;
+pub(crate) mod triangulate;
 
 fn as_point_chunks(x: Robj) -> extendr_api::Result<Vec<PointArray>> {
     if let Ok(vctr) = GeoArrowVctr::try_from(&x) {
@@ -37,6 +43,16 @@ fn as_geometry_chunks(x: Robj) -> extendr_api::Result<Vec<Arc<dyn GeoArrowArray>
     } else {
         let arr = <Arc<dyn GeoArrowArray>>::from_arrow_robj(&x)
             .map_err(|e| Error::Other(e.to_string()))?;
+        Ok(vec![arr])
+    }
+}
+
+fn as_multipoint_chunks(x: Robj) -> extendr_api::Result<Vec<MultiPointArray>> {
+    if let Ok(vctr) = GeoArrowVctr::try_from(&x) {
+        vctr.as_multipoint_chunks()
+            .map_err(|e| Error::Other(e.to_string()))
+    } else {
+        let arr = MultiPointArray::from_arrow_robj(&x).map_err(|e| Error::Other(e.to_string()))?;
         Ok(vec![arr])
     }
 }
@@ -82,32 +98,100 @@ fn as_multilinestring_chunks(x: Robj) -> extendr_api::Result<Vec<MultiLineString
     }
 }
 
+/// Accept either an arrow float64 array or a plain R numeric vector, so callers can pass `0.1` rather than wrapping it in `nanoarrow::as_nanoarrow_array()`.
 pub(crate) fn try_float_array(
     robj: Robj,
     label: &'static str,
 ) -> extendr_api::Result<Float64Array> {
-    let err_string = format!("Expected `{label}` to be float 64 array");
-    let Ok(arr) = ArrayData::from_arrow_robj(&robj) else {
-        return Err(Error::Other(err_string));
-    };
-
-    if !arr.data_type().is_floating() {
-        return Err(Error::Other(err_string));
+    if let Ok(arr) = ArrayData::from_arrow_robj(&robj) {
+        if arr.data_type().is_floating() {
+            return Ok(Float64Array::from(arr));
+        }
+        return Err(Error::Other(format!(
+            "Expected `{label}` to be a float 64 array, got {}",
+            arr.data_type()
+        )));
     }
 
-    Ok(Float64Array::from(arr))
+    // integer vectors are coerced, so `1L` works as readily as `1`
+    let doubles = robj.as_real_vector().or_else(|| {
+        robj.as_integer_vector()
+            .map(|v| v.into_iter().map(|i| i as f64).collect())
+    });
+
+    let Some(values) = doubles else {
+        return Err(Error::Other(format!(
+            "Expected `{label}` to be a numeric vector or a float 64 array"
+        )));
+    };
+
+    let mut bldr = Float64Builder::with_capacity(values.len());
+    for v in values {
+        if v.is_na() {
+            bldr.append_null();
+        } else {
+            bldr.append_value(v);
+        }
+    }
+    Ok(bldr.finish())
+}
+
+fn impl_to_geo<'a>(
+    array: &'a impl geoarrow_array::GeoArrowArrayAccessor<'a>,
+) -> geoarrow::error::GeoArrowResult<Vec<Option<geo::Geometry<f64>>>> {
+    use geo_traits::to_geo::ToGeoGeometry;
+    let mut out = Vec::with_capacity(array.len());
+    for item in array.iter() {
+        match item {
+            // try_ rather than to_geometry, which panics on an empty point
+            Some(g) => out.push(g?.try_to_geometry()),
+            None => out.push(None),
+        }
+    }
+    Ok(out)
+}
+
+/// Read any geoarrow array as geo geometries. Dispatching on the concrete type means a point or multipolygon array works, not just a mixed one.
+pub(crate) fn as_geo_geometries(
+    array: &dyn geoarrow_array::GeoArrowArray,
+) -> extendr_api::Result<Vec<Option<geo::Geometry<f64>>>> {
+    geoarrow_array::downcast_geoarrow_array!(array, impl_to_geo)
+        .map_err(|e| Error::Other(e.to_string()))
+}
+
+/// Check that a parameter array is length 1 or the same length as the geometry
+/// array, so that it can be recycled with `.cycle()` over `n` geometries.
+pub(crate) fn check_recycle_len(
+    len: usize,
+    n: usize,
+    label: &'static str,
+) -> extendr_api::Result<()> {
+    if len != 1 && len != n {
+        return Err(Error::Other(format!(
+            "`{label}` must be length 1 or the same length as `geometry` ({n}), got {len}"
+        )));
+    }
+    Ok(())
 }
 // Macro to generate exports.
 // This ensures exported functions are registered with R.
 // See corresponding C code in `entrypoint.c`.
 extendr_module! {
     mod geoarrowrs;
+    use affine;
     use area;
     use distance;
     use length;
     use bearing;
     use destination;
     use simplify;
+    use triangulate;
     use misc;
     use boundary;
+    use cast;
+    use convert;
+    use densify;
+    use interpolate_line;
+    use interpolate_point;
+    use io;
 }

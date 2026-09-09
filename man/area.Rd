@@ -26,12 +26,8 @@ non-negative value.
 \href{https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html}{Area}
 }
 \seealso{
-Other area: 
-\code{\link{signed_area_cd}()},
-\code{\link{signed_area_geodesic}()}
-
-Other area: 
-\code{\link{signed_area_cd}()},
-\code{\link{signed_area_geodesic}()}
+Other area:
+\code{\link[=signed_area_cd]{signed_area_cd()}},
+\code{\link[=signed_area_geodesic]{signed_area_geodesic()}}
 }
 \concept{area}

@@ -20,7 +20,10 @@ geometry, as a polygon array.
 \href{https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html}{MinimumRotatedRect}
 }
 \seealso{
-Other boundary: 
-\code{\link{bounding_rect}()}
+Other boundary:
+\code{\link[=bounding_rect]{bounding_rect()}},
+\code{\link[=concave_hull]{concave_hull()}},
+\code{\link[=convex_hull]{convex_hull()}},
+\code{\link[=extremes]{extremes()}}
 }
 \concept{boundary}

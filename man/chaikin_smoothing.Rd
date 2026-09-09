@@ -23,10 +23,10 @@ and multipolygons.
 \href{https://docs.rs/geo/latest/geo/algorithm/chaikin_smoothing/trait.ChaikinSmoothing.html}{ChaikinSmoothing}
 }
 \seealso{
-Other misc: 
-\code{\link{buffer}()},
-\code{\link{centroid}()},
-\code{\link{line_segmentize}()},
-\code{\link{remove_repeated_points}()}
+Other misc:
+\code{\link[=buffer]{buffer()}},
+\code{\link[=centroid]{centroid()}},
+\code{\link[=line_segmentize]{line_segmentize()}},
+\code{\link[=remove_repeated_points]{remove_repeated_points()}}
 }
 \concept{misc}

@@ -15,15 +15,23 @@ path = "document.rs"
 [dependencies]
 anyhow = "1.0.102"
 arrow = "58.3.0"
-arrow_extendr = {path = "/Users/josiahparry/github/rust/arrow-extendr",features = ["arrow", "geoarrow-08"]}
+arrow_extendr = { path = "/Users/josi/github/arrow-extendr", features = ["arrow", "geoarrow-08"] }
 extendr-api = { version = "*", features = ["either"] }
 geo = "0.33.1"
 geo-traits = { version = "0.3.0" }
+flatgeobuf = "5.0.0"
+geojson = "0.24.2"
+# preserve_order keeps property columns in document order rather than sorting them
+serde_json = { version = "1", features = ["preserve_order"] }
 geoarrow = { version = "0.8.0" }
 geoarrow-array = "0.8.0"
 geoarrow-flatgeobuf = "0.8.0"
 geoarrow-geojson = "0.8.0"
-# shapefile = { version = "0.8.0", features = ["geo-traits"] }
+# NOTE: `geo-traits` alone does not compile in shapefile 0.9.0 -- its
+# geo_traits_impl.rs references `Error::OrphanedInnerRing`, which is gated
+# behind `geo-types`. Both features are required until that is fixed upstream.
+shapefile = { version = "0.9.0", features = ["geo-traits", "geo-types"] }
+geoarrow-cast = "0.8.0"
 
 [profile.release]
 lto = true

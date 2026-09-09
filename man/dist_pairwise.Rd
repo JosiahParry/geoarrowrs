@@ -41,24 +41,9 @@ These functions differ in the metric space used for the calculation.
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html}{Rhumb}
 }
 \seealso{
-Other distance: 
-\code{\link{dist_frechet_pairwise}()},
-\code{\link{dist_hausdorff_pairwise}()},
-\code{\link{dist_vincenty_pairwise}()}
-
-Other distance: 
-\code{\link{dist_frechet_pairwise}()},
-\code{\link{dist_hausdorff_pairwise}()},
-\code{\link{dist_vincenty_pairwise}()}
-
-Other distance: 
-\code{\link{dist_frechet_pairwise}()},
-\code{\link{dist_hausdorff_pairwise}()},
-\code{\link{dist_vincenty_pairwise}()}
-
-Other distance: 
-\code{\link{dist_frechet_pairwise}()},
-\code{\link{dist_hausdorff_pairwise}()},
-\code{\link{dist_vincenty_pairwise}()}
+Other distance:
+\code{\link[=dist_frechet_pairwise]{dist_frechet_pairwise()}},
+\code{\link[=dist_hausdorff_pairwise]{dist_hausdorff_pairwise()}},
+\code{\link[=dist_vincenty_pairwise]{dist_vincenty_pairwise()}}
 }
 \concept{distance}

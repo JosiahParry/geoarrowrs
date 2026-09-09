@@ -1,14 +1,13 @@
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::algorithm::buffer::{Buffer, BufferStyle, LineCap, LineJoin};
-use geo_traits::to_geo::ToGeoGeometry;
 use geoarrow::{
-    array::{GeometryArray, MultiPolygonBuilder},
+    array::MultiPolygonBuilder,
     datatypes::{Dimension, MultiPolygonType},
 };
-use geoarrow_array::GeoArrowArrayAccessor;
+use geoarrow_array::GeoArrowArray;
 
-use crate::{as_geometry_chunks, try_float_array};
+use crate::{as_geo_geometries, as_geometry_chunks, try_float_array};
 
 /// Buffer geometries by a given distance
 ///
@@ -74,16 +73,15 @@ fn buffer(
     let mut bldr = MultiPolygonBuilder::new(MultiPolygonType::new(Dimension::XY, metadata));
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for (xi, d) in arr.iter().zip(dist.iter().cycle()) {
-            if let (Some(Ok(val)), Some(d)) = (xi, d) {
+        for (geom, d) in as_geo_geometries(chunk.as_ref())?
+            .into_iter()
+            .zip(dist.iter().cycle())
+        {
+            if let (Some(val), Some(d)) = (geom, d) {
                 let style = BufferStyle::new(d)
                     .line_cap(parsed_cap.clone())
                     .line_join(parsed_join.clone());
-                let result = val.to_geometry().buffer_with_style(style);
+                let result = val.buffer_with_style(style);
                 bldr.push_multi_polygon(Some(&result))
                     .map_err(|e| Error::Other(e.to_string()))?;
             } else {

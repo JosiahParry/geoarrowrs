@@ -9,6 +9,22 @@ use geoarrow::{
     datatypes::PointType,
 };
 
+/// Compute a destination point from an origin, bearing, and distance
+///
+/// Returns the point reached by travelling `distance` from `origin` along
+/// `bearing`. Each function uses a different metric space: `dest_euclidean`
+/// treats coordinates as planar, `dest_haversine` assumes a sphere,
+/// `dest_geodesic` an ellipsoid, and `dest_rhumb` follows a line of constant
+/// bearing.
+///
+/// @param origin a GeoArrow point array
+/// @param bearing a numeric vector of bearings in degrees; length 1 or the same length as `origin`
+/// @param distance a numeric vector of distances; length 1 or the same length as `origin`
+/// @returns a GeoArrow point array
+/// @export
+/// @rdname destination
+/// @family destination
+/// @references [Destination](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html)
 #[extendr]
 fn dest_rhumb(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
@@ -30,6 +46,8 @@ fn dest_rhumb(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Resul
     bldr.finish().into_arrow_robj()
 }
 
+/// @export
+/// @rdname destination
 #[extendr]
 fn dest_euclidean(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
@@ -51,6 +69,8 @@ fn dest_euclidean(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::R
     bldr.finish().into_arrow_robj()
 }
 
+/// @export
+/// @rdname destination
 #[extendr]
 fn dest_haversine(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
@@ -72,6 +92,8 @@ fn dest_haversine(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::R
     bldr.finish().into_arrow_robj()
 }
 
+/// @export
+/// @rdname destination
 #[extendr]
 fn dest_geodesic(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
@@ -184,4 +206,7 @@ fn dest_geodesic_impl(
 extendr_module! {
     mod destination;
     fn dest_rhumb;
+    fn dest_euclidean;
+    fn dest_haversine;
+    fn dest_geodesic;
 }

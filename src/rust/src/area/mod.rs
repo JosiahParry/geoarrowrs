@@ -2,10 +2,9 @@ use arrow::array::Float64Builder;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::{Area, ChamberlainDuquetteArea, GeodesicArea};
-use geo_traits::to_geo::ToGeoGeometry;
-use geoarrow::array::{GeoArrowArrayAccessor, GeometryArray};
+use geoarrow_array::GeoArrowArray;
 
-use crate::as_geometry_chunks;
+use crate::{as_geo_geometries, as_geometry_chunks};
 
 /// Compute the signed and unsigned planar area of geometries
 ///
@@ -26,13 +25,9 @@ fn signed_area(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().signed_area());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.signed_area());
             } else {
                 bldr.append_null();
             }
@@ -53,13 +48,9 @@ fn unsigned_area(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().unsigned_area());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.unsigned_area());
             } else {
                 bldr.append_null();
             }
@@ -87,13 +78,9 @@ fn signed_area_cd(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().chamberlain_duquette_signed_area());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.chamberlain_duquette_signed_area());
             } else {
                 bldr.append_null();
             }
@@ -114,13 +101,9 @@ fn unsigned_area_cd(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().chamberlain_duquette_unsigned_area());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.chamberlain_duquette_unsigned_area());
             } else {
                 bldr.append_null();
             }
@@ -149,13 +132,9 @@ fn signed_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().geodesic_area_signed());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.geodesic_area_signed());
             } else {
                 bldr.append_null();
             }
@@ -176,13 +155,9 @@ fn unsigned_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().geodesic_area_unsigned());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.geodesic_area_unsigned());
             } else {
                 bldr.append_null();
             }
@@ -203,13 +178,9 @@ fn perimeter_signed_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().geodesic_perimeter());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.geodesic_perimeter());
             } else {
                 bldr.append_null();
             }
@@ -230,13 +201,9 @@ fn perimeter_unsigned_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let mut bldr = Float64Builder::with_capacity(n);
 
     for chunk in &chunks {
-        let arr = chunk
-            .as_any()
-            .downcast_ref::<GeometryArray>()
-            .ok_or_else(|| Error::Other("expected GeometryArray".to_string()))?;
-        for xi in arr.iter() {
-            if let Some(Ok(val)) = xi {
-                bldr.append_value(val.to_geometry().geodesic_perimeter());
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            if let Some(val) = geom {
+                bldr.append_value(val.geodesic_perimeter());
             } else {
                 bldr.append_null();
             }

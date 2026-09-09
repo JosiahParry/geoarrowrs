@@ -5,6 +5,91 @@
 #' @useDynLib geoarrowrs, .registration = TRUE
 NULL
 
+#' Rotate geometries around their centroid
+#'
+#' Rotates each geometry counter-clockwise by `degrees` about its own centroid.
+#' The geometry type of the output matches the geometry type of the input.
+#'
+#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+#' @param degrees angle of rotation; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family affine
+#' @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
+rotate_around_centroid <- function(geometry, degrees) .Call(wrap__rotate_around_centroid, geometry, degrees)
+
+#' Rotate geometries around the center of their bounding box
+#'
+#' Rotates each geometry counter-clockwise by `degrees` about the center of its
+#' own axis-aligned bounding rectangle. The geometry type of the output matches
+#' the geometry type of the input.
+#'
+#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+#' @param degrees angle of rotation; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family affine
+#' @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
+rotate_around_center <- function(geometry, degrees) .Call(wrap__rotate_around_center, geometry, degrees)
+
+#' Scale geometries independently in x and y about their centroid
+#'
+#' Scales each geometry by `x_factor` along the x axis and `y_factor` along the
+#' y axis, about the geometry's own centroid. The geometry type of the output
+#' matches the geometry type of the input.
+#'
+#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+#' @param x_factor scaling factor along the x axis; length 1 or the same length as `geometry`
+#' @param y_factor scaling factor along the y axis; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family affine
+#' @references [Scale](https://docs.rs/geo/latest/geo/algorithm/scale/trait.Scale.html)
+scale_xy <- function(geometry, x_factor, y_factor) .Call(wrap__scale_xy, geometry, x_factor, y_factor)
+
+#' Skew geometries uniformly about their centroid
+#'
+#' Shears each geometry by `degrees` along both the x and y dimensions, about
+#' the geometry's own centroid. The geometry type of the output matches the
+#' geometry type of the input.
+#'
+#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+#' @param degrees the shear angle; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family affine
+#' @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
+skew <- function(geometry, degrees) .Call(wrap__skew, geometry, degrees)
+
+#' Skew geometries independently in x and y about their centroid
+#'
+#' Shears each geometry by `degrees_x` along the x dimension and `degrees_y`
+#' along the y dimension, about the geometry's own centroid. The geometry type
+#' of the output matches the geometry type of the input.
+#'
+#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+#' @param degrees_x shear angle along the x dimension; length 1 or the same length as `geometry`
+#' @param degrees_y shear angle along the y dimension; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family affine
+#' @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
+skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__skew_xy, geometry, degrees_x, degrees_y)
+
+#' Translate geometries along the x and y axes
+#'
+#' Shifts every coordinate of each geometry by `x_offset` and `y_offset`. The
+#' geometry type of the output matches the geometry type of the input.
+#'
+#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+#' @param x_offset distance to shift along the x axis; length 1 or the same length as `geometry`
+#' @param y_offset distance to shift along the y axis; length 1 or the same length as `geometry`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family affine
+#' @references [Translate](https://docs.rs/geo/latest/geo/algorithm/translate/trait.Translate.html)
+translate <- function(geometry, x_offset, y_offset) .Call(wrap__translate, geometry, x_offset, y_offset)
+
 #' Compute the signed and unsigned planar area of geometries
 #'
 #' `signed_area()` returns positive values for counter-clockwise winding and
@@ -252,7 +337,35 @@ bearing_geodesic <- function(origin, dest) .Call(wrap__bearing_geodesic, origin,
 #'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 bearing_rhumb <- function(origin, dest) .Call(wrap__bearing_rhumb, origin, dest)
 
+#' Compute a destination point from an origin, bearing, and distance
+#'
+#' Returns the point reached by travelling `distance` from `origin` along
+#' `bearing`. Each function uses a different metric space: `dest_euclidean`
+#' treats coordinates as planar, `dest_haversine` assumes a sphere,
+#' `dest_geodesic` an ellipsoid, and `dest_rhumb` follows a line of constant
+#' bearing.
+#'
+#' @param origin a GeoArrow point array
+#' @param bearing a numeric vector of bearings in degrees; length 1 or the same length as `origin`
+#' @param distance a numeric vector of distances; length 1 or the same length as `origin`
+#' @returns a GeoArrow point array
+#' @export
+#' @rdname destination
+#' @family destination
+#' @references [Destination](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html)
 dest_rhumb <- function(origin, bearing, distance) .Call(wrap__dest_rhumb, origin, bearing, distance)
+
+#' @export
+#' @rdname destination
+dest_euclidean <- function(origin, bearing, distance) .Call(wrap__dest_euclidean, origin, bearing, distance)
+
+#' @export
+#' @rdname destination
+dest_haversine <- function(origin, bearing, distance) .Call(wrap__dest_haversine, origin, bearing, distance)
+
+#' @export
+#' @rdname destination
+dest_geodesic <- function(origin, bearing, distance) .Call(wrap__dest_geodesic, origin, bearing, distance)
 
 #' Simplify geometries using the Ramer-Douglas-Peucker algorithm
 #'
@@ -297,6 +410,55 @@ simplify_vw <- function(geometry, epsilon) .Call(wrap__simplify_vw, geometry, ep
 #' @family simplify
 #' @references [SimplifyVwPreserve](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwPreserve.html)
 simplify_vw_preserve <- function(geometry, epsilon) .Call(wrap__simplify_vw_preserve, geometry, epsilon)
+
+#' Triangulate polygons with the earcut algorithm
+#'
+#' Returns one multipolygon per input geometry, whose parts are that
+#' geometry's triangles. The output has the same length as the input, so a
+#' triangulated geometry stays aligned with the row it came from.
+#'
+#' @details
+#' Earcut is defined for polygons only. A multipolygon is triangulated part by
+#' part and the triangles are merged into a single multipolygon. Any other
+#' geometry type, a null geometry, or a polygon that cannot be triangulated
+#' becomes a null element.
+#'
+#' Earcut is fast and respects interior rings, but the triangles it produces
+#' are not Delaunay. Use [triangulate_delaunay()] when triangle quality
+#' matters.
+#'
+#' @param x a GeoArrow polygon or multipolygon array
+#' @returns a GeoArrow multipolygon array of the same length as `x`
+#' @export
+#' @family triangulate
+#' @references [TriangulateEarcut](https://docs.rs/geo/latest/geo/algorithm/triangulate_earcut/trait.TriangulateEarcut.html)
+triangulate_earcut <- function(x) .Call(wrap__triangulate_earcut, x)
+
+#' Triangulate geometries with a Delaunay triangulation
+#'
+#' Returns one multipolygon per input geometry, whose parts are that
+#' geometry's triangles. The output has the same length as the input.
+#'
+#' @details
+#' A constrained triangulation keeps the input's edges and returns only the
+#' triangles that fall inside the geometry. An unconstrained triangulation
+#' triangulates the convex hull of the input's vertices, ignoring its edges,
+#' so it may cross holes and concavities.
+#'
+#' A null geometry, or one that cannot be triangulated, becomes a null
+#' element.
+#'
+#' @param x a GeoArrow geometry array
+#' @param constrained whether to constrain the triangulation to the input's
+#'   edges. `TRUE` by default
+#' @param snap_radius coordinates closer together than this are snapped to the
+#'   same position; length 1 or the same length as `x`. `geo` uses 1e-4 by
+#'   default
+#' @returns a GeoArrow multipolygon array of the same length as `x`
+#' @export
+#' @family triangulate
+#' @references [TriangulateDelaunay](https://docs.rs/geo/latest/geo/algorithm/triangulate_delaunay/trait.TriangulateDelaunay.html)
+triangulate_delaunay <- function(x, constrained = TRUE, snap_radius = 1e-4) .Call(wrap__triangulate_delaunay, x, constrained, snap_radius)
 
 #' Buffer geometries by a given distance
 #'
@@ -397,5 +559,401 @@ bounding_rect <- function(x) .Call(wrap__bounding_rect, x)
 #' @family boundary
 #' @references [MinimumRotatedRect](https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html)
 minimum_rotated_rect <- function(x) .Call(wrap__minimum_rotated_rect, x)
+
+#' Compute the convex hull of geometries
+#'
+#' Returns the smallest convex polygon that contains each geometry.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a GeoArrow polygon array
+#' @export
+#' @family boundary
+#' @references [ConvexHull](https://docs.rs/geo/latest/geo/algorithm/convex_hull/trait.ConvexHull.html)
+convex_hull <- function(x) .Call(wrap__convex_hull, x)
+
+#' Compute the concave hull of geometries
+#'
+#' Returns a polygon enclosing each geometry, tightened toward the geometry's
+#' own shape. Smaller `concavity` values produce a tighter, more concave hull;
+#' larger values approach the convex hull.
+#'
+#' Accepts multipoints, linestrings, multilinestrings, polygons, and
+#' multipolygons. `geo` does not define a concave hull for a single point.
+#'
+#' @param geometry a GeoArrow multipoint, linestring, multilinestring, polygon, or multipolygon array
+#' @param concavity the concavity coefficient; length 1 or the same length as `geometry`. `geo` uses 2 by default
+#' @param length_threshold edges shorter than this are not considered for further refinement; length 1 or the same length as `geometry`. `geo` uses 0 by default
+#' @returns a GeoArrow polygon array
+#' @export
+#' @family boundary
+#' @references [ConcaveHull](https://docs.rs/geo/latest/geo/algorithm/concave_hull/trait.ConcaveHull.html)
+concave_hull <- function(geometry, concavity, length_threshold) .Call(wrap__concave_hull, geometry, concavity, length_threshold)
+
+#' Compute the extreme coordinates of geometries
+#'
+#' Returns a struct array with four point fields -- `x_min`, `x_max`, `y_min`
+#' and `y_max` -- giving the coordinate that is furthest in each direction. The
+#' result has one row per input geometry; a null or empty geometry yields a row
+#' of four nulls.
+#'
+#' Note these are the extreme *coordinates*, not the corners of the bounding
+#' box: the `x_min` point carries the y value of whichever vertex was
+#' leftmost. Use [bounding_rect()] for the envelope.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns an Arrow struct array of four point fields, with one row per geometry
+#' @export
+#' @family boundary
+#' @references [Extremes](https://docs.rs/geo/latest/geo/algorithm/extremes/trait.Extremes.html)
+extremes <- function(x) .Call(wrap__extremes, x)
+
+#' Cast geometries to another GeoArrow geometry type
+#'
+#' Changes the geometry type of an array without changing the geometries it
+#' holds.
+#'
+#' @details
+#' Some casts always succeed:
+#'
+#' | from | to |
+#' | --- | --- |
+#' | `point` | `multipoint` |
+#' | `linestring` | `multilinestring` |
+#' | `polygon` | `multipolygon` |
+#' | any type | `geometry`, `wkb`, `wkt` |
+#'
+#' Others are fallible and error when a geometry does not fit the target type,
+#' such as a `multipoint` holding two points cast to `point`:
+#'
+#' | from | to |
+#' | --- | --- |
+#' | `multipoint` | `point` |
+#' | `multilinestring` | `linestring` |
+#' | `multipolygon` | `polygon` |
+#' | `geometry` | any concrete type |
+#'
+#' The dimension is carried over from the input, and casting between different
+#' dimensions is not supported.
+#'
+#' @param x a GeoArrow geometry array
+#' @param to the target type, one of `"point"`, `"linestring"`, `"polygon"`,
+#'   `"multipoint"`, `"multilinestring"`, `"multipolygon"`,
+#'   `"geometrycollection"`, `"geometry"`, `"wkb"`, or `"wkt"`
+#' @returns a GeoArrow array of the requested type, the same length as `x`
+#' @export
+#' @family cast
+cast_geometry <- function(x, to) .Call(wrap__cast_geometry, x, to)
+
+#' Cast geometries to the narrowest type that fits them
+#'
+#' Inspects the geometries and casts to the most specific type that can hold
+#' every one of them. A `geometry` array holding only points becomes a `point`
+#' array; one holding points and polygons is left alone, since no narrower
+#' type fits.
+#'
+#' This is the inverse of casting up to `geometry`, and is useful after
+#' reading a format that does not record a single geometry type.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a GeoArrow array of the narrowest type that fits, the same length as `x`
+#' @export
+#' @family cast
+downcast_geometry <- function(x) .Call(wrap__downcast_geometry, x)
+
+#' Split multi-part geometries into their parts
+#'
+#' Returns a list the same length as the input, where each element is an array
+#' of that geometry's constituent parts. A multipolygon of three polygons
+#' becomes one element holding a polygon array of length three.
+#'
+#' @details
+#' The output geometry type is the singular form of the input:
+#'
+#' | input | element type |
+#' | --- | --- |
+#' | `multipoint`, `point` | `point` |
+#' | `multilinestring`, `linestring` | `linestring` |
+#' | `multipolygon`, `polygon` | `polygon` |
+#'
+#' The element type is decided by the array's declared type, not by its
+#' contents, so an array of multipolygons that all happen to hold one part
+#' still explodes to polygons. A mixed `geometry` array has no single singular
+#' type and errors; narrow it with [downcast_geometry()] first.
+#'
+#' A singular geometry yields an element of length one, so the operation is
+#' well defined for any input. A null geometry yields a null element, which is
+#' distinct from an empty one.
+#'
+#' Because the length is preserved, the result lines up with the row it came
+#' from and can sit alongside the other columns of a table. Use [flatten()] to
+#' collapse it into a single array with one row per part.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a list array of the same length as `x`, whose elements are GeoArrow arrays
+#' @export
+#' @family cast
+explode <- function(x) .Call(wrap__explode, x)
+
+#' Collapse a list of geometries into a single array
+#'
+#' The inverse of [explode()]. Concatenates every element's parts into one
+#' array, so a list of `n` elements holding `m` parts in total becomes an
+#' array of length `m`.
+#'
+#' Null elements contribute nothing, so the result is shorter than the input
+#' whenever an element holds more or fewer than one geometry.
+#'
+#' @param x a list array of GeoArrow arrays, as returned by [explode()]
+#' @returns a GeoArrow array holding every part, flattened
+#' @export
+#' @family cast
+flatten <- function(x) .Call(wrap__flatten, x)
+
+#' Convert coordinates from radians to degrees
+#'
+#' Multiplies every x and y coordinate by `180 / pi`. The geometry type of the
+#' output matches the geometry type of the input.
+#'
+#' @details
+#' Only the x and y coordinates are converted. Z and M values are dropped,
+#' since the conversion goes through a two dimensional representation.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family convert
+#' @references [ToDegrees](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToDegrees.html)
+to_degrees <- function(geometry) .Call(wrap__to_degrees, geometry)
+
+#' Convert coordinates from degrees to radians
+#'
+#' Multiplies every x and y coordinate by `pi / 180`. The geometry type of the
+#' output matches the geometry type of the input.
+#'
+#' @details
+#' Only the x and y coordinates are converted. Z and M values are dropped,
+#' since the conversion goes through a two dimensional representation.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family convert
+#' @references [ToRadians](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToRadians.html)
+to_radians <- function(geometry) .Call(wrap__to_radians, geometry)
+
+#' Add intermediate points to geometries so no segment exceeds a maximum length
+#'
+#' Densifies linestrings, multilinestrings, polygons, and multipolygons by
+#' inserting additional points along each segment until no segment exceeds
+#' `max_segment_length`. The metric determines how segment length is measured.
+#'
+#' @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
+#' @param max_segment_length the maximum segment length; either length 1 or the same length as `geometry`
+#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+#' @returns a GeoArrow array of the same geometry type as the input
+#' @export
+#' @family densify
+#' @references [Densifiable](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html)
+densify <- function(geometry, max_segment_length, metric) .Call(wrap__densify, geometry, max_segment_length, metric)
+
+#' Interpolate a point along a linestring
+#'
+#' Returns the point at a given ratio or distance along each linestring,
+#' measured from either the start or end. The metric determines how distance
+#' is calculated.
+#'
+#' @param line a GeoArrow linestring array
+#' @param value a numeric vector of ratio or distance values; length 1 or the same length as `line`
+#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+#' @param measure one of `"ratio"` or `"distance"`
+#' @param from one of `"start"` or `"end"`
+#' @returns a GeoArrow point array
+#' @export
+#' @family interpolate
+#' @references [InterpolateLine](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html)
+interpolate_point <- function(line, value, metric, measure, from) .Call(wrap__interpolate_point, line, value, metric, measure, from)
+
+#' Interpolate a point at a given distance between two points
+#'
+#' Returns the point located at `distance` along the path from `start` to `end`.
+#' The metric determines how distance is measured.
+#'
+#' @param start a GeoArrow point array of start points
+#' @param end a GeoArrow point array of end points
+#' @param distance a numeric vector of distances; length 1 or the same length as `start`
+#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+#' @returns a GeoArrow point array
+#' @export
+#' @rdname interpolate_between
+#' @family interpolate
+#' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
+point_at_distance_between <- function(start, end, distance, metric) .Call(wrap__point_at_distance_between, start, end, distance, metric)
+
+#' Interpolate a point at a given ratio between two points
+#'
+#' Returns the point located at `ratio` of the way from `start` to `end`,
+#' where 0.0 is the start and 1.0 is the end. The metric determines how
+#' the interpolation is computed.
+#'
+#' @param start a GeoArrow point array of start points
+#' @param end a GeoArrow point array of end points
+#' @param ratio a numeric vector of ratios between 0 and 1; length 1 or the same length as `start`
+#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+#' @returns a GeoArrow point array
+#' @export
+#' @rdname interpolate_between
+#' @family interpolate
+#' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
+point_at_ratio_between <- function(start, end, ratio, metric) .Call(wrap__point_at_ratio_between, start, end, ratio, metric)
+
+#' Generate points at regular intervals along the line between two points
+#'
+#' Returns a multipoint array where each element contains all points spaced
+#' at most `max_distance` apart along the path from `start` to `end`.
+#'
+#' @param start a GeoArrow point array of start points
+#' @param end a GeoArrow point array of end points
+#' @param max_distance the maximum spacing between generated points; length 1 or the same length as `start`
+#' @param include_ends whether to include the start and end points in the output
+#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+#' @returns a GeoArrow multipoint array
+#' @export
+#' @family interpolate
+#' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
+points_along_line <- function(start, end, max_distance, include_ends, metric) .Call(wrap__points_along_line, start, end, max_distance, include_ends, metric)
+
+#' Read a FlatGeobuf file into a record batch stream
+#'
+#' Reads the geometries together with the feature properties. Unlike the
+#' shapefile and GeoJSON readers this one streams, so the whole file is never
+#' held in memory at once.
+#'
+#' @details
+#' The geometry type and the property schema are taken from the file header.
+#' If the header carries no column information, up to 1000 features are scanned
+#' to infer one.
+#'
+#' Passing `bbox` uses the file's packed Hilbert R-tree index to skip features
+#' that fall outside it, so a spatial subset does not read the whole file.
+#'
+#' Features come back in the order the file stores them, which for an indexed
+#' file is Hilbert R-tree order rather than the order they were written in.
+#'
+#' @param path path to a `.fgb` file.
+#' @param bbox optionally a length 4 numeric vector of `c(xmin, ymin, xmax, ymax)`
+#'   used to filter features spatially. `NULL` reads every feature.
+#' @returns a `nanoarrow_array_stream` of record batches, holding the property
+#'   columns followed by a `geometry` column.
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' path <- tempfile(fileext = ".fgb")
+#' sf::st_write(sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE),
+#'              path, quiet = TRUE)
+#'
+#' df <- as.data.frame(read_flatgeobuf(path))
+#' dim(df)
+#'
+#' # only the features intersecting the box
+#' nrow(as.data.frame(read_flatgeobuf(path, c(-79, 35, -78, 36))))
+#' @export
+#' @family io
+read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path, bbox)
+
+#' Read a GeoJSON FeatureCollection into a record batch stream
+#'
+#' Reads the geometries together with the feature properties. Properties are
+#' untyped in GeoJSON, so each column's arrow type is inferred by scanning
+#' every feature.
+#'
+#' @details
+#' The geometry column is narrowed to the most specific type that holds every
+#' feature, promoting a singular type to its multi form where the two are
+#' mixed. A feature with a `null` geometry becomes a null element and does not
+#' affect the choice:
+#'
+#' | geometry types in the file | column type |
+#' | --- | --- |
+#' | all points | `geoarrow.point` |
+#' | points and multipoints | `geoarrow.multipoint` |
+#' | all polygons | `geoarrow.polygon` |
+#' | polygons and multipolygons | `geoarrow.multipolygon` |
+#' | more than one family, or any collection | `geoarrow.geometry` |
+#'
+#' Narrowing matters in practice: `geoarrow.geometry` is a dense union that
+#' geoarrow's R bindings cannot yet convert, so a genuinely mixed collection
+#' reads back as its raw storage rather than as geometries.
+#'
+#' Property columns appear in the order the keys are first seen. A key missing
+#' from a given feature is null for that row. Types are widened across
+#' features:
+#'
+#' | values seen for a key | column type |
+#' | --- | --- |
+#' | booleans | `Boolean` |
+#' | integers | `Int64` |
+#' | integers and reals | `Float64` |
+#' | strings, or any mix that cannot unify | `Utf8` |
+#' | only `null` | `Utf8`, all null |
+#'
+#' Nested arrays and objects have no arrow analogue and are kept as their raw
+#' JSON text.
+#'
+#' Per RFC 7946 the coordinate reference system is always `OGC:CRS84`, so that
+#' is set on the geometry column without reading anything from the file.
+#'
+#' @param path path to a `.geojson` file holding a `FeatureCollection`.
+#' @returns a `nanoarrow_array_stream` of a single record batch, holding the
+#'   property columns followed by a `geometry` column.
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' path <- tempfile(fileext = ".geojson")
+#' sf::st_write(sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE),
+#'              path, quiet = TRUE)
+#'
+#' df <- as.data.frame(read_geojson(path))
+#' dim(df)
+#' head(df[, c("NAME", "BIR74", "geometry")], 3)
+#' @export
+#' @family io
+read_geojson <- function(path) .Call(wrap__read_geojson, path)
+
+#' Read an ESRI Shapefile into a record batch stream
+#'
+#' Reads the `.shp` geometries together with the `.dbf` attributes. The CRS is
+#' taken from the sibling `.prj` file when one is present.
+#'
+#' @details
+#' Polylines are read as multilinestrings and polygons as multipolygons,
+#' because a shapefile record of either type may contain multiple parts.
+#'
+#' The coordinate dimension is chosen once per file, from the shape type and
+#' from whether the coordinates actually carry measures. A `PolygonZ` file with
+#' no measures is therefore read as XYZ, rather than as XYZM full of nulls.
+#'
+#' | shape type | measures present | dimension |
+#' | --- | --- | --- |
+#' | `Point`, `Polyline`, `Polygon`, `Multipoint` | not applicable | XY |
+#' | `PointM`, `PolylineM`, `PolygonM`, `MultipointM` | no | XY |
+#' | `PointM`, `PolylineM`, `PolygonM`, `MultipointM` | yes | XYM |
+#' | `PointZ`, `PolylineZ`, `PolygonZ`, `MultipointZ` | no | XYZ |
+#' | `PointZ`, `PolylineZ`, `PolygonZ`, `MultipointZ` | yes | XYZM |
+#'
+#' If only some coordinates carry a measure, M is dropped and a message is
+#' emitted, because an Arrow column cannot mix dimensions.
+#'
+#' `Multipatch` files are not supported.
+#'
+#' @param path path to a `.shp` file. The sibling `.dbf` and `.prj` files are
+#'   resolved from the same base name.
+#' @returns a `nanoarrow_array_stream` of a single record batch, holding the
+#'   `.dbf` attribute columns followed by a `geometry` column.
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' path <- system.file("shape/nc.shp", package = "sf")
+#' df <- as.data.frame(read_shapefile(path))
+#'
+#' # the .dbf attribute columns, followed by `geometry`
+#' dim(df)
+#' head(df[, c("NAME", "BIR74", "geometry")], 3)
+#' @export
+#' @family io
+read_shapefile <- function(path) .Call(wrap__read_shapefile, path)
 
 # nolint end

@@ -25,12 +25,8 @@ geographic coordinates on a sphere. Results are in square meters.
 \href{https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html}{ChamberlainDuquetteArea}
 }
 \seealso{
-Other area: 
-\code{\link{signed_area}()},
-\code{\link{signed_area_geodesic}()}
-
-Other area: 
-\code{\link{signed_area}()},
-\code{\link{signed_area_geodesic}()}
+Other area:
+\code{\link[=signed_area]{signed_area()}},
+\code{\link[=signed_area_geodesic]{signed_area_geodesic()}}
 }
 \concept{area}
