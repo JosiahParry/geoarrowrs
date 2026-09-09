@@ -42,7 +42,9 @@ test_that("bbox filters features spatially", {
   skip_if_no_sf()
 
   path <- nc_fgb()
-  all_rows <- nrow(as.data.frame(nanoarrow::convert_array_stream(read_flatgeobuf(path))))
+  all_rows <- nrow(as.data.frame(nanoarrow::convert_array_stream(read_flatgeobuf(
+    path
+  ))))
   subset <- as.data.frame(
     nanoarrow::convert_array_stream(read_flatgeobuf(path, c(-79, 35, -78, 36)))
   )
@@ -56,7 +58,10 @@ test_that("a NULL bbox reads every feature", {
   skip_if_no_sf()
 
   path <- nc_fgb()
-  df <- as.data.frame(nanoarrow::convert_array_stream(read_flatgeobuf(path, NULL)))
+  df <- as.data.frame(nanoarrow::convert_array_stream(read_flatgeobuf(
+    path,
+    NULL
+  )))
   expect_equal(nrow(df), 100L)
 })
 

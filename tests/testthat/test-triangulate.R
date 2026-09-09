@@ -14,7 +14,8 @@ ga <- function(sfc) {
 square <- function(o = 0) {
   sf::st_polygon(list(matrix(
     c(o, o, o + 1, o, o + 1, o + 1, o, o + 1, o, o),
-    ncol = 2, byrow = TRUE
+    ncol = 2,
+    byrow = TRUE
   )))
 }
 
@@ -90,8 +91,14 @@ test_that("unconstrained triangulation ignores holes, constrained does not", {
   hole <- matrix(c(3, 3, 7, 3, 7, 7, 3, 7, 3, 3), ncol = 2, byrow = TRUE)
   g <- ga(sf::st_sfc(sf::st_polygon(list(outer, hole))))
 
-  con <- sf::st_as_sfc(geoarrow::as_geoarrow_vctr(triangulate_delaunay(g, TRUE)))
-  unc <- sf::st_as_sfc(geoarrow::as_geoarrow_vctr(triangulate_delaunay(g, FALSE)))
+  con <- sf::st_as_sfc(geoarrow::as_geoarrow_vctr(triangulate_delaunay(
+    g,
+    TRUE
+  )))
+  unc <- sf::st_as_sfc(geoarrow::as_geoarrow_vctr(triangulate_delaunay(
+    g,
+    FALSE
+  )))
 
   # constrained excludes the hole (area 100 - 16), unconstrained fills it
   expect_equal(sf::st_area(con[[1]]), 84, tolerance = 1e-6)

@@ -10,7 +10,8 @@ squares <- function(n = 2) {
   polys <- lapply(seq_len(n), function(i) {
     sf::st_polygon(list(matrix(
       c(i, i, i + 1, i, i + 1, i + 1, i, i + 1, i, i),
-      ncol = 2, byrow = TRUE
+      ncol = 2,
+      byrow = TRUE
     )))
   })
   geoarrow::as_geoarrow_array(sf::st_sfc(polys))

@@ -15,7 +15,9 @@ ext <- function(a) {
 }
 
 child_ext <- function(a) {
-  nanoarrow::infer_nanoarrow_schema(a)$children[[1]]$metadata[["ARROW:extension:name"]]
+  nanoarrow::infer_nanoarrow_schema(a)$children[[1]]$metadata[[
+    "ARROW:extension:name"
+  ]]
 }
 
 pts <- function() ga(sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(1, 1))))
@@ -23,18 +25,29 @@ pts <- function() ga(sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(1, 1))))
 square <- function(o = 0) {
   sf::st_polygon(list(matrix(
     c(o, o, o + 1, o, o + 1, o + 1, o, o + 1, o, o),
-    ncol = 2, byrow = TRUE
+    ncol = 2,
+    byrow = TRUE
   )))
 }
 
 test_that("singular types cast up to their multi form", {
   expect_equal(ext(cast_geometry(pts(), "multipoint")), "geoarrow.multipoint")
 
-  ls <- ga(sf::st_sfc(sf::st_linestring(matrix(c(0, 0, 1, 1), ncol = 2, byrow = TRUE))))
-  expect_equal(ext(cast_geometry(ls, "multilinestring")), "geoarrow.multilinestring")
+  ls <- ga(sf::st_sfc(sf::st_linestring(matrix(
+    c(0, 0, 1, 1),
+    ncol = 2,
+    byrow = TRUE
+  ))))
+  expect_equal(
+    ext(cast_geometry(ls, "multilinestring")),
+    "geoarrow.multilinestring"
+  )
 
   poly <- ga(sf::st_sfc(square()))
-  expect_equal(ext(cast_geometry(poly, "multipolygon")), "geoarrow.multipolygon")
+  expect_equal(
+    ext(cast_geometry(poly, "multipolygon")),
+    "geoarrow.multipolygon"
+  )
 })
 
 test_that("any type casts up to geometry, wkb and wkt", {
@@ -48,7 +61,10 @@ test_that("casting preserves length and geometries", {
   sfc <- sf::st_as_sfc(geoarrow::as_geoarrow_vctr(out))
 
   expect_length(sfc, 2L)
-  expect_equal(as.numeric(sf::st_coordinates(sfc)[, c("X", "Y")]), c(0, 1, 0, 1))
+  expect_equal(
+    as.numeric(sf::st_coordinates(sfc)[, c("X", "Y")]),
+    c(0, 1, 0, 1)
+  )
 })
 
 test_that("an unknown target type errors", {
@@ -63,7 +79,10 @@ test_that("downcast narrows a geometry array to its concrete type", {
 
 test_that("downcast leaves a genuinely mixed array alone", {
   # geoarrow-r encodes a mixed sfc as wkb, so go via geometry explicitly
-  mixed <- cast_geometry(ga(sf::st_sfc(sf::st_point(c(0, 0)), square())), "geometry")
+  mixed <- cast_geometry(
+    ga(sf::st_sfc(sf::st_point(c(0, 0)), square())),
+    "geometry"
+  )
   expect_equal(ext(mixed), "geoarrow.geometry")
   expect_equal(ext(downcast_geometry(mixed)), "geoarrow.geometry")
 })

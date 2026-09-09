@@ -2,9 +2,11 @@ default:
     just --list
 
 fmt:
+    air format R tests
     cargo fmt --manifest-path src/rust/Cargo.toml
 
 lint:
+    jarl check R tests && air format --check R tests
     cargo fmt --manifest-path src/rust/Cargo.toml --check && cargo clippy --manifest-path src/rust/Cargo.toml -- -D warnings
 
 check:

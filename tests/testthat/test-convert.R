@@ -44,7 +44,11 @@ test_that("the output geometry type matches the input", {
   cases <- list(
     point = sf::st_sfc(sf::st_point(c(1, 2))),
     multipoint = sf::st_sfc(sf::st_multipoint(matrix(c(1, 2, 3, 4), ncol = 2))),
-    linestring = sf::st_sfc(sf::st_linestring(matrix(c(0, 0, 1, 1), ncol = 2, byrow = TRUE))),
+    linestring = sf::st_sfc(sf::st_linestring(matrix(
+      c(0, 0, 1, 1),
+      ncol = 2,
+      byrow = TRUE
+    ))),
     polygon = sf::st_sfc(sf::st_polygon(list(
       matrix(c(0, 0, 1, 0, 1, 1, 0, 0), ncol = 2, byrow = TRUE)
     )))

@@ -18,8 +18,11 @@ roundtrip <- function(geometry, ..., name = "test", shpt = NULL) {
   layer_options <- if (is.null(shpt)) character() else paste0("SHPT=", shpt)
   suppressWarnings(
     sf::st_write(
-      df, path,
-      quiet = TRUE, delete_dsn = TRUE, layer_options = layer_options
+      df,
+      path,
+      quiet = TRUE,
+      delete_dsn = TRUE,
+      layer_options = layer_options
     )
   )
   read_shapefile(path)
@@ -37,7 +40,10 @@ geom_dim <- function(stream) {
       return(NA_character_)
     }
     if (all(c("x", "y") %in% nms)) {
-      return(toupper(paste0(intersect(c("x", "y", "z", "m"), nms), collapse = "")))
+      return(toupper(paste0(
+        intersect(c("x", "y", "z", "m"), nms),
+        collapse = ""
+      )))
     }
     if (length(nms) == 1 && grepl("^[xyzm]+$", nms)) {
       return(toupper(nms))
@@ -47,14 +53,24 @@ geom_dim <- function(stream) {
 }
 
 square <- function(dim = "XY") {
-  coords <- switch(dim,
-    XY   = matrix(c(0, 0,  1, 0,  1, 1,  0, 1,  0, 0), ncol = 2, byrow = TRUE),
-    XYZ  = matrix(c(0, 0, 10,  1, 0, 11,  1, 1, 12,  0, 1, 13,  0, 0, 10),
-                  ncol = 3, byrow = TRUE),
-    XYM  = matrix(c(0, 0, 20,  1, 0, 21,  1, 1, 22,  0, 1, 23,  0, 0, 20),
-                  ncol = 3, byrow = TRUE),
-    XYZM = matrix(c(0, 0, 10, 20,  1, 0, 11, 21,  1, 1, 12, 22,
-                    0, 1, 13, 23,  0, 0, 10, 20), ncol = 4, byrow = TRUE)
+  coords <- switch(
+    dim,
+    XY = matrix(c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0), ncol = 2, byrow = TRUE),
+    XYZ = matrix(
+      c(0, 0, 10, 1, 0, 11, 1, 1, 12, 0, 1, 13, 0, 0, 10),
+      ncol = 3,
+      byrow = TRUE
+    ),
+    XYM = matrix(
+      c(0, 0, 20, 1, 0, 21, 1, 1, 22, 0, 1, 23, 0, 0, 20),
+      ncol = 3,
+      byrow = TRUE
+    ),
+    XYZM = matrix(
+      c(0, 0, 10, 20, 1, 0, 11, 21, 1, 1, 12, 22, 0, 1, 13, 23, 0, 0, 10, 20),
+      ncol = 4,
+      byrow = TRUE
+    )
   )
   sf::st_sfc(sf::st_polygon(list(coords), dim = dim), crs = 4326)
 }

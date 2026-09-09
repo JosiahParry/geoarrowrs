@@ -8,3 +8,5 @@ justfile
 NEWS.md
 .pre-commit-config.yaml
 .claude/
+jarl.toml
+air.toml

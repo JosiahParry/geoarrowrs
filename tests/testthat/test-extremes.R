@@ -23,7 +23,7 @@ test_that("extremes returns four point fields, one row per geometry", {
 
   # An L-shaped triangle so each extreme is a distinct vertex.
   g <- sf::st_sfc(sf::st_polygon(list(
-    matrix(c(0, 0,  4, 1,  2, 5,  0, 0), ncol = 2, byrow = TRUE)
+    matrix(c(0, 0, 4, 1, 2, 5, 0, 0), ncol = 2, byrow = TRUE)
   )))
 
   res <- extremes(as_geoarrow(g))
@@ -37,7 +37,7 @@ test_that("extremes finds the correct vertices", {
   skip_if_no_sf()
 
   g <- sf::st_sfc(sf::st_polygon(list(
-    matrix(c(0, 0,  4, 1,  2, 5,  0, 0), ncol = 2, byrow = TRUE)
+    matrix(c(0, 0, 4, 1, 2, 5, 0, 0), ncol = 2, byrow = TRUE)
   )))
 
   res <- extremes(as_geoarrow(g))
@@ -54,8 +54,8 @@ test_that("extremes works on multipolygon arrays, not just mixed geometry", {
   skip_if_no_sf()
 
   g <- sf::st_sfc(sf::st_multipolygon(list(
-    list(matrix(c(0, 0,  1, 0,  1, 1,  0, 1,  0, 0), ncol = 2, byrow = TRUE)),
-    list(matrix(c(5, 5,  7, 5,  7, 7,  5, 7,  5, 5), ncol = 2, byrow = TRUE))
+    list(matrix(c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0), ncol = 2, byrow = TRUE)),
+    list(matrix(c(5, 5, 7, 5, 7, 7, 5, 7, 5, 5), ncol = 2, byrow = TRUE))
   )))
 
   res <- extremes(as_geoarrow(g))
@@ -69,8 +69,16 @@ test_that("extremes is vectorized over many geometries", {
   skip_if_no_sf()
 
   g <- sf::st_sfc(
-    sf::st_polygon(list(matrix(c(0, 0, 1, 0, 1, 1, 0, 0), ncol = 2, byrow = TRUE))),
-    sf::st_polygon(list(matrix(c(10, 10, 12, 10, 12, 12, 10, 10), ncol = 2, byrow = TRUE)))
+    sf::st_polygon(list(matrix(
+      c(0, 0, 1, 0, 1, 1, 0, 0),
+      ncol = 2,
+      byrow = TRUE
+    ))),
+    sf::st_polygon(list(matrix(
+      c(10, 10, 12, 10, 12, 12, 10, 10),
+      ncol = 2,
+      byrow = TRUE
+    )))
   )
 
   res <- extremes(as_geoarrow(g))
@@ -83,7 +91,11 @@ test_that("an empty geometry yields a null row", {
   skip_if_no_sf()
 
   g <- sf::st_sfc(
-    sf::st_polygon(list(matrix(c(0, 0, 1, 0, 1, 1, 0, 0), ncol = 2, byrow = TRUE))),
+    sf::st_polygon(list(matrix(
+      c(0, 0, 1, 0, 1, 1, 0, 0),
+      ncol = 2,
+      byrow = TRUE
+    ))),
     sf::st_polygon()
   )
 

@@ -10,7 +10,11 @@ write_geojson <- function(text) {
 }
 
 feature_collection <- function(features) {
-  paste0('{"type":"FeatureCollection","features":[', paste(features, collapse = ","), "]}")
+  paste0(
+    '{"type":"FeatureCollection","features":[',
+    paste(features, collapse = ","),
+    "]}"
+  )
 }
 
 feat <- function(geom, props = "{}") {
@@ -56,10 +60,12 @@ test_that("integers stay int64 but widen to double alongside reals", {
   skip_if_no_sf()
 
   ints <- write_geojson(feature_collection(c(
-    feat(pt(0, 0), '{"v":1}'), feat(pt(1, 1), '{"v":2}')
+    feat(pt(0, 0), '{"v":1}'),
+    feat(pt(1, 1), '{"v":2}')
   )))
   reals <- write_geojson(feature_collection(c(
-    feat(pt(0, 0), '{"v":1}'), feat(pt(1, 1), '{"v":2.5}')
+    feat(pt(0, 0), '{"v":1}'),
+    feat(pt(1, 1), '{"v":2.5}')
   )))
 
   # R has no int64, so check the arrow type rather than the converted R type
@@ -74,7 +80,8 @@ test_that("types that cannot unify fall back to string", {
   skip_if_no_sf()
 
   path <- write_geojson(feature_collection(c(
-    feat(pt(0, 0), '{"v":1}'), feat(pt(1, 1), '{"v":"text"}')
+    feat(pt(0, 0), '{"v":1}'),
+    feat(pt(1, 1), '{"v":"text"}')
   )))
 
   v <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(path)))$v
@@ -160,7 +167,10 @@ test_that("genuinely mixed families fall back to geoarrow.geometry", {
   path <- write_geojson(feature_collection(c(
     feat(pt(0, 0), '{"id":1}'),
     feat('{"type":"LineString","coordinates":[[0,0],[1,1]]}', '{"id":2}'),
-    feat('{"type":"Polygon","coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}', '{"id":3}')
+    feat(
+      '{"type":"Polygon","coordinates":[[[0,0],[1,0],[1,1],[0,0]]]}',
+      '{"id":3}'
+    )
   )))
 
   # geoarrow's R bindings cannot read this union type yet, so assert at the
