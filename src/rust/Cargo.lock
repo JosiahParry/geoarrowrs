@@ -278,7 +278,9 @@ dependencies = [
 
 [[package]]
 name = "arrow_extendr"
-version = "58.0.2"
+version = "58.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a15bfd179c2620455d30d698cb0a87834e2127451ee0ea2af1bc3f2e00e6a94"
 dependencies = [
  "anyhow",
  "arrow",
