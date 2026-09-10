@@ -852,6 +852,7 @@ dependencies = [
  "geoarrow-flatgeobuf",
  "geoarrow-geojson",
  "geojson",
+ "rayon",
  "serde_json",
  "shapefile",
 ]

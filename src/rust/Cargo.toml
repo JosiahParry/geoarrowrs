@@ -26,6 +26,7 @@ geojson = "0.24.2"
 # preserve_order keeps property columns in document order rather than sorting them
 serde_json = { version = "1", features = ["preserve_order"] }
 geoarrow = { version = "0.8.0" }
+rayon = "1.10"
 geoarrow-array = "0.8.0"
 geoarrow-flatgeobuf = "0.8.0"
 geoarrow-geojson = "0.8.0"

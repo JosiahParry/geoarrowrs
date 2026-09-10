@@ -5,6 +5,7 @@ use std::sync::Arc;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::{Geometry, MultiLineString, MultiPolygon};
+use geoarrow::array::from_arrow_array;
 use geoarrow::array::{MultiLineStringBuilder, MultiPolygonBuilder};
 use geoarrow::datatypes::{
     BoxType, Crs, Dimension, GeoArrowType, GeometryCollectionType, GeometryType, LineStringType,
@@ -14,6 +15,7 @@ use geoarrow::datatypes::{
 use geoarrow_array::GeoArrowArray;
 use geoarrow_cast::cast::cast;
 use geoarrow_cast::downcast::{NativeType, infer_downcast_type};
+use rayon::prelude::*;
 
 use crate::as_geometry_chunks;
 
@@ -46,21 +48,66 @@ fn target_type(to: &str, from: &GeoArrowType) -> extendr_api::Result<GeoArrowTyp
     Ok(ty)
 }
 
+/// Rows per rayon task. Parsing WKB is the expensive half of a cast, and below this the thread hand off costs more than the parse saves.
+const CAST_MIN_CHUNK: usize = 8192;
+
+/// Split the chunks into pieces big enough to be worth a thread each.
+fn cast_slices(chunks: &[Arc<dyn GeoArrowArray>]) -> Vec<Arc<dyn GeoArrowArray>> {
+    let mut slices = Vec::new();
+    for chunk in chunks {
+        let len = chunk.len();
+        let mut offset = 0;
+        while offset < len {
+            let take = CAST_MIN_CHUNK.min(len - offset);
+            slices.push(chunk.slice(offset, take));
+            offset += take;
+        }
+        if len == 0 {
+            slices.push(chunk.clone());
+        }
+    }
+    slices
+}
+
+/// Stitch the cast pieces back into the single array the R side expects.
+fn concat_cast(
+    parts: Vec<Arc<dyn GeoArrowArray>>,
+    to_type: &GeoArrowType,
+) -> extendr_api::Result<Robj> {
+    let mut parts = parts;
+    if parts.len() == 1 {
+        let only = parts
+            .pop()
+            .ok_or_else(|| Error::Other("empty".to_string()))?;
+        // return the geoarrow array itself; ArrayData alone would drop the extension metadata
+        return only.into_arrow_robj();
+    }
+
+    let arrays = parts.iter().map(|p| p.to_array_ref()).collect::<Vec<_>>();
+    let refs = arrays.iter().map(|a| a.as_ref()).collect::<Vec<_>>();
+    let combined = arrow::compute::concat(&refs).map_err(|e| Error::Other(e.to_string()))?;
+    let field = to_type.to_field("", true);
+    from_arrow_array(combined.as_ref(), &field)
+        .map_err(|e| Error::Other(e.to_string()))?
+        .into_arrow_robj()
+}
+
 fn cast_chunks(
     chunks: &[Arc<dyn GeoArrowArray>],
     to_type: &GeoArrowType,
 ) -> extendr_api::Result<Robj> {
-    let mut out: Vec<Arc<dyn GeoArrowArray>> = Vec::with_capacity(chunks.len());
-    for chunk in chunks {
-        out.push(cast(chunk.as_ref(), to_type).map_err(|e| Error::Other(e.to_string()))?);
+    if chunks.is_empty() {
+        return Err(Error::Other("empty array".to_string()));
     }
-    // a single chunk keeps the round trip simple; chunked output waits on arrow-extendr
-    let first = out
-        .into_iter()
-        .next()
-        .ok_or_else(|| Error::Other("empty array".to_string()))?;
-    // return the geoarrow array itself; ArrayData alone would drop the extension metadata
-    first.into_arrow_robj()
+
+    let slices = cast_slices(chunks);
+    let parts = slices
+        .par_iter()
+        .map(|slice| cast(slice.as_ref(), to_type))
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| Error::Other(e.to_string()))?;
+
+    concat_cast(parts, to_type)
 }
 
 /// Cast geometries to another GeoArrow geometry type
