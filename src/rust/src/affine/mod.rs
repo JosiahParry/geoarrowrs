@@ -1,3 +1,4 @@
+mod matrix;
 mod rotate;
 mod scale;
 mod skew;
@@ -6,6 +7,7 @@ use extendr_api::prelude::*;
 
 extendr_module! {
     mod affine;
+    use matrix;
     use rotate;
     use scale;
     use skew;

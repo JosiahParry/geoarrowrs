@@ -5,6 +5,46 @@
 #' @useDynLib geoarrowrs, .registration = TRUE
 NULL
 
+#' Apply an arbitrary affine transform
+#'
+#' Transforms every coordinate by the six coefficients of an affine matrix.
+#' The geometry type of the output matches the input.
+#'
+#' @details
+#' The coefficients map a coordinate to
+#' `x' = a * x + b * y + xoff` and `y' = d * x + e * y + yoff`, the same
+#' ordering PostGIS `ST_Affine` and Shapely use. The identity transform is
+#' `a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0`.
+#'
+#' This is the general form behind [translate()], [scale_xy()], [rotate_around_centroid()],
+#' and [skew()]. Reach for those when they fit, since they are clearer at the
+#' call site. Use this one to apply a matrix you already have, or to compose
+#' several steps into a single pass over the coordinates.
+#'
+#' All six coefficients are recycled against `geometry`, so a different
+#' transform can be applied to every row.
+#'
+#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or
+#'   multipolygon array
+#' @param a,b,d,e the linear part of the matrix; each length 1 or the same
+#'   length as `geometry`
+#' @param xoff,yoff the translation part; each length 1 or the same length as
+#'   `geometry`
+#' @returns a GeoArrow array of the same geometry type as `geometry`
+#' @export
+#' @family affine
+#' @references [AffineOps](https://docs.rs/geo/latest/geo/algorithm/affine_ops/trait.AffineOps.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' square <- sf::st_polygon(list(matrix(
+#'   c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0), ncol = 2, byrow = TRUE
+#' )))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
+#'
+#' # double the width and shift right by 10
+#' res <- affine_transform(g, a = 2, b = 0, xoff = 10, d = 0, e = 1, yoff = 0)
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(res))
+affine_transform <- function(geometry, a, b, xoff, d, e, yoff) .Call(wrap__affine_transform, geometry, a, b, xoff, d, e, yoff)
+
 #' Rotate geometries around their centroid
 #'
 #' Rotates each geometry counter-clockwise by `degrees` about its own centroid.

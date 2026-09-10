@@ -3,6 +3,7 @@
 S3method("$",RTree)
 S3method("[[",RTree)
 export(RTree)
+export(affine_transform)
 export(bearing_euclidean)
 export(bearing_geodesic)
 export(bearing_haversine)

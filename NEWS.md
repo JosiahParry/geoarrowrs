@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `affine_transform()`, the general form behind the other affine ops, taking six recyclable coefficients so a different transform can apply to every row.
 * Added `dbscan()`, `kmeans()`, and `outlier_scores()` for clustering the points within each row, plus `simplify_idx()` and `simplify_vw_idx()`, which return the coordinate positions simplification keeps rather than the simplified geometry.
 * Added `coords()`, `exterior_coords()`, `n_coords()`, and `lines()` for walking a geometry's vertices and segments, plus `is_valid()` and `validation_error()`.
 * Added an `RTree` spatial index built on the `geo-index` crate, with `$search()` for bounding box queries and `$neighbors()` for nearest rows. Queries return candidates to confirm with an exact predicate.

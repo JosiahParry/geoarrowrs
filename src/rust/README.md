@@ -126,7 +126,7 @@ triangle or cell. Use `explode()` to get at the individual parts.
   - ✅ Scale: Scale a geometry up or down by a factor (`scale_xy()`).
   - ✅ Skew: Skew a geometry by shearing angles along the x and y dimension (`skew()`, `skew_xy()`).
   - ✅ Translate: Translate a geometry along its axis (`translate()`).
-  - ❌ AffineOps: generalised composable affine operations. Decided against exposing a matrix; this should take six recyclable vectors.
+  - ✅ AffineOps: generalised composable affine operations (`affine_transform()`). Takes six recyclable coefficients rather than a matrix.
 
 ## Conversion
 

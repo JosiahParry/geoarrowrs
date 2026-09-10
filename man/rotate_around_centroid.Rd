@@ -23,6 +23,7 @@ The geometry type of the output matches the geometry type of the input.
 }
 \seealso{
 Other affine:
+\code{\link[=affine_transform]{affine_transform()}},
 \code{\link[=rotate_around_center]{rotate_around_center()}},
 \code{\link[=scale_xy]{scale_xy()}},
 \code{\link[=skew]{skew()}},
