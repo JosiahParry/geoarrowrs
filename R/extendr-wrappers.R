@@ -242,6 +242,79 @@ dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__dist_vincenty_pairw
 #' @references [FrechetDistance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html)
 dist_frechet_pairwise <- function(origin, dest) .Call(wrap__dist_frechet_pairwise, origin, dest)
 
+#' Collect a geometry's coordinates as points
+#'
+#' Returns one multipoint per input geometry, holding that geometry's
+#' vertices in order. The output has the same length as the input.
+#'
+#' @details
+#' `exterior_coords()` skips the interior rings of a polygon, so it gives the
+#' outline only. Both preserve the order the coordinates are stored in, so a
+#' closed ring repeats its first vertex at the end.
+#'
+#' A null geometry stays null.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow multipoint array of the same length as `geometry`
+#' @export
+#' @rdname coords
+#' @family iteration
+#' @references [CoordsIter](https://docs.rs/geo/latest/geo/algorithm/coords_iter/trait.CoordsIter.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
+#'
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(coords(g)))
+#' as.vector(nanoarrow::convert_array(n_coords(g)))
+coords <- function(geometry) .Call(wrap__coords, geometry)
+
+#' @export
+#' @rdname coords
+#' @family iteration
+exterior_coords <- function(geometry) .Call(wrap__exterior_coords, geometry)
+
+#' Count the coordinates in each geometry
+#'
+#' Returns how many vertices each geometry holds.
+#'
+#' @details
+#' Counts every coordinate that [coords()] would return, so a closed ring
+#' counts its repeated final vertex. A null geometry gives `NA`.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns an integer array of the same length as `geometry`
+#' @export
+#' @family iteration
+#' @references [CoordsIter](https://docs.rs/geo/latest/geo/algorithm/coords_iter/trait.CoordsIter.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
+#'
+#' as.vector(nanoarrow::convert_array(n_coords(g)))
+n_coords <- function(geometry) .Call(wrap__n_coords, geometry)
+
+#' Split geometries into their line segments
+#'
+#' Returns one multilinestring per input geometry, whose parts are that
+#' geometry's two point segments. The output has the same length as the input.
+#'
+#' @details
+#' A polygon contributes the segments of every ring, interior rings included.
+#' A point has no segments and becomes a null element, as does a null
+#' geometry.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow multilinestring array of the same length as `geometry`
+#' @export
+#' @family iteration
+#' @references [LinesIter](https://docs.rs/geo/latest/geo/algorithm/lines_iter/trait.LinesIter.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
+#'
+#' lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines(g))))
+lines <- function(geometry) .Call(wrap__lines, geometry)
+
 #' Compute the length of linestrings
 #'
 #' These functions calculate the total length of each linestring using
@@ -1334,6 +1407,55 @@ read_geojson <- function(path) .Call(wrap__read_geojson, path)
 #' @export
 #' @family io
 read_shapefile <- function(path) .Call(wrap__read_shapefile, path)
+
+#' Test whether geometries are well formed
+#'
+#' `TRUE` when a geometry satisfies the OGC simple features rules.
+#'
+#' @details
+#' Several algorithms give wrong answers on invalid input rather than failing,
+#' so this is worth checking before trusting a result. Common problems are a
+#' polygon whose rings self intersect, a ring with too few points, and a
+#' coordinate that is `NaN` or infinite.
+#'
+#' A null geometry gives `NA`. Use [validation_error()] to see why a geometry
+#' failed.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a boolean array of the same length as `geometry`
+#' @export
+#' @rdname validation
+#' @family validation
+#' @references [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' good <- sf::st_polygon(list(matrix(
+#'   c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE
+#' )))
+#' bowtie <- sf::st_polygon(list(matrix(
+#'   c(0, 0, 2, 2, 2, 0, 0, 2, 0, 0), ncol = 2, byrow = TRUE
+#' )))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
+#'
+#' as.vector(nanoarrow::convert_array(is_valid(g)))
+#' as.vector(nanoarrow::convert_array(validation_error(g)))
+is_valid <- function(geometry) .Call(wrap__is_valid, geometry)
+
+#' Explain why a geometry is invalid
+#'
+#' Returns the first validation problem found, or `NA` when the geometry is
+#' valid.
+#'
+#' @details
+#' A geometry can break more than one rule; only the first is reported, since
+#' fixing it often resolves the rest.
+#'
+#' @inheritParams is_valid
+#' @returns a string array of the same length as `geometry`
+#' @export
+#' @rdname validation
+#' @family validation
+#' @references [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
+validation_error <- function(geometry) .Call(wrap__validation_error, geometry)
 
 #' Compute Voronoi cells from the vertices of geometries
 #'

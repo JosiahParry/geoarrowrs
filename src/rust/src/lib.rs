@@ -23,12 +23,14 @@ pub(crate) mod index;
 pub(crate) mod interpolate_line;
 pub(crate) mod interpolate_point;
 pub(crate) mod io;
+pub(crate) mod iteration;
 pub(crate) mod length;
 pub(crate) mod misc;
 pub(crate) mod query;
 pub(crate) mod simplify;
 pub(crate) mod topology;
 pub(crate) mod triangulate;
+pub(crate) mod validation;
 pub(crate) mod voronoi;
 pub(crate) mod winding;
 
@@ -187,6 +189,7 @@ extendr_module! {
     use affine;
     use area;
     use distance;
+    use iteration;
     use length;
     use bearing;
     use destination;
@@ -204,6 +207,7 @@ extendr_module! {
     use interpolate_line;
     use interpolate_point;
     use io;
+    use validation;
     use voronoi;
     use winding;
 }

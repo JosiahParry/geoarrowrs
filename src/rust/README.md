@@ -109,10 +109,10 @@ triangle or cell. Use `explode()` to get at the individual parts.
 
 ## Iteration
 
-- ❌ CoordsIter: Iterate over the coordinates of a geometry
-- ❌ MapCoords: Map a function over all the coordinates in a geometry, returning a new geometry
-- ❌ MapCoordsInPlace: Map a function over all the coordinates in a geometry in-place
-- ❌ LinesIter: Iterate over lines of a geometry
+- ✅ CoordsIter: Iterate over the coordinates of a geometry (`coords()`, `exterior_coords()`, `n_coords()`).
+- ❌ MapCoords: not planned. Calling an R function per coordinate across the FFI boundary would undo the reason this package exists. Use the affine ops, or `to_degrees()` and `to_radians()`.
+- ❌ MapCoordsInPlace: not planned, and Arrow arrays are immutable besides.
+- ✅ LinesIter: Iterate over lines of a geometry (`lines()`).
 
 ## Boundary
 
@@ -145,7 +145,7 @@ triangle or cell. Use `explode()` to get at the individual parts.
 - ✅ LineStringSegmentizeHaversine: Segment a LineString using Haversine distance (`line_segmentize_haversine()`).
 - ❌ [Transform]: Transform a geometry using Proj. Out of scope for now.
 - ✅ RemoveRepeatedPoints: Remove repeated points from a geometry (`remove_repeated_points()`).
-- ❌ Validation: Checks if the geometry is well formed. Some algorithms may not work correctly with invalid geometries
+- ✅ Validation: Checks if the geometry is well formed (`is_valid()`, `validation_error()`).
 
 ## Known limitations
 
