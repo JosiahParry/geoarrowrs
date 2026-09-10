@@ -217,3 +217,65 @@ test_that("ga_from_wkb leaves a geoarrow array alone", {
     "geoarrow.point"
   )
 })
+
+test_that("ga_as_point casts bare WKB to a point array", {
+  skip_deps()
+  sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  res <- ga_as_point(wkb_array(sfc))
+
+  expect_equal(
+    nanoarrow::infer_nanoarrow_schema(res)$metadata[["ARROW:extension:name"]],
+    "geoarrow.point"
+  )
+  expect_equal(res$length, 2L)
+})
+
+test_that("each cast names the type it produces", {
+  skip_deps()
+  line <- sf::st_sfc(sf::st_linestring(cbind(c(0, 1), c(0, 1))))
+  poly <- sf::st_sfc(sf::st_polygon(list(matrix(
+    c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0),
+    ncol = 2,
+    byrow = TRUE
+  ))))
+
+  name <- function(x) {
+    nanoarrow::infer_nanoarrow_schema(x)$metadata[["ARROW:extension:name"]]
+  }
+
+  expect_equal(name(ga_as_linestring(wkb_array(line))), "geoarrow.linestring")
+  expect_equal(name(ga_as_polygon(wkb_array(poly))), "geoarrow.polygon")
+  expect_equal(
+    name(ga_as_multilinestring(wkb_array(line))),
+    "geoarrow.multilinestring"
+  )
+  expect_equal(
+    name(ga_as_multipolygon(wkb_array(poly))),
+    "geoarrow.multipolygon"
+  )
+})
+
+test_that("a cast that does not fit is an error", {
+  skip_deps()
+  poly <- sf::st_sfc(sf::st_polygon(list(matrix(
+    c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0),
+    ncol = 2,
+    byrow = TRUE
+  ))))
+
+  expect_error(ga_as_point(wkb_array(poly)))
+})
+
+test_that("ga_as_point keeps the geometries intact", {
+  skip_deps()
+  sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  pts <- ga_as_point(wkb_array(sfc))
+
+  expect_equal(
+    as.vector(nanoarrow::convert_array(ga_dist_euclidean_pairwise(
+      pts,
+      ga_xy(c(0, 0), c(0, 0))
+    ))),
+    c(0, 5)
+  )
+})

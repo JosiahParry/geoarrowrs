@@ -362,6 +362,26 @@ geoarrow_udf_is_wkb <- function(array) {
   nanoarrow::infer_nanoarrow_schema(array)$format %in% c("z", "Z")
 }
 
+#' Give a GeoArrow result the metadata encoding Arrow can carry
+#'
+#' geoarrow-rs writes no `ARROW:extension:metadata` key when an array has no
+#' CRS. Arrow hands that back as an empty string, which is not JSON, so the
+#' next kernel to read the column fails while parsing it. Writing the empty
+#' object geoarrow R writes keeps a column readable across kernels.
+#'
+#' @noRd
+geoarrow_udf_normalise <- function(array) {
+  if (!geoarrow_udf_is_geoarrow(array)) {
+    return(array)
+  }
+  schema <- nanoarrow::infer_nanoarrow_schema(array)
+  if (is.null(schema$metadata[["ARROW:extension:metadata"]])) {
+    schema$metadata[["ARROW:extension:metadata"]] <- "{}"
+    nanoarrow::nanoarrow_array_set_schema(array, schema, validate = FALSE)
+  }
+  array
+}
+
 #' Does this nanoarrow array carry a GeoArrow extension name
 #' @noRd
 geoarrow_udf_is_geoarrow <- function(array) {
@@ -373,7 +393,7 @@ geoarrow_udf_is_geoarrow <- function(array) {
 
 #' Turn the arguments Arrow hands a kernel into what the function expects
 #' @noRd
-geoarrow_udf_coerce <- function(args, kinds) {
+geoarrow_udf_coerce <- function(args, kinds, mode) {
   Map(
     function(arg, kind) {
       if (!kind %in% c("geometry", "array")) {
@@ -381,7 +401,12 @@ geoarrow_udf_coerce <- function(args, kinds) {
       }
       array <- nanoarrow::as_nanoarrow_array(arg)
       if (kind == "geometry" && geoarrow_udf_is_wkb(array)) {
-        array <- ga_from_wkb(array)
+        array <- switch(
+          mode,
+          pass = array,
+          downcast = ga_from_wkb(array),
+          ga_cast_geometry(array, mode)
+        )
       }
       array
     },
@@ -397,9 +422,10 @@ geoarrow_udf_coerce <- function(args, kinds) {
 #' type holds whatever the column turns out to contain.
 #'
 #' @noRd
-geoarrow_udf_kernel <- function(fun, kinds) {
+geoarrow_udf_kernel <- function(fun, kinds, mode) {
   force(fun)
   force(kinds)
+  mode <- mode %||% "downcast"
   function(context, ...) {
     args <- list(...)
     wkb <- any(vapply(
@@ -408,9 +434,12 @@ geoarrow_udf_kernel <- function(fun, kinds) {
       logical(1)
     ))
 
-    result <- rlang::inject(fun(!!!geoarrow_udf_coerce(args, kinds)))
-    if (wkb && geoarrow_udf_is_geoarrow(result)) {
-      result <- ga_cast_geometry(result, "wkb")
+    result <- rlang::inject(fun(!!!geoarrow_udf_coerce(args, kinds, mode)))
+    if (geoarrow_udf_is_geoarrow(result)) {
+      if (wkb) {
+        result <- ga_cast_geometry(result, "wkb")
+      }
+      result <- geoarrow_udf_normalise(result)
     }
     arrow::as_arrow_array(result)
   }
@@ -430,30 +459,28 @@ geoarrow_udf_wkb_kernels <- function(fun, spec) {
   prototypes <- geoarrow_udf_schemas(NULL)
 
   out <- NULL
+  accepts <- character()
   for (type in names(prototypes)) {
     values <- Map(geoarrow_udf_value, kinds, probes, MoreArgs = list(NULL))
     for (slot in slots) {
       values[[slot]] <- prototypes[[type]]$empty
     }
-    out <- rlang::try_fetch(
+    candidate <- rlang::try_fetch(
       rlang::inject(fun(!!!unname(values))),
       error = function(cnd) NULL
     )
-    if (!is.null(out)) {
-      break
+    if (!is.null(candidate)) {
+      accepts <- c(accepts, type)
+      out <- out %||% candidate
     }
   }
 
   if (is.null(out)) {
-    return(list(in_types = list(), out_types = list()))
+    return(list(in_types = list(), out_types = list(), mode = NULL))
   }
 
   out_type <- if (geoarrow_udf_is_geoarrow(out)) {
-    # the kernel casts to wkb through geoarrow-rs, which writes no extension
-    # metadata at all where na_extension_wkb() writes an empty "{}"
-    schema <- geoarrow::na_extension_wkb()
-    schema$metadata[["ARROW:extension:metadata"]] <- NULL
-    arrow::as_data_type(schema)
+    arrow::as_data_type(geoarrow::na_extension_wkb())
   } else {
     arrow::as_arrow_array(out)$type
   }
@@ -477,8 +504,28 @@ geoarrow_udf_wkb_kernels <- function(fun, spec) {
 
   list(
     in_types = in_types,
-    out_types = rep(list(out_type), length(in_types))
+    out_types = rep(list(out_type), length(in_types)),
+    mode = geoarrow_udf_wkb_mode(accepts, names(prototypes))
   )
+}
+
+#' How a kernel should turn a WKB argument into geometry
+#'
+#' Parsing WKB is the expensive part, so this picks the route that parses each
+#' geometry once. A function that takes every geometry type gets the WKB array
+#' untouched and parses it itself. One that takes exactly one type gets a
+#' direct cast to that type. Anything in between has to infer the type first,
+#' which costs a second pass over the column.
+#'
+#' @noRd
+geoarrow_udf_wkb_mode <- function(accepts, all_types) {
+  if (setequal(accepts, all_types)) {
+    "pass"
+  } else if (length(accepts) == 1) {
+    tolower(accepts)
+  } else {
+    "downcast"
+  }
 }
 
 #' Work out the kernels one function can offer
@@ -514,7 +561,9 @@ geoarrow_udf_kernels <- function(fun, spec, schemas) {
     }
 
     out <- rlang::try_fetch(
-      arrow::as_arrow_array(rlang::inject(fun(!!!unname(values)))),
+      arrow::as_arrow_array(geoarrow_udf_normalise(
+        rlang::inject(fun(!!!unname(values)))
+      )),
       error = function(cnd) NULL
     )
     if (is.null(out)) {
@@ -526,6 +575,67 @@ geoarrow_udf_kernels <- function(fun, spec, schemas) {
   }
 
   list(in_types = in_types, out_types = out_types)
+}
+
+#' The casts whose target type is fixed by their name
+#'
+#' These are the only geometry producing functions Arrow can run, because the
+#' result type does not depend on what the column holds.
+#'
+#' @noRd
+geoarrow_udf_cast_targets <- function() {
+  c(
+    ga_as_point = "point",
+    ga_as_linestring = "linestring",
+    ga_as_polygon = "polygon",
+    ga_as_multipoint = "multipoint",
+    ga_as_multilinestring = "multilinestring",
+    ga_as_multipolygon = "multipolygon"
+  )
+}
+
+#' A zero length array of one of the WKB storage types
+#' @noRd
+geoarrow_udf_empty_wkb <- function(type) {
+  nanoarrow::as_nanoarrow_array(arrow::Array$create(list(), type = type))
+}
+
+#' Register one WKB to native cast
+#'
+#' The output type is read off the function itself rather than built from
+#' geoarrow R, so it carries exactly the metadata encoding the Rust writes.
+#'
+#' @noRd
+geoarrow_udf_register_cast <- function(name, prefix) {
+  fun <- get(name, envir = asNamespace("geoarrowrs"))
+  wkb <- geoarrow_udf_wkb_types()
+
+  out <- rlang::try_fetch(
+    arrow::as_arrow_array(geoarrow_udf_normalise(
+      fun(geoarrow_udf_empty_wkb(wkb$binary))
+    )),
+    error = function(cnd) NULL
+  )
+  if (is.null(out)) {
+    return(NULL)
+  }
+
+  in_types <- lapply(wkb, function(type) arrow::schema(x = type))
+  arrow::register_scalar_function(
+    paste0(prefix, name),
+    local({
+      f <- fun
+      function(context, x) {
+        arrow::as_arrow_array(geoarrow_udf_normalise(
+          f(nanoarrow::as_nanoarrow_array(x))
+        ))
+      }
+    }),
+    in_type = unname(in_types),
+    out_type = out$type,
+    auto_convert = FALSE
+  )
+  paste0(prefix, name)
 }
 
 #' Register geoarrowrs functions with Arrow
@@ -555,6 +665,14 @@ geoarrow_udf_kernels <- function(fun, spec, schemas) {
 #'
 #' [ga_unary_union()], [ga_explode()], and [ga_flatten()] are not registered,
 #' because they change the length of the array and a scalar kernel may not.
+#'
+#' A bare `binary` column of WKB, which is what plain Parquet writes, is
+#' registered for too. The kernel parses it, and a geometry result comes back
+#' as WKB, since a kernel's output type cannot depend on what the column turns
+#' out to hold. To work on native GeoArrow instead, cast once with
+#' [ga_as_point()] or one of its siblings and follow it with `compute()`.
+#' Without the `compute()` Arrow inlines the cast into each expression that
+#' reads it, so it runs once per use rather than once per column.
 #'
 #' A GeoArrow type carries its CRS, and Arrow compares that when it looks for a
 #' kernel, so `crs` has to match the data. Pass every CRS you need in one call:
@@ -602,11 +720,12 @@ register_geoarrow_udfs <- function(crs = NULL, functions = NULL, prefix = "") {
   }
 
   catalogue <- geoarrow_udf_catalogue()
+  casts <- names(geoarrow_udf_cast_targets())
   if (is.null(functions)) {
-    functions <- names(catalogue)
+    functions <- c(names(catalogue), casts)
   }
 
-  unknown <- setdiff(functions, names(catalogue))
+  unknown <- setdiff(functions, c(names(catalogue), casts))
   if (length(unknown) > 0) {
     cli::cli_abort(c(
       "Cannot register {.fn {unknown}}.",
@@ -619,13 +738,14 @@ register_geoarrow_udfs <- function(crs = NULL, functions = NULL, prefix = "") {
   registered <- character()
   failed <- character()
 
-  for (name in functions) {
+  for (name in setdiff(functions, casts)) {
     fun <- get(name, envir = asNamespace("geoarrowrs"))
     spec <- catalogue[[name]]
     kernels <- lapply(sets, function(set) {
       geoarrow_udf_kernels(fun, spec, set)
     })
-    kernels[[length(kernels) + 1L]] <- geoarrow_udf_wkb_kernels(fun, spec)
+    wkb <- geoarrow_udf_wkb_kernels(fun, spec)
+    kernels[[length(kernels) + 1L]] <- wkb
 
     in_types <- unlist(lapply(kernels, `[[`, "in_types"), recursive = FALSE)
     out_types <- unlist(lapply(kernels, `[[`, "out_types"), recursive = FALSE)
@@ -637,12 +757,16 @@ register_geoarrow_udfs <- function(crs = NULL, functions = NULL, prefix = "") {
 
     arrow::register_scalar_function(
       paste0(prefix, name),
-      geoarrow_udf_kernel(fun, geoarrow_udf_kind(spec)),
+      geoarrow_udf_kernel(fun, geoarrow_udf_kind(spec), wkb$mode),
       in_type = in_types,
       out_type = out_types,
       auto_convert = FALSE
     )
     registered <- c(registered, paste0(prefix, name))
+  }
+
+  for (name in intersect(functions, names(geoarrow_udf_cast_targets()))) {
+    registered <- c(registered, geoarrow_udf_register_cast(name, prefix))
   }
 
   if (length(failed) > 0) {

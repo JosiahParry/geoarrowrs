@@ -34,7 +34,10 @@ test_that("the whole catalogue registers without warning", {
   expect_no_warning(register_geoarrow_udfs(crs = tbl, prefix = "t1_"))
   registered <- register_geoarrow_udfs(crs = tbl, prefix = "t1_")
 
-  expect_equal(length(registered), length(names(geoarrow_udf_catalogue())))
+  expect_equal(
+    length(registered),
+    length(geoarrow_udf_catalogue()) + length(geoarrow_udf_cast_targets())
+  )
   expect_true("t1_ga_unsigned_area" %in% registered)
   expect_true("t1_ga_length_euclidean" %in% registered)
   expect_true("t1_ga_simplify" %in% registered)
@@ -379,4 +382,52 @@ test_that("WKB kernels do not disturb the GeoArrow ones", {
 
   expect_equal(registered, "w4_ga_unsigned_area")
   expect_equal(nrow(geo), 100L)
+})
+
+test_that("ga_as_point runs inside Arrow and yields a native column", {
+  pts <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  tbl <- wkb_table(pts)
+  register_geoarrow_udfs(functions = "ga_as_point", prefix = "w5_")
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, p = w5_ga_as_point(loc)),
+    p
+  ))
+
+  expect_s3_class(res$p, "geoarrow_vctr")
+  expect_equal(
+    nanoarrow::infer_nanoarrow_schema(arrow::as_arrow_array(res$p))$metadata[[
+      "ARROW:extension:name"
+    ]],
+    "geoarrow.point"
+  )
+})
+
+test_that("a native column from a cast feeds the next kernel", {
+  pts <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  tbl <- wkb_table(pts)
+  register_geoarrow_udfs(
+    functions = c("ga_as_point", "ga_dist_euclidean_pairwise"),
+    prefix = "w6_"
+  )
+
+  mid <- dplyr::compute(dplyr::select(
+    dplyr::mutate(tbl, p = w6_ga_as_point(loc), q = w6_ga_as_point(other)),
+    p,
+    q
+  ))
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(mid, d = w6_ga_dist_euclidean_pairwise(p, q)),
+    d
+  ))
+
+  expect_equal(res$d, c(0, 0))
+})
+
+test_that("the casts are registered by default", {
+  tbl <- nc_table()
+  registered <- register_geoarrow_udfs(crs = tbl, prefix = "w7_")
+
+  expect_true("w7_ga_as_point" %in% registered)
+  expect_true("w7_ga_as_multipolygon" %in% registered)
 })

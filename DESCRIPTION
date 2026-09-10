@@ -19,7 +19,7 @@ Imports:
     cli,
     rlang
 Depends:
-    R (>= 4.2)
+    R (>= 4.4)
 Suggests:
     arrow,
     dplyr,

@@ -1227,6 +1227,70 @@ ga_downcast_geometry <- function(x) .Call(wrap__ga_downcast_geometry, x)
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
 ga_from_wkb <- function(x, crs = NULL) .Call(wrap__ga_from_wkb, x, crs)
 
+#' Cast to one GeoArrow geometry type
+#'
+#' Each of these casts to the single type its name gives. Because the result
+#' type does not depend on the data, these are the casts Arrow can run inside
+#' a query, which [ga_from_wkb()] cannot.
+#'
+#' @details
+#' Parsing WKB is the expensive part of using a plain Parquet geometry column,
+#' and every function that needs a concrete geometry type pays for it on its
+#' own. Casting once up front means the rest of the query runs on native
+#' GeoArrow instead:
+#'
+#' ```r
+#' trip |>
+#'   mutate(pickup = ga_as_point(t_pickuploc)) |>
+#'   mutate(
+#'     d = ga_dist_euclidean_pairwise(pickup, dropoff),
+#'     b = ga_bearing_euclidean(pickup, dropoff)
+#'   )
+#' ```
+#'
+#' The cast is fallible. A geometry that does not fit the target type, such as
+#' a two point multipoint cast to `point`, is an error rather than a null.
+#'
+#' @param x a binary array of WKB, or any GeoArrow array
+#' @returns a GeoArrow array of the named type, the same length as `x`
+#' @export
+#' @rdname ga_as_point
+#' @family cast
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && requireNamespace("wk", quietly = TRUE) && requireNamespace("arrow", quietly = TRUE)
+#' sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+#' wkb <- nanoarrow::as_nanoarrow_array(
+#'   arrow::Array$create(unclass(wk::as_wkb(sfc)), type = arrow::binary())
+#' )
+#'
+#' pts <- ga_as_point(wkb)
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
+ga_as_point <- function(x) .Call(wrap__ga_as_point, x)
+
+#' @export
+#' @rdname ga_as_point
+#' @family cast
+ga_as_linestring <- function(x) .Call(wrap__ga_as_linestring, x)
+
+#' @export
+#' @rdname ga_as_point
+#' @family cast
+ga_as_polygon <- function(x) .Call(wrap__ga_as_polygon, x)
+
+#' @export
+#' @rdname ga_as_point
+#' @family cast
+ga_as_multipoint <- function(x) .Call(wrap__ga_as_multipoint, x)
+
+#' @export
+#' @rdname ga_as_point
+#' @family cast
+ga_as_multilinestring <- function(x) .Call(wrap__ga_as_multilinestring, x)
+
+#' @export
+#' @rdname ga_as_point
+#' @family cast
+ga_as_multipolygon <- function(x) .Call(wrap__ga_as_multipolygon, x)
+
 #' Split multi-part geometries into their parts
 #'
 #' Returns a list the same length as the input, where each element is an array

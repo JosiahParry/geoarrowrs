@@ -49,6 +49,14 @@ every argument of a registered function must be given.
 \code{\link[=ga_unary_union]{ga_unary_union()}}, \code{\link[=ga_explode]{ga_explode()}}, and \code{\link[=ga_flatten]{ga_flatten()}} are not registered,
 because they change the length of the array and a scalar kernel may not.
 
+A bare \code{binary} column of WKB, which is what plain Parquet writes, is
+registered for too. The kernel parses it, and a geometry result comes back
+as WKB, since a kernel's output type cannot depend on what the column turns
+out to hold. To work on native GeoArrow instead, cast once with
+\code{\link[=ga_as_point]{ga_as_point()}} or one of its siblings and follow it with \code{compute()}.
+Without the \code{compute()} Arrow inlines the cast into each expression that
+reads it, so it runs once per use rather than once per column.
+
 A GeoArrow type carries its CRS, and Arrow compares that when it looks for a
 kernel, so \code{crs} has to match the data. Pass every CRS you need in one call:
 registering a name again replaces the kernels it had.

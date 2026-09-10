@@ -270,10 +270,98 @@ fn downcast_chunks(
     cast_chunks(chunks, &to_type)
 }
 
+/// Cast to one GeoArrow geometry type
+///
+/// Each of these casts to the single type its name gives. Because the result
+/// type does not depend on the data, these are the casts Arrow can run inside
+/// a query, which [ga_from_wkb()] cannot.
+///
+/// @details
+/// Parsing WKB is the expensive part of using a plain Parquet geometry column,
+/// and every function that needs a concrete geometry type pays for it on its
+/// own. Casting once up front means the rest of the query runs on native
+/// GeoArrow instead:
+///
+/// ```r
+/// trip |>
+///   mutate(pickup = ga_as_point(t_pickuploc)) |>
+///   mutate(
+///     d = ga_dist_euclidean_pairwise(pickup, dropoff),
+///     b = ga_bearing_euclidean(pickup, dropoff)
+///   )
+/// ```
+///
+/// The cast is fallible. A geometry that does not fit the target type, such as
+/// a two point multipoint cast to `point`, is an error rather than a null.
+///
+/// @param x a binary array of WKB, or any GeoArrow array
+/// @returns a GeoArrow array of the named type, the same length as `x`
+/// @export
+/// @rdname ga_as_point
+/// @family cast
+/// @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && requireNamespace("wk", quietly = TRUE) && requireNamespace("arrow", quietly = TRUE)
+/// sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+/// wkb <- nanoarrow::as_nanoarrow_array(
+///   arrow::Array$create(unclass(wk::as_wkb(sfc)), type = arrow::binary())
+/// )
+///
+/// pts <- ga_as_point(wkb)
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
+#[extendr]
+fn ga_as_point(x: Robj) -> extendr_api::Result<Robj> {
+    ga_cast_geometry(x, "point")
+}
+
+/// @export
+/// @rdname ga_as_point
+/// @family cast
+#[extendr]
+fn ga_as_linestring(x: Robj) -> extendr_api::Result<Robj> {
+    ga_cast_geometry(x, "linestring")
+}
+
+/// @export
+/// @rdname ga_as_point
+/// @family cast
+#[extendr]
+fn ga_as_polygon(x: Robj) -> extendr_api::Result<Robj> {
+    ga_cast_geometry(x, "polygon")
+}
+
+/// @export
+/// @rdname ga_as_point
+/// @family cast
+#[extendr]
+fn ga_as_multipoint(x: Robj) -> extendr_api::Result<Robj> {
+    ga_cast_geometry(x, "multipoint")
+}
+
+/// @export
+/// @rdname ga_as_point
+/// @family cast
+#[extendr]
+fn ga_as_multilinestring(x: Robj) -> extendr_api::Result<Robj> {
+    ga_cast_geometry(x, "multilinestring")
+}
+
+/// @export
+/// @rdname ga_as_point
+/// @family cast
+#[extendr]
+fn ga_as_multipolygon(x: Robj) -> extendr_api::Result<Robj> {
+    ga_cast_geometry(x, "multipolygon")
+}
+
 extendr_module! {
     mod cast;
     use explode;
     fn ga_cast_geometry;
     fn ga_downcast_geometry;
     fn ga_from_wkb;
+    fn ga_as_point;
+    fn ga_as_linestring;
+    fn ga_as_polygon;
+    fn ga_as_multipoint;
+    fn ga_as_multilinestring;
+    fn ga_as_multipolygon;
 }
