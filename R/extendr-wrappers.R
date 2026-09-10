@@ -1690,7 +1690,6 @@ is_valid <- function(geometry) .Call(wrap__is_valid, geometry)
 #' A geometry can break more than one rule; only the first is reported, since
 #' fixing it often resolves the rest.
 #'
-#' @inheritParams is_valid
 #' @returns a string array of the same length as `geometry`
 #' @export
 #' @rdname validation
@@ -1911,12 +1910,6 @@ is_cw <- function(geometry) .Call(wrap__is_cw, geometry)
 #' \subsection{returns}{
 #'an integer array of 1 based row numbers
 #'}
-#' \subsection{export}{
-#'
-#'}
-#' \subsection{family}{
-#'index
-#'}
 #'}
 #'
 #'\subsection{Method `neighbors`}{
@@ -1941,12 +1934,6 @@ is_cw <- function(geometry) .Call(wrap__is_cw, geometry)
 #' \subsection{returns}{
 #'an integer array of 1 based row numbers
 #'}
-#' \subsection{export}{
-#'
-#'}
-#' \subsection{family}{
-#'index
-#'}
 #'}
 #'
 #'\subsection{Method `size`}{
@@ -1954,12 +1941,6 @@ is_cw <- function(geometry) .Call(wrap__is_cw, geometry)
 #'
 #' \subsection{returns}{
 #'the length of the array the index was built from
-#'}
-#' \subsection{export}{
-#'
-#'}
-#' \subsection{family}{
-#'index
 #'}
 #'}
 #'
@@ -1973,12 +1954,6 @@ is_cw <- function(geometry) .Call(wrap__is_cw, geometry)
 #'}
 #' \subsection{returns}{
 #'the number of indexed rows
-#'}
-#' \subsection{export}{
-#'
-#'}
-#' \subsection{family}{
-#'index
 #'}
 #'}
 #'

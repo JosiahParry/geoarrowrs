@@ -57,12 +57,6 @@ matters.
 \subsection{returns}{
 an integer array of 1 based row numbers
 }
-\subsection{export}{
-
-}
-\subsection{family}{
-index
-}
 }
 
 \subsection{Method \code{neighbors}}{
@@ -87,12 +81,6 @@ back and \code{max_distance} caps how far the search goes; either can be
 \subsection{returns}{
 an integer array of 1 based row numbers
 }
-\subsection{export}{
-
-}
-\subsection{family}{
-index
-}
 }
 
 \subsection{Method \code{size}}{
@@ -100,12 +88,6 @@ The number of rows the index was built over
 
 \subsection{returns}{
 the length of the array the index was built from
-}
-\subsection{export}{
-
-}
-\subsection{family}{
-index
 }
 }
 
@@ -119,12 +101,6 @@ have no bounding box to index.
 }
 \subsection{returns}{
 the number of indexed rows
-}
-\subsection{export}{
-
-}
-\subsection{family}{
-index
 }
 }
 }

@@ -67,7 +67,6 @@ fn is_valid(geometry: Robj) -> anyhow::Result<Robj> {
 /// A geometry can break more than one rule; only the first is reported, since
 /// fixing it often resolves the rest.
 ///
-/// @inheritParams is_valid
 /// @returns a string array of the same length as `geometry`
 /// @export
 /// @rdname validation

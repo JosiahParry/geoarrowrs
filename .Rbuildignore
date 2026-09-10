@@ -14,3 +14,4 @@ air.toml
 ^docs$
 ^pkgdown$
 ^BUILD-NOTES\.md$
+^README\.qmd$

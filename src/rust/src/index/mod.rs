@@ -130,8 +130,6 @@ impl RTree {
     ///
     /// @param xmin,ymin,xmax,ymax the query box
     /// @returns an integer array of 1 based row numbers
-    /// @export
-    /// @family index
     fn search(&self, xmin: f64, ymin: f64, xmax: f64, ymax: f64) -> anyhow::Result<Robj> {
         to_r_indices(&self.positions, self.tree.search(xmin, ymin, xmax, ymax))
     }
@@ -151,8 +149,6 @@ impl RTree {
     /// @param max_results the most rows to return, or `NULL` for no limit
     /// @param max_distance the furthest to search, or `NULL` for no limit
     /// @returns an integer array of 1 based row numbers
-    /// @export
-    /// @family index
     fn neighbors(
         &self,
         x: f64,
@@ -188,8 +184,6 @@ impl RTree {
     /// The number of rows the index was built over
     ///
     /// @returns the length of the array the index was built from
-    /// @export
-    /// @family index
     fn size(&self) -> i32 {
         self.n as i32
     }
@@ -201,8 +195,6 @@ impl RTree {
     /// have no bounding box to index.
     ///
     /// @returns the number of indexed rows
-    /// @export
-    /// @family index
     fn n_indexed(&self) -> i32 {
         self.positions.len() as i32
     }
