@@ -27,6 +27,7 @@ Suggests:
     geoarrow,
     nanoarrow,
     sf,
+    wk,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr

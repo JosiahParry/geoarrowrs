@@ -34,13 +34,15 @@ library(geoarrow)
 
 ## Register once
 
+One call. Every function, every geometry type.
+
 ```{r}
 nc <- as.data.frame(read_shapefile(
   system.file("shape/nc.shp", package = "sf")
 ))
 tbl <- arrow_table(nc)
 
-register_geoarrow_udfs(tbl)
+length(register_geoarrow_udfs(crs = tbl))
 ```
 
 ## Then write normal dplyr
@@ -62,12 +64,12 @@ tbl |>
   collect()
 ```
 
-**Geometry in, geometry out.** The result keeps its GeoArrow type.
+**Geometry in, geometry out.** The result keeps its GeoArrow type and CRS.
 
 ```{r}
 tbl |>
   mutate(centre = centroid(geometry)) |>
-  pull(centre) |>
+  pull(centre, as_vector = TRUE) |>
   class()
 ```
 
@@ -84,28 +86,64 @@ open_dataset(dir, format = "feather") |>
   collect()
 ```
 
-## What gets skipped, and why
+## Arguments that are not geometry
 
-A warning names anything that could not register. Three reasons:
-
-- **Wrong type.** `length_euclidean()` needs linestrings. Against
-  multipolygons there is nothing to measure.
-- **Non-geometry arguments.** `buffer()` takes a distance. These kernels take
-  geometry columns only.
-- **Aggregates.** `unary_union()` collapses an array to one row, which is not
-  a scalar kernel.
-
-## Two rules
-
-**Register per geometry type.** Arrow dispatches on the exact input type, so
-reading a different type means calling `register_geoarrow_udfs()` again with
-that data.
-
-**Use `prefix` to avoid collisions** with an existing Arrow binding.
+Numeric arguments take a literal or a column, and recycle row by row.
 
 ```{r}
-head(register_geoarrow_udfs(tbl, prefix = "geo_"), 3)
+tbl |>
+  mutate(small = simplify(geometry, 0.05)) |>
+  select(NAME, small) |>
+  head(2) |>
+  collect()
 ```
+
+Option arguments take a literal. Arrow has no optional arguments, so give
+every one.
+
+```{r}
+tbl |>
+  mutate(dense = densify(geometry, 5000, "haversine")) |>
+  summarise(pts = sum(n_coords(dense))) |>
+  collect()
+```
+
+## The one thing to watch
+
+**A GeoArrow type carries its CRS**, and Arrow matches kernels on the exact
+type. Register for every CRS in one call, because registering a name again
+replaces the kernels it had.
+
+```{r}
+plain <- arrow_table(
+  id = 1:2,
+  geometry = as_geoarrow_vctr(as_geoarrow_array(
+    sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(1, 1)))
+  ))
+)
+
+register_geoarrow_udfs(crs = list(NULL, tbl), functions = "unsigned_area")
+
+bind_rows(
+  collect(summarise(tbl, total = sum(unsigned_area(geometry)))),
+  collect(summarise(plain, total = sum(unsigned_area(geometry))))
+)
+```
+
+Call a function against a type it cannot handle and Arrow says so, rather
+than silently falling back to R.
+
+```{r}
+#| error: true
+tbl |>
+  mutate(len = length_euclidean(geometry)) |>
+  collect()
+```
+
+## Not registered
+
+Three functions change the length of the array, which a scalar kernel may
+not: `unary_union()`, `explode()`, and `flatten()`. Call those in R.
 
 ## The bottom line
 

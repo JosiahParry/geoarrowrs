@@ -4,13 +4,14 @@
 \alias{register_geoarrow_udfs}
 \title{Register geoarrowrs functions with Arrow}
 \usage{
-register_geoarrow_udfs(x, column = "geometry", functions = NULL, prefix = "")
+register_geoarrow_udfs(crs = NULL, functions = NULL, prefix = "")
 }
 \arguments{
-\item{x}{an Arrow \code{Table}, \code{RecordBatch}, or \code{Dataset} holding a GeoArrow
-column}
-
-\item{column}{the name of the geometry column to take the type from}
+\item{crs}{the coordinate reference system the kernels dispatch on. \code{NULL},
+the default, registers for data with no CRS. Also accepts a CRS string, or
+any object carrying one: an Arrow \code{Table}, \code{RecordBatch}, \code{Dataset},
+\code{Schema}, \code{Array}, or a GeoArrow array or vector. Give a list to cover
+several at once}
 
 \item{functions}{names of geoarrowrs functions to register. \code{NULL}, the
 default, registers everything that can be}
@@ -34,18 +35,26 @@ function as an Arrow scalar kernel instead, which lets it run inside the
 engine and, on a \code{Dataset}, stream batch by batch without ever holding the
 whole column in memory.
 
-A kernel is registered for the exact GeoArrow type of \code{column} in \code{x}, since
-Arrow dispatches on the precise input type. Reading a different geometry
-type means calling this again with that data. Output types are inferred by
-running each function once against a single row.
+Registration is per CRS, not per table. Every GeoArrow geometry type gets
+its own kernel, so one call covers points, linestrings, polygons, and their
+multi variants at once. A function that cannot handle a type, such as
+\code{\link[=length_euclidean]{length_euclidean()}} against polygons, simply has no kernel for it.
 
-Only functions whose arguments are all geometries are registered. Those
-taking a numeric argument, such as \code{\link[=buffer]{buffer()}} or \code{\link[=simplify]{simplify()}}, are not
-registered, and neither is \code{\link[=unary_union]{unary_union()}}, which is an aggregate rather
-than a scalar kernel.
+Arguments that are not geometry are registered too. Numeric arguments such
+as the \code{epsilon} of \code{\link[=simplify]{simplify()}} take a \code{double} column or a literal and are
+recycled row by row. Option arguments such as the \code{metric} of \code{\link[=densify]{densify()}}
+take a literal string. Since Arrow has no optional arguments, every argument
+of a registered function must be given.
+
+\code{\link[=unary_union]{unary_union()}}, \code{\link[=explode]{explode()}}, and \code{\link[=flatten]{flatten()}} are not registered, because
+they change the length of the array and a scalar kernel may not.
+
+A GeoArrow type carries its CRS, and Arrow compares that when it looks for a
+kernel, so \code{crs} has to match the data. Pass every CRS you need in one call:
+registering a name again replaces the kernels it had.
 }
 \examples{
-\dontshow{if (requireNamespace("arrow", quietly = TRUE) && requireNamespace("dplyr", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("arrow", quietly = TRUE) && requireNamespace("dplyr", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && isTRUE(arrow::arrow_info()$capabilities[["acero"]])) withAutoprint(\{ # examplesIf}
 library(dplyr)
 
 nc <- as.data.frame(read_shapefile(
@@ -53,7 +62,7 @@ nc <- as.data.frame(read_shapefile(
 ))
 tbl <- arrow::arrow_table(nc)
 
-register_geoarrow_udfs(tbl)
+register_geoarrow_udfs(crs = tbl)
 
 tbl |>
   mutate(area = unsigned_area(geometry)) |>

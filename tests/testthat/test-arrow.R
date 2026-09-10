@@ -2,6 +2,7 @@ skip_arrow <- function() {
   skip_if_not_installed("arrow")
   skip_if_not_installed("dplyr")
   skip_if_not_installed("geoarrow")
+  skip_if_not_installed("nanoarrow")
   skip_if_not_installed("sf")
   skip_if_not(
     arrow::arrow_info()$capabilities[["acero"]],
@@ -17,74 +18,167 @@ nc_table <- function() {
   arrow::arrow_table(as.data.frame(read_shapefile(path)))
 }
 
-test_that("register_geoarrow_udfs registers most of the catalogue", {
-  tbl <- nc_table()
-  registered <- suppressWarnings(register_geoarrow_udfs(tbl, prefix = "t1_"))
+vctr_table <- function(sfc, ...) {
+  skip_arrow()
+  requireNamespace("geoarrow", quietly = TRUE)
+  arrow::arrow_table(
+    id = seq_along(sfc),
+    geometry = geoarrow::as_geoarrow_vctr(geoarrow::as_geoarrow_array(sfc)),
+    ...
+  )
+}
 
-  expect_gt(length(registered), 30L)
+test_that("the whole catalogue registers without warning", {
+  tbl <- nc_table()
+
+  expect_no_warning(register_geoarrow_udfs(crs = tbl, prefix = "t1_"))
+  registered <- register_geoarrow_udfs(crs = tbl, prefix = "t1_")
+
+  expect_equal(length(registered), length(names(geoarrow_udf_catalogue())))
   expect_true("t1_unsigned_area" %in% registered)
-  expect_true("t1_intersects" %in% registered)
+  expect_true("t1_length_euclidean" %in% registered)
+  expect_true("t1_simplify" %in% registered)
 })
 
 test_that("a unary function runs inside mutate on a Table", {
   tbl <- nc_table()
-  suppressWarnings(register_geoarrow_udfs(tbl, prefix = "t2_"))
+  register_geoarrow_udfs(crs = tbl, functions = "unsigned_area", prefix = "t2_")
 
   res <- dplyr::collect(dplyr::select(
     dplyr::mutate(tbl, a = t2_unsigned_area(geometry)),
     a
   ))
-
-  expect_equal(nrow(res), 100L)
-  expect_type(res$a, "double")
-})
-
-test_that("the engine result matches calling the function directly", {
-  tbl <- nc_table()
-  suppressWarnings(register_geoarrow_udfs(tbl, prefix = "t3_"))
-
-  via_arrow <- dplyr::collect(dplyr::select(
-    dplyr::mutate(tbl, a = t3_unsigned_area(geometry)),
-    a
-  ))$a
   direct <- as.vector(nanoarrow::convert_array(
     unsigned_area(as.data.frame(tbl)$geometry)
   ))
 
-  expect_equal(via_arrow, direct)
+  expect_equal(nrow(res), 100L)
+  expect_equal(res$a, direct)
 })
 
-test_that("a geometry returning function keeps its geoarrow type", {
+test_that("a geometry returning function keeps its geoarrow type and CRS", {
   tbl <- nc_table()
-  suppressWarnings(register_geoarrow_udfs(tbl, prefix = "t4_"))
+  register_geoarrow_udfs(crs = tbl, functions = "centroid", prefix = "t3_")
 
   res <- dplyr::collect(dplyr::select(
-    dplyr::mutate(tbl, cen = t4_centroid(geometry)),
+    dplyr::mutate(tbl, cen = t3_centroid(geometry)),
     cen
   ))
 
   expect_s3_class(res$cen, "geoarrow_vctr")
   expect_equal(nrow(res), 100L)
+  expect_equal(
+    wk::wk_crs(res$cen),
+    wk::wk_crs(as.data.frame(tbl)$geometry)
+  )
 })
 
-test_that("a binary predicate runs inside mutate", {
+test_that("a binary predicate pairs two geometry columns", {
   tbl <- nc_table()
-  suppressWarnings(register_geoarrow_udfs(tbl, prefix = "t5_"))
+  register_geoarrow_udfs(crs = tbl, functions = "intersects", prefix = "t4_")
 
   res <- dplyr::collect(dplyr::select(
-    dplyr::mutate(tbl, s = t5_intersects(geometry, geometry)),
+    dplyr::mutate(tbl, s = t4_intersects(geometry, geometry)),
     s
   ))
 
   expect_true(all(res$s))
 })
 
+test_that("a binary predicate pairs two different geometry types", {
+  tbl <- nc_table()
+  geometry <- as.data.frame(tbl)$geometry
+  pt <- geoarrow::as_geoarrow_vctr(centroid(geometry))
+  both <- arrow::arrow_table(geometry = geometry, pt = pt)
+  register_geoarrow_udfs(crs = tbl, functions = "contains", prefix = "t5_")
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(both, hit = t5_contains(geometry, pt)),
+    hit
+  ))
+
+  expect_equal(nrow(res), 100L)
+  expect_type(res$hit, "logical")
+})
+
+test_that("a numeric argument can be a literal", {
+  tbl <- nc_table()
+  register_geoarrow_udfs(crs = tbl, functions = "simplify", prefix = "t6_")
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, s = t6_simplify(geometry, 0.05)),
+    s
+  ))
+  direct <- geoarrow::as_geoarrow_vctr(
+    simplify(as.data.frame(tbl)$geometry, 0.05)
+  )
+
+  expect_equal(as.character(res$s), as.character(direct))
+})
+
+test_that("a numeric argument can be a column", {
+  tbl <- nc_table()
+  with_eps <- arrow::arrow_table(
+    geometry = as.data.frame(tbl)$geometry,
+    eps = rep(0.05, 100)
+  )
+  register_geoarrow_udfs(crs = tbl, functions = "simplify", prefix = "t7_")
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(with_eps, s = t7_simplify(geometry, eps)),
+    s
+  ))
+  direct <- geoarrow::as_geoarrow_vctr(
+    simplify(as.data.frame(tbl)$geometry, 0.05)
+  )
+
+  expect_equal(as.character(res$s), as.character(direct))
+})
+
+test_that("a string option argument is passed through", {
+  tbl <- nc_table()
+  register_geoarrow_udfs(crs = tbl, functions = "densify", prefix = "t8_")
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, d = t8_densify(geometry, 0.5, "haversine")),
+    d
+  ))
+  direct <- geoarrow::as_geoarrow_vctr(
+    densify(as.data.frame(tbl)$geometry, 0.5, "haversine")
+  )
+
+  expect_equal(as.character(res$d), as.character(direct))
+})
+
+test_that("an integer option argument is passed through", {
+  tbl <- nc_table()
+  register_geoarrow_udfs(
+    crs = tbl,
+    functions = "chaikin_smoothing",
+    prefix = "t9_"
+  )
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, k = t9_chaikin_smoothing(geometry, 2L)),
+    k
+  ))
+  direct <- geoarrow::as_geoarrow_vctr(
+    chaikin_smoothing(as.data.frame(tbl)$geometry, 2L)
+  )
+
+  expect_equal(as.character(res$k), as.character(direct))
+})
+
 test_that("a registered function can be filtered on", {
   tbl <- nc_table()
-  suppressWarnings(register_geoarrow_udfs(tbl, prefix = "t6_"))
+  register_geoarrow_udfs(
+    crs = tbl,
+    functions = "unsigned_area",
+    prefix = "t10_"
+  )
 
   kept <- dplyr::collect(dplyr::summarise(
-    dplyr::filter(tbl, t6_unsigned_area(geometry) > 0.1),
+    dplyr::filter(tbl, t10_unsigned_area(geometry) > 0.1),
     n = dplyr::n()
   ))$n
   direct <- sum(
@@ -99,7 +193,11 @@ test_that("a registered function can be filtered on", {
 
 test_that("registration works against an on disk dataset", {
   tbl <- nc_table()
-  suppressWarnings(register_geoarrow_udfs(tbl, prefix = "t7_"))
+  register_geoarrow_udfs(
+    crs = tbl,
+    functions = "unsigned_area",
+    prefix = "t11_"
+  )
 
   dir <- file.path(tempdir(), "geoarrowrs-udf-ds")
   on.exit(unlink(dir, recursive = TRUE), add = TRUE)
@@ -109,7 +207,7 @@ test_that("registration works against an on disk dataset", {
   res <- dplyr::collect(dplyr::select(
     dplyr::mutate(
       arrow::open_dataset(dir, format = "feather"),
-      a = t7_unsigned_area(geometry)
+      a = t11_unsigned_area(geometry)
     ),
     a
   ))
@@ -117,37 +215,90 @@ test_that("registration works against an on disk dataset", {
   expect_equal(nrow(res), 100L)
 })
 
-test_that("functions that do not apply to the type are reported not registered", {
-  tbl <- nc_table()
+test_that("one call covers every geometry type", {
+  lines <- vctr_table(sf::st_sfc(sf::st_linestring(cbind(c(0, 3), c(0, 4)))))
+  register_geoarrow_udfs(functions = "length_euclidean", prefix = "t12_")
 
-  expect_warning(
-    registered <- register_geoarrow_udfs(tbl, prefix = "t8_"),
-    "Could not register"
-  )
-  expect_false("t8_length_euclidean" %in% registered)
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(lines, len = t12_length_euclidean(geometry)),
+    len
+  ))
+
+  expect_equal(res$len, 5)
 })
 
-test_that("a subset of functions can be registered", {
+test_that("a type the function cannot handle has no kernel", {
   tbl <- nc_table()
+  register_geoarrow_udfs(
+    crs = tbl,
+    functions = "length_euclidean",
+    prefix = "t13_"
+  )
+
+  expect_error(
+    dplyr::collect(dplyr::mutate(tbl, l = t13_length_euclidean(geometry))),
+    "no kernel matching"
+  )
+})
+
+test_that("one call covers several coordinate reference systems", {
+  tbl <- nc_table()
+  plain <- vctr_table(sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(1, 1))))
+  register_geoarrow_udfs(
+    crs = list(NULL, tbl),
+    functions = c("unsigned_area", "to_radians"),
+    prefix = "t14_"
+  )
+
+  with_crs <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, a = t14_unsigned_area(geometry)),
+    a
+  ))
+  without_crs <- dplyr::collect(dplyr::select(
+    dplyr::mutate(plain, g = t14_to_radians(geometry)),
+    g
+  ))
+
+  expect_equal(nrow(with_crs), 100L)
+  expect_equal(nrow(without_crs), 2L)
+})
+
+test_that("a CRS can be given as a string", {
+  skip_arrow()
   registered <- register_geoarrow_udfs(
-    tbl,
-    functions = c("centroid", "unsigned_area"),
-    prefix = "t9_"
+    crs = "OGC:CRS84",
+    functions = "to_radians",
+    prefix = "t15_"
   )
 
-  expect_setequal(registered, c("t9_centroid", "t9_unsigned_area"))
+  expect_equal(registered, "t15_to_radians")
 })
 
-test_that("an unregisterable name is rejected", {
+test_that("a name that is not in the catalogue is rejected", {
   tbl <- nc_table()
 
   expect_error(
-    register_geoarrow_udfs(tbl, functions = "buffer"),
-    "Only functions whose arguments are all geometries"
+    register_geoarrow_udfs(crs = tbl, functions = "unary_union"),
+    "Cannot register"
   )
 })
 
-test_that("a missing column is reported", {
+test_that("an object with no geometry column is rejected", {
+  skip_arrow()
+
+  expect_error(
+    register_geoarrow_udfs(crs = arrow::arrow_table(a = 1:2)),
+    "no GeoArrow column"
+  )
+})
+
+test_that("prefix is applied to every registered name", {
   tbl <- nc_table()
-  expect_error(register_geoarrow_udfs(tbl, column = "nope"), "not found")
+  registered <- register_geoarrow_udfs(
+    crs = tbl,
+    functions = c("centroid", "unsigned_area"),
+    prefix = "t16_"
+  )
+
+  expect_setequal(registered, c("t16_centroid", "t16_unsigned_area"))
 })
