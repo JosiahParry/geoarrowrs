@@ -306,3 +306,77 @@ test_that("prefix is applied to every registered name", {
 
   expect_setequal(registered, c("t16_ga_centroid", "t16_ga_unsigned_area"))
 })
+
+wkb_table <- function(sfc) {
+  skip_arrow()
+  skip_if_not_installed("wk")
+  wkb <- arrow::Array$create(unclass(wk::as_wkb(sfc)), type = arrow::binary())
+  arrow::arrow_table(id = seq_along(sfc), loc = wkb, other = wkb)
+}
+
+test_that("a bare WKB column dispatches without converting first", {
+  pts <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  tbl <- wkb_table(pts)
+  register_geoarrow_udfs(functions = "ga_unsigned_area", prefix = "w1_")
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, a = w1_ga_unsigned_area(loc)),
+    a
+  ))
+
+  expect_equal(res$a, c(0, 0))
+})
+
+test_that("a type specific function reads bare WKB", {
+  pts <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  tbl <- wkb_table(pts)
+  register_geoarrow_udfs(
+    functions = "ga_dist_euclidean_pairwise",
+    prefix = "w2_"
+  )
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, d = w2_ga_dist_euclidean_pairwise(loc, other)),
+    d
+  ))
+
+  expect_equal(res$d, c(0, 0))
+})
+
+test_that("a geometry result from bare WKB comes back as WKB", {
+  polys <- sf::st_sfc(
+    sf::st_polygon(list(matrix(
+      c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0),
+      ncol = 2,
+      byrow = TRUE
+    )))
+  )
+  tbl <- wkb_table(polys)
+  register_geoarrow_udfs(functions = "ga_centroid", prefix = "w3_")
+
+  res <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, cen = w3_ga_centroid(loc)),
+    cen
+  ))
+
+  expect_equal(
+    as.character(wk::as_wkt(wk::as_wkb(res$cen))),
+    "POINT (1 1)"
+  )
+})
+
+test_that("WKB kernels do not disturb the GeoArrow ones", {
+  tbl <- nc_table()
+  registered <- register_geoarrow_udfs(
+    crs = tbl,
+    functions = "ga_unsigned_area",
+    prefix = "w4_"
+  )
+  geo <- dplyr::collect(dplyr::select(
+    dplyr::mutate(tbl, a = w4_ga_unsigned_area(geometry)),
+    a
+  ))
+
+  expect_equal(registered, "w4_ga_unsigned_area")
+  expect_equal(nrow(geo), 100L)
+})

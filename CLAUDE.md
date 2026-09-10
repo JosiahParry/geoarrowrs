@@ -35,6 +35,11 @@ hand-written R goes in a new file under `R/` and is linted normally. Prefer
 rlang standalone checks and `cli::cli_abort()` there rather than surfacing
 Rust's error strings.
 
+- Never use bare `try()`. Use `rlang::try_fetch()` with an `error` handler, so
+  the condition is caught deliberately rather than turned into a sentinel
+  object that has to be sniffed with `inherits()`.
+- Never use `do.call()`. Splice with rlang instead: `rlang::inject(f(!!!args))`.
+
 ## Verifying
 
 Never report a binding as working without running it from R. Type-checking

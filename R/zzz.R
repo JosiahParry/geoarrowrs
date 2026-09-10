@@ -16,6 +16,6 @@
     return(invisible(NULL))
   }
 
-  try(register_geoarrow_udfs(), silent = TRUE)
+  rlang::try_fetch(register_geoarrow_udfs(), error = function(cnd) NULL)
   invisible(NULL)
 }

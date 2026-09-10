@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Registered Arrow kernels now accept a bare `binary` or `large_binary` WKB column, the kind plain Parquet writes, so `mutate(d = ga_dist_euclidean_pairwise(pickup, dropoff))` runs on a Dataset without converting the column first. A geometry result from a WKB input comes back as WKB, since the kernel cannot declare a type that depends on what the column turns out to hold.
 * Loading the package now registers the Arrow kernels for CRS-less data automatically, so `mutate(a = ga_unsigned_area(geometry))` works on a `Table` or `Dataset` with no setup. Data carrying a CRS still needs `register_geoarrow_udfs(crs = ...)`. Set `options(geoarrowrs.register_udfs = FALSE)` to skip it and avoid loading arrow at all.
 * Added `ga_from_wkb()`, which reads a bare `binary` WKB column, the kind plain Parquet writes, into the narrowest GeoArrow type that fits it. Functions needing a specific geometry type, such as `ga_dist_euclidean_pairwise()`, could not read those columns at all.
 * Added `ga_xy()`, which pairs two numeric vectors or float64 arrays into a GeoArrow point array. Either argument may be length 1 and is recycled, a row where either coordinate is `NA` gives a null point, and `crs` is recorded in the array metadata verbatim without reprojecting anything.
