@@ -29,7 +29,7 @@ so this is worth checking before trusting a result. Common problems are a
 polygon whose rings self intersect, a ring with too few points, and a
 coordinate that is \code{NaN} or infinite.
 
-A null geometry gives \code{NA}. Use \code{\link[arrow:validation_error]{validation_error()}} to see why a geometry
+A null geometry gives \code{NA}. Use \code{\link[=validation_error]{validation_error()}} to see why a geometry
 failed.
 
 A geometry can break more than one rule; only the first is reported, since

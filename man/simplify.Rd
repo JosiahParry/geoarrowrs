@@ -24,6 +24,7 @@ multilinestrings, polygons, and multipolygons.
 }
 \seealso{
 Other simplify:
+\code{\link[=simplify_idx]{simplify_idx()}},
 \code{\link[=simplify_vw]{simplify_vw()}}
 }
 \concept{simplify}

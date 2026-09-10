@@ -1,6 +1,5 @@
 mod idx;
 mod vw;
-mod vw_idx;
 mod vw_preserve;
 
 use arrow_extendr::IntoArrowRobj;
@@ -145,4 +144,5 @@ extendr_module! {
     fn simplify;
     use vw;
     use vw_preserve;
+    use idx;
 }

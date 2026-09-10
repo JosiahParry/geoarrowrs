@@ -35,6 +35,7 @@ multipolygons.
 }
 \seealso{
 Other simplify:
-\code{\link[=simplify]{simplify()}}
+\code{\link[=simplify]{simplify()}},
+\code{\link[=simplify_idx]{simplify_idx()}}
 }
 \concept{simplify}

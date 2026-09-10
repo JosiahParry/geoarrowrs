@@ -15,6 +15,7 @@ pub(crate) mod bearing;
 pub(crate) mod boolean;
 pub(crate) mod boundary;
 pub(crate) mod cast;
+pub(crate) mod cluster;
 pub(crate) mod convert;
 pub(crate) mod densify;
 pub(crate) mod destination;
@@ -201,6 +202,7 @@ extendr_module! {
     use boolean;
     use boundary;
     use cast;
+    use cluster;
     use convert;
     use densify;
     use index;

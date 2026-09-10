@@ -592,6 +592,44 @@ simplify_vw <- function(geometry, epsilon) .Call(wrap__simplify_vw, geometry, ep
 #' @references [SimplifyVwPreserve](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwPreserve.html)
 simplify_vw_preserve <- function(geometry, epsilon) .Call(wrap__simplify_vw_preserve, geometry, epsilon)
 
+#' Find which coordinates simplification would keep
+#'
+#' Returns the positions of the coordinates that survive simplification,
+#' rather than the simplified geometry itself. One list per input geometry.
+#'
+#' @details
+#' Use these when the coordinates carry data of their own, such as a timestamp
+#' or a sensor reading per vertex. Simplifying the geometry discards that
+#' alignment; the indices let you subset the other columns the same way.
+#'
+#' `simplify_idx()` uses Ramer-Douglas-Peucker and `simplify_vw_idx()` uses
+#' Visvalingam-Whyatt, matching [simplify()] and [simplify_vw()]. Indices are
+#' 1 based and always include the first and last coordinate.
+#'
+#' Only linestrings can be simplified this way. Any other geometry type, or a
+#' null geometry, comes back null.
+#'
+#' @param geometry a GeoArrow linestring array
+#' @param epsilon the simplification tolerance; length 1 or the same length as
+#'   `geometry`
+#' @returns a list array of integer positions, one list per input geometry
+#' @export
+#' @rdname simplify_idx
+#' @family simplify
+#' @references [SimplifyIdx](https://docs.rs/geo/latest/geo/algorithm/simplify/trait.SimplifyIdx.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' line <- sf::st_linestring(cbind(c(0, 1, 2, 3, 4), c(0, 0.1, 0, 0.1, 0)))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(line))
+#'
+#' nanoarrow::convert_array(simplify_idx(g, 0.5))
+simplify_idx <- function(geometry, epsilon) .Call(wrap__simplify_idx, geometry, epsilon)
+
+#' @export
+#' @rdname simplify_idx
+#' @family simplify
+#' @references [SimplifyVwIdx](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwIdx.html)
+simplify_vw_idx <- function(geometry, epsilon) .Call(wrap__simplify_vw_idx, geometry, epsilon)
+
 #' Test a topological relationship between two geometry arrays
 #'
 #' Each function compares `x` and `y` row by row and returns `TRUE` when the
@@ -1160,6 +1198,104 @@ explode <- function(x) .Call(wrap__explode, x)
 #' @export
 #' @family cast
 flatten <- function(x) .Call(wrap__flatten, x)
+
+#' Assign points to clusters by density
+#'
+#' Labels each point of a geometry with a cluster number, or `NA` when the
+#' point is noise. Returns one list of labels per input geometry.
+#'
+#' @details
+#' DBSCAN grows a cluster from any point with at least `min_points` neighbours
+#' within `eps`. Points reachable from that core join the cluster, and points
+#' that never become reachable are noise. Unlike k-means it finds clusters of
+#' any shape and does not need the count up front.
+#'
+#' Cluster numbers start at 1 and mean nothing beyond grouping. Both `eps` and
+#' `min_points` are recycled against `geometry`. A row that is not point based,
+#' or is null, comes back null.
+#'
+#' @param geometry a GeoArrow multipoint array
+#' @param eps how close two points must be to be neighbours; length 1 or the
+#'   same length as `geometry`
+#' @param min_points how many neighbours a point needs to seed a cluster;
+#'   length 1 or the same length as `geometry`
+#' @returns a list array of integer labels, one list per input geometry
+#' @export
+#' @family cluster
+#' @references [Dbscan](https://docs.rs/geo/latest/geo/algorithm/dbscan/trait.Dbscan.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- sf::st_multipoint(cbind(
+#'   c(0, 0.1, 0.2, 5, 5.1, 5.2),
+#'   c(0, 0.1, 0.2, 5, 5.1, 5.2)
+#' ))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#'
+#' nanoarrow::convert_array(dbscan(g, eps = 1, min_points = 2))
+dbscan <- function(geometry, eps, min_points) .Call(wrap__dbscan, geometry, eps, min_points)
+
+#' Assign points to a fixed number of clusters
+#'
+#' Splits each geometry's points into `k` clusters by nearest centre. Returns
+#' one list of labels per input geometry.
+#'
+#' @details
+#' k-means always produces exactly `k` clusters and no noise, so every point
+#' gets a label. It favours round, similarly sized clusters; use [dbscan()]
+#' when the shapes are irregular or the count is unknown.
+#'
+#' The algorithm starts from a random seed, so results vary between runs
+#' unless `seed` is given. A row with fewer than `k` points cannot be split
+#' and comes back null, as does a row that is not point based or is null.
+#'
+#' @param geometry a GeoArrow multipoint array
+#' @param k how many clusters to produce; length 1 or the same length as
+#'   `geometry`
+#' @param seed a seed for reproducible starts, or `NULL` to vary each run
+#' @returns a list array of integer labels, one list per input geometry
+#' @export
+#' @family cluster
+#' @references [KMeans](https://docs.rs/geo/latest/geo/algorithm/kmeans/trait.KMeans.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- sf::st_multipoint(cbind(
+#'   c(0, 0.1, 0.2, 5, 5.1, 5.2),
+#'   c(0, 0.1, 0.2, 5, 5.1, 5.2)
+#' ))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#'
+#' nanoarrow::convert_array(kmeans(g, k = 2, seed = 1))
+kmeans <- function(geometry, k, seed = NULL) .Call(wrap__kmeans, geometry, k, seed)
+
+#' Score how much each point looks like an outlier
+#'
+#' Returns the local outlier factor of every point in a geometry, one list per
+#' input geometry.
+#'
+#' @details
+#' A score near 1 means a point sits at the same density as its neighbours.
+#' Scores meaningfully above 1 mean it is in a sparser neighbourhood than they
+#' are, which is what marks an outlier. There is no universal cutoff, so
+#' compare scores within a dataset rather than against a fixed threshold.
+#'
+#' `k_neighbours` sets how many neighbours define the local neighbourhood.
+#' Small values react to fine structure and large values smooth it away. A
+#' row that is not point based, or is null, comes back null.
+#'
+#' @param geometry a GeoArrow multipoint array
+#' @param k_neighbours how many neighbours define a neighbourhood; length 1 or
+#'   the same length as `geometry`
+#' @returns a list array of doubles, one list per input geometry
+#' @export
+#' @family cluster
+#' @references [OutlierDetection](https://docs.rs/geo/latest/geo/algorithm/outlier_detection/trait.OutlierDetection.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- sf::st_multipoint(cbind(
+#'   c(0, 0.1, 0.2, 0.3, 9),
+#'   c(0, 0.1, 0.2, 0.3, 9)
+#' ))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#'
+#' nanoarrow::convert_array(outlier_scores(g, k_neighbours = 2))
+outlier_scores <- function(geometry, k_neighbours) .Call(wrap__outlier_scores, geometry, k_neighbours)
 
 #' Convert coordinates from radians to degrees
 #'

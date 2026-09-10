@@ -57,18 +57,18 @@ This will require more work and should be pushed to the end of implementation.
 
 - ✅ BooleanOps: Combine or split (Multi)Polygons using intersection, union, xor, or difference operations (`boolean_intersection()`, `boolean_union()`, `boolean_difference()`, `boolean_xor()`).
 - ✅ unary_union: Efficient union of many Polygon or MultiPolygons (`unary_union()`). The one aggregate in the package, returning length 1.
-- ❌ Outlier Detection / Clustering
-- ❌ OutlierDetection: Detect outliers in a group of points using LOF
-- ❌ Dbscan: Calculate point clusters using the DBSCAN algorithm
-- ❌ KMeans: Calculate point clusters using the k-means algorithm
+- ✅ Outlier Detection / Clustering: all three operate within a row, so a multipoint of `k` points gives `k` labels or scores.
+- ✅ OutlierDetection: Detect outliers in a group of points using LOF (`outlier_scores()`).
+- ✅ Dbscan: Calculate point clusters using the DBSCAN algorithm (`dbscan()`).
+- ✅ KMeans: Calculate point clusters using the k-means algorithm (`kmeans()`).
 
 ## Simplification
 
 - ✅ Simplify: Simplify a geometry using the Ramer-Douglas-Peucker algorithm (`simplify()`).
-- ❌ SimplifyIdx: Calculate a simplified geometry using the Ramer-Douglas-Peucker algorithm, returning coordinate indices
+- ✅ SimplifyIdx: Calculate a simplified geometry using the Ramer-Douglas-Peucker algorithm, returning coordinate indices (`simplify_idx()`).
 - ✅ SimplifyVw: Simplify a geometry using the Visvalingam-Whyatt algorithm (`simplify_vw()`).
 - ✅ SimplifyVwPreserve: Simplify a geometry using a topology-preserving variant of the Visvalingam-Whyatt algorithm (`simplify_vw_preserve()`).
-- ❌ SimplifyVwIdx: Calculate a simplified geometry using the Visvalingam-Whyatt algorithm, returning coordinate indices
+- ✅ SimplifyVwIdx: Calculate a simplified geometry using the Visvalingam-Whyatt algorithm, returning coordinate indices (`simplify_vw_idx()`).
 
 ## Query
 
