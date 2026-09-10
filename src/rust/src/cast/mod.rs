@@ -99,7 +99,7 @@ fn cast_chunks(
 /// @export
 /// @family cast
 #[extendr]
-fn cast_geometry(x: Robj, to: &str) -> extendr_api::Result<Robj> {
+fn ga_cast_geometry(x: Robj, to: &str) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let from_type = chunks[0].data_type();
     let to_type = target_type(to, &from_type)?;
@@ -175,7 +175,7 @@ fn promote_to_multi(
 /// @export
 /// @family cast
 #[extendr]
-fn downcast_geometry(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_downcast_geometry(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let inferred = infer_downcast_type(chunks.iter().map(|c| c.as_ref()))
         .map_err(|e| Error::Other(e.to_string()))?;
@@ -208,6 +208,6 @@ fn downcast_geometry(x: Robj) -> extendr_api::Result<Robj> {
 extendr_module! {
     mod cast;
     use explode;
-    fn cast_geometry;
-    fn downcast_geometry;
+    fn ga_cast_geometry;
+    fn ga_downcast_geometry;
 }

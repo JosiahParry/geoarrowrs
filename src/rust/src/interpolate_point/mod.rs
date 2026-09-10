@@ -38,7 +38,7 @@ fn check_pair_len(n_start: usize, n_end: usize) -> extendr_api::Result<()> {
 /// @family interpolate
 /// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #[extendr]
-fn point_at_distance_between(
+fn ga_point_at_distance_between(
     start: Robj,
     end: Robj,
     distance: Robj,
@@ -106,7 +106,7 @@ fn point_at_distance_between(
 /// @family interpolate
 /// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #[extendr]
-fn point_at_ratio_between(
+fn ga_point_at_ratio_between(
     start: Robj,
     end: Robj,
     ratio: Robj,
@@ -172,7 +172,7 @@ fn point_at_ratio_between(
 /// @family interpolate
 /// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #[extendr]
-fn points_along_line(
+fn ga_points_along_line(
     start: Robj,
     end: Robj,
     max_distance: Robj,
@@ -233,7 +233,7 @@ fn points_along_line(
 
 extendr_module! {
     mod interpolate_point;
-    fn point_at_distance_between;
-    fn point_at_ratio_between;
-    fn points_along_line;
+    fn ga_point_at_distance_between;
+    fn ga_point_at_ratio_between;
+    fn ga_points_along_line;
 }

@@ -26,7 +26,7 @@ test_that("extremes returns four point fields, one row per geometry", {
     matrix(c(0, 0, 4, 1, 2, 5, 0, 0), ncol = 2, byrow = TRUE)
   )))
 
-  res <- extremes(as_geoarrow(g))
+  res <- ga_extremes(as_geoarrow(g))
   schema <- nanoarrow::infer_nanoarrow_schema(res)
 
   expect_equal(names(schema$children), c("x_min", "x_max", "y_min", "y_max"))
@@ -40,7 +40,7 @@ test_that("extremes finds the correct vertices", {
     matrix(c(0, 0, 4, 1, 2, 5, 0, 0), ncol = 2, byrow = TRUE)
   )))
 
-  res <- extremes(as_geoarrow(g))
+  res <- ga_extremes(as_geoarrow(g))
 
   # These are extreme vertices, not bounding box corners: x_max is (4, 1),
   # carrying the y of the rightmost vertex rather than the bbox's y_max of 5.
@@ -58,7 +58,7 @@ test_that("extremes works on multipolygon arrays, not just mixed geometry", {
     list(matrix(c(5, 5, 7, 5, 7, 7, 5, 7, 5, 5), ncol = 2, byrow = TRUE))
   )))
 
-  res <- extremes(as_geoarrow(g))
+  res <- ga_extremes(as_geoarrow(g))
 
   expect_equal(length(pt(res, "x_min")$x), 1L)
   expect_equal(pt(res, "x_min")$x, 0)
@@ -81,7 +81,7 @@ test_that("extremes is vectorized over many geometries", {
     )))
   )
 
-  res <- extremes(as_geoarrow(g))
+  res <- ga_extremes(as_geoarrow(g))
 
   expect_equal(length(pt(res, "x_max")$x), 2L)
   expect_equal(pt(res, "x_max")$x, c(1, 12))
@@ -99,7 +99,7 @@ test_that("an empty geometry yields a null row", {
     sf::st_polygon()
   )
 
-  res <- extremes(as_geoarrow(g))
+  res <- ga_extremes(as_geoarrow(g))
   xs <- pt(res, "x_min")$x
 
   expect_equal(length(xs), 2L)

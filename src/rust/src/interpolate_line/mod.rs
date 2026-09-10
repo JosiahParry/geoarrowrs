@@ -89,7 +89,7 @@ impl From<WhereFrom> for Robj {
 /// @family interpolate
 /// @references [InterpolateLine](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html)
 #[extendr]
-fn interpolate_point(
+fn ga_interpolate_point(
     line: Robj,
     value: Robj,
     metric: &str,
@@ -163,5 +163,5 @@ fn interpolate_point(
 
 extendr_module! {
     mod interpolate_line;
-    fn interpolate_point;
+    fn ga_interpolate_point;
 }

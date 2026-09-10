@@ -22,7 +22,7 @@ geometries is queried repeatedly.
 
 Every query is a bounding box test, not an exact one. Two geometries whose
 boxes overlap need not themselves intersect, so treat results as candidates
-and confirm with \code{\link[=intersects]{intersects()}} when exactness matters. Narrowing to
+and confirm with \code{\link[=ga_intersects]{ga_intersects()}} when exactness matters. Narrowing to
 candidates first is the point: the exact test then runs on a handful of
 rows rather than all of them.
 
@@ -50,7 +50,7 @@ in increasing order.
 \subsection{details}{
 This is a bounding box test, not an exact one. Two geometries whose
 boxes overlap need not themselves intersect, so treat the result as a
-set of candidates and confirm with \code{\link[=intersects]{intersects()}} when exactness
+set of candidates and confirm with \code{\link[=ga_intersects]{ga_intersects()}} when exactness
 matters.
 
 }

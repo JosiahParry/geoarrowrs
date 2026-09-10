@@ -81,9 +81,9 @@ fn boolean_pairwise(x: Robj, y: Robj, op: Op) -> extendr_api::Result<Robj> {
 /// result. `y` is recycled against `x`.
 ///
 /// @details
-/// `boolean_intersection()` keeps the area in both, `boolean_union()` the area
-/// in either, `boolean_difference()` the area in `x` but not `y`, and
-/// `boolean_xor()` the area in exactly one of them.
+/// `ga_boolean_intersection()` keeps the area in both, `ga_boolean_union()` the area
+/// in either, `ga_boolean_difference()` the area in `x` but not `y`, and
+/// `ga_boolean_xor()` the area in exactly one of them.
 ///
 /// These are defined for polygons and multipolygons only. A row whose geometry
 /// is any other type, or is null, comes back null. The result is always a
@@ -106,10 +106,10 @@ fn boolean_pairwise(x: Robj, y: Robj, op: Op) -> extendr_api::Result<Robj> {
 /// y <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(1, 1, 3, 3)))
 ///
 /// sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
-///   boolean_intersection(x, y)
+///   ga_boolean_intersection(x, y)
 /// )))
 #[extendr]
-fn boolean_intersection(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_boolean_intersection(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     boolean_pairwise(x, y, Op::Intersection)
 }
 
@@ -117,7 +117,7 @@ fn boolean_intersection(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname boolean_ops
 /// @family boolean
 #[extendr]
-fn boolean_union(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_boolean_union(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     boolean_pairwise(x, y, Op::Union)
 }
 
@@ -125,7 +125,7 @@ fn boolean_union(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname boolean_ops
 /// @family boolean
 #[extendr]
-fn boolean_difference(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_boolean_difference(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     boolean_pairwise(x, y, Op::Difference)
 }
 
@@ -133,7 +133,7 @@ fn boolean_difference(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname boolean_ops
 /// @family boolean
 #[extendr]
-fn boolean_xor(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_boolean_xor(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     boolean_pairwise(x, y, Op::Xor)
 }
 
@@ -147,7 +147,7 @@ fn boolean_xor(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// is an aggregate over the whole array, so it always returns a length 1
 /// array, in the way `sum()` reduces a vector to a single value.
 ///
-/// It is far faster than folding [boolean_union()] across the array, since it
+/// It is far faster than folding [ga_boolean_union()] across the array, since it
 /// unions all the rings in one pass. Rows that are not polygonal, and null
 /// rows, are skipped.
 ///
@@ -162,9 +162,9 @@ fn boolean_xor(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// )))
 /// x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2), bx(1, 1, 3, 3)))
 ///
-/// sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(unary_union(x))))
+/// sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_unary_union(x))))
 #[extendr]
-fn unary_union(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_unary_union(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let metadata = chunks[0].data_type().metadata().clone();
 
@@ -187,9 +187,9 @@ fn unary_union(x: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod boolean;
-    fn boolean_intersection;
-    fn boolean_union;
-    fn boolean_difference;
-    fn boolean_xor;
-    fn unary_union;
+    fn ga_boolean_intersection;
+    fn ga_boolean_union;
+    fn ga_boolean_difference;
+    fn ga_boolean_xor;
+    fn ga_unary_union;
 }

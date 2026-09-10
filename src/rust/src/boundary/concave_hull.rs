@@ -32,7 +32,7 @@ use crate::{
 /// @family boundary
 /// @references [ConcaveHull](https://docs.rs/geo/latest/geo/algorithm/concave_hull/trait.ConcaveHull.html)
 #[extendr]
-fn concave_hull(
+fn ga_concave_hull(
     geometry: Robj,
     concavity: Robj,
     length_threshold: Robj,
@@ -169,5 +169,5 @@ fn concave_hull(
 
 extendr_module! {
     mod concave_hull;
-    fn concave_hull;
+    fn ga_concave_hull;
 }

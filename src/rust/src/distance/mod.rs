@@ -26,7 +26,7 @@ use crate::{as_geo_geometries, as_geometry_chunks, as_linestring_chunks, as_poin
 ///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 // TODO: use rayon with min chunk size of 4096
 #[extendr]
-fn dist_euclidean_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_dist_euclidean_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -57,7 +57,7 @@ fn dist_euclidean_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
 ///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
 ///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
-fn dist_haversine_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_dist_haversine_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -88,7 +88,7 @@ fn dist_haversine_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
 ///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
 ///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
-fn dist_geodesic_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_dist_geodesic_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -119,7 +119,7 @@ fn dist_geodesic_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 ///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
 ///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
-fn dist_rhumb_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_dist_rhumb_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -155,7 +155,7 @@ fn dist_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointA
 /// @family distance
 /// @references [HausdorffDistance](https://docs.rs/geo/latest/geo/algorithm/hausdorff_distance/trait.HausdorffDistance.html)
 #[extendr]
-fn dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_geometry_chunks(origin)?;
     let dest_chunks = as_geometry_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -188,7 +188,7 @@ fn dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj
 /// @family distance
 /// @references [VincentyDistance](https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html)
 #[extendr]
-fn dist_vincenty_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_dist_vincenty_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -227,7 +227,7 @@ fn dist_vincenty_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 /// @family distance
 /// @references [FrechetDistance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html)
 #[extendr]
-fn dist_frechet_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_dist_frechet_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_linestring_chunks(origin)?;
     let dest_chunks = as_linestring_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -253,11 +253,11 @@ fn dist_frechet_impl(bldr: &mut Float64Builder, origin: &LineStringArray, dest: 
 
 extendr_module! {
     mod distance;
-    fn dist_euclidean_pairwise;
-    fn dist_haversine_pairwise;
-    fn dist_geodesic_pairwise;
-    fn dist_rhumb_pairwise;
-    fn dist_hausdorff_pairwise;
-    fn dist_vincenty_pairwise;
-    fn dist_frechet_pairwise;
+    fn ga_dist_euclidean_pairwise;
+    fn ga_dist_haversine_pairwise;
+    fn ga_dist_geodesic_pairwise;
+    fn ga_dist_rhumb_pairwise;
+    fn ga_dist_hausdorff_pairwise;
+    fn ga_dist_vincenty_pairwise;
+    fn ga_dist_frechet_pairwise;
 }

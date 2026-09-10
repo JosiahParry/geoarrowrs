@@ -25,7 +25,7 @@ use crate::{
 /// @family misc
 /// @references [ChaikinSmoothing](https://docs.rs/geo/latest/geo/algorithm/chaikin_smoothing/trait.ChaikinSmoothing.html)
 #[extendr]
-fn chaikin_smoothing(geometry: Robj, n_iterations: i32) -> extendr_api::Result<Robj> {
+fn ga_chaikin_smoothing(geometry: Robj, n_iterations: i32) -> extendr_api::Result<Robj> {
     if n_iterations <= 0 {
         return Err(Error::Other(
             "`n_iterations` must be greater than 0".to_string(),
@@ -111,5 +111,5 @@ fn chaikin_smoothing(geometry: Robj, n_iterations: i32) -> extendr_api::Result<R
 
 extendr_module! {
     mod chaikin;
-    fn chaikin_smoothing;
+    fn ga_chaikin_smoothing;
 }

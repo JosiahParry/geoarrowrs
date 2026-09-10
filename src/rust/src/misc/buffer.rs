@@ -26,7 +26,7 @@ use crate::{as_geo_geometries, as_geometry_chunks, try_float_array};
 /// @family misc
 /// @references [Buffer](https://docs.rs/geo/latest/geo/algorithm/buffer/trait.Buffer.html)
 #[extendr]
-fn buffer(
+fn ga_buffer(
     geometry: Robj,
     distance: Robj,
     line_cap: &str,
@@ -96,5 +96,5 @@ fn buffer(
 
 extendr_module! {
     mod buffer;
-    fn buffer;
+    fn ga_buffer;
 }

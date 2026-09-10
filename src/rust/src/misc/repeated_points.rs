@@ -23,7 +23,7 @@ use crate::{
 /// @family misc
 /// @references [RemoveRepeatedPoints](https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html)
 #[extendr]
-fn remove_repeated_points(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_remove_repeated_points(geometry: Robj) -> extendr_api::Result<Robj> {
     if let Ok(chunks) = as_linestring_chunks(geometry.clone()) {
         let metadata = chunks[0].data_type().metadata().clone();
         let mut bldr = LineStringBuilder::new(LineStringType::new(Dimension::XY, metadata));
@@ -102,5 +102,5 @@ fn remove_repeated_points(geometry: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod repeated_points;
-    fn remove_repeated_points;
+    fn ga_remove_repeated_points;
 }

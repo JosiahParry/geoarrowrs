@@ -8,8 +8,8 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 
 /// Compute the signed and unsigned planar area of geometries
 ///
-/// `signed_area()` returns positive values for counter-clockwise winding and
-/// negative values for clockwise winding. `unsigned_area()` always returns a
+/// `ga_signed_area()` returns positive values for counter-clockwise winding and
+/// negative values for clockwise winding. `ga_unsigned_area()` always returns a
 /// non-negative value.
 ///
 /// @param x a GeoArrow geometry array
@@ -19,7 +19,7 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// @family area
 /// @references [Area](https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html)
 #[extendr]
-fn signed_area(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_signed_area(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -42,7 +42,7 @@ fn signed_area(x: Robj) -> extendr_api::Result<Robj> {
 /// @family area
 /// @references [Area](https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html)
 #[extendr]
-fn unsigned_area(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_unsigned_area(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -72,7 +72,7 @@ fn unsigned_area(x: Robj) -> extendr_api::Result<Robj> {
 /// @family area
 /// @references [ChamberlainDuquetteArea](https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html)
 #[extendr]
-fn signed_area_cd(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_signed_area_cd(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -95,7 +95,7 @@ fn signed_area_cd(x: Robj) -> extendr_api::Result<Robj> {
 /// @family area
 /// @references [ChamberlainDuquetteArea](https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html)
 #[extendr]
-fn unsigned_area_cd(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_unsigned_area_cd(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -126,7 +126,7 @@ fn unsigned_area_cd(x: Robj) -> extendr_api::Result<Robj> {
 /// @family area
 /// @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 #[extendr]
-fn signed_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_signed_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -149,7 +149,7 @@ fn signed_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
 /// @family area
 /// @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 #[extendr]
-fn unsigned_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_unsigned_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -172,7 +172,7 @@ fn unsigned_area_geodesic(x: Robj) -> extendr_api::Result<Robj> {
 /// @family area
 /// @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 #[extendr]
-fn perimeter_signed_geodesic(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_perimeter_signed_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -195,7 +195,7 @@ fn perimeter_signed_geodesic(x: Robj) -> extendr_api::Result<Robj> {
 /// @family area
 /// @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 #[extendr]
-fn perimeter_unsigned_geodesic(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_perimeter_unsigned_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -215,12 +215,12 @@ fn perimeter_unsigned_geodesic(x: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod area;
-    fn signed_area;
-    fn unsigned_area;
-    fn signed_area_cd;
-    fn unsigned_area_cd;
-    fn signed_area_geodesic;
-    fn unsigned_area_geodesic;
-    fn perimeter_signed_geodesic;
-    fn perimeter_unsigned_geodesic;
+    fn ga_signed_area;
+    fn ga_unsigned_area;
+    fn ga_signed_area_cd;
+    fn ga_unsigned_area_cd;
+    fn ga_signed_area_geodesic;
+    fn ga_unsigned_area_geodesic;
+    fn ga_perimeter_signed_geodesic;
+    fn ga_perimeter_unsigned_geodesic;
 }

@@ -34,7 +34,7 @@ use crate::{
 /// @family affine
 /// @references [Scale](https://docs.rs/geo/latest/geo/algorithm/scale/trait.Scale.html)
 #[extendr]
-fn scale_xy(geometry: Robj, x_factor: Robj, y_factor: Robj) -> extendr_api::Result<Robj> {
+fn ga_scale_xy(geometry: Robj, x_factor: Robj, y_factor: Robj) -> extendr_api::Result<Robj> {
     let xs = try_float_array(x_factor, "x_factor")?;
     let ys = try_float_array(y_factor, "y_factor")?;
 
@@ -144,5 +144,5 @@ fn scale_xy(geometry: Robj, x_factor: Robj, y_factor: Robj) -> extendr_api::Resu
 
 extendr_module! {
     mod scale;
-    fn scale_xy;
+    fn ga_scale_xy;
 }

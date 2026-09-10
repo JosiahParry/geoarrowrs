@@ -30,7 +30,7 @@ use crate::{
 /// @family simplify
 /// @references [Simplify](https://docs.rs/geo/latest/geo/algorithm/simplify/trait.Simplify.html)
 #[extendr]
-fn simplify(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
+fn ga_simplify(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
     let eps = try_float_array(epsilon, "epsilon")?;
 
     if let Ok(chunks) = as_linestring_chunks(geometry.clone()) {
@@ -141,7 +141,7 @@ fn simplify(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod simplify;
-    fn simplify;
+    fn ga_simplify;
     use vw;
     use vw_preserve;
     use idx;

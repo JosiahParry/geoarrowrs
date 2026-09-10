@@ -25,79 +25,79 @@ geoarrow_udf_geometry_types <- function() {
 #' @noRd
 geoarrow_udf_catalogue <- function() {
   unary <- c(
-    "signed_area",
-    "unsigned_area",
-    "signed_area_cd",
-    "unsigned_area_cd",
-    "signed_area_geodesic",
-    "unsigned_area_geodesic",
-    "perimeter_signed_geodesic",
-    "perimeter_unsigned_geodesic",
-    "length_euclidean",
-    "length_haversine",
-    "length_geodesic",
-    "length_rhumb",
-    "length_vincenty",
-    "centroid",
-    "interior_point",
-    "convex_hull",
-    "bounding_rect",
-    "minimum_rotated_rect",
-    "extremes",
-    "is_convex",
-    "is_empty",
-    "is_valid",
-    "validation_error",
-    "dimension",
-    "boundary_dimension",
-    "winding_order",
-    "is_ccw",
-    "is_cw",
-    "remove_repeated_points",
-    "to_degrees",
-    "to_radians",
-    "triangulate_earcut",
-    "downcast_geometry",
-    "coords",
-    "exterior_coords",
-    "n_coords",
-    "lines",
-    "self_intersections"
+    "ga_signed_area",
+    "ga_unsigned_area",
+    "ga_signed_area_cd",
+    "ga_unsigned_area_cd",
+    "ga_signed_area_geodesic",
+    "ga_unsigned_area_geodesic",
+    "ga_perimeter_signed_geodesic",
+    "ga_perimeter_unsigned_geodesic",
+    "ga_length_euclidean",
+    "ga_length_haversine",
+    "ga_length_geodesic",
+    "ga_length_rhumb",
+    "ga_length_vincenty",
+    "ga_centroid",
+    "ga_interior_point",
+    "ga_convex_hull",
+    "ga_bounding_rect",
+    "ga_minimum_rotated_rect",
+    "ga_extremes",
+    "ga_is_convex",
+    "ga_is_empty",
+    "ga_is_valid",
+    "ga_validation_error",
+    "ga_dimension",
+    "ga_boundary_dimension",
+    "ga_winding_order",
+    "ga_is_ccw",
+    "ga_is_cw",
+    "ga_remove_repeated_points",
+    "ga_to_degrees",
+    "ga_to_radians",
+    "ga_triangulate_earcut",
+    "ga_downcast_geometry",
+    "ga_coords",
+    "ga_exterior_coords",
+    "ga_n_coords",
+    "ga_lines",
+    "ga_self_intersections"
   )
 
   binary <- c(
-    "contains",
-    "contains_properly",
-    "within",
-    "covers",
-    "covered_by",
-    "intersects",
-    "disjoint",
-    "touches",
-    "crosses",
-    "overlaps",
-    "equals_topo",
-    "relate",
-    "coordinate_position",
-    "closest_point",
-    "closest_point_haversine",
-    "line_locate_point",
-    "line_intersection",
-    "boolean_intersection",
-    "boolean_union",
-    "boolean_difference",
-    "boolean_xor",
-    "bearing_euclidean",
-    "bearing_geodesic",
-    "bearing_haversine",
-    "bearing_rhumb",
-    "dist_euclidean_pairwise",
-    "dist_frechet_pairwise",
-    "dist_geodesic_pairwise",
-    "dist_hausdorff_pairwise",
-    "dist_haversine_pairwise",
-    "dist_rhumb_pairwise",
-    "dist_vincenty_pairwise"
+    "ga_contains",
+    "ga_contains_properly",
+    "ga_within",
+    "ga_covers",
+    "ga_covered_by",
+    "ga_intersects",
+    "ga_disjoint",
+    "ga_touches",
+    "ga_crosses",
+    "ga_overlaps",
+    "ga_equals_topo",
+    "ga_relate",
+    "ga_coordinate_position",
+    "ga_closest_point",
+    "ga_closest_point_haversine",
+    "ga_line_locate_point",
+    "ga_line_intersection",
+    "ga_boolean_intersection",
+    "ga_boolean_union",
+    "ga_boolean_difference",
+    "ga_boolean_xor",
+    "ga_bearing_euclidean",
+    "ga_bearing_geodesic",
+    "ga_bearing_haversine",
+    "ga_bearing_rhumb",
+    "ga_dist_euclidean_pairwise",
+    "ga_dist_frechet_pairwise",
+    "ga_dist_geodesic_pairwise",
+    "ga_dist_hausdorff_pairwise",
+    "ga_dist_haversine_pairwise",
+    "ga_dist_rhumb_pairwise",
+    "ga_dist_vincenty_pairwise"
   )
 
   catalogue <- c(
@@ -111,30 +111,30 @@ geoarrow_udf_catalogue <- function() {
   c(
     catalogue,
     list(
-      simplify = c(geometry = "geometry", epsilon = "array"),
-      simplify_vw = c(geometry = "geometry", epsilon = "array"),
-      simplify_vw_preserve = c(geometry = "geometry", epsilon = "array"),
-      simplify_idx = c(geometry = "geometry", epsilon = "array"),
-      simplify_vw_idx = c(geometry = "geometry", epsilon = "array"),
-      rotate_around_center = c(geometry = "geometry", degrees = "array"),
-      rotate_around_centroid = c(geometry = "geometry", degrees = "array"),
-      skew = c(geometry = "geometry", degrees = "array"),
-      translate = c(
+      ga_simplify = c(geometry = "geometry", epsilon = "array"),
+      ga_simplify_vw = c(geometry = "geometry", epsilon = "array"),
+      ga_simplify_vw_preserve = c(geometry = "geometry", epsilon = "array"),
+      ga_simplify_idx = c(geometry = "geometry", epsilon = "array"),
+      ga_simplify_vw_idx = c(geometry = "geometry", epsilon = "array"),
+      ga_rotate_around_center = c(geometry = "geometry", degrees = "array"),
+      ga_rotate_around_centroid = c(geometry = "geometry", degrees = "array"),
+      ga_skew = c(geometry = "geometry", degrees = "array"),
+      ga_translate = c(
         geometry = "geometry",
         x_offset = "array",
         y_offset = "array"
       ),
-      scale_xy = c(
+      ga_scale_xy = c(
         geometry = "geometry",
         x_factor = "array",
         y_factor = "array"
       ),
-      skew_xy = c(
+      ga_skew_xy = c(
         geometry = "geometry",
         degrees_x = "array",
         degrees_y = "array"
       ),
-      affine_transform = c(
+      ga_affine_transform = c(
         geometry = "geometry",
         a = "array",
         b = "array",
@@ -143,26 +143,26 @@ geoarrow_udf_catalogue <- function() {
         e = "array",
         yoff = "array"
       ),
-      concave_hull = c(
+      ga_concave_hull = c(
         geometry = "geometry",
         concavity = "array",
         length_threshold = "array"
       ),
-      dbscan = c(geometry = "geometry", eps = "array", min_points = "array"),
-      kmeans = c(geometry = "geometry", k = "array"),
-      outlier_scores = c(geometry = "geometry", k_neighbours = "array"),
-      chaikin_smoothing = c(geometry = "geometry", n_iterations = "int=1"),
-      line_segmentize = c(geometry = "geometry", segment_count = "int=2"),
-      line_segmentize_haversine = c(
+      ga_dbscan = c(geometry = "geometry", eps = "array", min_points = "array"),
+      ga_kmeans = c(geometry = "geometry", k = "array"),
+      ga_outlier_scores = c(geometry = "geometry", k_neighbours = "array"),
+      ga_chaikin_smoothing = c(geometry = "geometry", n_iterations = "int=1"),
+      ga_line_segmentize = c(geometry = "geometry", segment_count = "int=2"),
+      ga_line_segmentize_haversine = c(
         geometry = "geometry",
         segment_count = "int=2"
       ),
-      densify = c(
+      ga_densify = c(
         geometry = "geometry",
         max_segment_length = "array",
         metric = "string=euclidean"
       ),
-      buffer = c(
+      ga_buffer = c(
         geometry = "geometry",
         distance = "array",
         line_cap = "string=round",
@@ -170,52 +170,52 @@ geoarrow_udf_catalogue <- function() {
         miter_limit = "num=2",
         round_segments = "num=8"
       ),
-      triangulate_delaunay = c(
+      ga_triangulate_delaunay = c(
         x = "geometry",
         constrained = "bool=TRUE",
         snap_radius = "array"
       ),
-      orient = c(geometry = "geometry", direction = "string=default"),
-      interpolate_point = c(
+      ga_orient = c(geometry = "geometry", direction = "string=default"),
+      ga_interpolate_point = c(
         line = "geometry",
         value = "array",
         metric = "string=euclidean",
         measure = "string=ratio",
         from = "string=start"
       ),
-      dest_euclidean = c(
+      ga_dest_euclidean = c(
         origin = "geometry",
         bearing = "array",
         distance = "array"
       ),
-      dest_haversine = c(
+      ga_dest_haversine = c(
         origin = "geometry",
         bearing = "array",
         distance = "array"
       ),
-      dest_geodesic = c(
+      ga_dest_geodesic = c(
         origin = "geometry",
         bearing = "array",
         distance = "array"
       ),
-      dest_rhumb = c(
+      ga_dest_rhumb = c(
         origin = "geometry",
         bearing = "array",
         distance = "array"
       ),
-      point_at_distance_between = c(
+      ga_point_at_distance_between = c(
         start = "geometry",
         end = "geometry",
         distance = "array",
         metric = "string=euclidean"
       ),
-      point_at_ratio_between = c(
+      ga_point_at_ratio_between = c(
         start = "geometry",
         end = "geometry",
         ratio = "array",
         metric = "string=euclidean"
       ),
-      points_along_line = c(
+      ga_points_along_line = c(
         start = "geometry",
         end = "geometry",
         max_distance = "array",
@@ -436,16 +436,16 @@ geoarrow_udf_kernels <- function(fun, spec, schemas) {
 #' Registration is per CRS, not per table. Every GeoArrow geometry type gets
 #' its own kernel, so one call covers points, linestrings, polygons, and their
 #' multi variants at once. A function that cannot handle a type, such as
-#' [length_euclidean()] against polygons, simply has no kernel for it.
+#' [ga_length_euclidean()] against polygons, simply has no kernel for it.
 #'
 #' Arguments that are not geometry are registered too. Numeric arguments such
-#' as the `epsilon` of [simplify()] take a `double` column or a literal and are
-#' recycled row by row. Option arguments such as the `metric` of [densify()]
-#' take a literal string. Since Arrow has no optional arguments, every argument
-#' of a registered function must be given.
+#' as the `epsilon` of [ga_simplify()] take a `double` column or a literal and
+#' are recycled row by row. Option arguments such as the `metric` of
+#' [ga_densify()] take a literal string. Since Arrow has no optional arguments,
+#' every argument of a registered function must be given.
 #'
-#' [unary_union()], [explode()], and [flatten()] are not registered, because
-#' they change the length of the array and a scalar kernel may not.
+#' [ga_unary_union()], [ga_explode()], and [ga_flatten()] are not registered,
+#' because they change the length of the array and a scalar kernel may not.
 #'
 #' A GeoArrow type carries its CRS, and Arrow compares that when it looks for a
 #' kernel, so `crs` has to match the data. Pass every CRS you need in one call:
@@ -473,7 +473,7 @@ geoarrow_udf_kernels <- function(fun, spec, schemas) {
 #' register_geoarrow_udfs(crs = tbl)
 #'
 #' tbl |>
-#'   mutate(area = unsigned_area(geometry)) |>
+#'   mutate(area = ga_unsigned_area(geometry)) |>
 #'   select(NAME, area) |>
 #'   head(3) |>
 #'   collect()

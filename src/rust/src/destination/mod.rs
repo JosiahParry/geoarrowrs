@@ -26,7 +26,7 @@ use geoarrow::{
 /// @family destination
 /// @references [Destination](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html)
 #[extendr]
-fn dest_rhumb(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
+fn ga_dest_rhumb(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
     let n = origin.iter().map(|c| c.len()).sum();
     let bearing = try_float_array(bearing, "bearing")?;
@@ -49,7 +49,7 @@ fn dest_rhumb(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Resul
 /// @export
 /// @rdname destination
 #[extendr]
-fn dest_euclidean(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
+fn ga_dest_euclidean(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
     let n = origin.iter().map(|c| c.len()).sum();
     let bearing = try_float_array(bearing, "bearing")?;
@@ -72,7 +72,7 @@ fn dest_euclidean(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::R
 /// @export
 /// @rdname destination
 #[extendr]
-fn dest_haversine(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
+fn ga_dest_haversine(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
     let n = origin.iter().map(|c| c.len()).sum();
     let bearing = try_float_array(bearing, "bearing")?;
@@ -95,7 +95,7 @@ fn dest_haversine(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::R
 /// @export
 /// @rdname destination
 #[extendr]
-fn dest_geodesic(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
+fn ga_dest_geodesic(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;
     let n = origin.iter().map(|c| c.len()).sum();
     let bearing = try_float_array(bearing, "bearing")?;
@@ -205,8 +205,8 @@ fn dest_geodesic_impl(
 
 extendr_module! {
     mod destination;
-    fn dest_rhumb;
-    fn dest_euclidean;
-    fn dest_haversine;
-    fn dest_geodesic;
+    fn ga_dest_rhumb;
+    fn ga_dest_euclidean;
+    fn ga_dest_haversine;
+    fn ga_dest_geodesic;
 }

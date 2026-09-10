@@ -50,14 +50,14 @@ fn finish_list(
 /// The element type is decided by the array's declared type, not by its
 /// contents, so an array of multipolygons that all happen to hold one part
 /// still explodes to polygons. A mixed `geometry` array has no single singular
-/// type and errors; narrow it with [downcast_geometry()] first.
+/// type and errors; narrow it with [ga_downcast_geometry()] first.
 ///
 /// A singular geometry yields an element of length one, so the operation is
 /// well defined for any input. A null geometry yields a null element, which is
 /// distinct from an empty one.
 ///
 /// Because the length is preserved, the result lines up with the row it came
-/// from and can sit alongside the other columns of a table. Use [flatten()] to
+/// from and can sit alongside the other columns of a table. Use [ga_flatten()] to
 /// collapse it into a single array with one row per part.
 ///
 /// @param x a GeoArrow geometry array
@@ -65,7 +65,7 @@ fn finish_list(
 /// @export
 /// @family cast
 #[extendr]
-fn explode(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_explode(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n: usize = chunks.iter().map(|c| c.len()).sum();
     let metadata = chunks[0].data_type().metadata().clone();
@@ -189,19 +189,19 @@ fn explode(x: Robj) -> extendr_api::Result<Robj> {
 
 /// Collapse a list of geometries into a single array
 ///
-/// The inverse of [explode()]. Concatenates every element's parts into one
+/// The inverse of [ga_explode()]. Concatenates every element's parts into one
 /// array, so a list of `n` elements holding `m` parts in total becomes an
 /// array of length `m`.
 ///
 /// Null elements contribute nothing, so the result is shorter than the input
 /// whenever an element holds more or fewer than one geometry.
 ///
-/// @param x a list array of GeoArrow arrays, as returned by [explode()]
+/// @param x a list array of GeoArrow arrays, as returned by [ga_explode()]
 /// @returns a GeoArrow array holding every part, flattened
 /// @export
 /// @family cast
 #[extendr]
-fn flatten(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_flatten(x: Robj) -> extendr_api::Result<Robj> {
     let data = arrow::array::ArrayData::from_arrow_robj(&x)
         .map_err(|e| Error::Other(format!("Expected a list array: {e}")))?;
     let array = arrow::array::make_array(data);
@@ -221,6 +221,6 @@ fn flatten(x: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod explode;
-    fn explode;
-    fn flatten;
+    fn ga_explode;
+    fn ga_flatten;
 }

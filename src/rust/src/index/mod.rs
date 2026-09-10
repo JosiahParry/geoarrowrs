@@ -48,7 +48,7 @@ fn to_r_indices(positions: &[u32], found: Vec<u32>) -> anyhow::Result<Robj> {
 ///
 /// Every query is a bounding box test, not an exact one. Two geometries whose
 /// boxes overlap need not themselves intersect, so treat results as candidates
-/// and confirm with [intersects()] when exactness matters. Narrowing to
+/// and confirm with [ga_intersects()] when exactness matters. Narrowing to
 /// candidates first is the point: the exact test then runs on a handful of
 /// rows rather than all of them.
 ///
@@ -125,7 +125,7 @@ impl RTree {
     /// @details
     /// This is a bounding box test, not an exact one. Two geometries whose
     /// boxes overlap need not themselves intersect, so treat the result as a
-    /// set of candidates and confirm with [intersects()] when exactness
+    /// set of candidates and confirm with [ga_intersects()] when exactness
     /// matters.
     ///
     /// @param xmin,ymin,xmax,ymax the query box

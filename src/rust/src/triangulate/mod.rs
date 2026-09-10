@@ -46,7 +46,7 @@ fn constrained_of(
 /// becomes a null element.
 ///
 /// Earcut is fast and respects interior rings, but the triangles it produces
-/// are not Delaunay. Use [triangulate_delaunay()] when triangle quality
+/// are not Delaunay. Use [ga_triangulate_delaunay()] when triangle quality
 /// matters.
 ///
 /// @param x a GeoArrow polygon or multipolygon array
@@ -55,7 +55,7 @@ fn constrained_of(
 /// @family triangulate
 /// @references [TriangulateEarcut](https://docs.rs/geo/latest/geo/algorithm/triangulate_earcut/trait.TriangulateEarcut.html)
 #[extendr]
-fn triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let metadata = chunks[0].data_type().metadata().clone();
     let mut bldr = MultiPolygonBuilder::new(MultiPolygonType::new(Dimension::XY, metadata));
@@ -108,7 +108,7 @@ fn triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
 /// @family triangulate
 /// @references [TriangulateDelaunay](https://docs.rs/geo/latest/geo/algorithm/triangulate_delaunay/trait.TriangulateDelaunay.html)
 #[extendr]
-fn triangulate_delaunay(
+fn ga_triangulate_delaunay(
     x: Robj,
     #[extendr(default = "TRUE")] constrained: bool,
     #[extendr(default = "1e-4")] snap_radius: Robj,
@@ -153,6 +153,6 @@ fn triangulate_delaunay(
 
 extendr_module! {
     mod triangulate;
-    fn triangulate_earcut;
-    fn triangulate_delaunay;
+    fn ga_triangulate_earcut;
+    fn ga_triangulate_delaunay;
 }

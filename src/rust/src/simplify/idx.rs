@@ -30,8 +30,8 @@ fn retained(g: &Geometry<f64>, epsilon: f64, vw: bool) -> Option<Vec<usize>> {
 /// or a sensor reading per vertex. Simplifying the geometry discards that
 /// alignment; the indices let you subset the other columns the same way.
 ///
-/// `simplify_idx()` uses Ramer-Douglas-Peucker and `simplify_vw_idx()` uses
-/// Visvalingam-Whyatt, matching [simplify()] and [simplify_vw()]. Indices are
+/// `ga_simplify_idx()` uses Ramer-Douglas-Peucker and `ga_simplify_vw_idx()` uses
+/// Visvalingam-Whyatt, matching [ga_simplify()] and [ga_simplify_vw()]. Indices are
 /// 1 based and always include the first and last coordinate.
 ///
 /// Only linestrings can be simplified this way. Any other geometry type, or a
@@ -42,25 +42,25 @@ fn retained(g: &Geometry<f64>, epsilon: f64, vw: bool) -> Option<Vec<usize>> {
 ///   `geometry`
 /// @returns a list array of integer positions, one list per input geometry
 /// @export
-/// @rdname simplify_idx
+/// @rdname ga_simplify_idx
 /// @family simplify
 /// @references [SimplifyIdx](https://docs.rs/geo/latest/geo/algorithm/simplify/trait.SimplifyIdx.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// line <- sf::st_linestring(cbind(c(0, 1, 2, 3, 4), c(0, 0.1, 0, 0.1, 0)))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(line))
 ///
-/// nanoarrow::convert_array(simplify_idx(g, 0.5))
+/// nanoarrow::convert_array(ga_simplify_idx(g, 0.5))
 #[extendr]
-fn simplify_idx(geometry: Robj, epsilon: Robj) -> anyhow::Result<Robj> {
+fn ga_simplify_idx(geometry: Robj, epsilon: Robj) -> anyhow::Result<Robj> {
     idx_impl(geometry, epsilon, false)
 }
 
 /// @export
-/// @rdname simplify_idx
+/// @rdname ga_simplify_idx
 /// @family simplify
 /// @references [SimplifyVwIdx](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwIdx.html)
 #[extendr]
-fn simplify_vw_idx(geometry: Robj, epsilon: Robj) -> anyhow::Result<Robj> {
+fn ga_simplify_vw_idx(geometry: Robj, epsilon: Robj) -> anyhow::Result<Robj> {
     idx_impl(geometry, epsilon, true)
 }
 
@@ -100,6 +100,6 @@ fn idx_impl(geometry: Robj, epsilon: Robj, vw: bool) -> anyhow::Result<Robj> {
 
 extendr_module! {
     mod idx;
-    fn simplify_idx;
-    fn simplify_vw_idx;
+    fn ga_simplify_idx;
+    fn ga_simplify_vw_idx;
 }

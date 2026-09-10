@@ -43,7 +43,7 @@ fn extremes_of(array: &dyn GeoArrowArray) -> GeoArrowResult<Vec<Option<Outcome<f
 ///
 /// Note these are the extreme *coordinates*, not the corners of the bounding
 /// box: the `x_min` point carries the y value of whichever vertex was
-/// leftmost. Use [bounding_rect()] for the envelope.
+/// leftmost. Use [ga_bounding_rect()] for the envelope.
 ///
 /// @param x a GeoArrow geometry array
 /// @returns an Arrow struct array of four point fields, with one row per geometry
@@ -51,7 +51,7 @@ fn extremes_of(array: &dyn GeoArrowArray) -> GeoArrowResult<Vec<Option<Outcome<f
 /// @family boundary
 /// @references [Extremes](https://docs.rs/geo/latest/geo/algorithm/extremes/trait.Extremes.html)
 #[extendr]
-fn extremes(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_extremes(x: Robj) -> extendr_api::Result<Robj> {
     let err = |e: GeoArrowError| Error::Other(e.to_string());
     let chunks = as_geometry_chunks(x)?;
     let metadata = chunks[0].data_type().metadata().clone();
@@ -104,5 +104,5 @@ fn extremes(x: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod extremes;
-    fn extremes;
+    fn ga_extremes;
 }

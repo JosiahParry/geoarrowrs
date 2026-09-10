@@ -22,11 +22,11 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 /// @param epsilon the simplification tolerance; length 1 or the same length as `geometry`
 /// @returns a GeoArrow array of the same geometry type as the input
 /// @export
-/// @rdname simplify_vw
+/// @rdname ga_simplify_vw
 /// @family simplify
 /// @references [SimplifyVw](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVw.html)
 #[extendr]
-fn simplify_vw(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
+fn ga_simplify_vw(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
     let eps = try_float_array(epsilon, "epsilon")?;
 
     if let Ok(chunks) = as_linestring_chunks(geometry.clone()) {
@@ -137,5 +137,5 @@ fn simplify_vw(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod vw;
-    fn simplify_vw;
+    fn ga_simplify_vw;
 }

@@ -92,7 +92,7 @@ fn closest_impl(geometry: Robj, point: Robj, haversine: bool) -> extendr_api::Re
 /// Find the point on a geometry closest to another point
 ///
 /// Returns the position on each geometry nearest the corresponding point,
-/// using planar distance. `closest_point_haversine()` measures on a sphere
+/// using planar distance. `ga_closest_point_haversine()` measures on a sphere
 /// instead, treating coordinates as longitude and latitude in degrees.
 ///
 /// @details
@@ -105,7 +105,7 @@ fn closest_impl(geometry: Robj, point: Robj, haversine: bool) -> extendr_api::Re
 /// @param point a GeoArrow point array; length 1 or the same length as `geometry`
 /// @returns a GeoArrow point array of the same length as `geometry`
 /// @export
-/// @rdname closest_point
+/// @rdname ga_closest_point
 /// @family query
 /// @references [ClosestPoint](https://docs.rs/geo/latest/geo/algorithm/closest_point/trait.ClosestPoint.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
@@ -114,24 +114,24 @@ fn closest_impl(geometry: Robj, point: Robj, haversine: bool) -> extendr_api::Re
 /// ))
 /// pt <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(4, 5))))
 ///
-/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(closest_point(line, pt)))
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_closest_point(line, pt)))
 #[extendr]
-fn closest_point(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
+fn ga_closest_point(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
     closest_impl(geometry, point, false)
 }
 
 /// @export
-/// @rdname closest_point
+/// @rdname ga_closest_point
 /// @family query
 /// @references [HaversineClosestPoint](https://docs.rs/geo/latest/geo/algorithm/haversine_closest_point/trait.HaversineClosestPoint.html)
 #[extendr]
-fn closest_point_haversine(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
+fn ga_closest_point_haversine(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
     closest_impl(geometry, point, true)
 }
 
 /// Compute a representative point inside a geometry
 ///
-/// Returns a point guaranteed to lie on the geometry, unlike [centroid()],
+/// Returns a point guaranteed to lie on the geometry, unlike [ga_centroid()],
 /// which can fall outside a concave shape.
 ///
 /// @details
@@ -149,9 +149,9 @@ fn closest_point_haversine(geometry: Robj, point: Robj) -> extendr_api::Result<R
 ///   matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
 /// ))))
 ///
-/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(interior_point(g)))
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_interior_point(g)))
 #[extendr]
-fn interior_point(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_interior_point(geometry: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let metadata = chunks[0].data_type().metadata().clone();
     let mut bldr = PointBuilder::new(PointType::new(Dimension::XY, metadata));
@@ -189,9 +189,9 @@ fn interior_point(geometry: Robj) -> extendr_api::Result<Robj> {
 /// ))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
 ///
-/// as.vector(nanoarrow::convert_array(is_convex(g)))
+/// as.vector(nanoarrow::convert_array(ga_is_convex(g)))
 #[extendr]
-fn is_convex(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_is_convex(geometry: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = BooleanBuilder::with_capacity(n);
@@ -231,9 +231,9 @@ fn is_convex(geometry: Robj) -> extendr_api::Result<Robj> {
 /// ))
 /// pt <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2.5, 0))))
 ///
-/// as.vector(nanoarrow::convert_array(line_locate_point(line, pt)))
+/// as.vector(nanoarrow::convert_array(ga_line_locate_point(line, pt)))
 #[extendr]
-fn line_locate_point(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
+fn ga_line_locate_point(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let n: usize = chunks.iter().map(|c| c.len()).sum();
     let points = as_geo_points(point, n, "point")?;
@@ -260,9 +260,9 @@ fn line_locate_point(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod query;
-    fn closest_point;
-    fn closest_point_haversine;
-    fn interior_point;
-    fn is_convex;
-    fn line_locate_point;
+    fn ga_closest_point;
+    fn ga_closest_point_haversine;
+    fn ga_interior_point;
+    fn ga_is_convex;
+    fn ga_line_locate_point;
 }

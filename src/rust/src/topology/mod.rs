@@ -73,18 +73,18 @@ fn relate_predicate(
 /// named DE-9IM relationship holds. `y` is recycled against `x`.
 ///
 /// @details
-/// `contains()` is `TRUE` when no point of `y` lies outside `x` and at least
-/// one point of `y` lies in the interior of `x`. `within()` is the same test
-/// with the arguments swapped. `covers()` and `covered_by()` are the weaker
+/// `ga_contains()` is `TRUE` when no point of `y` lies outside `x` and at least
+/// one point of `y` lies in the interior of `x`. `ga_within()` is the same test
+/// with the arguments swapped. `ga_covers()` and `ga_covered_by()` are the weaker
 /// forms that allow every shared point to lie on the boundary.
-/// `contains_properly()` is the stricter form requiring `y` to fall entirely
+/// `ga_contains_properly()` is the stricter form requiring `y` to fall entirely
 /// within the interior.
 ///
-/// `intersects()` and `disjoint()` are negations of one another.
-/// `touches()` is `TRUE` when the geometries share a boundary point but no
-/// interior point, `crosses()` when their interiors meet in a lower dimension
-/// than at least one of them, and `overlaps()` when they meet in the same
-/// dimension as both. `equals_topo()` compares point sets rather than
+/// `ga_intersects()` and `ga_disjoint()` are negations of one another.
+/// `ga_touches()` is `TRUE` when the geometries share a boundary point but no
+/// interior point, `ga_crosses()` when their interiors meet in a lower dimension
+/// than at least one of them, and `ga_overlaps()` when they meet in the same
+/// dimension as both. `ga_equals_topo()` compares point sets rather than
 /// coordinate order, so two geometries wound differently are still equal.
 ///
 /// A null geometry on either side gives `NA`.
@@ -103,10 +103,10 @@ fn relate_predicate(
 /// x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
 /// y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
 ///
-/// as.vector(nanoarrow::convert_array(contains(x, y)))
-/// as.vector(nanoarrow::convert_array(intersects(x, y)))
+/// as.vector(nanoarrow::convert_array(ga_contains(x, y)))
+/// as.vector(nanoarrow::convert_array(ga_intersects(x, y)))
 #[extendr]
-fn contains(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_contains(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_contains)
 }
 
@@ -114,7 +114,7 @@ fn contains(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn contains_properly(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_contains_properly(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_contains_properly)
 }
 
@@ -122,7 +122,7 @@ fn contains_properly(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn within(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_within(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_within)
 }
 
@@ -130,7 +130,7 @@ fn within(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn covers(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_covers(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_covers)
 }
 
@@ -138,7 +138,7 @@ fn covers(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn covered_by(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_covered_by(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_coveredby)
 }
 
@@ -146,7 +146,7 @@ fn covered_by(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn intersects(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_intersects(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_intersects)
 }
 
@@ -154,7 +154,7 @@ fn intersects(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn disjoint(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_disjoint(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_disjoint)
 }
 
@@ -162,7 +162,7 @@ fn disjoint(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn touches(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_touches(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_touches)
 }
 
@@ -170,7 +170,7 @@ fn touches(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn crosses(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_crosses(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_crosses)
 }
 
@@ -178,7 +178,7 @@ fn crosses(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn overlaps(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_overlaps(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_overlaps)
 }
 
@@ -186,7 +186,7 @@ fn overlaps(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @rdname topology
 /// @family topology
 #[extendr]
-fn equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_equal_topo)
 }
 
@@ -201,7 +201,7 @@ fn equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// dimension of that intersection: `F` for empty, `0` for a point, `1` for a
 /// curve, and `2` for a surface. A null geometry on either side gives `NA`.
 ///
-/// @inheritParams contains
+/// @inheritParams ga_contains
 /// @returns a string array of the same length as `x`
 /// @export
 /// @family topology
@@ -213,9 +213,9 @@ fn equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
 /// y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
 ///
-/// as.vector(nanoarrow::convert_array(relate(x, y)))
+/// as.vector(nanoarrow::convert_array(ga_relate(x, y)))
 #[extendr]
-fn relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
+fn ga_relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n: usize = chunks.iter().map(|c| c.len()).sum();
     let others = as_recycled_geometries(y, n, "y")?;
@@ -242,13 +242,13 @@ fn relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 ///
 /// @details
 /// An empty geometry has no dimension and gives `NA`, which is distinct from a
-/// point's 0. `boundary_dimension()` gives the dimension of the geometry's
+/// point's 0. `ga_boundary_dimension()` gives the dimension of the geometry's
 /// boundary instead, so a polygon is 1 and a point is `NA`.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns an integer array of the same length as `geometry`
 /// @export
-/// @rdname dimension
+/// @rdname ga_dimension
 /// @family topology
 /// @references [HasDimensions](https://docs.rs/geo/latest/geo/algorithm/dimensions/trait.HasDimensions.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
@@ -257,17 +257,17 @@ fn relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 ///   sf::st_linestring(cbind(c(0, 1), c(0, 1)))
 /// ))
 ///
-/// as.vector(nanoarrow::convert_array(dimension(g)))
+/// as.vector(nanoarrow::convert_array(ga_dimension(g)))
 #[extendr]
-fn dimension(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_dimension(geometry: Robj) -> extendr_api::Result<Robj> {
     dimension_impl(geometry, false)
 }
 
 /// @export
-/// @rdname dimension
+/// @rdname ga_dimension
 /// @family topology
 #[extendr]
-fn boundary_dimension(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_boundary_dimension(geometry: Robj) -> extendr_api::Result<Robj> {
     dimension_impl(geometry, true)
 }
 
@@ -316,9 +316,9 @@ fn dimension_impl(geometry: Robj, boundary: bool) -> extendr_api::Result<Robj> {
 ///   sf::st_point()
 /// ))
 ///
-/// as.vector(nanoarrow::convert_array(is_empty(g)))
+/// as.vector(nanoarrow::convert_array(ga_is_empty(g)))
 #[extendr]
-fn is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = BooleanBuilder::with_capacity(n);
@@ -359,9 +359,9 @@ fn is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
 ///   sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
 /// ))
 ///
-/// as.vector(nanoarrow::convert_array(coordinate_position(g, p)))
+/// as.vector(nanoarrow::convert_array(ga_coordinate_position(g, p)))
 #[extendr]
-fn coordinate_position(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
+fn ga_coordinate_position(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let n: usize = chunks.iter().map(|c| c.len()).sum();
     let points = as_recycled_geometries(point, n, "point")?;
@@ -392,20 +392,20 @@ fn coordinate_position(geometry: Robj, point: Robj) -> extendr_api::Result<Robj>
 
 extendr_module! {
     mod topology;
-    fn contains;
-    fn contains_properly;
-    fn within;
-    fn covers;
-    fn covered_by;
-    fn intersects;
-    fn disjoint;
-    fn touches;
-    fn crosses;
-    fn overlaps;
-    fn equals_topo;
-    fn relate;
-    fn dimension;
-    fn boundary_dimension;
-    fn is_empty;
-    fn coordinate_position;
+    fn ga_contains;
+    fn ga_contains_properly;
+    fn ga_within;
+    fn ga_covers;
+    fn ga_covered_by;
+    fn ga_intersects;
+    fn ga_disjoint;
+    fn ga_touches;
+    fn ga_crosses;
+    fn ga_overlaps;
+    fn ga_equals_topo;
+    fn ga_relate;
+    fn ga_dimension;
+    fn ga_boundary_dimension;
+    fn ga_is_empty;
+    fn ga_coordinate_position;
 }

@@ -67,7 +67,7 @@ test_that("search is a superset of the exact predicate", {
 
   candidates <- conv(idx$search(-79, 35, -78, 36))
   query <- ga(sf::st_sfc(box(-79, 35, -78, 36)))
-  exact <- which(conv(intersects(g, query)))
+  exact <- which(conv(ga_intersects(g, query)))
 
   expect_true(all(exact %in% candidates))
   expect_lte(length(candidates), 100L)

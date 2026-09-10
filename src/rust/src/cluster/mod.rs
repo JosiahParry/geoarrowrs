@@ -50,9 +50,9 @@ fn as_points(g: &Geometry<f64>) -> Option<MultiPoint<f64>> {
 /// ))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
 ///
-/// nanoarrow::convert_array(dbscan(g, eps = 1, min_points = 2))
+/// nanoarrow::convert_array(ga_dbscan(g, eps = 1, min_points = 2))
 #[extendr]
-fn dbscan(geometry: Robj, eps: Robj, min_points: Robj) -> anyhow::Result<Robj> {
+fn ga_dbscan(geometry: Robj, eps: Robj, min_points: Robj) -> anyhow::Result<Robj> {
     let epsilons = try_float_array(eps, "eps").map_err(|e| anyhow::anyhow!("{e}"))?;
     let minima = try_float_array(min_points, "min_points").map_err(|e| anyhow::anyhow!("{e}"))?;
 
@@ -99,7 +99,7 @@ fn dbscan(geometry: Robj, eps: Robj, min_points: Robj) -> anyhow::Result<Robj> {
 ///
 /// @details
 /// k-means always produces exactly `k` clusters and no noise, so every point
-/// gets a label. It favours round, similarly sized clusters; use [dbscan()]
+/// gets a label. It favours round, similarly sized clusters; use [ga_dbscan()]
 /// when the shapes are irregular or the count is unknown.
 ///
 /// The algorithm starts from a random seed, so results vary between runs
@@ -121,9 +121,9 @@ fn dbscan(geometry: Robj, eps: Robj, min_points: Robj) -> anyhow::Result<Robj> {
 /// ))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
 ///
-/// nanoarrow::convert_array(kmeans(g, k = 2, seed = 1))
+/// nanoarrow::convert_array(ga_kmeans(g, k = 2, seed = 1))
 #[extendr]
-fn kmeans(
+fn ga_kmeans(
     geometry: Robj,
     k: Robj,
     #[extendr(default = "NULL")] seed: Nullable<f64>,
@@ -198,9 +198,9 @@ fn kmeans(
 /// ))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
 ///
-/// nanoarrow::convert_array(outlier_scores(g, k_neighbours = 2))
+/// nanoarrow::convert_array(ga_outlier_scores(g, k_neighbours = 2))
 #[extendr]
-fn outlier_scores(geometry: Robj, k_neighbours: Robj) -> anyhow::Result<Robj> {
+fn ga_outlier_scores(geometry: Robj, k_neighbours: Robj) -> anyhow::Result<Robj> {
     let ks = try_float_array(k_neighbours, "k_neighbours").map_err(|e| anyhow::anyhow!("{e}"))?;
     let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
     let n: usize = chunks.iter().map(|c| c.len()).sum();
@@ -232,7 +232,7 @@ fn outlier_scores(geometry: Robj, k_neighbours: Robj) -> anyhow::Result<Robj> {
 
 extendr_module! {
     mod cluster;
-    fn dbscan;
-    fn kmeans;
-    fn outlier_scores;
+    fn ga_dbscan;
+    fn ga_kmeans;
+    fn ga_outlier_scores;
 }

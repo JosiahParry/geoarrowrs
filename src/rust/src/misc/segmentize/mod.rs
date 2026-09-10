@@ -15,18 +15,18 @@ use crate::as_linestring_chunks;
 ///
 /// Divides each linestring into `segment_count` segments of equal length,
 /// returning a multilinestring. Returns `NA` if segmentation fails.
-/// `line_segmentize_haversine()` uses the Haversine formula for geographic
-/// coordinates; `line_segmentize()` uses planar Euclidean distance.
+/// `ga_line_segmentize_haversine()` uses the Haversine formula for geographic
+/// coordinates; `ga_line_segmentize()` uses planar Euclidean distance.
 ///
 /// @param geometry a GeoArrow linestring array
 /// @param segment_count the number of segments to split each linestring into; must be greater than 0
 /// @returns a GeoArrow multilinestring array
 /// @export
-/// @rdname line_segmentize
+/// @rdname ga_line_segmentize
 /// @family misc
 /// @references [LineStringSegmentize](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentize.html)
 #[extendr]
-fn line_segmentize(geometry: Robj, segment_count: i32) -> extendr_api::Result<Robj> {
+fn ga_line_segmentize(geometry: Robj, segment_count: i32) -> extendr_api::Result<Robj> {
     if segment_count <= 0 {
         return Err(Error::Other(
             "`segment_count` must be greater than 0".to_string(),
@@ -59,11 +59,11 @@ fn line_segmentize(geometry: Robj, segment_count: i32) -> extendr_api::Result<Ro
 }
 
 /// @export
-/// @rdname line_segmentize
+/// @rdname ga_line_segmentize
 /// @family misc
 /// @references [LineStringSegmentizeHaversine](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentizeHaversine.html)
 #[extendr]
-fn line_segmentize_haversine(geometry: Robj, segment_count: i32) -> extendr_api::Result<Robj> {
+fn ga_line_segmentize_haversine(geometry: Robj, segment_count: i32) -> extendr_api::Result<Robj> {
     if segment_count <= 0 {
         return Err(Error::Other(
             "`segment_count` must be greater than 0".to_string(),
@@ -97,6 +97,6 @@ fn line_segmentize_haversine(geometry: Robj, segment_count: i32) -> extendr_api:
 
 extendr_module! {
     mod segmentize;
-    fn line_segmentize;
-    fn line_segmentize_haversine;
+    fn ga_line_segmentize;
+    fn ga_line_segmentize_haversine;
 }

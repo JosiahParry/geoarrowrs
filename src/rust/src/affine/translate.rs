@@ -33,7 +33,7 @@ use crate::{
 /// @family affine
 /// @references [Translate](https://docs.rs/geo/latest/geo/algorithm/translate/trait.Translate.html)
 #[extendr]
-fn translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::Result<Robj> {
+fn ga_translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::Result<Robj> {
     let xs = try_float_array(x_offset, "x_offset")?;
     let ys = try_float_array(y_offset, "y_offset")?;
 
@@ -143,5 +143,5 @@ fn translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::Res
 
 extendr_module! {
     mod translate;
-    fn translate;
+    fn ga_translate;
 }

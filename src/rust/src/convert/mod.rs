@@ -144,7 +144,7 @@ macro_rules! convert_angle {
 /// @family convert
 /// @references [ToDegrees](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToDegrees.html)
 #[extendr]
-fn to_degrees(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_to_degrees(geometry: Robj) -> extendr_api::Result<Robj> {
     to_degrees_impl(geometry)
 }
 
@@ -163,7 +163,7 @@ fn to_degrees(geometry: Robj) -> extendr_api::Result<Robj> {
 /// @family convert
 /// @references [ToRadians](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToRadians.html)
 #[extendr]
-fn to_radians(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_to_radians(geometry: Robj) -> extendr_api::Result<Robj> {
     to_radians_impl(geometry)
 }
 
@@ -172,6 +172,6 @@ convert_angle!(to_radians_impl, to_radians, "convert to radians");
 
 extendr_module! {
     mod convert;
-    fn to_degrees;
-    fn to_radians;
+    fn ga_to_degrees;
+    fn ga_to_radians;
 }

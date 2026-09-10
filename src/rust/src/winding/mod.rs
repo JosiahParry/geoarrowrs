@@ -11,7 +11,7 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
 use crate::{as_geo_geometries, as_geometry_chunks, as_multipolygon_chunks, as_polygon_chunks};
 
-/// Parse the winding direction accepted by `orient()`.
+/// Parse the winding direction accepted by `ga_orient()`.
 fn parse_direction(direction: &str) -> extendr_api::Result<Direction> {
     match direction {
         "default" | "ccw" => Ok(Direction::Default),
@@ -71,10 +71,10 @@ fn order_of(g: &Geometry<f64>) -> Option<WindingOrder> {
 /// )))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(p))
 ///
-/// winding_order(g)
-/// winding_order(orient(g, "default"))
+/// ga_winding_order(g)
+/// ga_winding_order(ga_orient(g, "default"))
 #[extendr]
-fn orient(
+fn ga_orient(
     geometry: Robj,
     #[extendr(default = "\"default\"")] direction: &str,
 ) -> extendr_api::Result<Robj> {
@@ -140,9 +140,9 @@ fn orient(
 /// ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 ///
-/// as.vector(nanoarrow::convert_array(winding_order(g)))
+/// as.vector(nanoarrow::convert_array(ga_winding_order(g)))
 #[extendr]
-fn winding_order(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_winding_order(geometry: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let mut bldr = StringBuilder::new();
 
@@ -161,7 +161,7 @@ fn winding_order(geometry: Robj) -> extendr_api::Result<Robj> {
 
 /// Test the winding order of a ring
 ///
-/// `is_ccw()` is `TRUE` for counter-clockwise geometries and `is_cw()` is
+/// `ga_is_ccw()` is `TRUE` for counter-clockwise geometries and `ga_is_cw()` is
 /// `TRUE` for clockwise ones. A polygon is tested on its exterior ring.
 ///
 /// @details
@@ -172,29 +172,29 @@ fn winding_order(geometry: Robj) -> extendr_api::Result<Robj> {
 /// @param geometry a GeoArrow linestring or polygon array
 /// @returns a boolean array of the same length as `geometry`
 /// @export
-/// @rdname is_ccw
+/// @rdname ga_is_ccw
 /// @family winding
 /// @references [Winding](https://docs.rs/geo/latest/geo/algorithm/winding_order/trait.Winding.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 ///
-/// as.vector(nanoarrow::convert_array(is_ccw(g)))
-/// as.vector(nanoarrow::convert_array(is_cw(orient(g, "reversed"))))
+/// as.vector(nanoarrow::convert_array(ga_is_ccw(g)))
+/// as.vector(nanoarrow::convert_array(ga_is_cw(ga_orient(g, "reversed"))))
 #[extendr]
-fn is_ccw(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_is_ccw(geometry: Robj) -> extendr_api::Result<Robj> {
     winding_is(geometry, WindingOrder::CounterClockwise)
 }
 
 /// @export
-/// @rdname is_ccw
+/// @rdname ga_is_ccw
 /// @family winding
 #[extendr]
-fn is_cw(geometry: Robj) -> extendr_api::Result<Robj> {
+fn ga_is_cw(geometry: Robj) -> extendr_api::Result<Robj> {
     winding_is(geometry, WindingOrder::Clockwise)
 }
 
-/// Shared body for `is_ccw()` and `is_cw()`, which differ only in the order they test for.
+/// Shared body for `ga_is_ccw()` and `ga_is_cw()`, which differ only in the order they test for.
 fn winding_is(geometry: Robj, want: WindingOrder) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let n = chunks.iter().map(|c| c.len()).sum();
@@ -214,8 +214,8 @@ fn winding_is(geometry: Robj, want: WindingOrder) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod winding;
-    fn orient;
-    fn winding_order;
-    fn is_ccw;
-    fn is_cw;
+    fn ga_orient;
+    fn ga_winding_order;
+    fn ga_is_ccw;
+    fn ga_is_cw;
 }

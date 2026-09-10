@@ -19,38 +19,38 @@ squares <- function(n = 2) {
 
 test_that("numeric args accept a plain double", {
   g <- squares()
-  expect_no_error(simplify(g, 0.01))
+  expect_no_error(ga_simplify(g, 0.01))
 })
 
 test_that("numeric args accept an integer", {
   g <- squares()
-  expect_no_error(simplify(g, 1L))
+  expect_no_error(ga_simplify(g, 1L))
 })
 
 test_that("numeric args accept an arrow array", {
   g <- squares()
-  expect_no_error(simplify(g, nanoarrow::as_nanoarrow_array(0.01)))
+  expect_no_error(ga_simplify(g, nanoarrow::as_nanoarrow_array(0.01)))
 })
 
 test_that("a length-1 value recycles and a full-length vector is elementwise", {
   g <- squares(3)
-  expect_no_error(simplify(g, 0.01))
-  expect_no_error(simplify(g, c(0.01, 0.02, 0.03)))
+  expect_no_error(ga_simplify(g, 0.01))
+  expect_no_error(ga_simplify(g, c(0.01, 0.02, 0.03)))
 })
 
 test_that("a wrong-length vector errors", {
   g <- squares(3)
-  expect_error(simplify(g, c(0.01, 0.02)), "length 1 or the same length")
+  expect_error(ga_simplify(g, c(0.01, 0.02)), "length 1 or the same length")
 })
 
 test_that("NA is carried through as null rather than erroring", {
   g <- squares()
-  expect_no_error(simplify(g, NA_real_))
+  expect_no_error(ga_simplify(g, NA_real_))
 })
 
 test_that("a non-numeric arg errors clearly", {
   g <- squares()
-  expect_error(simplify(g, "nope"), "numeric vector or a float 64 array")
+  expect_error(ga_simplify(g, "nope"), "numeric vector or a float 64 array")
 })
 
 test_that("geometry args accept concrete arrays, not just mixed ones", {
@@ -63,13 +63,13 @@ test_that("geometry args accept concrete arrays, not just mixed ones", {
     read_shapefile(system.file("shape/nc.shp", package = "sf"))
   )$geometry
 
-  expect_no_error(centroid(g))
-  expect_no_error(signed_area(g))
-  expect_no_error(unsigned_area(g))
-  expect_no_error(bounding_rect(g))
-  expect_no_error(convex_hull(g))
-  expect_no_error(minimum_rotated_rect(g))
-  expect_no_error(extremes(g))
-  expect_no_error(perimeter_unsigned_geodesic(g))
-  expect_no_error(buffer(g, 0.1, "round", "round", 5, 8))
+  expect_no_error(ga_centroid(g))
+  expect_no_error(ga_signed_area(g))
+  expect_no_error(ga_unsigned_area(g))
+  expect_no_error(ga_bounding_rect(g))
+  expect_no_error(ga_convex_hull(g))
+  expect_no_error(ga_minimum_rotated_rect(g))
+  expect_no_error(ga_extremes(g))
+  expect_no_error(ga_perimeter_unsigned_geodesic(g))
+  expect_no_error(ga_buffer(g, 0.1, "round", "round", 5, 8))
 })

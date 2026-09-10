@@ -16,7 +16,7 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// polygon whose rings self intersect, a ring with too few points, and a
 /// coordinate that is `NaN` or infinite.
 ///
-/// A null geometry gives `NA`. Use [validation_error()] to see why a geometry
+/// A null geometry gives `NA`. Use [ga_validation_error()] to see why a geometry
 /// failed.
 ///
 /// @param geometry a GeoArrow geometry array
@@ -34,10 +34,10 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// )))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
 ///
-/// as.vector(nanoarrow::convert_array(is_valid(g)))
-/// as.vector(nanoarrow::convert_array(validation_error(g)))
+/// as.vector(nanoarrow::convert_array(ga_is_valid(g)))
+/// as.vector(nanoarrow::convert_array(ga_validation_error(g)))
 #[extendr]
-fn is_valid(geometry: Robj) -> anyhow::Result<Robj> {
+fn ga_is_valid(geometry: Robj) -> anyhow::Result<Robj> {
     let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = BooleanBuilder::with_capacity(n);
@@ -73,7 +73,7 @@ fn is_valid(geometry: Robj) -> anyhow::Result<Robj> {
 /// @family validation
 /// @references [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
 #[extendr]
-fn validation_error(geometry: Robj) -> anyhow::Result<Robj> {
+fn ga_validation_error(geometry: Robj) -> anyhow::Result<Robj> {
     let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
     let mut bldr = StringBuilder::new();
 
@@ -97,6 +97,6 @@ fn validation_error(geometry: Robj) -> anyhow::Result<Robj> {
 
 extendr_module! {
     mod validation;
-    fn is_valid;
-    fn validation_error;
+    fn ga_is_valid;
+    fn ga_validation_error;
 }

@@ -30,7 +30,7 @@ fn lines_of(g: &Geometry<f64>) -> Option<Vec<Line<f64>>> {
 /// vertices in order. The output has the same length as the input.
 ///
 /// @details
-/// `exterior_coords()` skips the interior rings of a polygon, so it gives the
+/// `ga_exterior_coords()` skips the interior rings of a polygon, so it gives the
 /// outline only. Both preserve the order the coordinates are stored in, so a
 /// closed ring repeats its first vertex at the end.
 ///
@@ -39,25 +39,25 @@ fn lines_of(g: &Geometry<f64>) -> Option<Vec<Line<f64>>> {
 /// @param geometry a GeoArrow geometry array
 /// @returns a GeoArrow multipoint array of the same length as `geometry`
 /// @export
-/// @rdname coords
+/// @rdname ga_coords
 /// @family iteration
 /// @references [CoordsIter](https://docs.rs/geo/latest/geo/algorithm/coords_iter/trait.CoordsIter.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 ///
-/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(coords(g)))
-/// as.vector(nanoarrow::convert_array(n_coords(g)))
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_coords(g)))
+/// as.vector(nanoarrow::convert_array(ga_n_coords(g)))
 #[extendr]
-fn coords(geometry: Robj) -> anyhow::Result<Robj> {
+fn ga_coords(geometry: Robj) -> anyhow::Result<Robj> {
     coords_impl(geometry, false)
 }
 
 /// @export
-/// @rdname coords
+/// @rdname ga_coords
 /// @family iteration
 #[extendr]
-fn exterior_coords(geometry: Robj) -> anyhow::Result<Robj> {
+fn ga_exterior_coords(geometry: Robj) -> anyhow::Result<Robj> {
     coords_impl(geometry, true)
 }
 
@@ -93,7 +93,7 @@ fn coords_impl(geometry: Robj, exterior_only: bool) -> anyhow::Result<Robj> {
 /// Returns how many vertices each geometry holds.
 ///
 /// @details
-/// Counts every coordinate that [coords()] would return, so a closed ring
+/// Counts every coordinate that [ga_coords()] would return, so a closed ring
 /// counts its repeated final vertex. A null geometry gives `NA`.
 ///
 /// @param geometry a GeoArrow geometry array
@@ -105,9 +105,9 @@ fn coords_impl(geometry: Robj, exterior_only: bool) -> anyhow::Result<Robj> {
 /// ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 ///
-/// as.vector(nanoarrow::convert_array(n_coords(g)))
+/// as.vector(nanoarrow::convert_array(ga_n_coords(g)))
 #[extendr]
-fn n_coords(geometry: Robj) -> anyhow::Result<Robj> {
+fn ga_n_coords(geometry: Robj) -> anyhow::Result<Robj> {
     let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Int32Builder::with_capacity(n);
@@ -147,9 +147,9 @@ fn n_coords(geometry: Robj) -> anyhow::Result<Robj> {
 /// ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 ///
-/// lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines(g))))
+/// lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_lines(g))))
 #[extendr]
-fn lines(geometry: Robj) -> anyhow::Result<Robj> {
+fn ga_lines(geometry: Robj) -> anyhow::Result<Robj> {
     let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
     let metadata = chunks[0].data_type().metadata().clone();
     let mut bldr = MultiLineStringBuilder::new(MultiLineStringType::new(Dimension::XY, metadata));
@@ -176,8 +176,8 @@ fn lines(geometry: Robj) -> anyhow::Result<Robj> {
 
 extendr_module! {
     mod iteration;
-    fn coords;
-    fn exterior_coords;
-    fn n_coords;
-    fn lines;
+    fn ga_coords;
+    fn ga_exterior_coords;
+    fn ga_n_coords;
+    fn ga_lines;
 }

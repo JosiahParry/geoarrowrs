@@ -109,8 +109,8 @@ impl Coeffs {
 /// ordering PostGIS `ST_Affine` and Shapely use. The identity transform is
 /// `a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0`.
 ///
-/// This is the general form behind [translate()], [scale_xy()], [rotate_around_centroid()],
-/// and [skew()]. Reach for those when they fit, since they are clearer at the
+/// This is the general form behind [ga_translate()], [ga_scale_xy()], [ga_rotate_around_centroid()],
+/// and [ga_skew()]. Reach for those when they fit, since they are clearer at the
 /// call site. Use this one to apply a matrix you already have, or to compose
 /// several steps into a single pass over the coordinates.
 ///
@@ -134,10 +134,10 @@ impl Coeffs {
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
 ///
 /// # double the width and shift right by 10
-/// res <- affine_transform(g, a = 2, b = 0, xoff = 10, d = 0, e = 1, yoff = 0)
+/// res <- ga_affine_transform(g, a = 2, b = 0, xoff = 10, d = 0, e = 1, yoff = 0)
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(res))
 #[extendr]
-fn affine_transform(
+fn ga_affine_transform(
     geometry: Robj,
     a: Robj,
     b: Robj,
@@ -231,5 +231,5 @@ fn affine_transform(
 
 extendr_module! {
     mod matrix;
-    fn affine_transform;
+    fn ga_affine_transform;
 }

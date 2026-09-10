@@ -29,7 +29,7 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 /// @family densify
 /// @references [Densifiable](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html)
 #[extendr]
-fn densify(geometry: Robj, max_segment_length: Robj, metric: &str) -> extendr_api::Result<Robj> {
+fn ga_densify(geometry: Robj, max_segment_length: Robj, metric: &str) -> extendr_api::Result<Robj> {
     let msl = try_float_array(max_segment_length, "max_segment_length")?;
 
     macro_rules! run_densify {
@@ -138,5 +138,5 @@ fn densify(geometry: Robj, max_segment_length: Robj, metric: &str) -> extendr_ap
 
 extendr_module! {
     mod densify;
-    fn densify;
+    fn ga_densify;
 }

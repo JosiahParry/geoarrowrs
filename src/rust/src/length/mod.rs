@@ -22,7 +22,7 @@ mod vicenty_length;
 ///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
 ///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 #[extendr]
-fn length_euclidean(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_length_euclidean(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
     let n = x_chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -51,7 +51,7 @@ fn length_euclidean_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
 ///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
 ///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
-fn length_haversine(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_length_haversine(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
     let n = x_chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -80,7 +80,7 @@ fn length_haversine_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
 ///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
 ///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
-fn length_geodesic(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_length_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
     let n = x_chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -109,7 +109,7 @@ fn length_geodesic_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
 ///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
 ///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
-fn length_rhumb(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_length_rhumb(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
     let n = x_chunks.iter().map(|c| c.len()).sum();
     let mut bldr = Float64Builder::with_capacity(n);
@@ -133,9 +133,9 @@ fn length_rhumb_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
 
 extendr_module! {
     mod length;
-    fn length_euclidean;
-    fn length_haversine;
-    fn length_geodesic;
-    fn length_rhumb;
+    fn ga_length_euclidean;
+    fn ga_length_haversine;
+    fn ga_length_geodesic;
+    fn ga_length_rhumb;
     use vicenty_length;
 }

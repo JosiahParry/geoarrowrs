@@ -80,7 +80,7 @@ fn clip_for<'a>(
 ///
 /// A geometry with fewer than two distinct vertices, or one whose vertices are
 /// all collinear, has no cells and comes back as an empty multipolygon rather
-/// than a null. Use [voronoi_edges()] for the collinear case, which returns
+/// than a null. Use [ga_voronoi_edges()] for the collinear case, which returns
 /// the perpendicular bisectors. A null geometry stays null.
 ///
 /// @param geometry a GeoArrow geometry array whose vertices are the sites
@@ -98,10 +98,10 @@ fn clip_for<'a>(
 /// pts <- sf::st_multipoint(cbind(c(0, 1, 1, 0), c(0, 0, 1, 1)))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
 ///
-/// cells <- voronoi_cells(g)
+/// cells <- ga_voronoi_cells(g)
 /// lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(cells)))
 #[extendr]
-fn voronoi_cells(
+fn ga_voronoi_cells(
     geometry: Robj,
     #[extendr(default = "\"padded\"")] clip: &str,
     #[extendr(default = "0")] tolerance: Robj,
@@ -154,14 +154,14 @@ fn voronoi_cells(
 /// length as the input.
 ///
 /// @details
-/// Unlike [voronoi_cells()], this works on collinear sites, where the edges
+/// Unlike [ga_voronoi_cells()], this works on collinear sites, where the edges
 /// are the perpendicular bisectors between neighbouring points. Prefer it
 /// when you want the diagram's skeleton rather than closed regions.
 ///
 /// A geometry with fewer than two distinct vertices has no edges and comes
 /// back as an empty multilinestring. A null geometry stays null.
 ///
-/// @inheritParams voronoi_cells
+/// @inheritParams ga_voronoi_cells
 /// @returns a GeoArrow multilinestring array of the same length as `geometry`
 /// @export
 /// @family voronoi
@@ -170,9 +170,9 @@ fn voronoi_cells(
 /// pts <- sf::st_multipoint(cbind(c(0, 1, 1, 0), c(0, 0, 1, 1)))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
 ///
-/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(voronoi_edges(g)))
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_voronoi_edges(g)))
 #[extendr]
-fn voronoi_edges(
+fn ga_voronoi_edges(
     geometry: Robj,
     #[extendr(default = "\"padded\"")] clip: &str,
     #[extendr(default = "0")] tolerance: Robj,
@@ -220,6 +220,6 @@ fn voronoi_edges(
 
 extendr_module! {
     mod voronoi;
-    fn voronoi_cells;
-    fn voronoi_edges;
+    fn ga_voronoi_cells;
+    fn ga_voronoi_edges;
 }

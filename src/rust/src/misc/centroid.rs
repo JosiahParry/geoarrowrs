@@ -19,7 +19,7 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// @family misc
 /// @references [Centroid](https://docs.rs/geo/latest/geo/algorithm/centroid/trait.Centroid.html)
 #[extendr]
-fn centroid(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_centroid(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let metadata = chunks[0].data_type().metadata().clone();
@@ -40,5 +40,5 @@ fn centroid(x: Robj) -> extendr_api::Result<Robj> {
 
 extendr_module! {
     mod centroid;
-    fn centroid;
+    fn ga_centroid;
 }

@@ -32,7 +32,7 @@ use crate::{
 /// @family affine
 /// @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
 #[extendr]
-fn rotate_around_centroid(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
+fn ga_rotate_around_centroid(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
     let ds = try_float_array(degrees, "degrees")?;
 
     if let Ok(chunks) = as_point_chunks(geometry.clone()) {
@@ -149,7 +149,7 @@ fn rotate_around_centroid(geometry: Robj, degrees: Robj) -> extendr_api::Result<
 /// @family affine
 /// @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
 #[extendr]
-fn rotate_around_center(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
+fn ga_rotate_around_center(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
     let ds = try_float_array(degrees, "degrees")?;
 
     if let Ok(chunks) = as_point_chunks(geometry.clone()) {
@@ -255,6 +255,6 @@ fn rotate_around_center(geometry: Robj, degrees: Robj) -> extendr_api::Result<Ro
 
 extendr_module! {
     mod rotate;
-    fn rotate_around_centroid;
-    fn rotate_around_center;
+    fn ga_rotate_around_centroid;
+    fn ga_rotate_around_center;
 }

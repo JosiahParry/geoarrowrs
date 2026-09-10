@@ -38,16 +38,16 @@ whole column in memory.
 Registration is per CRS, not per table. Every GeoArrow geometry type gets
 its own kernel, so one call covers points, linestrings, polygons, and their
 multi variants at once. A function that cannot handle a type, such as
-\code{\link[=length_euclidean]{length_euclidean()}} against polygons, simply has no kernel for it.
+\code{\link[=ga_length_euclidean]{ga_length_euclidean()}} against polygons, simply has no kernel for it.
 
 Arguments that are not geometry are registered too. Numeric arguments such
-as the \code{epsilon} of \code{\link[=simplify]{simplify()}} take a \code{double} column or a literal and are
-recycled row by row. Option arguments such as the \code{metric} of \code{\link[=densify]{densify()}}
-take a literal string. Since Arrow has no optional arguments, every argument
-of a registered function must be given.
+as the \code{epsilon} of \code{\link[=ga_simplify]{ga_simplify()}} take a \code{double} column or a literal and
+are recycled row by row. Option arguments such as the \code{metric} of
+\code{\link[=ga_densify]{ga_densify()}} take a literal string. Since Arrow has no optional arguments,
+every argument of a registered function must be given.
 
-\code{\link[=unary_union]{unary_union()}}, \code{\link[=explode]{explode()}}, and \code{\link[=flatten]{flatten()}} are not registered, because
-they change the length of the array and a scalar kernel may not.
+\code{\link[=ga_unary_union]{ga_unary_union()}}, \code{\link[=ga_explode]{ga_explode()}}, and \code{\link[=ga_flatten]{ga_flatten()}} are not registered,
+because they change the length of the array and a scalar kernel may not.
 
 A GeoArrow type carries its CRS, and Arrow compares that when it looks for a
 kernel, so \code{crs} has to match the data. Pass every CRS you need in one call:
@@ -65,7 +65,7 @@ tbl <- arrow::arrow_table(nc)
 register_geoarrow_udfs(crs = tbl)
 
 tbl |>
-  mutate(area = unsigned_area(geometry)) |>
+  mutate(area = ga_unsigned_area(geometry)) |>
   select(NAME, area) |>
   head(3) |>
   collect()

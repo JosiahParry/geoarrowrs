@@ -24,7 +24,7 @@ use crate::as_point_chunks;
 ///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
 // TODO: use rayon with min chunk size of 4096
 #[extendr]
-fn bearing_euclidean(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_bearing_euclidean(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -55,7 +55,7 @@ fn bearing_euclidean_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: 
 ///   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
 ///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
-fn bearing_haversine(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_bearing_haversine(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -86,7 +86,7 @@ fn bearing_haversine_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: 
 ///   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
 ///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
-fn bearing_geodesic(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_bearing_geodesic(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -117,7 +117,7 @@ fn bearing_geodesic_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &
 ///   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
 ///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
-fn bearing_rhumb(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
+fn ga_bearing_rhumb(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
@@ -143,8 +143,8 @@ fn bearing_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 
 extendr_module! {
     mod bearing;
-    fn bearing_euclidean;
-    fn bearing_haversine;
-    fn bearing_geodesic;
-    fn bearing_rhumb;
+    fn ga_bearing_euclidean;
+    fn ga_bearing_haversine;
+    fn ga_bearing_geodesic;
+    fn ga_bearing_rhumb;
 }

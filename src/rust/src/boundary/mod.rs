@@ -22,7 +22,7 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// @family boundary
 /// @references [BoundingRect](https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html)
 #[extendr]
-fn bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let n = chunks.iter().map(|c| c.len()).sum();
     let metadata = chunks[0].data_type().metadata().clone();
@@ -53,7 +53,7 @@ fn bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
 /// @family boundary
 /// @references [MinimumRotatedRect](https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html)
 #[extendr]
-fn minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let metadata = chunks[0].data_type().metadata().clone();
     let mut bldr = PolygonBuilder::new(PolygonType::new(Dimension::XY, metadata));
@@ -83,7 +83,7 @@ fn minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
 /// @family boundary
 /// @references [ConvexHull](https://docs.rs/geo/latest/geo/algorithm/convex_hull/trait.ConvexHull.html)
 #[extendr]
-fn convex_hull(x: Robj) -> extendr_api::Result<Robj> {
+fn ga_convex_hull(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
     let metadata = chunks[0].data_type().metadata().clone();
     let mut bldr = PolygonBuilder::new(PolygonType::new(Dimension::XY, metadata));
@@ -107,7 +107,7 @@ extendr_module! {
     mod boundary;
     use concave_hull;
     use extremes;
-    fn bounding_rect;
-    fn minimum_rotated_rect;
-    fn convex_hull;
+    fn ga_bounding_rect;
+    fn ga_minimum_rotated_rect;
+    fn ga_convex_hull;
 }

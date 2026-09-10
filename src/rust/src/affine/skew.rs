@@ -33,7 +33,7 @@ use crate::{
 /// @family affine
 /// @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
 #[extendr]
-fn skew(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
+fn ga_skew(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
     let ds = try_float_array(degrees, "degrees")?;
 
     if let Ok(chunks) = as_point_chunks(geometry.clone()) {
@@ -149,7 +149,7 @@ fn skew(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
 /// @family affine
 /// @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
 #[extendr]
-fn skew_xy(geometry: Robj, degrees_x: Robj, degrees_y: Robj) -> extendr_api::Result<Robj> {
+fn ga_skew_xy(geometry: Robj, degrees_x: Robj, degrees_y: Robj) -> extendr_api::Result<Robj> {
     let xs = try_float_array(degrees_x, "degrees_x")?;
     let ys = try_float_array(degrees_y, "degrees_y")?;
 
@@ -259,6 +259,6 @@ fn skew_xy(geometry: Robj, degrees_x: Robj, degrees_y: Robj) -> extendr_api::Res
 
 extendr_module! {
     mod skew;
-    fn skew;
-    fn skew_xy;
+    fn ga_skew;
+    fn ga_skew_xy;
 }
