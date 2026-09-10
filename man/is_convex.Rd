@@ -17,8 +17,10 @@ a boolean array of the same length as \code{geometry}
 polygon is judged on its exterior ring.
 }
 \details{
-Only linestrings and polygons have a convexity. Any other geometry type, or
-a null geometry, becomes \code{NA} rather than \code{FALSE}.
+A linestring must be closed, that is form a ring, to be reported convex; an
+open one is \code{FALSE}. A polygon's exterior ring is always closed, so polygons
+need no special handling. Any other geometry type, or a null geometry,
+becomes \code{NA} rather than \code{FALSE}.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

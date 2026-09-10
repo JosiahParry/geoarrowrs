@@ -55,8 +55,8 @@ form and a self-distance square matrix form. Lengths are unary and need neither.
 Note that Boolean ops on array will likely require query trees to be effective and scalable.
 This will require more work and should be pushed to the end of implementation.
 
-- ❌ BooleanOps: Combine or split (Multi)Polygons using intersection, union, xor, or difference operations
-- ❌ unary_union: Efficient union of many Polygon or MultiPolygons
+- ✅ BooleanOps: Combine or split (Multi)Polygons using intersection, union, xor, or difference operations (`boolean_intersection()`, `boolean_union()`, `boolean_difference()`, `boolean_xor()`).
+- ✅ unary_union: Efficient union of many Polygon or MultiPolygons (`unary_union()`). The one aggregate in the package, returning length 1.
 - ❌ Outlier Detection / Clustering
 - ❌ OutlierDetection: Detect outliers in a group of points using LOF
 - ❌ Dbscan: Calculate point clusters using the DBSCAN algorithm
@@ -80,16 +80,16 @@ This will require more work and should be pushed to the end of implementation.
 
 ## Topology
 
-- ❌ Contains: Calculate if a geometry contains another geometry
-- ❌ ContainsProperly: Calculate if a geometry completely contains another geometry within its interior
-- ❌ CoordinatePosition: Calculate the position of a coordinate relative to a geometry
-- ❌ Covers: Calculate if a geometry covers another geometry
-- ❌ HasDimensions: Determine the dimensions of a geometry
-- ❌ Intersects: Calculate if a geometry intersects another geometry
+- ✅ Contains: Calculate if a geometry contains another geometry (`contains()`).
+- ✅ ContainsProperly: Calculate if a geometry completely contains another geometry within its interior (`contains_properly()`).
+- ✅ CoordinatePosition: Calculate the position of a coordinate relative to a geometry (`coordinate_position()`).
+- ✅ Covers: Calculate if a geometry covers another geometry (`covers()`, `covered_by()`).
+- ✅ HasDimensions: Determine the dimensions of a geometry (`dimension()`, `boundary_dimension()`, `is_empty()`).
+- ✅ Intersects: Calculate if a geometry intersects another geometry (`intersects()`, `disjoint()`).
 - ❌ line_intersection: Calculates the intersection, if any, between two lines
 - ❌ Intersections: Find all line segment intersections using an efficient sweep line algorithm (Bentley-Ottmann)
-- ❌ Relate: Topologically relate two geometries based on DE-9IM semantics
-- ❌ Within: Calculate if a geometry lies completely within another geometry
+- ✅ Relate: Topologically relate two geometries based on DE-9IM semantics (`relate()`, plus `touches()`, `crosses()`, `overlaps()`, `equals_topo()`).
+- ✅ Within: Calculate if a geometry lies completely within another geometry (`within()`).
 
 ## Triangulation
 

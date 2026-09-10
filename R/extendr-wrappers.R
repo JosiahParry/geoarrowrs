@@ -430,8 +430,10 @@ interior_point <- function(geometry) .Call(wrap__interior_point, geometry)
 #' polygon is judged on its exterior ring.
 #'
 #' @details
-#' Only linestrings and polygons have a convexity. Any other geometry type, or
-#' a null geometry, becomes `NA` rather than `FALSE`.
+#' A linestring must be closed, that is form a ring, to be reported convex; an
+#' open one is `FALSE`. A polygon's exterior ring is always closed, so polygons
+#' need no special handling. Any other geometry type, or a null geometry,
+#' becomes `NA` rather than `FALSE`.
 #'
 #' @param geometry a GeoArrow linestring or polygon array
 #' @returns a boolean array of the same length as `geometry`
@@ -516,6 +518,199 @@ simplify_vw <- function(geometry, epsilon) .Call(wrap__simplify_vw, geometry, ep
 #' @family simplify
 #' @references [SimplifyVwPreserve](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwPreserve.html)
 simplify_vw_preserve <- function(geometry, epsilon) .Call(wrap__simplify_vw_preserve, geometry, epsilon)
+
+#' Test a topological relationship between two geometry arrays
+#'
+#' Each function compares `x` and `y` row by row and returns `TRUE` when the
+#' named DE-9IM relationship holds. `y` is recycled against `x`.
+#'
+#' @details
+#' `contains()` is `TRUE` when no point of `y` lies outside `x` and at least
+#' one point of `y` lies in the interior of `x`. `within()` is the same test
+#' with the arguments swapped. `covers()` and `covered_by()` are the weaker
+#' forms that allow every shared point to lie on the boundary.
+#' `contains_properly()` is the stricter form requiring `y` to fall entirely
+#' within the interior.
+#'
+#' `intersects()` and `disjoint()` are negations of one another.
+#' `touches()` is `TRUE` when the geometries share a boundary point but no
+#' interior point, `crosses()` when their interiors meet in a lower dimension
+#' than at least one of them, and `overlaps()` when they meet in the same
+#' dimension as both. `equals_topo()` compares point sets rather than
+#' coordinate order, so two geometries wound differently are still equal.
+#'
+#' A null geometry on either side gives `NA`.
+#'
+#' @param x a GeoArrow geometry array
+#' @param y a GeoArrow geometry array; length 1 or the same length as `x`
+#' @returns a boolean array of the same length as `x`
+#' @export
+#' @rdname topology
+#' @family topology
+#' @references [Relate](https://docs.rs/geo/latest/geo/algorithm/relate/trait.Relate.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' big <- sf::st_polygon(list(
+#'   matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
+#' ))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
+#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
+#'
+#' as.vector(nanoarrow::convert_array(contains(x, y)))
+#' as.vector(nanoarrow::convert_array(intersects(x, y)))
+contains <- function(x, y) .Call(wrap__contains, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+contains_properly <- function(x, y) .Call(wrap__contains_properly, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+within <- function(x, y) .Call(wrap__within, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+covers <- function(x, y) .Call(wrap__covers, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+covered_by <- function(x, y) .Call(wrap__covered_by, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+intersects <- function(x, y) .Call(wrap__intersects, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+disjoint <- function(x, y) .Call(wrap__disjoint, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+touches <- function(x, y) .Call(wrap__touches, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+crosses <- function(x, y) .Call(wrap__crosses, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+overlaps <- function(x, y) .Call(wrap__overlaps, x, y)
+
+#' @export
+#' @rdname topology
+#' @family topology
+equals_topo <- function(x, y) .Call(wrap__equals_topo, x, y)
+
+#' Compute the DE-9IM relationship between two geometry arrays
+#'
+#' Returns the nine character DE-9IM matrix describing how each pair of
+#' geometries relates, from which every named predicate can be derived.
+#'
+#' @details
+#' The string reads as the intersections of the interior, boundary and
+#' exterior of `x` with those of `y`, in that order. Each character is the
+#' dimension of that intersection: `F` for empty, `0` for a point, `1` for a
+#' curve, and `2` for a surface. A null geometry on either side gives `NA`.
+#'
+#' @inheritParams contains
+#' @returns a string array of the same length as `x`
+#' @export
+#' @family topology
+#' @references [Relate](https://docs.rs/geo/latest/geo/algorithm/relate/trait.Relate.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' big <- sf::st_polygon(list(
+#'   matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
+#' ))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
+#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
+#'
+#' as.vector(nanoarrow::convert_array(relate(x, y)))
+relate <- function(x, y) .Call(wrap__relate, x, y)
+
+#' Determine the topological dimension of geometries
+#'
+#' Returns 0 for points, 1 for lines and curves, and 2 for surfaces.
+#'
+#' @details
+#' An empty geometry has no dimension and gives `NA`, which is distinct from a
+#' point's 0. `boundary_dimension()` gives the dimension of the geometry's
+#' boundary instead, so a polygon is 1 and a point is `NA`.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns an integer array of the same length as `geometry`
+#' @export
+#' @rdname dimension
+#' @family topology
+#' @references [HasDimensions](https://docs.rs/geo/latest/geo/algorithm/dimensions/trait.HasDimensions.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_point(c(0, 0)),
+#'   sf::st_linestring(cbind(c(0, 1), c(0, 1)))
+#' ))
+#'
+#' as.vector(nanoarrow::convert_array(dimension(g)))
+dimension <- function(geometry) .Call(wrap__dimension, geometry)
+
+#' @export
+#' @rdname dimension
+#' @family topology
+boundary_dimension <- function(geometry) .Call(wrap__boundary_dimension, geometry)
+
+#' Test whether geometries are empty
+#'
+#' `TRUE` when the geometry holds no coordinates.
+#'
+#' @details
+#' An empty geometry is distinct from a null one. A null geometry gives `NA`.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a boolean array of the same length as `geometry`
+#' @export
+#' @family topology
+#' @references [HasDimensions](https://docs.rs/geo/latest/geo/algorithm/dimensions/trait.HasDimensions.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_point(c(0, 0)),
+#'   sf::st_point()
+#' ))
+#'
+#' as.vector(nanoarrow::convert_array(is_empty(g)))
+is_empty <- function(geometry) .Call(wrap__is_empty, geometry)
+
+#' Locate a point relative to a geometry
+#'
+#' Returns `"inside"`, `"outside"`, or `"boundary"` for each pair.
+#'
+#' @details
+#' This is the three way form of a point in polygon test, distinguishing a
+#' point that lies exactly on an edge from one strictly inside. `point` is
+#' recycled against `geometry`. A null geometry or a null point gives `NA`.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @param point a GeoArrow point array; length 1 or the same length as `geometry`
+#' @returns a string array of the same length as `geometry`
+#' @export
+#' @family topology
+#' @references [CoordinatePosition](https://docs.rs/geo/latest/geo/algorithm/coordinate_position/trait.CoordinatePosition.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' square <- sf::st_polygon(list(
+#'   matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
+#' ))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(square, square, square))
+#' p <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
+#' ))
+#'
+#' as.vector(nanoarrow::convert_array(coordinate_position(g, p)))
+coordinate_position <- function(geometry, point) .Call(wrap__coordinate_position, geometry, point)
 
 #' Triangulate polygons with the earcut algorithm
 #'
@@ -642,6 +837,84 @@ line_segmentize <- function(geometry, segment_count) .Call(wrap__line_segmentize
 #' @family misc
 #' @references [LineStringSegmentizeHaversine](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentizeHaversine.html)
 line_segmentize_haversine <- function(geometry, segment_count) .Call(wrap__line_segmentize_haversine, geometry, segment_count)
+
+#' Combine two polygon arrays with a set operation
+#'
+#' Each function pairs `x` with `y` row by row and returns the polygonal
+#' result. `y` is recycled against `x`.
+#'
+#' @details
+#' `boolean_intersection()` keeps the area in both, `boolean_union()` the area
+#' in either, `boolean_difference()` the area in `x` but not `y`, and
+#' `boolean_xor()` the area in exactly one of them.
+#'
+#' These are defined for polygons and multipolygons only. A row whose geometry
+#' is any other type, or is null, comes back null. The result is always a
+#' multipolygon, since a set operation can split one polygon into several or
+#' erase it entirely.
+#'
+#' @param x a GeoArrow polygon or multipolygon array
+#' @param y a GeoArrow polygon or multipolygon array; length 1 or the same
+#'   length as `x`
+#' @returns a GeoArrow multipolygon array of the same length as `x`
+#' @export
+#' @rdname boolean_ops
+#' @family boolean
+#' @references [BooleanOps](https://docs.rs/geo/latest/geo/algorithm/bool_ops/trait.BooleanOps.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
+#'   c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
+#' )))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2)))
+#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(1, 1, 3, 3)))
+#'
+#' sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
+#'   boolean_intersection(x, y)
+#' )))
+boolean_intersection <- function(x, y) .Call(wrap__boolean_intersection, x, y)
+
+#' @export
+#' @rdname boolean_ops
+#' @family boolean
+boolean_union <- function(x, y) .Call(wrap__boolean_union, x, y)
+
+#' @export
+#' @rdname boolean_ops
+#' @family boolean
+boolean_difference <- function(x, y) .Call(wrap__boolean_difference, x, y)
+
+#' @export
+#' @rdname boolean_ops
+#' @family boolean
+boolean_xor <- function(x, y) .Call(wrap__boolean_xor, x, y)
+
+#' Dissolve an entire array of polygons into one
+#'
+#' Merges every polygon in `x` into a single multipolygon, dropping the
+#' boundaries between any that touch or overlap.
+#'
+#' @details
+#' This is the one function in the package that is not length-preserving. It
+#' is an aggregate over the whole array, so it always returns a length 1
+#' array, in the way `sum()` reduces a vector to a single value.
+#'
+#' It is far faster than folding [boolean_union()] across the array, since it
+#' unions all the rings in one pass. Rows that are not polygonal, and null
+#' rows, are skipped.
+#'
+#' @param x a GeoArrow polygon or multipolygon array
+#' @returns a GeoArrow multipolygon array of length 1
+#' @export
+#' @family boolean
+#' @references [unary_union](https://docs.rs/geo/latest/geo/algorithm/bool_ops/fn.unary_union.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
+#'   c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
+#' )))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2), bx(1, 1, 3, 3)))
+#'
+#' sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(unary_union(x))))
+unary_union <- function(x) .Call(wrap__unary_union, x)
 
 #' Compute the axis-aligned bounding rectangle of geometries
 #'

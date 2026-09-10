@@ -11,10 +11,14 @@ Language: en
 Roxygen: list(markdown = TRUE)
 Config/rextendr/version: 0.5.0
 SystemRequirements: Cargo (Rust's package manager), rustc >= 1.65.0, xz
+Imports:
+    cli,
+    rlang
 Depends:
     R (>= 4.2)
 Suggests:
     arrow,
+    dplyr,
     geoarrow,
     nanoarrow,
     sf,

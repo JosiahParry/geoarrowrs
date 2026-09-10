@@ -2,6 +2,9 @@
 
 * Added `voronoi_cells()` and `voronoi_edges()`, returning one multipolygon of cells or multilinestring of edges per input geometry. Both take a `clip` mode and an optional `boundary` polygon to cut the diagram to a study area.
 * Added `orient()`, `winding_order()`, `is_ccw()`, and `is_cw()`. A multi part geometry reports a winding only when all of its parts agree.
+* Added `register_geoarrow_udfs()`, which registers geoarrowrs functions as Arrow scalar kernels so they run inside `dplyr` verbs on a `Table` or `Dataset` rather than pulling the geometry into R.
+* Added the topological predicates `contains()`, `contains_properly()`, `within()`, `covers()`, `covered_by()`, `intersects()`, `disjoint()`, `touches()`, `crosses()`, `overlaps()`, and `equals_topo()`, plus `relate()` for the DE-9IM string, `dimension()`, `boundary_dimension()`, `is_empty()`, and `coordinate_position()`.
+* Added `boolean_intersection()`, `boolean_union()`, `boolean_difference()`, `boolean_xor()`, and `unary_union()`.
 * Added `closest_point()`, `closest_point_haversine()`, `interior_point()`, `is_convex()`, and `line_locate_point()`. `interior_point()` always lands on the geometry, unlike `centroid()`.
 * Added `read_shapefile()`, `read_geojson()`, and `read_flatgeobuf()`, each returning a record batch stream of the attribute columns followed by a `geometry` column. `read_flatgeobuf()` streams and takes an optional `bbox` that uses the file's spatial index.
 * Added `cast_geometry()` and `downcast_geometry()` for converting between GeoArrow geometry types, and `explode()`/`flatten()` for splitting multi-part geometries into their parts and collapsing them again. `explode()` preserves length, returning one array of parts per row.
