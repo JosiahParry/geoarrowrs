@@ -29,8 +29,8 @@ negations of one another.
 ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 
-as.vector(nanoarrow::convert_array(ga_is_ccw(g)))
-as.vector(nanoarrow::convert_array(ga_is_cw(ga_orient(g, "reversed"))))
+as.vector(ga_is_ccw(g))
+as.vector(ga_is_cw(ga_orient(g, "reversed")))
 \dontshow{\}) # examplesIf}
 }
 \references{

@@ -148,9 +148,6 @@ geoarrow_udf_catalogue <- function() {
         concavity = "array",
         length_threshold = "array"
       ),
-      ga_dbscan = c(geometry = "geometry", eps = "array", min_points = "array"),
-      ga_kmeans = c(geometry = "geometry", k = "array"),
-      ga_outlier_scores = c(geometry = "geometry", k_neighbours = "array"),
       ga_chaikin_smoothing = c(geometry = "geometry", n_iterations = "int=1"),
       ga_line_segmentize = c(geometry = "geometry", segment_count = "int=2"),
       ga_line_segmentize_haversine = c(

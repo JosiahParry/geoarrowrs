@@ -45,8 +45,8 @@ bowtie <- sf::st_polygon(list(matrix(
 )))
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
 
-as.vector(nanoarrow::convert_array(ga_is_valid(g)))
-as.vector(nanoarrow::convert_array(ga_validation_error(g)))
+as.vector(ga_is_valid(g))
+as.vector(ga_validation_error(g))
 \dontshow{\}) # examplesIf}
 }
 \references{

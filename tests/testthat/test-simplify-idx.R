@@ -10,7 +10,7 @@ ga <- function(sfc) {
   geoarrow::as_geoarrow_array(sfc)
 }
 
-lst <- function(x) nanoarrow::convert_array(x)
+lst <- function(x) as.vector(x)
 
 zigzag <- function() {
   sf::st_linestring(cbind(c(0, 1, 2, 3, 4), c(0, 0.1, 0, 0.1, 0)))

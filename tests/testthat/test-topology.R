@@ -10,7 +10,7 @@ ga <- function(sfc) {
   geoarrow::as_geoarrow_array(sfc)
 }
 
-conv <- function(x) as.vector(nanoarrow::convert_array(x))
+conv <- function(x) as.vector(x)
 
 box <- function(xmin, ymin, xmax, ymax) {
   sf::st_polygon(list(matrix(

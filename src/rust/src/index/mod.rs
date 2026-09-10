@@ -1,13 +1,13 @@
-use arrow::array::{Array, UInt32Builder};
+use arrow::array::{Array, ListBuilder, UInt32Builder};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 
-use geo::algorithm::bounding_rect::BoundingRect;
-use geo_index::rtree::sort::HilbertSort;
+use geo_index::rtree::sort::{HilbertSort, STRSort};
 use geo_index::rtree::{DEFAULT_RTREE_NODE_SIZE, RTree as GeoRTree, RTreeBuilder, RTreeIndex};
 use geoarrow_array::GeoArrowArray;
 
-use crate::{as_geo_geometries, as_geometry_chunks};
+use crate::as_geometry_chunks;
+use crate::envelope::as_rects;
 
 /// A packed Hilbert R-tree over the bounding boxes of a geometry array.
 #[extendr]
@@ -69,34 +69,38 @@ fn to_r_indices(positions: &[u32], found: Vec<u32>) -> anyhow::Result<Robj> {
 /// idx$size()
 ///
 /// # candidate rows whose bounding box meets the query box
-/// hits <- as.vector(nanoarrow::convert_array(idx$search(-79, 35, -78, 36)))
+/// hits <- as.vector(idx$search(-79, 35, -78, 36))
 /// length(hits)
 ///
 /// # the three rows nearest a point
-/// as.vector(nanoarrow::convert_array(idx$neighbors(-79, 35, max_results = 3)))
+/// as.vector(idx$neighbors(-79, 35, max_results = 3))
 #[extendr]
 impl RTree {
     /// Build the index. `node_size` sets how many entries share a tree node;
-    /// larger values build faster and query slower.
-    fn new(geometry: Robj, #[extendr(default = "16")] node_size: i32) -> anyhow::Result<Self> {
+    /// larger values build faster and query slower. `sort` picks the packing
+    /// order, either `"hilbert"` or `"str"`.
+    fn new(
+        geometry: Robj,
+        #[extendr(default = "16")] node_size: i32,
+        #[extendr(default = "\"hilbert\"")] sort: &str,
+    ) -> anyhow::Result<Self> {
         if node_size < 2 {
             anyhow::bail!("`node_size` must be at least 2");
+        }
+        if !matches!(sort, "hilbert" | "str") {
+            anyhow::bail!("`sort` must be either \"hilbert\" or \"str\", got \"{sort}\"");
         }
 
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
         let n: usize = chunks.iter().map(|c| c.len()).sum();
+        let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
 
-        let mut boxes: Vec<(f64, f64, f64, f64)> = Vec::with_capacity(n);
-        let mut positions: Vec<u32> = Vec::with_capacity(n);
-        let mut row = 0u32;
-        for chunk in &chunks {
-            let geoms = as_geo_geometries(chunk.as_ref()).map_err(|e| anyhow::anyhow!("{e}"))?;
-            for geom in geoms {
-                if let Some(rect) = geom.as_ref().and_then(|g| g.bounding_rect()) {
-                    boxes.push((rect.min().x, rect.min().y, rect.max().x, rect.max().y));
-                    positions.push(row);
-                }
-                row += 1;
+        let mut boxes = Vec::with_capacity(n);
+        let mut positions = Vec::with_capacity(n);
+        for (row, rect) in rects.into_iter().enumerate() {
+            if let Some(rect) = rect {
+                boxes.push((rect.min().x, rect.min().y, rect.max().x, rect.max().y));
+                positions.push(row as u32);
             }
         }
 
@@ -110,11 +114,62 @@ impl RTree {
             bldr.add(min_x, min_y, max_x, max_y);
         }
 
-        Ok(Self {
-            tree: bldr.finish::<HilbertSort>(),
-            positions,
-            n,
-        })
+        let tree = match sort {
+            "str" => bldr.finish::<STRSort>(),
+            _ => bldr.finish::<HilbertSort>(),
+        };
+
+        Ok(Self { tree, positions, n })
+    }
+
+    /// Find the rows whose bounding box overlaps each geometry
+    ///
+    /// Returns one list of candidate row numbers per element of `geometry`,
+    /// so the result lines up row for row with the query array. This is the
+    /// shape a spatial join needs.
+    ///
+    /// @details
+    /// Anything with a bounding box works: a point array, a polygon array, or
+    /// the box array [ga_envelope()] produces. Boxes are taken as they are and
+    /// everything else is reduced to its envelope first.
+    ///
+    /// This is a bounding box test, not an exact one, so each list holds
+    /// candidates to confirm with [ga_intersects()] or another predicate. A
+    /// null or empty query geometry gives a null rather than an empty list.
+    ///
+    /// @param geometry a GeoArrow array to look up
+    /// @returns a list array of 1 based row numbers, the same length as
+    ///   `geometry`
+    fn query(&self, geometry: Robj) -> anyhow::Result<Robj> {
+        let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
+
+        let mut bldr = ListBuilder::new(UInt32Builder::new());
+        for rect in rects {
+            match rect {
+                Some(rect) => {
+                    let found =
+                        self.tree
+                            .search(rect.min().x, rect.min().y, rect.max().x, rect.max().y);
+                    let mut rows = found
+                        .into_iter()
+                        .filter_map(|i| self.positions.get(i as usize).copied())
+                        .map(|i| i + 1)
+                        .collect::<Vec<_>>();
+                    rows.sort_unstable();
+                    for row in rows {
+                        bldr.values().append_value(row);
+                    }
+                    bldr.append(true);
+                }
+                None => bldr.append(false),
+            }
+        }
+
+        bldr.finish()
+            .into_data()
+            .into_arrow_robj()
+            .map_err(|e| anyhow::anyhow!("{e}"))
     }
 
     /// Find the rows whose bounding box overlaps a query box

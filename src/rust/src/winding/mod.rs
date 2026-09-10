@@ -140,7 +140,7 @@ fn ga_orient(
 /// ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 ///
-/// as.vector(nanoarrow::convert_array(ga_winding_order(g)))
+/// as.vector(ga_winding_order(g))
 #[extendr]
 fn ga_winding_order(geometry: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
@@ -179,8 +179,8 @@ fn ga_winding_order(geometry: Robj) -> extendr_api::Result<Robj> {
 /// ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 ///
-/// as.vector(nanoarrow::convert_array(ga_is_ccw(g)))
-/// as.vector(nanoarrow::convert_array(ga_is_cw(ga_orient(g, "reversed"))))
+/// as.vector(ga_is_ccw(g))
+/// as.vector(ga_is_cw(ga_orient(g, "reversed")))
 #[extendr]
 fn ga_is_ccw(geometry: Robj) -> extendr_api::Result<Robj> {
     winding_is(geometry, WindingOrder::CounterClockwise)

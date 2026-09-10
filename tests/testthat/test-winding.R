@@ -10,7 +10,7 @@ ga <- function(sfc) {
   geoarrow::as_geoarrow_array(sfc)
 }
 
-conv <- function(x) as.vector(nanoarrow::convert_array(x))
+conv <- function(x) as.vector(x)
 
 ccw_ring <- matrix(c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0), ncol = 2, byrow = TRUE)
 cw_ring <- ccw_ring[rev(seq_len(nrow(ccw_ring))), ]

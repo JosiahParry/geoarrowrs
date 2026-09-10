@@ -32,7 +32,7 @@ big <- sf::st_polygon(list(
 x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
 y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
 
-as.vector(nanoarrow::convert_array(ga_relate(x, y)))
+as.vector(ga_relate(x, y))
 \dontshow{\}) # examplesIf}
 }
 \references{

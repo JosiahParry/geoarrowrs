@@ -10,119 +10,117 @@ ga <- function(sfc) {
   geoarrow::as_geoarrow_array(sfc)
 }
 
-lst <- function(x) nanoarrow::convert_array(x)
-
 two_blobs <- function() {
-  sf::st_multipoint(cbind(
-    c(0, 0.1, 0.2, 5, 5.1, 5.2),
-    c(0, 0.1, 0.2, 5, 5.1, 5.2)
-  ))
+  skip_deps()
+  ga_xy(c(0, 0.1, 0.2, 5, 5.1, 5.2), c(0, 0.1, 0.2, 5, 5.1, 5.2))
 }
 
 blob_and_stray <- function() {
-  sf::st_multipoint(cbind(
-    c(0, 0.1, 0.2, 0.3, 9),
-    c(0, 0.1, 0.2, 0.3, 9)
-  ))
+  skip_deps()
+  ga_xy(c(0, 0.1, 0.2, 0.3, 9), c(0, 0.1, 0.2, 0.3, 9))
 }
 
 test_that("dbscan separates two blobs", {
-  res <- lst(ga_dbscan(ga(sf::st_sfc(two_blobs())), eps = 1, min_points = 2))
+  res <- as.vector(ga_dbscan(two_blobs(), eps = 1, min_points = 2))
 
-  expect_length(res, 1L)
-  expect_length(res[[1]], 6L)
-  expect_equal(length(unique(res[[1]])), 2L)
-  expect_equal(res[[1]][1], res[[1]][2])
-  expect_false(res[[1]][1] == res[[1]][4])
-})
-
-test_that("dbscan marks a stray point as noise", {
-  res <- lst(ga_dbscan(
-    ga(sf::st_sfc(blob_and_stray())),
-    eps = 1,
-    min_points = 3
-  ))
-
-  expect_true(is.na(res[[1]][5]))
-  expect_false(anyNA(res[[1]][1:4]))
-})
-
-test_that("a larger eps merges the blobs", {
-  merged <- lst(ga_dbscan(
-    ga(sf::st_sfc(two_blobs())),
-    eps = 10,
-    min_points = 2
-  ))
-  expect_equal(length(unique(merged[[1]])), 1L)
-})
-
-test_that("dbscan is length preserving", {
-  g <- ga(sf::st_sfc(two_blobs(), two_blobs(), two_blobs()))
-  expect_length(lst(ga_dbscan(g, eps = 1, min_points = 2)), 3L)
-})
-
-test_that("dbscan recycles and validates its arguments", {
-  g <- ga(sf::st_sfc(two_blobs(), two_blobs()))
-
-  expect_length(lst(ga_dbscan(g, eps = c(1, 10), min_points = 2)), 2L)
-  expect_error(ga_dbscan(g, eps = c(1, 2, 3), min_points = 2), "eps")
-})
-
-test_that("kmeans produces exactly k clusters", {
-  res <- lst(ga_kmeans(ga(sf::st_sfc(two_blobs())), k = 2, seed = 1))
-
-  expect_length(res[[1]], 6L)
-  expect_equal(length(unique(res[[1]])), 2L)
-  expect_false(anyNA(res[[1]]))
-})
-
-test_that("kmeans with a seed is reproducible", {
-  g <- ga(sf::st_sfc(two_blobs()))
-
-  expect_equal(
-    lst(ga_kmeans(g, k = 2, seed = 42))[[1]],
-    lst(ga_kmeans(g, k = 2, seed = 42))[[1]]
-  )
-})
-
-test_that("kmeans groups the blobs together", {
-  res <- lst(ga_kmeans(ga(sf::st_sfc(two_blobs())), k = 2, seed = 1))[[1]]
-
-  expect_equal(length(unique(res[1:3])), 1L)
-  expect_equal(length(unique(res[4:6])), 1L)
+  expect_length(res, 6L)
+  expect_equal(length(unique(res)), 2L)
+  expect_equal(res[1], res[2])
   expect_false(res[1] == res[4])
 })
 
-test_that("kmeans is length preserving", {
-  g <- ga(sf::st_sfc(two_blobs(), two_blobs()))
-  expect_length(lst(ga_kmeans(g, k = 2, seed = 1)), 2L)
+test_that("dbscan marks a stray point as noise", {
+  res <- as.vector(ga_dbscan(blob_and_stray(), eps = 1, min_points = 2))
+
+  expect_length(res, 5L)
+  expect_true(is.na(res[5]))
+  expect_false(anyNA(res[1:4]))
 })
 
-test_that("outlier_scores flags the stray point", {
-  res <- lst(ga_outlier_scores(
-    ga(sf::st_sfc(blob_and_stray())),
-    k_neighbours = 2
+test_that("dbscan labels start at one", {
+  res <- as.vector(ga_dbscan(two_blobs(), eps = 1, min_points = 2))
+  expect_equal(min(res, na.rm = TRUE), 1L)
+})
+
+test_that("kmeans splits into exactly k clusters", {
+  res <- as.vector(ga_kmeans(two_blobs(), k = 2, seed = 1))
+
+  expect_length(res, 6L)
+  expect_equal(sort(unique(res)), c(1L, 2L))
+  expect_false(anyNA(res))
+})
+
+test_that("kmeans is reproducible with a seed", {
+  a <- as.vector(ga_kmeans(two_blobs(), k = 2, seed = 42))
+  b <- as.vector(ga_kmeans(two_blobs(), k = 2, seed = 42))
+
+  expect_equal(a, b)
+})
+
+test_that("outlier_scores gives one score per row", {
+  res <- as.vector(ga_outlier_scores(blob_and_stray(), k_neighbours = 2))
+
+  expect_length(res, 5L)
+  expect_type(res, "double")
+  expect_gt(res[5], res[1])
+})
+
+test_that("clustering is length preserving", {
+  g <- two_blobs()
+
+  expect_equal(ga_dbscan(g, eps = 1, min_points = 2)$length, g$length)
+  expect_equal(ga_kmeans(g, k = 2, seed = 1)$length, g$length)
+  expect_equal(ga_outlier_scores(g, k_neighbours = 2)$length, g$length)
+})
+
+test_that("a row that is not a single point comes back null", {
+  g <- ga(sf::st_sfc(
+    sf::st_point(c(0, 0)),
+    sf::st_point(),
+    sf::st_point(c(5, 5))
   ))
+  res <- ga_dbscan(g, eps = 1, min_points = 1)
 
-  expect_length(res[[1]], 5L)
-  expect_equal(which.max(res[[1]]), 5L)
-  expect_gt(res[[1]][5], res[[1]][1])
+  expect_equal(res$length, 3L)
+  expect_equal(res$null_count, 1L)
 })
 
-test_that("outlier_scores is length preserving", {
-  g <- ga(sf::st_sfc(blob_and_stray(), blob_and_stray()))
-  expect_length(lst(ga_outlier_scores(g, k_neighbours = 2)), 2L)
-})
-
-test_that("a non point geometry comes back null", {
-  square <- sf::st_polygon(list(matrix(
-    c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0),
-    ncol = 2,
-    byrow = TRUE
-  )))
-  g <- ga(sf::st_sfc(two_blobs(), square))
-  res <- ga_dbscan(g, eps = 1, min_points = 2)
+test_that("a multipoint array has no single points to cluster", {
+  g <- ga(sf::st_sfc(
+    sf::st_multipoint(cbind(c(0, 0.1), c(0, 0.1))),
+    sf::st_multipoint(cbind(c(1, 2), c(1, 2)))
+  ))
+  res <- ga_dbscan(g, eps = 1, min_points = 1)
 
   expect_equal(res$length, 2L)
-  expect_equal(res$null_count, 1L)
+  expect_equal(res$null_count, 2L)
+})
+
+test_that("explode turns a multipoint into rows that can be clustered", {
+  mp <- ga(sf::st_sfc(sf::st_multipoint(cbind(
+    c(0, 0.1, 0.2, 5, 5.1, 5.2),
+    c(0, 0.1, 0.2, 5, 5.1, 5.2)
+  ))))
+  pts <- ga_cast_geometry(ga_flatten(ga_explode(mp)), "point")
+  res <- as.vector(ga_dbscan(pts, eps = 1, min_points = 2))
+
+  expect_length(res, 6L)
+  expect_equal(length(unique(res)), 2L)
+})
+
+test_that("whole array parameters must be a single value", {
+  g <- two_blobs()
+
+  expect_error(ga_dbscan(g, eps = c(1, 2), min_points = 2), "single value")
+  expect_error(ga_dbscan(g, eps = 1, min_points = c(1, 2)), "single value")
+  expect_error(ga_kmeans(g, k = c(1, 2)), "single value")
+  expect_error(ga_outlier_scores(g, k_neighbours = c(1, 2)), "single value")
+})
+
+test_that("out of range parameters are rejected", {
+  g <- two_blobs()
+
+  expect_error(ga_dbscan(g, eps = 1, min_points = 0), "at least 1")
+  expect_error(ga_kmeans(g, k = 0), "at least 1")
+  expect_error(ga_outlier_scores(g, k_neighbours = 0), "at least 1")
 })

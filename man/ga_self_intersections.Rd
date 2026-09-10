@@ -35,7 +35,7 @@ bowtie <- sf::st_polygon(list(matrix(
 )))
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
 
-as.vector(nanoarrow::convert_array(ga_is_valid(g)))
+as.vector(ga_is_valid(g))
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_self_intersections(g)))
 \dontshow{\}) # examplesIf}
 }

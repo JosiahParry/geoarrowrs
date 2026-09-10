@@ -7,17 +7,16 @@
 ga_outlier_scores(geometry, k_neighbours)
 }
 \arguments{
-\item{geometry}{a GeoArrow multipoint array}
+\item{geometry}{a GeoArrow point array}
 
-\item{k_neighbours}{how many neighbours define a neighbourhood; length 1 or
-the same length as \code{geometry}}
+\item{k_neighbours}{how many neighbours define a neighbourhood}
 }
 \value{
-a list array of doubles, one list per input geometry
+a double array of scores, the same length as \code{geometry}
 }
 \description{
-Returns the local outlier factor of every point in a geometry, one list per
-input geometry.
+Returns the local outlier factor of every point in the array, one score per
+row.
 }
 \details{
 A score near 1 means a point sits at the same density as its neighbours.
@@ -26,18 +25,18 @@ are, which is what marks an outlier. There is no universal cutoff, so
 compare scores within a dataset rather than against a fixed threshold.
 
 \code{k_neighbours} sets how many neighbours define the local neighbourhood.
-Small values react to fine structure and large values smooth it away. A
-row that is not point based, or is null, comes back null.
+Small values react to fine structure and large values smooth it away.
+Scoring is over the whole array, not within each row, so it is a single
+value. A row that is not a single point, or is null, comes back null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-pts <- sf::st_multipoint(cbind(
+g <- ga_xy(
   c(0, 0.1, 0.2, 0.3, 9),
   c(0, 0.1, 0.2, 0.3, 9)
-))
-g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+)
 
-nanoarrow::convert_array(ga_outlier_scores(g, k_neighbours = 2))
+round(as.vector(ga_outlier_scores(g, k_neighbours = 2)), 2)
 \dontshow{\}) # examplesIf}
 }
 \references{

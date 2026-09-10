@@ -31,7 +31,7 @@ test_that("properties and geometry round trip", {
     feat(pt(2, 3), '{"name":"b","n":2,"ok":false}')
   )))
 
-  df <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(path)))
+  df <- as.data.frame(read_geojson(path))
 
   expect_equal(nrow(df), 2L)
   expect_equal(names(df), c("name", "n", "ok", "geometry"))
@@ -47,7 +47,7 @@ test_that("property columns keep first-seen key order", {
     feat(pt(0, 0), '{"zebra":1,"apple":2}')
   )))
 
-  df <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(path)))
+  df <- as.data.frame(read_geojson(path))
   expect_equal(names(df), c("zebra", "apple", "geometry"))
 })
 
@@ -72,7 +72,7 @@ test_that("integers stay int64 but widen to double alongside reals", {
   expect_equal(col_format(ints, "v"), "l")
   expect_equal(col_format(reals, "v"), "g")
 
-  v <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(reals)))$v
+  v <- as.data.frame(read_geojson(reals))$v
   expect_equal(v, c(1, 2.5))
 })
 
@@ -84,7 +84,7 @@ test_that("types that cannot unify fall back to string", {
     feat(pt(1, 1), '{"v":"text"}')
   )))
 
-  v <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(path)))$v
+  v <- as.data.frame(read_geojson(path))$v
   expect_type(v, "character")
   expect_equal(v, c("1", "text"))
 })
@@ -96,7 +96,7 @@ test_that("nested arrays and objects are kept as JSON text", {
     feat(pt(0, 0), '{"tags":["a","b"],"meta":{"k":1}}')
   )))
 
-  df <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(path)))
+  df <- as.data.frame(read_geojson(path))
   expect_equal(df$tags, '["a","b"]')
   expect_equal(df$meta, '{"k":1}')
 })
@@ -109,7 +109,7 @@ test_that("a key missing from a feature is null for that row", {
     feat(pt(1, 1), '{"b":"y"}')
   )))
 
-  df <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(path)))
+  df <- as.data.frame(read_geojson(path))
   expect_equal(df$a, c("x", NA))
   expect_equal(df$b, c(NA, "y"))
 })
@@ -177,7 +177,7 @@ test_that("genuinely mixed families fall back to geoarrow.geometry", {
   # arrow level rather than converting to sf
   expect_equal(geom_ext(path), "geoarrow.geometry")
 
-  df <- as.data.frame(nanoarrow::convert_array_stream(read_geojson(path)))
+  df <- as.data.frame(read_geojson(path))
   expect_equal(nrow(df), 3L)
 })
 

@@ -305,7 +305,7 @@ ga_dist_frechet_pairwise <- function(origin, dest) .Call(wrap__ga_dist_frechet_p
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 #'
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_coords(g)))
-#' as.vector(nanoarrow::convert_array(ga_n_coords(g)))
+#' as.vector(ga_n_coords(g))
 ga_coords <- function(geometry) .Call(wrap__ga_coords, geometry)
 
 #' @export
@@ -330,7 +330,7 @@ ga_exterior_coords <- function(geometry) .Call(wrap__ga_exterior_coords, geometr
 #' ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 #'
-#' as.vector(nanoarrow::convert_array(ga_n_coords(g)))
+#' as.vector(ga_n_coords(g))
 ga_n_coords <- function(geometry) .Call(wrap__ga_n_coords, geometry)
 
 #' Split geometries into their line segments
@@ -559,7 +559,7 @@ ga_interior_point <- function(geometry) .Call(wrap__ga_interior_point, geometry)
 #' ))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
 #'
-#' as.vector(nanoarrow::convert_array(ga_is_convex(g)))
+#' as.vector(ga_is_convex(g))
 ga_is_convex <- function(geometry) .Call(wrap__ga_is_convex, geometry)
 
 #' Locate a point along a line as a fraction of its length
@@ -585,7 +585,7 @@ ga_is_convex <- function(geometry) .Call(wrap__ga_is_convex, geometry)
 #' ))
 #' pt <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2.5, 0))))
 #'
-#' as.vector(nanoarrow::convert_array(ga_line_locate_point(line, pt)))
+#' as.vector(ga_line_locate_point(line, pt))
 ga_line_locate_point <- function(geometry, point) .Call(wrap__ga_line_locate_point, geometry, point)
 
 #' Simplify geometries using the Ramer-Douglas-Peucker algorithm
@@ -661,7 +661,7 @@ ga_simplify_vw_preserve <- function(geometry, epsilon) .Call(wrap__ga_simplify_v
 #' line <- sf::st_linestring(cbind(c(0, 1, 2, 3, 4), c(0, 0.1, 0, 0.1, 0)))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(line))
 #'
-#' nanoarrow::convert_array(ga_simplify_idx(g, 0.5))
+#' as.vector(ga_simplify_idx(g, 0.5))
 ga_simplify_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_idx, geometry, epsilon)
 
 #' @export
@@ -706,8 +706,8 @@ ga_simplify_vw_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_vw_idx
 #' x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
 #' y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
 #'
-#' as.vector(nanoarrow::convert_array(ga_contains(x, y)))
-#' as.vector(nanoarrow::convert_array(ga_intersects(x, y)))
+#' as.vector(ga_contains(x, y))
+#' as.vector(ga_intersects(x, y))
 ga_contains <- function(x, y) .Call(wrap__ga_contains, x, y)
 
 #' @export
@@ -783,7 +783,7 @@ ga_equals_topo <- function(x, y) .Call(wrap__ga_equals_topo, x, y)
 #' x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
 #' y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
 #'
-#' as.vector(nanoarrow::convert_array(ga_relate(x, y)))
+#' as.vector(ga_relate(x, y))
 ga_relate <- function(x, y) .Call(wrap__ga_relate, x, y)
 
 #' Determine the topological dimension of geometries
@@ -807,7 +807,7 @@ ga_relate <- function(x, y) .Call(wrap__ga_relate, x, y)
 #'   sf::st_linestring(cbind(c(0, 1), c(0, 1)))
 #' ))
 #'
-#' as.vector(nanoarrow::convert_array(ga_dimension(g)))
+#' as.vector(ga_dimension(g))
 ga_dimension <- function(geometry) .Call(wrap__ga_dimension, geometry)
 
 #' @export
@@ -833,7 +833,7 @@ ga_boundary_dimension <- function(geometry) .Call(wrap__ga_boundary_dimension, g
 #'   sf::st_point()
 #' ))
 #'
-#' as.vector(nanoarrow::convert_array(ga_is_empty(g)))
+#' as.vector(ga_is_empty(g))
 ga_is_empty <- function(geometry) .Call(wrap__ga_is_empty, geometry)
 
 #' Locate a point relative to a geometry
@@ -860,7 +860,7 @@ ga_is_empty <- function(geometry) .Call(wrap__ga_is_empty, geometry)
 #'   sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
 #' ))
 #'
-#' as.vector(nanoarrow::convert_array(ga_coordinate_position(g, p)))
+#' as.vector(ga_coordinate_position(g, p))
 ga_coordinate_position <- function(geometry, point) .Call(wrap__ga_coordinate_position, geometry, point)
 
 #' Triangulate polygons with the earcut algorithm
@@ -1342,8 +1342,8 @@ ga_flatten <- function(x) .Call(wrap__ga_flatten, x)
 
 #' Assign points to clusters by density
 #'
-#' Labels each point of a geometry with a cluster number, or `NA` when the
-#' point is noise. Returns one list of labels per input geometry.
+#' Labels every point in the array with a cluster number, or `NA` when the
+#' point is noise. One label per row, in the order the points were given.
 #'
 #' @details
 #' DBSCAN grows a cluster from any point with at least `min_points` neighbours
@@ -1351,65 +1351,62 @@ ga_flatten <- function(x) .Call(wrap__ga_flatten, x)
 #' that never become reachable are noise. Unlike k-means it finds clusters of
 #' any shape and does not need the count up front.
 #'
-#' Cluster numbers start at 1 and mean nothing beyond grouping. Both `eps` and
-#' `min_points` are recycled against `geometry`. A row that is not point based,
-#' or is null, comes back null.
+#' Clustering is over the whole array, not within each row, so `eps` and
+#' `min_points` are single values rather than one per row. Cluster numbers
+#' start at 1 and mean nothing beyond grouping. A row that is not a single
+#' point, or is null, takes no part in the clustering and comes back null.
 #'
-#' @param geometry a GeoArrow multipoint array
-#' @param eps how close two points must be to be neighbours; length 1 or the
-#'   same length as `geometry`
-#' @param min_points how many neighbours a point needs to seed a cluster;
-#'   length 1 or the same length as `geometry`
-#' @returns a list array of integer labels, one list per input geometry
+#' @param geometry a GeoArrow point array
+#' @param eps how close two points must be to be neighbours
+#' @param min_points how many neighbours a point needs to seed a cluster
+#' @returns an integer array of cluster labels, the same length as `geometry`
 #' @export
 #' @family cluster
 #' @references [Dbscan](https://docs.rs/geo/latest/geo/algorithm/dbscan/trait.Dbscan.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' pts <- sf::st_multipoint(cbind(
+#' g <- ga_xy(
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2),
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2)
-#' ))
-#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#' )
 #'
-#' nanoarrow::convert_array(ga_dbscan(g, eps = 1, min_points = 2))
+#' as.vector(ga_dbscan(g, eps = 1, min_points = 2))
 ga_dbscan <- function(geometry, eps, min_points) .Call(wrap__ga_dbscan, geometry, eps, min_points)
 
 #' Assign points to a fixed number of clusters
 #'
-#' Splits each geometry's points into `k` clusters by nearest centre. Returns
-#' one list of labels per input geometry.
+#' Splits the points in the array into `k` clusters by nearest centre. One
+#' label per row, in the order the points were given.
 #'
 #' @details
 #' k-means always produces exactly `k` clusters and no noise, so every point
 #' gets a label. It favours round, similarly sized clusters; use [ga_dbscan()]
 #' when the shapes are irregular or the count is unknown.
 #'
-#' The algorithm starts from a random seed, so results vary between runs
-#' unless `seed` is given. A row with fewer than `k` points cannot be split
-#' and comes back null, as does a row that is not point based or is null.
+#' Clustering is over the whole array, not within each row, so `k` is a single
+#' value rather than one per row. The algorithm starts from a random seed, so
+#' results vary between runs unless `seed` is given. A row that is not a single
+#' point, or is null, takes no part in the clustering and comes back null.
 #'
-#' @param geometry a GeoArrow multipoint array
-#' @param k how many clusters to produce; length 1 or the same length as
-#'   `geometry`
+#' @param geometry a GeoArrow point array
+#' @param k how many clusters to produce
 #' @param seed a seed for reproducible starts, or `NULL` to vary each run
-#' @returns a list array of integer labels, one list per input geometry
+#' @returns an integer array of cluster labels, the same length as `geometry`
 #' @export
 #' @family cluster
 #' @references [KMeans](https://docs.rs/geo/latest/geo/algorithm/kmeans/trait.KMeans.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' pts <- sf::st_multipoint(cbind(
+#' g <- ga_xy(
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2),
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2)
-#' ))
-#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#' )
 #'
-#' nanoarrow::convert_array(ga_kmeans(g, k = 2, seed = 1))
+#' as.vector(ga_kmeans(g, k = 2, seed = 1))
 ga_kmeans <- function(geometry, k, seed = NULL) .Call(wrap__ga_kmeans, geometry, k, seed)
 
 #' Score how much each point looks like an outlier
 #'
-#' Returns the local outlier factor of every point in a geometry, one list per
-#' input geometry.
+#' Returns the local outlier factor of every point in the array, one score per
+#' row.
 #'
 #' @details
 #' A score near 1 means a point sits at the same density as its neighbours.
@@ -1418,24 +1415,23 @@ ga_kmeans <- function(geometry, k, seed = NULL) .Call(wrap__ga_kmeans, geometry,
 #' compare scores within a dataset rather than against a fixed threshold.
 #'
 #' `k_neighbours` sets how many neighbours define the local neighbourhood.
-#' Small values react to fine structure and large values smooth it away. A
-#' row that is not point based, or is null, comes back null.
+#' Small values react to fine structure and large values smooth it away.
+#' Scoring is over the whole array, not within each row, so it is a single
+#' value. A row that is not a single point, or is null, comes back null.
 #'
-#' @param geometry a GeoArrow multipoint array
-#' @param k_neighbours how many neighbours define a neighbourhood; length 1 or
-#'   the same length as `geometry`
-#' @returns a list array of doubles, one list per input geometry
+#' @param geometry a GeoArrow point array
+#' @param k_neighbours how many neighbours define a neighbourhood
+#' @returns a double array of scores, the same length as `geometry`
 #' @export
 #' @family cluster
 #' @references [OutlierDetection](https://docs.rs/geo/latest/geo/algorithm/outlier_detection/trait.OutlierDetection.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' pts <- sf::st_multipoint(cbind(
+#' g <- ga_xy(
 #'   c(0, 0.1, 0.2, 0.3, 9),
 #'   c(0, 0.1, 0.2, 0.3, 9)
-#' ))
-#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#' )
 #'
-#' nanoarrow::convert_array(ga_outlier_scores(g, k_neighbours = 2))
+#' round(as.vector(ga_outlier_scores(g, k_neighbours = 2)), 2)
 ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_scores, geometry, k_neighbours)
 
 #' Build a point array from x and y coordinates
@@ -1518,6 +1514,38 @@ ga_to_radians <- function(geometry) .Call(wrap__ga_to_radians, geometry)
 #' @references [Densifiable](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html)
 ga_densify <- function(geometry, max_segment_length, metric) .Call(wrap__ga_densify, geometry, max_segment_length, metric)
 
+#' Compute the bounding box of geometries
+#'
+#' Returns the axis aligned bounding box of each geometry, as the box array
+#' that the spatial index queries take.
+#'
+#' @details
+#' A box array is passed straight through rather than recomputed, so this is
+#' cheap to call on something that already holds boxes and safe to call
+#' defensively before a query.
+#'
+#' This is the envelope in the OGC sense. It differs from
+#' [ga_bounding_rect()] only in that pass through; the boxes themselves are
+#' the same.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a GeoArrow box array of the same length as `x`
+#' @export
+#' @family index
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' boxes <- ga_envelope(nc$geometry)
+#' head(geoarrow::as_geoarrow_vctr(boxes), 3)
+#'
+#' # already boxes, so this is a no op
+#' identical(
+#'   as.character(geoarrow::as_geoarrow_vctr(ga_envelope(boxes))),
+#'   as.character(geoarrow::as_geoarrow_vctr(boxes))
+#' )
+ga_envelope <- function(x) .Call(wrap__ga_envelope, x)
+
 #' Intersect pairs of two point lines
 #'
 #' Returns where each pair of lines meets: a point when they cross, and a line
@@ -1579,7 +1607,7 @@ ga_line_intersection <- function(x, y) .Call(wrap__ga_line_intersection, x, y)
 #' )))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
 #'
-#' as.vector(nanoarrow::convert_array(ga_is_valid(g)))
+#' as.vector(ga_is_valid(g))
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_self_intersections(g)))
 ga_self_intersections <- function(geometry) .Call(wrap__ga_self_intersections, geometry)
 
@@ -1811,8 +1839,8 @@ read_shapefile <- function(path) .Call(wrap__read_shapefile, path)
 #' )))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
 #'
-#' as.vector(nanoarrow::convert_array(ga_is_valid(g)))
-#' as.vector(nanoarrow::convert_array(ga_validation_error(g)))
+#' as.vector(ga_is_valid(g))
+#' as.vector(ga_validation_error(g))
 ga_is_valid <- function(geometry) .Call(wrap__ga_is_valid, geometry)
 
 #' Explain why a geometry is invalid
@@ -1947,7 +1975,7 @@ ga_orient <- function(geometry, direction = "default") .Call(wrap__ga_orient, ge
 #' ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 #'
-#' as.vector(nanoarrow::convert_array(ga_winding_order(g)))
+#' as.vector(ga_winding_order(g))
 ga_winding_order <- function(geometry) .Call(wrap__ga_winding_order, geometry)
 
 #' Test the winding order of a ring
@@ -1970,8 +1998,8 @@ ga_winding_order <- function(geometry) .Call(wrap__ga_winding_order, geometry)
 #' ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 #'
-#' as.vector(nanoarrow::convert_array(ga_is_ccw(g)))
-#' as.vector(nanoarrow::convert_array(ga_is_cw(ga_orient(g, "reversed"))))
+#' as.vector(ga_is_ccw(g))
+#' as.vector(ga_is_cw(ga_orient(g, "reversed")))
 ga_is_ccw <- function(geometry) .Call(wrap__ga_is_ccw, geometry)
 
 #' @export
@@ -2013,15 +2041,43 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #' idx$size()
 #'
 #' # candidate rows whose bounding box meets the query box
-#' hits <- as.vector(nanoarrow::convert_array(idx$search(-79, 35, -78, 36)))
+#' hits <- as.vector(idx$search(-79, 35, -78, 36))
 #' length(hits)
 #'
 #' # the three rows nearest a point
-#' as.vector(nanoarrow::convert_array(idx$neighbors(-79, 35, max_results = 3)))
+#' as.vector(idx$neighbors(-79, 35, max_results = 3))
 #' @section Methods:
 #'\subsection{Method `new`}{
 #'Build the index. `node_size` sets how many entries share a tree node;
-#'larger values build faster and query slower.
+#'larger values build faster and query slower. `sort` picks the packing
+#'order, either `"hilbert"` or `"str"`.
+#'}
+#'
+#'\subsection{Method `query`}{
+#'Find the rows whose bounding box overlaps each geometry
+#'
+#'Returns one list of candidate row numbers per element of `geometry`,
+#'so the result lines up row for row with the query array. This is the
+#'shape a spatial join needs.
+#'
+#' \subsection{Arguments}{
+#'\describe{
+#'\item{`geometry`}{a GeoArrow array to look up}
+#'}}
+#' \subsection{details}{
+#'Anything with a bounding box works: a point array, a polygon array, or
+#'the box array [ga_envelope()] produces. Boxes are taken as they are and
+#'everything else is reduced to its envelope first.
+#'
+#'This is a bounding box test, not an exact one, so each list holds
+#'candidates to confirm with [ga_intersects()] or another predicate. A
+#'null or empty query geometry gives a null rather than an empty list.
+#'
+#'}
+#' \subsection{returns}{
+#'a list array of 1 based row numbers, the same length as
+#'`geometry`
+#'}
 #'}
 #'
 #'\subsection{Method `search`}{
@@ -2093,7 +2149,9 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #'
 RTree <- new.env(parent = emptyenv())
 
-RTree$new <- function(geometry, node_size = 16) .Call(wrap__RTree__new, geometry, node_size)
+RTree$new <- function(geometry, node_size = 16, sort = "hilbert") .Call(wrap__RTree__new, geometry, node_size, sort)
+
+RTree$query <- function(geometry) .Call(wrap__RTree__query, self, geometry)
 
 RTree$search <- function(xmin, ymin, xmax, ymax) .Call(wrap__RTree__search, self, xmin, ymin, xmax, ymax)
 

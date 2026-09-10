@@ -32,7 +32,7 @@ ring <- matrix(c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE)
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_coords(g)))
-as.vector(nanoarrow::convert_array(ga_n_coords(g)))
+as.vector(ga_n_coords(g))
 \dontshow{\}) # examplesIf}
 }
 \references{

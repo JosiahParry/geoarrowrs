@@ -10,7 +10,7 @@ ga <- function(sfc) {
   geoarrow::as_geoarrow_array(sfc)
 }
 
-conv <- function(x) as.vector(nanoarrow::convert_array(x))
+conv <- function(x) as.vector(x)
 tosfc <- function(x) sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x))
 coords <- function(x) unname(sf::st_coordinates(tosfc(x))[, 1:2, drop = FALSE])
 

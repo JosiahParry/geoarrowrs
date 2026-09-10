@@ -29,7 +29,7 @@ square <- sf::st_polygon(list(
 ))
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
 
-as.vector(nanoarrow::convert_array(ga_is_convex(g)))
+as.vector(ga_is_convex(g))
 \dontshow{\}) # examplesIf}
 }
 \references{

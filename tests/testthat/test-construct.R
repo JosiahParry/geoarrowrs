@@ -88,10 +88,7 @@ test_that("ga_xy output feeds the other functions", {
   pts <- ga_xy(c(0, 3), c(0, 4))
 
   expect_equal(
-    as.vector(nanoarrow::convert_array(ga_dist_euclidean_pairwise(
-      pts,
-      ga_xy(c(0, 0), c(0, 0))
-    ))),
+    as.vector(ga_dist_euclidean_pairwise(pts, ga_xy(c(0, 0), c(0, 0)))),
     c(0, 5)
   )
 })

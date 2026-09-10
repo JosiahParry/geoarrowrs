@@ -7,20 +7,18 @@
 ga_dbscan(geometry, eps, min_points)
 }
 \arguments{
-\item{geometry}{a GeoArrow multipoint array}
+\item{geometry}{a GeoArrow point array}
 
-\item{eps}{how close two points must be to be neighbours; length 1 or the
-same length as \code{geometry}}
+\item{eps}{how close two points must be to be neighbours}
 
-\item{min_points}{how many neighbours a point needs to seed a cluster;
-length 1 or the same length as \code{geometry}}
+\item{min_points}{how many neighbours a point needs to seed a cluster}
 }
 \value{
-a list array of integer labels, one list per input geometry
+an integer array of cluster labels, the same length as \code{geometry}
 }
 \description{
-Labels each point of a geometry with a cluster number, or \code{NA} when the
-point is noise. Returns one list of labels per input geometry.
+Labels every point in the array with a cluster number, or \code{NA} when the
+point is noise. One label per row, in the order the points were given.
 }
 \details{
 DBSCAN grows a cluster from any point with at least \code{min_points} neighbours
@@ -28,19 +26,19 @@ within \code{eps}. Points reachable from that core join the cluster, and points
 that never become reachable are noise. Unlike k-means it finds clusters of
 any shape and does not need the count up front.
 
-Cluster numbers start at 1 and mean nothing beyond grouping. Both \code{eps} and
-\code{min_points} are recycled against \code{geometry}. A row that is not point based,
-or is null, comes back null.
+Clustering is over the whole array, not within each row, so \code{eps} and
+\code{min_points} are single values rather than one per row. Cluster numbers
+start at 1 and mean nothing beyond grouping. A row that is not a single
+point, or is null, takes no part in the clustering and comes back null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-pts <- sf::st_multipoint(cbind(
+g <- ga_xy(
   c(0, 0.1, 0.2, 5, 5.1, 5.2),
   c(0, 0.1, 0.2, 5, 5.1, 5.2)
-))
-g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+)
 
-nanoarrow::convert_array(ga_dbscan(g, eps = 1, min_points = 2))
+as.vector(ga_dbscan(g, eps = 1, min_points = 2))
 \dontshow{\}) # examplesIf}
 }
 \references{

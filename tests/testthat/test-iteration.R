@@ -10,7 +10,7 @@ ga <- function(sfc) {
   geoarrow::as_geoarrow_array(sfc)
 }
 
-conv <- function(x) as.vector(nanoarrow::convert_array(x))
+conv <- function(x) as.vector(x)
 tosfc <- function(x) sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x))
 
 n_pts <- function(x) vapply(tosfc(x), nrow, integer(1))

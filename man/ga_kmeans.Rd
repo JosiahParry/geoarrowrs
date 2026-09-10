@@ -7,38 +7,37 @@
 ga_kmeans(geometry, k, seed = NULL)
 }
 \arguments{
-\item{geometry}{a GeoArrow multipoint array}
+\item{geometry}{a GeoArrow point array}
 
-\item{k}{how many clusters to produce; length 1 or the same length as
-\code{geometry}}
+\item{k}{how many clusters to produce}
 
 \item{seed}{a seed for reproducible starts, or \code{NULL} to vary each run}
 }
 \value{
-a list array of integer labels, one list per input geometry
+an integer array of cluster labels, the same length as \code{geometry}
 }
 \description{
-Splits each geometry's points into \code{k} clusters by nearest centre. Returns
-one list of labels per input geometry.
+Splits the points in the array into \code{k} clusters by nearest centre. One
+label per row, in the order the points were given.
 }
 \details{
 k-means always produces exactly \code{k} clusters and no noise, so every point
 gets a label. It favours round, similarly sized clusters; use \code{\link[=ga_dbscan]{ga_dbscan()}}
 when the shapes are irregular or the count is unknown.
 
-The algorithm starts from a random seed, so results vary between runs
-unless \code{seed} is given. A row with fewer than \code{k} points cannot be split
-and comes back null, as does a row that is not point based or is null.
+Clustering is over the whole array, not within each row, so \code{k} is a single
+value rather than one per row. The algorithm starts from a random seed, so
+results vary between runs unless \code{seed} is given. A row that is not a single
+point, or is null, takes no part in the clustering and comes back null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-pts <- sf::st_multipoint(cbind(
+g <- ga_xy(
   c(0, 0.1, 0.2, 5, 5.1, 5.2),
   c(0, 0.1, 0.2, 5, 5.1, 5.2)
-))
-g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+)
 
-nanoarrow::convert_array(ga_kmeans(g, k = 2, seed = 1))
+as.vector(ga_kmeans(g, k = 2, seed = 1))
 \dontshow{\}) # examplesIf}
 }
 \references{

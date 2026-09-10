@@ -102,18 +102,6 @@ if (file.exists(mv_ofp)) {
   invisible(file.remove(mv_ofp))
 }
 
-# The document step links rust/document.c into a standalone executable, so it
-# has to name the system libraries the static lib depends on. R adds these
-# itself when it links the shared object, which is why only this step needs
-# them. They are what `--print=native-static-libs` reports, minus -lR, which
-# the rule already passes.
-.document_libs <- switch(
-  Sys.info()[["sysname"]],
-  Darwin = "-liconv -framework CoreFoundation",
-  Linux = "-lm -ldl -lpthread",
-  ""
-)
-
 # read as a single string
 mv_txt <- readLines(mv_fp)
 
@@ -124,8 +112,7 @@ new_txt <- gsub("@CRAN_FLAGS@", .cran_flags, mv_txt) |>
   gsub("@CLEAN_TARGET@", .clean_targets, x = _) |>
   gsub("@LIBDIR@", .libdir, x = _) |>
   gsub("@TARGET@", .target, x = _) |>
-  gsub("@PANIC_EXPORTS@", .panic_exports, x = _) |>
-  gsub("@DOCUMENT_LIBS@", .document_libs, x = _)
+  gsub("@PANIC_EXPORTS@", .panic_exports, x = _)
 
 message("Writing `", mv_ofp, "`.")
 con <- file(mv_ofp, open = "wb")

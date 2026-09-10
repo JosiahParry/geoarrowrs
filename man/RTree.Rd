@@ -34,7 +34,35 @@ positions in the original array.
 
 \subsection{Method \code{new}}{
 Build the index. \code{node_size} sets how many entries share a tree node;
-larger values build faster and query slower.
+larger values build faster and query slower. \code{sort} picks the packing
+order, either \code{"hilbert"} or \code{"str"}.
+}
+
+\subsection{Method \code{query}}{
+Find the rows whose bounding box overlaps each geometry
+
+Returns one list of candidate row numbers per element of \code{geometry},
+so the result lines up row for row with the query array. This is the
+shape a spatial join needs.
+
+\subsection{Arguments}{
+\describe{
+\item{\code{geometry}}{a GeoArrow array to look up}
+}}
+\subsection{details}{
+Anything with a bounding box works: a point array, a polygon array, or
+the box array \code{\link[=ga_envelope]{ga_envelope()}} produces. Boxes are taken as they are and
+everything else is reduced to its envelope first.
+
+This is a bounding box test, not an exact one, so each list holds
+candidates to confirm with \code{\link[=ga_intersects]{ga_intersects()}} or another predicate. A
+null or empty query geometry gives a null rather than an empty list.
+
+}
+\subsection{returns}{
+a list array of 1 based row numbers, the same length as
+\code{geometry}
+}
 }
 
 \subsection{Method \code{search}}{
@@ -115,14 +143,18 @@ idx <- RTree$new(nc$geometry)
 idx$size()
 
 # candidate rows whose bounding box meets the query box
-hits <- as.vector(nanoarrow::convert_array(idx$search(-79, 35, -78, 36)))
+hits <- as.vector(idx$search(-79, 35, -78, 36))
 length(hits)
 
 # the three rows nearest a point
-as.vector(nanoarrow::convert_array(idx$neighbors(-79, 35, max_results = 3)))
+as.vector(idx$neighbors(-79, 35, max_results = 3))
 \dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo-index/latest/geo_index/}{geo-index}
+}
+\seealso{
+Other index:
+\code{\link[=ga_envelope]{ga_envelope()}}
 }
 \concept{index}

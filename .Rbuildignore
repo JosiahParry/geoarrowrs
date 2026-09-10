@@ -13,5 +13,5 @@ air.toml
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-^BUILD-NOTES\.md$
 ^README\.qmd$
+^\.github$

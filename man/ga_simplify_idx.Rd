@@ -39,7 +39,7 @@ null geometry, comes back null.
 line <- sf::st_linestring(cbind(c(0, 1, 2, 3, 4), c(0, 0.1, 0, 0.1, 0)))
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(line))
 
-nanoarrow::convert_array(ga_simplify_idx(g, 0.5))
+as.vector(ga_simplify_idx(g, 0.5))
 \dontshow{\}) # examplesIf}
 }
 \references{

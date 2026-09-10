@@ -189,7 +189,7 @@ fn ga_interior_point(geometry: Robj) -> extendr_api::Result<Robj> {
 /// ))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
 ///
-/// as.vector(nanoarrow::convert_array(ga_is_convex(g)))
+/// as.vector(ga_is_convex(g))
 #[extendr]
 fn ga_is_convex(geometry: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
@@ -231,7 +231,7 @@ fn ga_is_convex(geometry: Robj) -> extendr_api::Result<Robj> {
 /// ))
 /// pt <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2.5, 0))))
 ///
-/// as.vector(nanoarrow::convert_array(ga_line_locate_point(line, pt)))
+/// as.vector(ga_line_locate_point(line, pt))
 #[extendr]
 fn ga_line_locate_point(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;

@@ -85,7 +85,7 @@ test_that("XY polygons round trip with attributes", {
     value = 1.5,
     name = "xy"
   )
-  tbl <- as.data.frame(nanoarrow::convert_array_stream(stream))
+  tbl <- as.data.frame(stream)
 
   expect_equal(nrow(tbl), 1L)
   expect_true(all(c("id", "label", "value", "geometry") %in% names(tbl)))
@@ -150,7 +150,7 @@ test_that("point shapefiles round trip", {
     crs = 4326
   )
   stream <- roundtrip(pts, id = 1:2, name = "pts")
-  tbl <- as.data.frame(nanoarrow::convert_array_stream(stream))
+  tbl <- as.data.frame(stream)
 
   expect_equal(nrow(tbl), 2L)
   expect_equal(tbl$id, 1:2)

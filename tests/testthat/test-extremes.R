@@ -13,8 +13,8 @@ as_geoarrow <- function(sfc) {
 pt <- function(res, name) {
   a <- res$children[[name]]
   list(
-    x = nanoarrow::convert_array(a$children$x),
-    y = nanoarrow::convert_array(a$children$y)
+    x = as.vector(a$children$x),
+    y = as.vector(a$children$y)
   )
 }
 

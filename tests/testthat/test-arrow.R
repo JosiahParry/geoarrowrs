@@ -55,9 +55,7 @@ test_that("a unary function runs inside mutate on a Table", {
     dplyr::mutate(tbl, a = t2_ga_unsigned_area(geometry)),
     a
   ))
-  direct <- as.vector(nanoarrow::convert_array(
-    ga_unsigned_area(as.data.frame(tbl)$geometry)
-  ))
+  direct <- as.vector(ga_unsigned_area(as.data.frame(tbl)$geometry))
 
   expect_equal(nrow(res), 100L)
   expect_equal(res$a, direct)
@@ -189,10 +187,7 @@ test_that("a registered function can be filtered on", {
     n = dplyr::n()
   ))$n
   direct <- sum(
-    as.vector(nanoarrow::convert_array(
-      ga_unsigned_area(as.data.frame(tbl)$geometry)
-    )) >
-      0.1
+    as.vector(ga_unsigned_area(as.data.frame(tbl)$geometry)) > 0.1
   )
 
   expect_equal(kept, direct)

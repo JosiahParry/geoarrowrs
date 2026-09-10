@@ -30,7 +30,7 @@ g <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_linestring(cbind(c(0, 1), c(0, 1)))
 ))
 
-as.vector(nanoarrow::convert_array(ga_dimension(g)))
+as.vector(ga_dimension(g))
 \dontshow{\}) # examplesIf}
 }
 \references{

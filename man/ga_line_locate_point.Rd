@@ -31,7 +31,7 @@ line <- geoarrow::as_geoarrow_array(sf::st_sfc(
 ))
 pt <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2.5, 0))))
 
-as.vector(nanoarrow::convert_array(ga_line_locate_point(line, pt)))
+as.vector(ga_line_locate_point(line, pt))
 \dontshow{\}) # examplesIf}
 }
 \references{

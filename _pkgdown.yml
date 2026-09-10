@@ -1,108 +1,100 @@
 url: https://josiahparry.github.io/geoarrowrs/
-
+repo:
+  url:
+    home: https://github.com/JosiahParry/geoarrowrs
+    source: https://github.com/JosiahParry/geoarrowrs/blob/main/
+    issue: https://github.com/JosiahParry/geoarrowrs/issues/
+    user: https://github.com/
 template:
   bootstrap: 5
   light-switch: true
   bslib:
-    primary: "#B7410E"
-    base_font: {google: "Inter"}
-    heading_font: {google: "Inter"}
-    code_font: {google: "JetBrains Mono"}
+    primary: "#974ba8"
+    bg: "#ffffff"
+    fg: "#1f131a"
+    navbar-light-bg: "#f8f4f6"
+    navbar-dark-bg: "#0e080d"
+    enable-rounded: false
 
-home:
-  title: Fast geospatial operations on GeoArrow arrays
-  description: >
-    Rust bindings to geoarrow-rs and the GeoRust algorithms, vectorized over
-    Arrow arrays. Read shapefiles, GeoJSON, and FlatGeobuf, then compute
-    without leaving Arrow.
-
-navbar:
-  structure:
-    left: [reference, news]
-    right: [search, github, lightswitch]
 
 reference:
-- title: Read
-  desc: >
-    Readers return a record batch stream. Everything else returns an Arrow
-    array.
-  contents:
-  - has_concept("io")
+  - title: Read
+    contents:
+      - has_concept("io")
 
-- title: Stay in Arrow
-  desc: >
-    Register these functions with Arrow so they run on a Table or Dataset
-    without pulling geometry into R.
-  contents:
-  - register_geoarrow_udfs
+  - title: Construct
+    contents:
+      - has_concept("construct")
 
-- title: Construct
-  desc: Build geometry from plain coordinates.
-  contents:
-  - has_concept("construct")
+  - title: Area
+    contents:
+      - has_concept("area")
 
-- title: Measure
-  desc: Area, length, distance, and bearing. All return plain Arrow arrays.
-  contents:
-  - has_concept("area")
-  - has_concept("length")
-  - has_concept("distance")
-  - has_concept("bearing")
-  - has_concept("destination")
+  - title: Distance
+    contents:
+      - has_concept("distance")
 
-- title: Index
-  desc: >
-    Build an index once, query it many times. Results are candidates to confirm
-    with an exact predicate.
-  contents:
-  - has_concept("index")
+  - title: Measure
+    contents:
+      - has_concept("length")
+      - has_concept("bearing")
+      - has_concept("destination")
 
-- title: Relate
-  desc: Topological predicates. Pairwise, with the second argument recycled.
-  contents:
-  - has_concept("topology")
-  - has_concept("intersection")
+  - title: Index
+    contents:
+      - has_concept("index")
 
-- title: Inspect
-  desc: Walk a geometry's parts, and check it is well formed.
-  contents:
-  - has_concept("iteration")
-  - has_concept("validation")
+  - title: Relate
+    contents:
+      - has_concept("topology")
+      - has_concept("intersection")
 
-- title: Cluster
-  desc: Group the points within each row, or score them for outlyingness.
-  contents:
-  - has_concept("cluster")
+  - title: Locate
+    contents:
+      - has_concept("query")
 
-- title: Combine
-  desc: Set operations on polygons.
-  contents:
-  - has_concept("boolean")
+  - title: Hulls and bounds
+    contents:
+      - has_concept("boundary")
 
-- title: Reshape
-  desc: Move, simplify, and convert. The geometry type is preserved.
-  contents:
-  - has_concept("affine")
-  - has_concept("simplify")
-  - has_concept("convert")
-  - has_concept("misc")
+  - title: Tessellate
+    contents:
+      - has_concept("triangulate")
+      - has_concept("voronoi")
 
-- title: Derive
-  desc: Build new geometry from existing geometry.
-  contents:
-  - has_concept("boundary")
-  - has_concept("triangulate")
-  - has_concept("voronoi")
-  - has_concept("query")
-  - has_concept("winding")
+  - title: Cluster
+    contents:
+      - has_concept("cluster")
 
-- title: Interpolate
-  desc: Place points along lines and add vertices.
-  contents:
-  - has_concept("interpolate")
-  - has_concept("densify")
+  - title: Combine
+    contents:
+      - has_concept("boolean")
 
-- title: Cast
-  desc: Convert between geometry types and split multi-part geometries.
-  contents:
-  - has_concept("cast")
+  - title: Transform
+    contents:
+      - has_concept("affine")
+      - has_concept("simplify")
+      - has_concept("convert")
+
+  - title: Interpolate
+    contents:
+      - has_concept("interpolate")
+      - has_concept("densify")
+
+  - title: Winding
+    contents:
+      - has_concept("winding")
+
+  - title: Inspect
+    contents:
+      - has_concept("iteration")
+      - has_concept("validation")
+
+  - title: Cast
+    contents:
+      - has_concept("cast")
+
+  - title: Misc
+    contents:
+      - has_concept("misc")
+      - register_geoarrow_udfs

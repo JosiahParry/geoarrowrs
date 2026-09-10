@@ -103,8 +103,8 @@ fn relate_predicate(
 /// x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
 /// y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
 ///
-/// as.vector(nanoarrow::convert_array(ga_contains(x, y)))
-/// as.vector(nanoarrow::convert_array(ga_intersects(x, y)))
+/// as.vector(ga_contains(x, y))
+/// as.vector(ga_intersects(x, y))
 #[extendr]
 fn ga_contains(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_contains)
@@ -213,7 +213,7 @@ fn ga_equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// x <- geoarrow::as_geoarrow_array(sf::st_sfc(big))
 /// y <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2, 2))))
 ///
-/// as.vector(nanoarrow::convert_array(ga_relate(x, y)))
+/// as.vector(ga_relate(x, y))
 #[extendr]
 fn ga_relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -257,7 +257,7 @@ fn ga_relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 ///   sf::st_linestring(cbind(c(0, 1), c(0, 1)))
 /// ))
 ///
-/// as.vector(nanoarrow::convert_array(ga_dimension(g)))
+/// as.vector(ga_dimension(g))
 #[extendr]
 fn ga_dimension(geometry: Robj) -> extendr_api::Result<Robj> {
     dimension_impl(geometry, false)
@@ -316,7 +316,7 @@ fn dimension_impl(geometry: Robj, boundary: bool) -> extendr_api::Result<Robj> {
 ///   sf::st_point()
 /// ))
 ///
-/// as.vector(nanoarrow::convert_array(ga_is_empty(g)))
+/// as.vector(ga_is_empty(g))
 #[extendr]
 fn ga_is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
@@ -359,7 +359,7 @@ fn ga_is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
 ///   sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
 /// ))
 ///
-/// as.vector(nanoarrow::convert_array(ga_coordinate_position(g, p)))
+/// as.vector(ga_coordinate_position(g, p))
 #[extendr]
 fn ga_coordinate_position(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;

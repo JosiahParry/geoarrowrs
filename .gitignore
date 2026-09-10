@@ -5,3 +5,4 @@ src/Makevars.win
 src/vendor
 src/.cargo
 docs/
+docs

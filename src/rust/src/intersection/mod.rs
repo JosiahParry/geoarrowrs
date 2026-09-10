@@ -146,7 +146,7 @@ fn ga_line_intersection(x: Robj, y: Robj) -> anyhow::Result<Robj> {
 /// )))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
 ///
-/// as.vector(nanoarrow::convert_array(ga_is_valid(g)))
+/// as.vector(ga_is_valid(g))
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_self_intersections(g)))
 #[extendr]
 fn ga_self_intersections(geometry: Robj) -> anyhow::Result<Robj> {

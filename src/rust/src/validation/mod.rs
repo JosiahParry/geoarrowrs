@@ -34,8 +34,8 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// )))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
 ///
-/// as.vector(nanoarrow::convert_array(ga_is_valid(g)))
-/// as.vector(nanoarrow::convert_array(ga_validation_error(g)))
+/// as.vector(ga_is_valid(g))
+/// as.vector(ga_validation_error(g))
 #[extendr]
 fn ga_is_valid(geometry: Robj) -> anyhow::Result<Robj> {
     let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;

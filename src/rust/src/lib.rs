@@ -21,6 +21,7 @@ pub(crate) mod convert;
 pub(crate) mod densify;
 pub(crate) mod destination;
 pub(crate) mod distance;
+pub(crate) mod envelope;
 pub(crate) mod index;
 pub(crate) mod interpolate_line;
 pub(crate) mod interpolate_point;
@@ -223,6 +224,7 @@ extendr_module! {
     use construct;
     use convert;
     use densify;
+    use envelope;
     use index;
     use intersection;
     use interpolate_line;

@@ -28,7 +28,7 @@ also \code{NA}.
 ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
 
-as.vector(nanoarrow::convert_array(ga_winding_order(g)))
+as.vector(ga_winding_order(g))
 \dontshow{\}) # examplesIf}
 }
 \references{

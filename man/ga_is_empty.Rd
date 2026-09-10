@@ -25,7 +25,7 @@ g <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_point()
 ))
 
-as.vector(nanoarrow::convert_array(ga_is_empty(g)))
+as.vector(ga_is_empty(g))
 \dontshow{\}) # examplesIf}
 }
 \references{

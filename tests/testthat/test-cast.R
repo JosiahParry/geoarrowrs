@@ -98,8 +98,8 @@ test_that("explode preserves length and yields the singular type", {
   res <- ga_explode(mp)
 
   expect_equal(child_ext(res), "geoarrow.point")
-  expect_equal(length(nanoarrow::convert_array(res)), 2L)
-  expect_equal(lengths(nanoarrow::convert_array(res)), c(3L, 1L))
+  expect_equal(length(as.vector(res)), 2L)
+  expect_equal(lengths(as.vector(res)), c(3L, 1L))
 })
 
 test_that("explode uses the declared type, not the contents", {
@@ -114,7 +114,7 @@ test_that("explode of a singular array gives one part per row", {
   res <- ga_explode(poly)
 
   expect_equal(child_ext(res), "geoarrow.polygon")
-  expect_equal(lengths(nanoarrow::convert_array(res)), c(1L, 1L))
+  expect_equal(lengths(as.vector(res)), c(1L, 1L))
 })
 
 test_that("explode errors on a mixed geometry array", {
@@ -139,10 +139,10 @@ test_that("explode then flatten round trips a multipolygon column", {
   )$geometry
 
   parts <- ga_explode(g)
-  expect_equal(length(nanoarrow::convert_array(parts)), 100L)
+  expect_equal(length(as.vector(parts)), 100L)
 
   flat <- ga_flatten(parts)
-  n_parts <- sum(lengths(nanoarrow::convert_array(parts)))
+  n_parts <- sum(lengths(as.vector(parts)))
   expect_length(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(flat)), n_parts)
 })
 
@@ -178,7 +178,7 @@ test_that("ga_from_wkb unblocks the type specific functions", {
   expect_error(ga_dist_euclidean_pairwise(bin, bin), "Extension type name")
   pts <- ga_from_wkb(bin)
   expect_equal(
-    as.vector(nanoarrow::convert_array(ga_dist_euclidean_pairwise(pts, pts))),
+    as.vector(ga_dist_euclidean_pairwise(pts, pts)),
     c(0, 0)
   )
 })
@@ -272,10 +272,7 @@ test_that("ga_as_point keeps the geometries intact", {
   pts <- ga_as_point(wkb_array(sfc))
 
   expect_equal(
-    as.vector(nanoarrow::convert_array(ga_dist_euclidean_pairwise(
-      pts,
-      ga_xy(c(0, 0), c(0, 0))
-    ))),
+    as.vector(ga_dist_euclidean_pairwise(pts, ga_xy(c(0, 0), c(0, 0)))),
     c(0, 5)
   )
 })

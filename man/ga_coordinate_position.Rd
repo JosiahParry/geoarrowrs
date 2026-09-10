@@ -32,7 +32,7 @@ p <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
 ))
 
-as.vector(nanoarrow::convert_array(ga_coordinate_position(g, p)))
+as.vector(ga_coordinate_position(g, p))
 \dontshow{\}) # examplesIf}
 }
 \references{
