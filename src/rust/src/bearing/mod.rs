@@ -5,7 +5,7 @@ use geo::{Bearing, Euclidean, Geodesic, Haversine, Rhumb};
 use geo_traits::to_geo::ToGeoPoint;
 use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, PointArray};
 
-use crate::as_point_chunks;
+use crate::{as_point_chunks, check_pair_len};
 
 /// Compute the bearing between pairs of points
 ///
@@ -28,6 +28,12 @@ fn ga_bearing_euclidean(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -59,6 +65,12 @@ fn ga_bearing_haversine(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -90,6 +102,12 @@ fn ga_bearing_geodesic(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -121,6 +139,12 @@ fn ga_bearing_rhumb(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {

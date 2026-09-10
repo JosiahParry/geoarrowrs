@@ -182,3 +182,38 @@ test_that("query functions read a concrete array from a reader", {
   expect_length(conv(ga_is_convex(g)), 100L)
   expect_length(tosfc(ga_closest_point(g, ga(sf::st_sfc(pt(-79, 35))))), 100L)
 })
+
+test_that("pairwise functions reject a length mismatch rather than truncating", {
+  two <- ga(sf::st_sfc(pt(0, 0), pt(3, 4)))
+  one <- ga(sf::st_sfc(pt(0, 0)))
+
+  expect_error(ga_dist_euclidean_pairwise(two, one), "same length")
+  expect_error(ga_dist_haversine_pairwise(two, one), "same length")
+  expect_error(ga_dist_geodesic_pairwise(two, one), "same length")
+  expect_error(ga_dist_rhumb_pairwise(two, one), "same length")
+  expect_error(ga_dist_vincenty_pairwise(two, one), "same length")
+  expect_error(ga_bearing_euclidean(two, one), "same length")
+  expect_error(ga_bearing_haversine(two, one), "same length")
+  expect_error(ga_bearing_geodesic(two, one), "same length")
+  expect_error(ga_bearing_rhumb(two, one), "same length")
+})
+
+test_that("the geometry pairwise distances check length too", {
+  two <- ga(sf::st_sfc(square(), square()))
+  one <- ga(sf::st_sfc(square()))
+  two_lines <- ga(sf::st_sfc(hline(), hline()))
+  one_line <- ga(sf::st_sfc(hline()))
+
+  expect_error(ga_dist_hausdorff_pairwise(two, one), "same length")
+  expect_error(ga_dist_frechet_pairwise(two_lines, one_line), "same length")
+})
+
+test_that("equal lengths still work", {
+  two <- ga(sf::st_sfc(pt(0, 0), pt(3, 4)))
+  origin <- ga(sf::st_sfc(pt(0, 0), pt(0, 0)))
+
+  expect_equal(
+    conv(ga_dist_euclidean_pairwise(two, origin)),
+    c(0, 5)
+  )
+})

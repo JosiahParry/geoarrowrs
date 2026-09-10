@@ -172,6 +172,21 @@ pub(crate) fn as_geo_geometries(
 
 /// Check that a parameter array is length 1 or the same length as the geometry
 /// array, so that it can be recycled with `.cycle()` over `n` geometries.
+/// Check that two geometry arrays walked in lockstep have the same length, since zipping them would otherwise truncate to the shorter one.
+pub(crate) fn check_pair_len(
+    a: usize,
+    b: usize,
+    label_a: &'static str,
+    label_b: &'static str,
+) -> extendr_api::Result<()> {
+    if a != b {
+        return Err(Error::Other(format!(
+            "`{label_a}` and `{label_b}` must be the same length, got {a} and {b}"
+        )));
+    }
+    Ok(())
+}
+
 pub(crate) fn check_recycle_len(
     len: usize,
     n: usize,

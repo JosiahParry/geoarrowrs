@@ -8,7 +8,9 @@ use geo::{
 use geo_traits::to_geo::{ToGeoLineString, ToGeoPoint};
 use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, LineStringArray, PointArray};
 
-use crate::{as_geo_geometries, as_geometry_chunks, as_linestring_chunks, as_point_chunks};
+use crate::{
+    as_geo_geometries, as_geometry_chunks, as_linestring_chunks, as_point_chunks, check_pair_len,
+};
 
 /// Compute pairwise distances between points
 ///
@@ -30,6 +32,12 @@ fn ga_dist_euclidean_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -61,6 +69,12 @@ fn ga_dist_haversine_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -92,6 +106,12 @@ fn ga_dist_geodesic_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Ro
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -123,6 +143,12 @@ fn ga_dist_rhumb_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj>
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -159,6 +185,12 @@ fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
     let origin_chunks = as_geometry_chunks(origin)?;
     let dest_chunks = as_geometry_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -192,6 +224,12 @@ fn ga_dist_vincenty_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Ro
     let origin_chunks = as_point_chunks(origin)?;
     let dest_chunks = as_point_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
@@ -231,6 +269,12 @@ fn ga_dist_frechet_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Rob
     let origin_chunks = as_linestring_chunks(origin)?;
     let dest_chunks = as_linestring_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
+    check_pair_len(
+        n,
+        dest_chunks.iter().map(|c| c.len()).sum(),
+        "origin",
+        "dest",
+    )?;
     let mut bldr = Float64Builder::with_capacity(n);
 
     for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {

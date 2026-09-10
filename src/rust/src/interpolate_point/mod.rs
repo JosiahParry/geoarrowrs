@@ -11,17 +11,7 @@ use geoarrow::{
 };
 use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
-use crate::{as_point_chunks, check_recycle_len, try_float_array};
-
-/// Check that two point arrays being walked in lockstep have the same length.
-fn check_pair_len(n_start: usize, n_end: usize) -> extendr_api::Result<()> {
-    if n_start != n_end {
-        return Err(Error::Other(format!(
-            "`start` and `end` must be the same length, got {n_start} and {n_end}"
-        )));
-    }
-    Ok(())
-}
+use crate::{as_point_chunks, check_pair_len, check_recycle_len, try_float_array};
 
 /// Interpolate a point at a given distance between two points
 ///
@@ -49,7 +39,7 @@ fn ga_point_at_distance_between(
     let distance = try_float_array(distance, "distance")?;
 
     let n: usize = start_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(n, end_chunks.iter().map(|c| c.len()).sum())?;
+    check_pair_len(n, end_chunks.iter().map(|c| c.len()).sum(), "start", "end")?;
     check_recycle_len(distance.len(), n, "distance")?;
 
     let metadata = start_chunks[0].data_type().metadata().clone();
@@ -117,7 +107,7 @@ fn ga_point_at_ratio_between(
     let ratio = try_float_array(ratio, "ratio")?;
 
     let n: usize = start_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(n, end_chunks.iter().map(|c| c.len()).sum())?;
+    check_pair_len(n, end_chunks.iter().map(|c| c.len()).sum(), "start", "end")?;
     check_recycle_len(ratio.len(), n, "ratio")?;
 
     let metadata = start_chunks[0].data_type().metadata().clone();
@@ -184,7 +174,7 @@ fn ga_points_along_line(
     let max_distance = try_float_array(max_distance, "max_distance")?;
 
     let n: usize = start_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(n, end_chunks.iter().map(|c| c.len()).sum())?;
+    check_pair_len(n, end_chunks.iter().map(|c| c.len()).sum(), "start", "end")?;
     check_recycle_len(max_distance.len(), n, "max_distance")?;
 
     let metadata = start_chunks[0].data_type().metadata().clone();
