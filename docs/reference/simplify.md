@@ -32,4 +32,5 @@ a GeoArrow array of the same geometry type as the input
 ## See also
 
 Other simplify:
+[`simplify_idx()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_idx.md),
 [`simplify_vw()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_vw.md)

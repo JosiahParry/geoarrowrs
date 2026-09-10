@@ -3,6 +3,40 @@
 ## geoarrowrs (development version)
 
 - Added
+  [`line_intersection()`](https://josiahparry.github.io/geoarrowrs/reference/line_intersection.md)
+  and
+  [`self_intersections()`](https://josiahparry.github.io/geoarrowrs/reference/self_intersections.md),
+  the latter using the Bentley-Ottmann sweep to locate exactly where a
+  geometry crosses itself.
+- Added
+  [`affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/affine_transform.md),
+  the general form behind the other affine ops, taking six recyclable
+  coefficients so a different transform can apply to every row.
+- Added
+  [`dbscan()`](https://josiahparry.github.io/geoarrowrs/reference/dbscan.md),
+  [`kmeans()`](https://josiahparry.github.io/geoarrowrs/reference/kmeans.md),
+  and
+  [`outlier_scores()`](https://josiahparry.github.io/geoarrowrs/reference/outlier_scores.md)
+  for clustering the points within each row, plus
+  [`simplify_idx()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_idx.md)
+  and
+  [`simplify_vw_idx()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_idx.md),
+  which return the coordinate positions simplification keeps rather than
+  the simplified geometry.
+- Added
+  [`coords()`](https://josiahparry.github.io/geoarrowrs/reference/coords.md),
+  [`exterior_coords()`](https://josiahparry.github.io/geoarrowrs/reference/coords.md),
+  [`n_coords()`](https://josiahparry.github.io/geoarrowrs/reference/n_coords.md),
+  and
+  [`lines()`](https://josiahparry.github.io/geoarrowrs/reference/lines.md)
+  for walking a geometry’s vertices and segments, plus
+  [`is_valid()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
+  and
+  [`validation_error()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md).
+- Added an `RTree` spatial index built on the `geo-index` crate, with
+  `$search()` for bounding box queries and `$neighbors()` for nearest
+  rows. Queries return candidates to confirm with an exact predicate.
+- Added
   [`voronoi_cells()`](https://josiahparry.github.io/geoarrowrs/reference/voronoi_cells.md)
   and
   [`voronoi_edges()`](https://josiahparry.github.io/geoarrowrs/reference/voronoi_edges.md),

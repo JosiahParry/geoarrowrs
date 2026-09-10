@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://josiahparry.github.io/geoarrowrs/404.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/BUILD-NOTES.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/CLAUDE.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/articles/arrow-native.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/articles/benchmarks.html</loc></url>
@@ -8,6 +9,8 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/authors.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/index.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/news/index.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/RTree.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/affine_transform.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/area.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/area_cd.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.html</loc></url>
@@ -22,6 +25,8 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/concave_hull.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/convex_hull.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/coordinate_position.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/coords.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/dbscan.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/densify.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/destination.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/dimension.html</loc></url>
@@ -40,11 +45,16 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/is_ccw.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/is_convex.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/is_empty.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/kmeans.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/length.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/line_intersection.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/line_locate_point.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/line_segmentize.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/lines.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/minimum_rotated_rect.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/n_coords.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/orient.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/outlier_scores.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/points_along_line.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/read_flatgeobuf.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/read_geojson.html</loc></url>
@@ -55,7 +65,9 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/rotate_around_center.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/rotate_around_centroid.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/scale_xy.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/self_intersections.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/simplify.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/simplify_idx.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/simplify_vw.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/skew.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/skew_xy.html</loc></url>
@@ -66,6 +78,7 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/triangulate_delaunay.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/triangulate_earcut.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/unary_union.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/validation.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/voronoi_cells.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/voronoi_edges.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/winding_order.html</loc></url>

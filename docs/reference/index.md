@@ -65,6 +65,15 @@ Area, length, distance, and bearing. All return plain Arrow arrays.
   [`dest_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md)
   : Compute a destination point from an origin, bearing, and distance
 
+## Index
+
+Build an index once, query it many times. Results are candidates to
+confirm with an exact predicate.
+
+- [`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md)
+  : A packed Hilbert R-tree over the bounding boxes of a geometry array.
+  A spatial index over a geometry array
+
 ## Relate
 
 Topological predicates. Pairwise, with the second argument recycled.
@@ -90,6 +99,36 @@ Topological predicates. Pairwise, with the second argument recycled.
   [`overlaps()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
   [`equals_topo()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
   : Test a topological relationship between two geometry arrays
+- [`line_intersection()`](https://josiahparry.github.io/geoarrowrs/reference/line_intersection.md)
+  : Intersect pairs of two point lines
+- [`self_intersections()`](https://josiahparry.github.io/geoarrowrs/reference/self_intersections.md)
+  : Find where a geometry crosses itself
+
+## Inspect
+
+Walk a geometry’s parts, and check it is well formed.
+
+- [`coords()`](https://josiahparry.github.io/geoarrowrs/reference/coords.md)
+  [`exterior_coords()`](https://josiahparry.github.io/geoarrowrs/reference/coords.md)
+  : Collect a geometry's coordinates as points
+- [`lines()`](https://josiahparry.github.io/geoarrowrs/reference/lines.md)
+  : Split geometries into their line segments
+- [`n_coords()`](https://josiahparry.github.io/geoarrowrs/reference/n_coords.md)
+  : Count the coordinates in each geometry
+- [`is_valid()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
+  [`validation_error()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
+  : Test whether geometries are well formed
+
+## Cluster
+
+Group the points within each row, or score them for outlyingness.
+
+- [`dbscan()`](https://josiahparry.github.io/geoarrowrs/reference/dbscan.md)
+  : Assign points to clusters by density
+- [`kmeans()`](https://josiahparry.github.io/geoarrowrs/reference/kmeans.md)
+  : Assign points to a fixed number of clusters
+- [`outlier_scores()`](https://josiahparry.github.io/geoarrowrs/reference/outlier_scores.md)
+  : Score how much each point looks like an outlier
 
 ## Combine
 
@@ -107,6 +146,8 @@ Set operations on polygons.
 
 Move, simplify, and convert. The geometry type is preserved.
 
+- [`affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/affine_transform.md)
+  : Apply an arbitrary affine transform
 - [`rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/rotate_around_center.md)
   : Rotate geometries around the center of their bounding box
 - [`rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/rotate_around_centroid.md)
@@ -121,6 +162,9 @@ Move, simplify, and convert. The geometry type is preserved.
   : Translate geometries along the x and y axes
 - [`simplify()`](https://josiahparry.github.io/geoarrowrs/reference/simplify.md)
   : Simplify geometries using the Ramer-Douglas-Peucker algorithm
+- [`simplify_idx()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_idx.md)
+  [`simplify_vw_idx()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_idx.md)
+  : Find which coordinates simplification would keep
 - [`simplify_vw()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_vw.md)
   [`simplify_vw_preserve()`](https://josiahparry.github.io/geoarrowrs/reference/simplify_vw.md)
   : Simplify geometries using the Visvalingam-Whyatt algorithm

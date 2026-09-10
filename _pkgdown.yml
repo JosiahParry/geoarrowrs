@@ -53,10 +53,29 @@ reference:
   - has_concept("bearing")
   - has_concept("destination")
 
+- title: Index
+  desc: >
+    Build an index once, query it many times. Results are candidates to confirm
+    with an exact predicate.
+  contents:
+  - has_concept("index")
+
 - title: Relate
   desc: Topological predicates. Pairwise, with the second argument recycled.
   contents:
   - has_concept("topology")
+  - has_concept("intersection")
+
+- title: Inspect
+  desc: Walk a geometry's parts, and check it is well formed.
+  contents:
+  - has_concept("iteration")
+  - has_concept("validation")
+
+- title: Cluster
+  desc: Group the points within each row, or score them for outlyingness.
+  contents:
+  - has_concept("cluster")
 
 - title: Combine
   desc: Set operations on polygons.

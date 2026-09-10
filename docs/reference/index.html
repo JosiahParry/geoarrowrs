@@ -19,7 +19,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/reading-data.html">Read spatial files</a></li>
-    <li><a class="dropdown-item" href="../articles/arrow-native.html">Compute inside Arrow with dplyr</a></li>
+    <li><a class="dropdown-item" href="../articles/arrow-native.html">dplyr and Arrow</a></li>
     <li><a class="dropdown-item" href="../articles/benchmarks.html">How fast is it?</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -168,6 +168,22 @@
         </dt>
         <dd>Compute a destination point from an origin, bearing, and distance</dd>
       </dl></div><div class="section level2">
+      <h2 id="index">Index<a class="anchor" aria-label="anchor" href="#index"></a></h2>
+
+      <div class="section-desc"><p>Build an index once, query it many times. Results are candidates to confirm with an exact predicate.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="RTree.html">RTree</a></code>
+
+        </dt>
+        <dd>A packed Hilbert R-tree over the bounding boxes of a geometry array. A spatial index over a geometry array</dd>
+      </dl></div><div class="section level2">
       <h2 id="relate">Relate<a class="anchor" aria-label="anchor" href="#relate"></a></h2>
 
       <div class="section-desc"><p>Topological predicates. Pairwise, with the second argument recycled.</p></div>
@@ -211,6 +227,87 @@
 
         </dt>
         <dd>Test a topological relationship between two geometry arrays</dd>
+
+        <dt>
+
+          <code><a href="line_intersection.html">line_intersection()</a></code>
+
+        </dt>
+        <dd>Intersect pairs of two point lines</dd>
+
+        <dt>
+
+          <code><a href="self_intersections.html">self_intersections()</a></code>
+
+        </dt>
+        <dd>Find where a geometry crosses itself</dd>
+      </dl></div><div class="section level2">
+      <h2 id="inspect">Inspect<a class="anchor" aria-label="anchor" href="#inspect"></a></h2>
+
+      <div class="section-desc"><p>Walk a geometry’s parts, and check it is well formed.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="coords.html">coords()</a></code> <code><a href="coords.html">exterior_coords()</a></code>
+
+        </dt>
+        <dd>Collect a geometry's coordinates as points</dd>
+
+        <dt>
+
+          <code><a href="lines.html">lines()</a></code>
+
+        </dt>
+        <dd>Split geometries into their line segments</dd>
+
+        <dt>
+
+          <code><a href="n_coords.html">n_coords()</a></code>
+
+        </dt>
+        <dd>Count the coordinates in each geometry</dd>
+
+        <dt>
+
+          <code><a href="validation.html">is_valid()</a></code> <code><a href="validation.html">validation_error()</a></code>
+
+        </dt>
+        <dd>Test whether geometries are well formed</dd>
+      </dl></div><div class="section level2">
+      <h2 id="cluster">Cluster<a class="anchor" aria-label="anchor" href="#cluster"></a></h2>
+
+      <div class="section-desc"><p>Group the points within each row, or score them for outlyingness.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="dbscan.html">dbscan()</a></code>
+
+        </dt>
+        <dd>Assign points to clusters by density</dd>
+
+        <dt>
+
+          <code><a href="kmeans.html">kmeans()</a></code>
+
+        </dt>
+        <dd>Assign points to a fixed number of clusters</dd>
+
+        <dt>
+
+          <code><a href="outlier_scores.html">outlier_scores()</a></code>
+
+        </dt>
+        <dd>Score how much each point looks like an outlier</dd>
       </dl></div><div class="section level2">
       <h2 id="combine">Combine<a class="anchor" aria-label="anchor" href="#combine"></a></h2>
 
@@ -245,6 +342,13 @@
 
 
       <dl><dt>
+
+          <code><a href="affine_transform.html">affine_transform()</a></code>
+
+        </dt>
+        <dd>Apply an arbitrary affine transform</dd>
+
+        <dt>
 
           <code><a href="rotate_around_center.html">rotate_around_center()</a></code>
 
@@ -292,6 +396,13 @@
 
         </dt>
         <dd>Simplify geometries using the Ramer-Douglas-Peucker algorithm</dd>
+
+        <dt>
+
+          <code><a href="simplify_idx.html">simplify_idx()</a></code> <code><a href="simplify_idx.html">simplify_vw_idx()</a></code>
+
+        </dt>
+        <dd>Find which coordinates simplification would keep</dd>
 
         <dt>
 

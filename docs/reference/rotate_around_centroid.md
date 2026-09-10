@@ -32,6 +32,7 @@ a GeoArrow array of the same geometry type as the input
 ## See also
 
 Other affine:
+[`affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/affine_transform.md),
 [`rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/rotate_around_center.md),
 [`scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/scale_xy.md),
 [`skew()`](https://josiahparry.github.io/geoarrowrs/reference/skew.md),
