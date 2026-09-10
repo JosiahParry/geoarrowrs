@@ -1384,6 +1384,71 @@ to_radians <- function(geometry) .Call(wrap__to_radians, geometry)
 #' @references [Densifiable](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html)
 densify <- function(geometry, max_segment_length, metric) .Call(wrap__densify, geometry, max_segment_length, metric)
 
+#' Intersect pairs of two point lines
+#'
+#' Returns where each pair of lines meets: a point when they cross, and a line
+#' when they overlap along a shared stretch. `y` is recycled against `x`.
+#'
+#' @details
+#' The answer is a point when the lines cross and a segment when they overlap.
+#' Both come back as a multipoint so the column has one type: a crossing gives
+#' one point, an overlap gives the two endpoints of the shared stretch. So
+#' `n_coords()` tells the two apart, and an overlap can be rebuilt from its
+#' endpoints.
+#'
+#' Both arguments must hold single segments, that is a `LINE` or a two point
+#' `LINESTRING`. Longer linestrings, other geometry types, and null rows come
+#' back null, as do pairs that simply do not meet. Use
+#' [self_intersections()] for a geometry with many segments.
+#'
+#' @param x a GeoArrow array of two point linestrings
+#' @param y a GeoArrow array of two point linestrings; length 1 or the same
+#'   length as `x`
+#' @returns a GeoArrow multipoint array of the same length as `x`
+#' @export
+#' @family intersection
+#' @references [line_intersection](https://docs.rs/geo/latest/geo/algorithm/line_intersection/fn.line_intersection.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' a <- sf::st_linestring(cbind(c(0, 2), c(0, 2)))
+#' b <- sf::st_linestring(cbind(c(0, 2), c(2, 0)))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(a))
+#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(b))
+#'
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(line_intersection(x, y)))
+line_intersection <- function(x, y) .Call(wrap__line_intersection, x, y)
+
+#' Find where a geometry crosses itself
+#'
+#' Returns the points at which a geometry's own segments intersect, one
+#' multipoint per input geometry.
+#'
+#' @details
+#' Uses the Bentley-Ottmann sweep line, which finds all crossings in roughly
+#' `n log n` rather than by testing every pair. This is how to locate the
+#' problem that [is_valid()] reports: a self intersecting polygon comes back
+#' with the offending points.
+#'
+#' Segments that merely share an endpoint, as consecutive segments of a
+#' linestring always do, are not counted. A geometry with no crossings gives
+#' an empty multipoint rather than a null, so an empty result is
+#' distinguishable from an unsupported geometry. Points and null rows come
+#' back null.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow multipoint array of the same length as `geometry`
+#' @export
+#' @family intersection
+#' @references [Intersections](https://docs.rs/geo/latest/geo/sweep/struct.Intersections.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' bowtie <- sf::st_polygon(list(matrix(
+#'   c(0, 0, 2, 2, 2, 0, 0, 2, 0, 0), ncol = 2, byrow = TRUE
+#' )))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
+#'
+#' as.vector(nanoarrow::convert_array(is_valid(g)))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(self_intersections(g)))
+self_intersections <- function(geometry) .Call(wrap__self_intersections, geometry)
+
 #' Interpolate a point along a linestring
 #'
 #' Returns the point at a given ratio or distance along each linestring,

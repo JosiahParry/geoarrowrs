@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `line_intersection()` and `self_intersections()`, the latter using the Bentley-Ottmann sweep to locate exactly where a geometry crosses itself.
 * Added `affine_transform()`, the general form behind the other affine ops, taking six recyclable coefficients so a different transform can apply to every row.
 * Added `dbscan()`, `kmeans()`, and `outlier_scores()` for clustering the points within each row, plus `simplify_idx()` and `simplify_vw_idx()`, which return the coordinate positions simplification keeps rather than the simplified geometry.
 * Added `coords()`, `exterior_coords()`, `n_coords()`, and `lines()` for walking a geometry's vertices and segments, plus `is_valid()` and `validation_error()`.

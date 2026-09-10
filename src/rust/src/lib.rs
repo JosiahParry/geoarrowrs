@@ -23,6 +23,7 @@ pub(crate) mod distance;
 pub(crate) mod index;
 pub(crate) mod interpolate_line;
 pub(crate) mod interpolate_point;
+pub(crate) mod intersection;
 pub(crate) mod io;
 pub(crate) mod iteration;
 pub(crate) mod length;
@@ -206,6 +207,7 @@ extendr_module! {
     use convert;
     use densify;
     use index;
+    use intersection;
     use interpolate_line;
     use interpolate_point;
     use io;

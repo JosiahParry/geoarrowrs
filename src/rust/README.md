@@ -86,8 +86,8 @@ This will require more work and should be pushed to the end of implementation.
 - ✅ Covers: Calculate if a geometry covers another geometry (`covers()`, `covered_by()`).
 - ✅ HasDimensions: Determine the dimensions of a geometry (`dimension()`, `boundary_dimension()`, `is_empty()`).
 - ✅ Intersects: Calculate if a geometry intersects another geometry (`intersects()`, `disjoint()`).
-- ❌ line_intersection: Calculates the intersection, if any, between two lines
-- ❌ Intersections: Find all line segment intersections using an efficient sweep line algorithm (Bentley-Ottmann)
+- ✅ line_intersection: Calculates the intersection, if any, between two lines (`line_intersection()`). Returns a multipoint: one point for a crossing, two for an overlap.
+- ✅ Intersections: Find all line segment intersections using an efficient sweep line algorithm (`self_intersections()`).
 - ✅ Relate: Topologically relate two geometries based on DE-9IM semantics (`relate()`, plus `touches()`, `crosses()`, `overlaps()`, `equals_topo()`).
 - ✅ Within: Calculate if a geometry lies completely within another geometry (`within()`).
 
