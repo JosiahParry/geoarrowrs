@@ -10,3 +10,7 @@ NEWS.md
 .claude/
 jarl.toml
 air.toml
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^vignettes/.*\.html$

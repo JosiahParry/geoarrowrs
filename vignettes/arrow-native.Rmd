@@ -1,0 +1,147 @@
+---
+title: "Compute inside Arrow with dplyr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Compute inside Arrow with dplyr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+can_run <- requireNamespace("sf", quietly = TRUE) &&
+  requireNamespace("arrow", quietly = TRUE) &&
+  requireNamespace("dplyr", quietly = TRUE) &&
+  requireNamespace("geoarrow", quietly = TRUE) &&
+  isTRUE(arrow::arrow_info()$capabilities[["acero"]])
+knitr::opts_chunk$set(eval = can_run)
+```
+
+Spatial functions that run in Arrow's query engine, not in R.
+
+**Why it matters:** a `Dataset` can be larger than memory. If every spatial
+call drags the geometry column into R, that advantage is gone.
+
+```{r}
+#| message: false
+library(geoarrowrs)
+library(arrow)
+library(dplyr)
+library(geoarrow)
+```
+
+## The problem
+
+Arrow only knows the functions registered with it. Call anything else and it
+gives up and pulls your data into R.
+
+```{r}
+nc <- as.data.frame(read_shapefile(
+  system.file("shape/nc.shp", package = "sf")
+))
+tbl <- arrow_table(nc)
+```
+
+Without registration you get a warning and a fallback:
+
+```
+Warning: Expression not supported in Arrow
+→ Pulling data into R
+```
+
+On a `Table` that is merely slow. On a `Dataset` that does not fit in memory,
+it fails outright.
+
+## The fix
+
+One call.
+
+```{r}
+registered <- register_geoarrow_udfs(tbl)
+length(registered)
+```
+
+Now the same code runs inside the engine.
+
+```{r}
+tbl |>
+  mutate(area = unsigned_area(geometry)) |>
+  select(NAME, area) |>
+  head(3) |>
+  collect()
+```
+
+## It composes
+
+**Filter on a spatial predicate.** The comparison happens in the engine.
+
+```{r}
+tbl |>
+  filter(unsigned_area(geometry) > 0.1) |>
+  summarise(n = n()) |>
+  collect()
+```
+
+**Geometry in, geometry out.** The result keeps its GeoArrow type.
+
+```{r}
+res <- tbl |>
+  mutate(centre = centroid(geometry)) |>
+  select(NAME, centre) |>
+  head(3) |>
+  collect()
+
+class(res$centre)
+```
+
+**Predicates take two geometry columns.**
+
+```{r}
+tbl |>
+  mutate(self = intersects(geometry, geometry)) |>
+  summarise(all_true = all(self)) |>
+  collect()
+```
+
+## Datasets stream
+
+This is the case that matters. Nothing here holds the whole column in memory.
+
+```{r}
+dir <- file.path(tempdir(), "nc-dataset")
+unlink(dir, recursive = TRUE)
+write_dataset(tbl, dir, format = "feather")
+
+open_dataset(dir, format = "feather") |>
+  filter(unsigned_area(geometry) > 0.1) |>
+  summarise(n = n()) |>
+  collect()
+```
+
+## What gets registered
+
+**46 of 51** functions register against a multipolygon column. The rest are
+skipped on purpose, and the warning tells you which:
+
+- **Wrong geometry type.** `length_euclidean()` needs linestrings. Against
+  multipolygons there is nothing to measure, so it is not registered.
+- **Non-geometry arguments.** `buffer()` and `simplify()` take a distance.
+  Arrow kernels here only take geometry columns.
+- **Aggregates.** `unary_union()` collapses an array to one row. That is not a
+  scalar kernel.
+
+Arrow dispatches on the exact input type, so a kernel is registered for the
+precise GeoArrow type in your data. Reading a different geometry type means
+calling `register_geoarrow_udfs()` again with that data.
+
+Use `prefix` if a name would collide with an existing Arrow binding:
+
+```{r}
+head(register_geoarrow_udfs(tbl, prefix = "geo_"), 3)
+```
+
+## The bottom line
+
+Register once, then write ordinary dplyr. The geometry stays in Arrow and the
+work happens in the engine.

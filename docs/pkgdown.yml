@@ -1,0 +1,11 @@
+pandoc: 3.10.1
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  arrow-native: arrow-native.html
+  benchmarks: benchmarks.html
+  reading-data: reading-data.html
+last_built: 2026-09-10T04:59Z
+urls:
+  reference: https://josiahparry.github.io/geoarrowrs/reference
+  article: https://josiahparry.github.io/geoarrowrs/articles

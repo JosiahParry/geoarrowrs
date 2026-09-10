@@ -1,0 +1,92 @@
+url: https://josiahparry.github.io/geoarrowrs/
+
+template:
+  bootstrap: 5
+  light-switch: true
+  bslib:
+    primary: "#B7410E"
+    base_font: {google: "Inter"}
+    heading_font: {google: "Inter"}
+    code_font: {google: "JetBrains Mono"}
+
+home:
+  title: Fast geospatial operations on GeoArrow arrays
+  description: >
+    Rust bindings to geoarrow-rs and the GeoRust algorithms, vectorized over
+    Arrow arrays. Read shapefiles, GeoJSON, and FlatGeobuf, then compute
+    without leaving Arrow.
+
+navbar:
+  structure:
+    left: [reference, articles, news]
+    right: [search, github, lightswitch]
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - reading-data
+  - arrow-native
+  - benchmarks
+
+reference:
+- title: Read
+  desc: >
+    Readers return a record batch stream. Everything else returns an Arrow
+    array.
+  contents:
+  - has_concept("io")
+
+- title: Stay in Arrow
+  desc: >
+    Register these functions with Arrow so they run on a Table or Dataset
+    without pulling geometry into R.
+  contents:
+  - register_geoarrow_udfs
+
+- title: Measure
+  desc: Area, length, distance, and bearing. All return plain Arrow arrays.
+  contents:
+  - has_concept("area")
+  - has_concept("length")
+  - has_concept("distance")
+  - has_concept("bearing")
+  - has_concept("destination")
+
+- title: Relate
+  desc: Topological predicates. Pairwise, with the second argument recycled.
+  contents:
+  - has_concept("topology")
+
+- title: Combine
+  desc: Set operations on polygons.
+  contents:
+  - has_concept("boolean")
+
+- title: Reshape
+  desc: Move, simplify, and convert. The geometry type is preserved.
+  contents:
+  - has_concept("affine")
+  - has_concept("simplify")
+  - has_concept("convert")
+  - has_concept("misc")
+
+- title: Derive
+  desc: Build new geometry from existing geometry.
+  contents:
+  - has_concept("boundary")
+  - has_concept("triangulate")
+  - has_concept("voronoi")
+  - has_concept("query")
+  - has_concept("winding")
+
+- title: Interpolate
+  desc: Place points along lines and add vertices.
+  contents:
+  - has_concept("interpolate")
+  - has_concept("densify")
+
+- title: Cast
+  desc: Convert between geometry types and split multi-part geometries.
+  contents:
+  - has_concept("cast")

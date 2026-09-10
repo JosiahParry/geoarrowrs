@@ -1,0 +1,143 @@
+---
+title: "How fast is it?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{How fast is it?}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+can_run <- requireNamespace("sf", quietly = TRUE) &&
+  requireNamespace("geoarrow", quietly = TRUE) &&
+  requireNamespace("nanoarrow", quietly = TRUE)
+knitr::opts_chunk$set(eval = can_run)
+```
+
+Algorithms are faster than `{sf}`. Readers are slower. Here are the numbers.
+
+**Why it matters:** knowing which half is which tells you when this package
+helps and when it does not.
+
+```{r}
+#| message: false
+library(geoarrowrs)
+library(sf)
+library(geoarrow)
+```
+
+Every number below is measured when this page is built, on 5,000 polygons.
+
+```{r}
+nc <- st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
+big <- do.call(rbind, replicate(50, nc, simplify = FALSE))
+geom <- st_geometry(big)
+arr <- as_geoarrow_array(geom)
+
+nrow(big)
+```
+
+```{r}
+best <- function(f, n = 5) min(replicate(n, system.time(f())[["elapsed"]]))
+
+compare <- function(...) {
+  ops <- list(...)
+  out <- do.call(rbind, lapply(names(ops), function(nm) {
+    a <- best(ops[[nm]][[1]])
+    b <- best(ops[[nm]][[2]])
+    data.frame(op = nm, geoarrowrs = a, sf = b, speedup = round(b / a, 1))
+  }))
+  out
+}
+```
+
+## Algorithms
+
+```{r}
+cv <- function(x) as.vector(nanoarrow::convert_array(x))
+
+compare(
+  area = list(
+    function() cv(unsigned_area(arr)),
+    function() as.numeric(st_area(big))
+  ),
+  centroid = list(
+    function() centroid(arr),
+    function() st_centroid(geom)
+  ),
+  convex_hull = list(
+    function() convex_hull(arr),
+    function() st_convex_hull(geom)
+  ),
+  simplify = list(
+    function() simplify(arr, 0.01),
+    function() st_simplify(geom, dTolerance = 0.01)
+  )
+)
+```
+
+**The pattern.** Anything that walks coordinates and returns a number is
+several times faster. `convex_hull()` is closer to a tie, because the work is
+dominated by the hull itself rather than by iteration overhead.
+
+## Readers
+
+This is the honest part.
+
+```{r}
+shp <- file.path(tempdir(), "bench.shp")
+suppressWarnings(st_write(big, shp, quiet = TRUE, delete_dsn = TRUE))
+
+compare(
+  shapefile = list(
+    function() as.data.frame(read_shapefile(shp)),
+    function() st_read(shp, quiet = TRUE)
+  )
+)
+```
+
+**`{sf}` wins, by roughly 4x.** GDAL's shapefile reader is mature and hard to
+beat. The cost here is in the read itself, not in handing the result to R:
+building the stream without materialising it takes just as long.
+
+So read speed is not the reason to use these readers. Two other things are:
+
+- **The output is already Arrow.** No conversion step, and no R-side list of
+  geometries.
+- **FlatGeobuf can skip data.** Pass a bounding box and the packed Hilbert
+  R-tree means unwanted features are never decoded.
+
+```{r}
+fgb <- file.path(tempdir(), "bench.fgb")
+suppressWarnings(st_write(big, fgb, quiet = TRUE, delete_dsn = TRUE))
+
+full <- best(function() as.data.frame(read_flatgeobuf(fgb)))
+boxed <- best(function() {
+  as.data.frame(read_flatgeobuf(fgb, bbox = c(-79, 35, -78, 36)))
+})
+
+round(full / boxed, 1)
+```
+
+That ratio is the index doing its job.
+
+## Caveats
+
+Read these before quoting any number above.
+
+- **One machine, one dataset.** North Carolina counties repeated 50 times.
+  Your geometries have different vertex counts and different complexity.
+- **Timings are a minimum of five runs.** That favours warm caches, which is
+  the right choice for comparing algorithms and a generous one for readers.
+- **Nothing is parallel yet.** Both packages are single threaded here. The
+  Rust side has room for `rayon` that has not been taken.
+- **`{sf}` does more.** It carries a CRS through every operation and validates
+  geometries. Some of its extra time buys something this package does not
+  offer yet.
+
+## The bottom line
+
+Use this package for the compute and for staying in Arrow. Keep using
+`{sf}` or GDAL when the bottleneck is reading a file.

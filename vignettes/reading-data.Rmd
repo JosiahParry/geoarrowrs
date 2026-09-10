@@ -1,0 +1,91 @@
+---
+title: "Read spatial files"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Read spatial files}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+can_run <- requireNamespace("sf", quietly = TRUE) &&
+  requireNamespace("geoarrow", quietly = TRUE) &&
+  requireNamespace("nanoarrow", quietly = TRUE)
+knitr::opts_chunk$set(eval = can_run)
+```
+
+Three readers. One shape of output.
+
+**Why it matters:** every reader hands back a record batch stream, so the data
+is Arrow from the first byte. Nothing is converted to an R list of geometries
+on the way in.
+
+```{r}
+#| message: false
+library(geoarrowrs)
+library(geoarrow)
+```
+
+## Shapefiles
+
+`read_shapefile()` reads the `.shp` and its `.dbf` attributes together.
+
+```{r}
+path <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(path))
+
+dim(nc)
+head(nc[, c("NAME", "BIR74", "geometry")], 3)
+```
+
+The attribute columns come first, `geometry` last.
+
+**Z and M work.** Both are detected from the coordinate data, not the file
+header. The header records a `0` range when M is absent, which is
+indistinguishable from a real measure of zero, so it cannot be trusted.
+
+## GeoJSON
+
+```{r}
+gj <- tempfile(fileext = ".geojson")
+sf::st_write(sf::st_read(path, quiet = TRUE), gj, quiet = TRUE)
+
+as.data.frame(read_geojson(gj))[1:3, c("NAME", "geometry")]
+```
+
+Two things worth knowing:
+
+- **Property order is preserved.** Columns come back in document order, not
+  sorted.
+- **Types widen across features.** A property that is an integer in one feature
+  and a double in the next becomes a double column.
+
+## FlatGeobuf
+
+The only reader that truly streams, and the only one with a spatial index.
+
+```{r}
+fgb <- tempfile(fileext = ".fgb")
+sf::st_write(sf::st_read(path, quiet = TRUE), fgb, quiet = TRUE)
+
+nrow(as.data.frame(read_flatgeobuf(fgb)))
+```
+
+Pass a bounding box and the reader uses the file's packed Hilbert R-tree to
+skip everything outside it. It never decodes the features you did not ask for.
+
+```{r}
+nrow(as.data.frame(read_flatgeobuf(fgb, bbox = c(-79, 35, -78, 36))))
+```
+
+## What about GeoParquet?
+
+Use `{geoarrow}` and `{arrow}`. It is already handled well there, so this
+package does not duplicate it.
+
+## The bottom line
+
+Read into Arrow, stay in Arrow. The next article shows how to compute without
+ever leaving it.
