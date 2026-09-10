@@ -13,5 +13,4 @@ air.toml
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
-^vignettes/.*\.html$
 ^BUILD-NOTES\.md$

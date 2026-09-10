@@ -18,16 +18,8 @@ home:
 
 navbar:
   structure:
-    left: [reference, articles, news]
+    left: [reference, news]
     right: [search, github, lightswitch]
-
-articles:
-- title: Articles
-  navbar: ~
-  contents:
-  - reading-data
-  - arrow-native
-  - benchmarks
 
 reference:
 - title: Read
