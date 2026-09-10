@@ -36,8 +36,8 @@ Legend: ✅ done · ⚠️ partial · ❌ not started
 
 ## Misc measures
 
-At present only pairwise distances are implemented. We need to also implement
-dense matrices and self-distance square matrices.
+The distance methods here are pairwise only. Each still needs a dense matrix
+form and a self-distance square matrix form. Lengths are unary and need neither.
 
 - ⚠️ HausdorffDistance: pairwise done (`dist_hausdorff_pairwise()`), matrix and self forms pending.
 - ⚠️ VincentyDistance: pairwise done (`dist_vincenty_pairwise()`, points only), matrix and self forms pending.
