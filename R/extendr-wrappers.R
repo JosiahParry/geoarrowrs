@@ -367,6 +367,112 @@ dest_haversine <- function(origin, bearing, distance) .Call(wrap__dest_haversine
 #' @rdname destination
 dest_geodesic <- function(origin, bearing, distance) .Call(wrap__dest_geodesic, origin, bearing, distance)
 
+#' Find the point on a geometry closest to another point
+#'
+#' Returns the position on each geometry nearest the corresponding point,
+#' using planar distance. `closest_point_haversine()` measures on a sphere
+#' instead, treating coordinates as longitude and latitude in degrees.
+#'
+#' @details
+#' When the point lies on the geometry the intersection itself is returned.
+#' A geometry with no single nearest position, such as a point equidistant
+#' from both ends of a symmetric line, becomes a null element, as does a null
+#' geometry or a null point.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @param point a GeoArrow point array; length 1 or the same length as `geometry`
+#' @returns a GeoArrow point array of the same length as `geometry`
+#' @export
+#' @rdname closest_point
+#' @family query
+#' @references [ClosestPoint](https://docs.rs/geo/latest/geo/algorithm/closest_point/trait.ClosestPoint.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(cbind(c(0, 10), c(0, 0)))
+#' ))
+#' pt <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(4, 5))))
+#'
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(closest_point(line, pt)))
+closest_point <- function(geometry, point) .Call(wrap__closest_point, geometry, point)
+
+#' @export
+#' @rdname closest_point
+#' @family query
+#' @references [HaversineClosestPoint](https://docs.rs/geo/latest/geo/algorithm/haversine_closest_point/trait.HaversineClosestPoint.html)
+closest_point_haversine <- function(geometry, point) .Call(wrap__closest_point_haversine, geometry, point)
+
+#' Compute a representative point inside a geometry
+#'
+#' Returns a point guaranteed to lie on the geometry, unlike [centroid()],
+#' which can fall outside a concave shape.
+#'
+#' @details
+#' For a polygon this is a point on the interior, chosen from the horizontal
+#' line closest to the centroid. An empty or null geometry becomes a null
+#' element.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow point array of the same length as `geometry`
+#' @export
+#' @family query
+#' @references [InteriorPoint](https://docs.rs/geo/latest/geo/algorithm/interior_point/trait.InteriorPoint.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(
+#'   matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
+#' ))))
+#'
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(interior_point(g)))
+interior_point <- function(geometry) .Call(wrap__interior_point, geometry)
+
+#' Test whether a ring is convex
+#'
+#' `TRUE` when the geometry's ring turns consistently in one direction. A
+#' polygon is judged on its exterior ring.
+#'
+#' @details
+#' Only linestrings and polygons have a convexity. Any other geometry type, or
+#' a null geometry, becomes `NA` rather than `FALSE`.
+#'
+#' @param geometry a GeoArrow linestring or polygon array
+#' @returns a boolean array of the same length as `geometry`
+#' @export
+#' @family query
+#' @references [IsConvex](https://docs.rs/geo/latest/geo/algorithm/is_convex/trait.IsConvex.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' square <- sf::st_polygon(list(
+#'   matrix(c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0), ncol = 2, byrow = TRUE)
+#' ))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
+#'
+#' as.vector(nanoarrow::convert_array(is_convex(g)))
+is_convex <- function(geometry) .Call(wrap__is_convex, geometry)
+
+#' Locate a point along a line as a fraction of its length
+#'
+#' Returns how far along each line the closest position to the corresponding
+#' point lies, as a fraction between 0 and 1.
+#'
+#' @details
+#' 0 is the start of the line and 1 its end, so the value multiplied by the
+#' line's length gives a distance. Only lines and linestrings can be located
+#' along; any other geometry type, a null geometry, a null point, or a
+#' zero length line becomes `NA`.
+#'
+#' @param geometry a GeoArrow linestring array
+#' @param point a GeoArrow point array; length 1 or the same length as `geometry`
+#' @returns a double array of the same length as `geometry`
+#' @export
+#' @family query
+#' @references [LineLocatePoint](https://docs.rs/geo/latest/geo/algorithm/line_locate_point/trait.LineLocatePoint.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(cbind(c(0, 10), c(0, 0)))
+#' ))
+#' pt <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(2.5, 0))))
+#'
+#' as.vector(nanoarrow::convert_array(line_locate_point(line, pt)))
+line_locate_point <- function(geometry, point) .Call(wrap__line_locate_point, geometry, point)
+
 #' Simplify geometries using the Ramer-Douglas-Peucker algorithm
 #'
 #' Reduces the number of points in each geometry by removing vertices that
@@ -955,5 +1061,153 @@ read_geojson <- function(path) .Call(wrap__read_geojson, path)
 #' @export
 #' @family io
 read_shapefile <- function(path) .Call(wrap__read_shapefile, path)
+
+#' Compute Voronoi cells from the vertices of geometries
+#'
+#' Returns one multipolygon per input geometry, whose parts are the Voronoi
+#' cells of that geometry's vertices. The output has the same length as the
+#' input.
+#'
+#' @details
+#' Every vertex of a geometry is treated as a site, so a multipoint of `k`
+#' points yields `k` cells. A Voronoi diagram is unbounded, so the cells are
+#' clipped: `"padded"` uses a box with 50 percent padding around the sites,
+#' matching PostGIS `ST_VoronoiPolygons`, and `"envelope"` uses their exact
+#' bounding box. Passing `boundary` clips to an arbitrary polygon instead,
+#' which is the usual way to cut a diagram to a study area.
+#'
+#' A geometry with fewer than two distinct vertices, or one whose vertices are
+#' all collinear, has no cells and comes back as an empty multipolygon rather
+#' than a null. Use [voronoi_edges()] for the collinear case, which returns
+#' the perpendicular bisectors. A null geometry stays null.
+#'
+#' @param geometry a GeoArrow geometry array whose vertices are the sites
+#' @param clip how to bound the diagram, either `"padded"` or `"envelope"`.
+#'   Ignored when `boundary` is supplied
+#' @param tolerance sites closer together than this are snapped to the same
+#'   position; length 1 or the same length as `geometry`
+#' @param boundary an optional GeoArrow polygon array to clip to; length 1 or
+#'   the same length as `geometry`
+#' @returns a GeoArrow multipolygon array of the same length as `geometry`
+#' @export
+#' @family voronoi
+#' @references [Voronoi](https://docs.rs/geo/latest/geo/algorithm/voronoi/trait.Voronoi.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- sf::st_multipoint(cbind(c(0, 1, 1, 0), c(0, 0, 1, 1)))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#'
+#' cells <- voronoi_cells(g)
+#' lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(cells)))
+voronoi_cells <- function(geometry, clip = "padded", tolerance = 0, boundary = NULL) .Call(wrap__voronoi_cells, geometry, clip, tolerance, boundary)
+
+#' Compute Voronoi edges from the vertices of geometries
+#'
+#' Returns one multilinestring per input geometry, whose parts are the
+#' boundaries between that geometry's Voronoi cells. The output has the same
+#' length as the input.
+#'
+#' @details
+#' Unlike [voronoi_cells()], this works on collinear sites, where the edges
+#' are the perpendicular bisectors between neighbouring points. Prefer it
+#' when you want the diagram's skeleton rather than closed regions.
+#'
+#' A geometry with fewer than two distinct vertices has no edges and comes
+#' back as an empty multilinestring. A null geometry stays null.
+#'
+#' @inheritParams voronoi_cells
+#' @returns a GeoArrow multilinestring array of the same length as `geometry`
+#' @export
+#' @family voronoi
+#' @references [Voronoi](https://docs.rs/geo/latest/geo/algorithm/voronoi/trait.Voronoi.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- sf::st_multipoint(cbind(c(0, 1, 1, 0), c(0, 0, 1, 1)))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(pts))
+#'
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(voronoi_edges(g)))
+voronoi_edges <- function(geometry, clip = "padded", tolerance = 0, boundary = NULL) .Call(wrap__voronoi_edges, geometry, clip, tolerance, boundary)
+
+#' Apply a winding direction to polygon rings
+#'
+#' Rewinds each polygon so its exterior and interior rings follow a
+#' consistent direction. The geometry type of the output matches the input.
+#'
+#' @details
+#' `"default"` gives a counter-clockwise exterior ring and clockwise interior
+#' rings, which is the winding the OGC simple features and GeoJSON
+#' specifications call for. `"reversed"` gives the opposite. `"ccw"` and
+#' `"cw"` are accepted as aliases and refer to the exterior ring.
+#'
+#' Rewinding does not change which points a polygon covers, only the order
+#' its coordinates are stored in. A null geometry stays null.
+#'
+#' @param geometry a GeoArrow polygon or multipolygon array
+#' @param direction one of `"default"`, `"reversed"`, `"ccw"`, or `"cw"`
+#' @returns a GeoArrow array of the same geometry type as `geometry`
+#' @export
+#' @family winding
+#' @references [Orient](https://docs.rs/geo/latest/geo/algorithm/orient/trait.Orient.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # a clockwise square
+#' p <- sf::st_polygon(list(matrix(
+#'   c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE
+#' )))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(p))
+#'
+#' winding_order(g)
+#' winding_order(orient(g, "default"))
+orient <- function(geometry, direction = "default") .Call(wrap__orient, geometry, direction)
+
+#' Determine the winding order of a ring
+#'
+#' Returns `"clockwise"` or `"counterclockwise"` for each geometry. A polygon
+#' reports the winding of its exterior ring.
+#'
+#' @details
+#' A multipolygon reports a winding only when every part's exterior ring
+#' agrees, and a multilinestring only when every part agrees; a geometry whose
+#' parts disagree is `NA`, since it has no single winding. Any other geometry
+#' type, a null geometry, or a ring with fewer than three distinct points is
+#' also `NA`.
+#'
+#' @param geometry a GeoArrow linestring, polygon, or multi part array of either
+#' @returns a string array of the same length as `geometry`
+#' @export
+#' @family winding
+#' @references [Winding](https://docs.rs/geo/latest/geo/algorithm/winding_order/trait.Winding.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
+#'
+#' as.vector(nanoarrow::convert_array(winding_order(g)))
+winding_order <- function(geometry) .Call(wrap__winding_order, geometry)
+
+#' Test the winding order of a ring
+#'
+#' `is_ccw()` is `TRUE` for counter-clockwise geometries and `is_cw()` is
+#' `TRUE` for clockwise ones. A polygon is tested on its exterior ring.
+#'
+#' @details
+#' Any geometry with no winding order, such as a point or a null geometry,
+#' becomes `NA` rather than `FALSE`, so the two functions are not simply
+#' negations of one another.
+#'
+#' @param geometry a GeoArrow linestring or polygon array
+#' @returns a boolean array of the same length as `geometry`
+#' @export
+#' @rdname is_ccw
+#' @family winding
+#' @references [Winding](https://docs.rs/geo/latest/geo/algorithm/winding_order/trait.Winding.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' ring <- matrix(c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(ring))))
+#'
+#' as.vector(nanoarrow::convert_array(is_ccw(g)))
+#' as.vector(nanoarrow::convert_array(is_cw(orient(g, "reversed"))))
+is_ccw <- function(geometry) .Call(wrap__is_ccw, geometry)
+
+#' @export
+#' @rdname is_ccw
+#' @family winding
+is_cw <- function(geometry) .Call(wrap__is_cw, geometry)
 
 # nolint end

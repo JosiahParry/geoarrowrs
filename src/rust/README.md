@@ -72,11 +72,11 @@ This will require more work and should be pushed to the end of implementation.
 
 ## Query
 
-- ❌ ClosestPoint: Find the point on a geometry closest to a given point
-- ❌ HaversineClosestPoint: Find the point on a geometry closest to a given point on a sphere using spherical coordinates and lines being great arcs
-- ❌ IsConvex: Calculate the convexity of a LineString
-- ❌ LineLocatePoint: Calculate the fraction of a line's total length representing the location of the closest point on the line to the given point
-- ❌ InteriorPoint: Calculates a representative point inside a Geometry
+- ✅ ClosestPoint: Find the point on a geometry closest to a given point (`closest_point()`).
+- ✅ HaversineClosestPoint: Find the point on a geometry closest to a given point on a sphere (`closest_point_haversine()`).
+- ✅ IsConvex: Calculate the convexity of a LineString (`is_convex()`).
+- ✅ LineLocatePoint: Calculate the fraction of a line's total length representing the location of the closest point on the line to the given point (`line_locate_point()`).
+- ✅ InteriorPoint: Calculates a representative point inside a Geometry (`interior_point()`).
 
 ## Topology
 
@@ -95,16 +95,17 @@ This will require more work and should be pushed to the end of implementation.
 
 - ✅ TriangulateEarcut: Triangulate polygons using the earcut algorithm (`triangulate_earcut()`).
 - ✅ TriangulateDelaunay: Produce constrained or unconstrained Delaunay triangulations of polygons (`triangulate_delaunay()`).
-- ❌ Voronoi: Produce the Voronoi Diagram of a triangulation
+- ✅ Voronoi: Produce the Voronoi Diagram of a triangulation (`voronoi_cells()`, `voronoi_edges()`).
 
-Both return one multipolygon of triangles per input geometry, so the result is
-length-preserving rather than one row per triangle. Use `explode()` to get at
-the individual triangles.
+The triangulate functions return one multipolygon of triangles per input
+geometry, and the voronoi functions one multipolygon of cells or one
+multilinestring of edges. All are length-preserving rather than one row per
+triangle or cell. Use `explode()` to get at the individual parts.
 
 ## Winding
 
-- ❌ Orient: Apply a specified winding Direction to a Polygon's interior and exterior rings
-- ❌ Winding: Calculate and manipulate the WindingOrder of a LineString
+- ✅ Orient: Apply a specified winding Direction to a Polygon's interior and exterior rings (`orient()`).
+- ✅ Winding: Calculate and manipulate the WindingOrder of a LineString (`winding_order()`, `is_ccw()`, `is_cw()`).
 
 ## Iteration
 
@@ -156,3 +157,7 @@ the individual triangles.
   for LineString to MultiLineString and Polygon to MultiPolygon size
   `geom_offsets` by coordinate count rather than geometry count and panic.
   Not yet reported upstream.
+- `voronoi_edges()` trips a `debug_assert!` in geo 0.33.1 on ordinary input.
+  It is compiled out in release, so an installed package is fine, but the
+  function errors under a debug build such as `devtools::test()`. Its tests
+  skip on that specific error. Not yet reported upstream.

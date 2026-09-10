@@ -20,6 +20,5 @@
 ## FFI gotchas
 
 - Return a GeoArrow array with `into_arrow_robj()` on the array itself. `.to_data()` drops the extension metadata and the round trip comes back as bare storage.
-- Prefer `try_to_geometry()` / `try_to_point()` / `try_to_multi_point()`. The plain forms `.expect()` on an empty point and panic across the FFI.
-- Prefer `try_push_*` over `push_*` where both exist. The latter panics on a dimension mismatch.
-- A panic in a dependency still crashes R. Check whether an upstream call panics before using it.
+- Never worry about panics. extendr handles them. Never write `catch_unwind`, never add a panic hook, never defend against a dependency panicking, and never let a panic shape an API. If something panics, that is upstream's bug to fix, not ours to work around.
+- Prefer `try_to_geometry()` / `try_to_point()` / `try_to_multi_point()` and `try_push_*` over `push_*`, because they give a null element for an empty or mismatched geometry rather than aborting the whole call.

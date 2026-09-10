@@ -13,10 +13,15 @@ name = "geoarrowrs"
 anyhow = "1.0.102"
 arrow = "58.3.0"
 arrow_extendr = { version = "58.1.0", features = ["arrow", "geoarrow-08"] }
-extendr-api = { version = "*", features = ["either"] }
+# extendr-api = { version = "*", features = ["either"] }
+extendr-api = { git = "https://github.com/extendr/extendr", features = [
+    "either",
+] }
 geo = "0.33.1"
 geo-traits = { version = "0.3.0" }
-flatgeobuf = "5.0.0"
+# default features pull in reqwest, native-tls and security-framework for the
+# http reader; we only ever open a local File, so drop them
+flatgeobuf = { version = "5.0.0", default-features = false }
 geojson = "0.24.2"
 # preserve_order keeps property columns in document order rather than sorting them
 serde_json = { version = "1", features = ["preserve_order"] }
@@ -33,3 +38,10 @@ geoarrow-cast = "0.8.0"
 [profile.release]
 lto = true
 codegen-units = 1
+
+# arrow_extendr pulls extendr-api and extendr-ffi from crates.io while this
+# crate pulls them from git. Both declare `links = "R"`, and cargo permits only
+# one package per links value, so force everything onto the git source.
+[patch.crates-io]
+extendr-api = { git = "https://github.com/extendr/extendr" }
+extendr-ffi = { git = "https://github.com/extendr/extendr" }

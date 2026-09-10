@@ -1,5 +1,8 @@
 # geoarrowrs (development version)
 
+* Added `voronoi_cells()` and `voronoi_edges()`, returning one multipolygon of cells or multilinestring of edges per input geometry. Both take a `clip` mode and an optional `boundary` polygon to cut the diagram to a study area.
+* Added `orient()`, `winding_order()`, `is_ccw()`, and `is_cw()`. A multi part geometry reports a winding only when all of its parts agree.
+* Added `closest_point()`, `closest_point_haversine()`, `interior_point()`, `is_convex()`, and `line_locate_point()`. `interior_point()` always lands on the geometry, unlike `centroid()`.
 * Added `read_shapefile()`, `read_geojson()`, and `read_flatgeobuf()`, each returning a record batch stream of the attribute columns followed by a `geometry` column. `read_flatgeobuf()` streams and takes an optional `bbox` that uses the file's spatial index.
 * Added `cast_geometry()` and `downcast_geometry()` for converting between GeoArrow geometry types, and `explode()`/`flatten()` for splitting multi-part geometries into their parts and collapsing them again. `explode()` preserves length, returning one array of parts per row.
 * Added `triangulate_earcut()` and `triangulate_delaunay()`, returning one multipolygon of triangles per input geometry.
