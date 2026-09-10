@@ -161,3 +161,10 @@ triangle or cell. Use `explode()` to get at the individual parts.
   It is compiled out in release, so an installed package is fine, but the
   function errors under a debug build such as `devtools::test()`. Its tests
   skip on that specific error. Not yet reported upstream.
+
+## Spatial index
+
+- ✅ RTree: A packed Hilbert R-tree over bounding boxes, from the `geo-index`
+  crate (`RTree$new()`, `$search()`, `$neighbors()`, `$size()`,
+  `$n_indexed()`). Queries are bounding box tests, so results are candidates to
+  confirm with an exact predicate.

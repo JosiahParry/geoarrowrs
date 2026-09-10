@@ -14,3 +14,4 @@ air.toml
 ^docs$
 ^pkgdown$
 ^vignettes/.*\.html$
+^BUILD-NOTES\.md$

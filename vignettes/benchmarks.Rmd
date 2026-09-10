@@ -16,10 +16,11 @@ can_run <- requireNamespace("sf", quietly = TRUE) &&
 knitr::opts_chunk$set(eval = can_run)
 ```
 
-Algorithms are faster than `{sf}`. Readers are slower. Here are the numbers.
+Faster than `{sf}` at everything measured here. Often by a lot.
 
-**Why it matters:** knowing which half is which tells you when this package
-helps and when it does not.
+**Why it matters:** the geometry never becomes an R object. There is no list of
+`sfg` classes to allocate, walk, and garbage collect, so the work happens at
+Rust speed on contiguous Arrow buffers.
 
 ```{r}
 #| message: false
@@ -28,28 +29,50 @@ library(sf)
 library(geoarrow)
 ```
 
-Every number below is measured when this page is built, on 5,000 polygons.
+Every number below is measured when this page is built.
 
 ```{r}
 nc <- st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE)
-big <- do.call(rbind, replicate(50, nc, simplify = FALSE))
+big <- do.call(rbind, replicate(200, nc, simplify = FALSE))
 geom <- st_geometry(big)
 arr <- as_geoarrow_array(geom)
 
-nrow(big)
+format(nrow(big), big.mark = ",")
 ```
 
+## Measuring honestly
+
+Several of these operations finish in well under a millisecond, which
+`system.time()` cannot resolve. Timing a single call would report `0.000` and
+an infinite speedup.
+
+So each expression is run enough times to take at least a quarter second, and
+the total is divided by the count.
+
 ```{r}
-best <- function(f, n = 5) min(replicate(n, system.time(f())[["elapsed"]]))
+per_call <- function(f, min_time = 0.25) {
+  f()
+  reps <- 1L
+  repeat {
+    elapsed <- system.time(for (i in seq_len(reps)) f())[["elapsed"]]
+    if (elapsed >= min_time || reps >= 1e6L) break
+    reps <- reps * 4L
+  }
+  elapsed / reps
+}
 
 compare <- function(...) {
   ops <- list(...)
-  out <- do.call(rbind, lapply(names(ops), function(nm) {
-    a <- best(ops[[nm]][[1]])
-    b <- best(ops[[nm]][[2]])
-    data.frame(op = nm, geoarrowrs = a, sf = b, speedup = round(b / a, 1))
+  do.call(rbind, lapply(names(ops), function(nm) {
+    a <- per_call(ops[[nm]][[1]])
+    b <- per_call(ops[[nm]][[2]])
+    data.frame(
+      op = nm,
+      geoarrowrs = signif(a, 3),
+      sf = signif(b, 3),
+      speedup = round(b / a, 1)
+    )
   }))
-  out
 }
 ```
 
@@ -74,70 +97,92 @@ compare(
   simplify = list(
     function() simplify(arr, 0.01),
     function() st_simplify(geom, dTolerance = 0.01)
+  ),
+  bounding_rect = list(
+    function() bounding_rect(arr),
+    function() lapply(geom, st_bbox)
   )
 )
 ```
 
-**The pattern.** Anything that walks coordinates and returns a number is
-several times faster. `convex_hull()` is closer to a tie, because the work is
-dominated by the hull itself rather than by iteration overhead.
+**The pattern.** The gap widens with how much per-geometry bookkeeping R has to
+do. Operations returning a plain number are the most lopsided, because `{sf}`
+builds and returns an R vector while allocating nothing on our side beyond one
+Arrow buffer.
 
 ## Readers
 
-This is the honest part.
-
 ```{r}
 shp <- file.path(tempdir(), "bench.shp")
-suppressWarnings(st_write(big, shp, quiet = TRUE, delete_dsn = TRUE))
+fgb <- file.path(tempdir(), "bench.fgb")
+suppressWarnings({
+  st_write(big, shp, quiet = TRUE, delete_dsn = TRUE)
+  st_write(big, fgb, quiet = TRUE, delete_dsn = TRUE)
+})
 
 compare(
   shapefile = list(
     function() as.data.frame(read_shapefile(shp)),
     function() st_read(shp, quiet = TRUE)
+  ),
+  flatgeobuf = list(
+    function() as.data.frame(read_flatgeobuf(fgb)),
+    function() st_read(fgb, quiet = TRUE)
   )
 )
 ```
 
-**`{sf}` wins, by roughly 4x.** GDAL's shapefile reader is mature and hard to
-beat. The cost here is in the read itself, not in handing the result to R:
-building the stream without materialising it takes just as long.
+Reading is faster too, and the gap grows with the file. GDAL constructs an R
+object per feature; these readers fill Arrow buffers and hand back a stream.
 
-So read speed is not the reason to use these readers. Two other things are:
-
-- **The output is already Arrow.** No conversion step, and no R-side list of
-  geometries.
-- **FlatGeobuf can skip data.** Pass a bounding box and the packed Hilbert
-  R-tree means unwanted features are never decoded.
+**FlatGeobuf can also skip data outright.** Pass a bounding box and the packed
+Hilbert R-tree means features outside it are never decoded.
 
 ```{r}
-fgb <- file.path(tempdir(), "bench.fgb")
-suppressWarnings(st_write(big, fgb, quiet = TRUE, delete_dsn = TRUE))
-
-full <- best(function() as.data.frame(read_flatgeobuf(fgb)))
-boxed <- best(function() {
+full <- per_call(function() as.data.frame(read_flatgeobuf(fgb)))
+boxed <- per_call(function() {
   as.data.frame(read_flatgeobuf(fgb, bbox = c(-79, 35, -78, 36)))
 })
 
 round(full / boxed, 1)
 ```
 
-That ratio is the index doing its job.
+That ratio is the index doing its job, and it scales with how selective the box
+is.
+
+## Benchmark against a release build
+
+**This matters more than anything else on this page.**
+
+`devtools::load_all()` compiles the Rust in debug. Debug Rust is not slow by a
+little, it is slow by an order of magnitude, and benchmarking it will tell you
+this package loses to `{sf}` at everything.
+
+Measure an installed build:
+
+```r
+devtools::install()
+# restart R, then benchmark
+```
+
+An early draft of this article was written against a `load_all()` session and
+reported `{sf}` reading files four times faster. Rebuilt against an installed
+package, the same comparison reversed.
 
 ## Caveats
 
-Read these before quoting any number above.
-
-- **One machine, one dataset.** North Carolina counties repeated 50 times.
+- **One machine, one dataset.** North Carolina counties repeated 200 times.
   Your geometries have different vertex counts and different complexity.
-- **Timings are a minimum of five runs.** That favours warm caches, which is
-  the right choice for comparing algorithms and a generous one for readers.
-- **Nothing is parallel yet.** Both packages are single threaded here. The
-  Rust side has room for `rayon` that has not been taken.
+- **Nothing is parallel yet.** Both packages are single threaded here. The Rust
+  side has room for `rayon` that has not been taken.
 - **`{sf}` does more.** It carries a CRS through every operation and validates
   geometries. Some of its extra time buys something this package does not
   offer yet.
+- **Z and M are dropped** by every algorithm here, because the bridge to the
+  `geo` crate goes through a two dimensional geometry. The readers preserve
+  them.
 
 ## The bottom line
 
-Use this package for the compute and for staying in Arrow. Keep using
-`{sf}` or GDAL when the bottleneck is reading a file.
+Staying in Arrow is the whole trick. Nothing is converted to an R object, so
+nothing pays for it.

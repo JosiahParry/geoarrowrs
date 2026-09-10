@@ -19,6 +19,7 @@ pub(crate) mod convert;
 pub(crate) mod densify;
 pub(crate) mod destination;
 pub(crate) mod distance;
+pub(crate) mod index;
 pub(crate) mod interpolate_line;
 pub(crate) mod interpolate_point;
 pub(crate) mod io;
@@ -199,6 +200,7 @@ extendr_module! {
     use cast;
     use convert;
     use densify;
+    use index;
     use interpolate_line;
     use interpolate_point;
     use io;

@@ -356,6 +356,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 
 [[package]]
+name = "bytemuck"
+version = "1.25.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95832e849adfb21180ccb6826a99da14e5d266ae5c2e668e1602cf234f153797"
+
+[[package]]
 name = "byteorder"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -610,6 +616,12 @@ dependencies = [
 
 [[package]]
 name = "float_next_after"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8bf7cc16383c4b8d58b9905a8509f02926ce3058053c056376248d958c9df1e8"
+
+[[package]]
+name = "float_next_after"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37007738a80ea34f969af54a3390dd72cacdef654974cfd449c9f6f72dbaac10"
@@ -679,7 +691,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "30eb1fdc57c1e5cfd11826fe0caec4b9dc7901f3758263bb506228d88c8d9e9a"
 dependencies = [
  "earcut",
- "float_next_after",
+ "float_next_after 2.0.0",
  "geo-types",
  "geographiclib-rs",
  "i_overlay",
@@ -691,6 +703,20 @@ dependencies = [
  "rstar 0.12.2",
  "sif-itree",
  "spade",
+]
+
+[[package]]
+name = "geo-index"
+version = "0.3.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f310ad245e63f6b5fcf4a7c2663139708eae1374045396eef95ea3badd242d57"
+dependencies = [
+ "bytemuck",
+ "float_next_after 1.0.0",
+ "geo-traits",
+ "num-traits",
+ "thiserror 1.0.69",
+ "tinyvec",
 ]
 
 [[package]]
@@ -818,6 +844,7 @@ dependencies = [
  "extendr-api",
  "flatgeobuf",
  "geo",
+ "geo-index",
  "geo-traits",
  "geoarrow",
  "geoarrow-array",
@@ -1748,6 +1775,21 @@ checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
 dependencies = [
  "crunchy",
 ]
+
+[[package]]
+name = "tinyvec"
+version = "1.13.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4cf0ded5c4e56918d8f8a339e1bb67d038d3bc6d144ac407904015ba2e4cde9b"
+dependencies = [
+ "tinyvec_macros",
+]
+
+[[package]]
+name = "tinyvec_macros"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 
 [[package]]
 name = "toml_datetime"

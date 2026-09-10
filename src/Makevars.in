@@ -40,7 +40,7 @@ $(STATLIB):
 	@PANIC_EXPORTS@RUSTFLAGS="$(RUSTFLAGS) --print=native-static-libs" cargo build @CRAN_FLAGS@ --lib @PROFILE@ --manifest-path=./rust/Cargo.toml --target-dir="$(TARGET_DIR)" @TARGET@
 
 	if [ -n "$$ROXYGEN_PKG" ]; then \
-		$(CC) -o $(DOCUMENT) rust/document.c $(PKG_LIBS) -L"$(R_HOME)/lib$(R_ARCH)" -lR && \
+		$(CC) -o $(DOCUMENT) rust/document.c $(PKG_LIBS) -L"$(R_HOME)/lib$(R_ARCH)" -lR @DOCUMENT_LIBS@ && \
 		./$(DOCUMENT) $(R_PACKAGE_NAME) ../R/extendr-wrappers.R && \
 		rm -f $(DOCUMENT); \
 	fi

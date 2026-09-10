@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added an `RTree` spatial index built on the `geo-index` crate, with `$search()` for bounding box queries and `$neighbors()` for nearest rows. Queries return candidates to confirm with an exact predicate.
 * Added `voronoi_cells()` and `voronoi_edges()`, returning one multipolygon of cells or multilinestring of edges per input geometry. Both take a `clip` mode and an optional `boundary` polygon to cut the diagram to a study area.
 * Added `orient()`, `winding_order()`, `is_ccw()`, and `is_cw()`. A multi part geometry reports a winding only when all of its parts agree.
 * Added `register_geoarrow_udfs()`, which registers geoarrowrs functions as Arrow scalar kernels so they run inside `dplyr` verbs on a `Table` or `Dataset` rather than pulling the geometry into R.
