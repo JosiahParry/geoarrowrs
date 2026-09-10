@@ -451,6 +451,11 @@ geoarrow_udf_kernels <- function(fun, spec, schemas) {
 #' kernel, so `crs` has to match the data. Pass every CRS you need in one call:
 #' registering a name again replaces the kernels it had.
 #'
+#' Loading geoarrowrs calls this once for you with `crs = NULL`, so data with
+#' no CRS works without any setup. Data that carries one still needs a call
+#' naming it. Set `options(geoarrowrs.register_udfs = FALSE)` before loading to
+#' skip that, which also stops the package pulling in arrow at load time.
+#'
 #' @param crs the coordinate reference system the kernels dispatch on. `NULL`,
 #'   the default, registers for data with no CRS. Also accepts a CRS string, or
 #'   any object carrying one: an Arrow `Table`, `RecordBatch`, `Dataset`,
@@ -506,7 +511,7 @@ register_geoarrow_udfs <- function(crs = NULL, functions = NULL, prefix = "") {
   failed <- character()
 
   for (name in functions) {
-    fun <- getExportedValue("geoarrowrs", name)
+    fun <- get(name, envir = asNamespace("geoarrowrs"))
     spec <- catalogue[[name]]
     kernels <- lapply(sets, function(set) {
       geoarrow_udf_kernels(fun, spec, set)

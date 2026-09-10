@@ -25,6 +25,7 @@ whenever an element holds more or fewer than one geometry.
 Other cast:
 \code{\link[=ga_cast_geometry]{ga_cast_geometry()}},
 \code{\link[=ga_downcast_geometry]{ga_downcast_geometry()}},
-\code{\link[=ga_explode]{ga_explode()}}
+\code{\link[=ga_explode]{ga_explode()}},
+\code{\link[=ga_from_wkb]{ga_from_wkb()}}
 }
 \concept{cast}

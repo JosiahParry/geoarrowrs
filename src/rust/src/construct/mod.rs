@@ -43,7 +43,7 @@ use crate::try_float_array;
 fn ga_xy(
     x: Robj,
     y: Robj,
-    #[extendr(default = "NULL")] crs: Nullable<String>,
+    #[extendr(default = "NULL")] crs: Option<String>,
 ) -> anyhow::Result<Robj> {
     let xs = try_float_array(x, "x").map_err(|e| anyhow::anyhow!("{e}"))?;
     let ys = try_float_array(y, "y").map_err(|e| anyhow::anyhow!("{e}"))?;
@@ -58,10 +58,8 @@ fn ga_xy(
     }
 
     let metadata = match crs {
-        Nullable::NotNull(value) => {
-            Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None))
-        }
-        Nullable::Null => Arc::new(Metadata::default()),
+        Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
+        None => Arc::new(Metadata::default()),
     };
 
     let mut bldr = PointBuilder::new(PointType::new(Dimension::XY, metadata));

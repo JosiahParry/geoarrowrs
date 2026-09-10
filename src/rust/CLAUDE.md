@@ -19,6 +19,8 @@
 
 ## FFI gotchas
 
+- Never annotate a `let` binding with an explicit type. Let it infer, or pin it with a turbofish on the call that produces it, such as `.collect::<Vec<_>>()`. The annotations already in the crate stay until that code is touched for another reason; do not go and refactor them.
+- Never use `Nullable<T>` for an optional argument. Use `Option<T>`, which matches on `Some`/`None` and reads like ordinary Rust. The `Nullable<T>` already in the crate stays until that code is touched for another reason; do not go and refactor it.
 - Return a GeoArrow array with `into_arrow_robj()` on the array itself. `.to_data()` drops the extension metadata and the round trip comes back as bare storage.
 - Never worry about panics. extendr handles them. Never write `catch_unwind`, never add a panic hook, never defend against a dependency panicking, and never let a panic shape an API. If something panics, that is upstream's bug to fix, not ours to work around.
 - Prefer `try_to_geometry()` / `try_to_point()` / `try_to_multi_point()` and `try_push_*` over `push_*`, because they give a null element for an empty or mismatched geometry rather than aborting the whole call.

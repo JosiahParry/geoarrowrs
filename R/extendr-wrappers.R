@@ -1190,6 +1190,43 @@ ga_cast_geometry <- function(x, to) .Call(wrap__ga_cast_geometry, x, to)
 #' @family cast
 ga_downcast_geometry <- function(x) .Call(wrap__ga_downcast_geometry, x)
 
+#' Read well known binary as a GeoArrow array
+#'
+#' Parses a binary column of WKB into the narrowest GeoArrow type that fits
+#' every geometry in it. A column of points becomes a `point` array.
+#'
+#' @details
+#' GeoParquet writers, and plenty of plain Parquet ones, store geometry as a
+#' bare `binary` column with no GeoArrow extension metadata on it. Most
+#' geoarrowrs functions read that directly, but the ones that need a specific
+#' geometry type, such as [ga_dist_euclidean_pairwise()], cannot tell what is
+#' in it. Converting once up front settles the type for everything
+#' downstream.
+#'
+#' `crs` is stored verbatim in the array's metadata and is never interpreted,
+#' so nothing here reprojects. Leaving it `NULL` keeps whatever the input
+#' carried, which for a bare binary column is no CRS at all.
+#'
+#' Mixed geometry types are left as a `geometry` array, since no narrower
+#' type fits.
+#'
+#' @param x a binary array of WKB, or any GeoArrow array
+#' @param crs a coordinate reference system to record, or `NULL` to keep the
+#'   one `x` already has
+#' @returns a GeoArrow array of the narrowest type that fits, the same length
+#'   as `x`
+#' @export
+#' @family cast
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && requireNamespace("wk", quietly = TRUE) && requireNamespace("arrow", quietly = TRUE)
+#' sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+#' wkb <- nanoarrow::as_nanoarrow_array(
+#'   arrow::Array$create(unclass(wk::as_wkb(sfc)), type = arrow::binary())
+#' )
+#'
+#' pts <- ga_from_wkb(wkb, crs = "EPSG:4326")
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
+ga_from_wkb <- function(x, crs = NULL) .Call(wrap__ga_from_wkb, x, crs)
+
 #' Split multi-part geometries into their parts
 #'
 #' Returns a list the same length as the input, where each element is an array

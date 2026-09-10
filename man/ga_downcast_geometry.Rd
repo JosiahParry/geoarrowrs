@@ -26,6 +26,7 @@ reading a format that does not record a single geometry type.
 Other cast:
 \code{\link[=ga_cast_geometry]{ga_cast_geometry()}},
 \code{\link[=ga_explode]{ga_explode()}},
-\code{\link[=ga_flatten]{ga_flatten()}}
+\code{\link[=ga_flatten]{ga_flatten()}},
+\code{\link[=ga_from_wkb]{ga_from_wkb()}}
 }
 \concept{cast}

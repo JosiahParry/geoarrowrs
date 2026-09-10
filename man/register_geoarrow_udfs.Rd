@@ -52,6 +52,11 @@ because they change the length of the array and a scalar kernel may not.
 A GeoArrow type carries its CRS, and Arrow compares that when it looks for a
 kernel, so \code{crs} has to match the data. Pass every CRS you need in one call:
 registering a name again replaces the kernels it had.
+
+Loading geoarrowrs calls this once for you with \code{crs = NULL}, so data with
+no CRS works without any setup. Data that carries one still needs a call
+naming it. Set \code{options(geoarrowrs.register_udfs = FALSE)} before loading to
+skip that, which also stops the package pulling in arrow at load time.
 }
 \examples{
 \dontshow{if (requireNamespace("arrow", quietly = TRUE) && requireNamespace("dplyr", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && isTRUE(arrow::arrow_info()$capabilities[["acero"]])) withAutoprint(\{ # examplesIf}

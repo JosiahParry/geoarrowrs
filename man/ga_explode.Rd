@@ -43,6 +43,7 @@ collapse it into a single array with one row per part.
 Other cast:
 \code{\link[=ga_cast_geometry]{ga_cast_geometry()}},
 \code{\link[=ga_downcast_geometry]{ga_downcast_geometry()}},
-\code{\link[=ga_flatten]{ga_flatten()}}
+\code{\link[=ga_flatten]{ga_flatten()}},
+\code{\link[=ga_from_wkb]{ga_from_wkb()}}
 }
 \concept{cast}

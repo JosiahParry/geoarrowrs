@@ -47,6 +47,7 @@ dimensions is not supported.
 Other cast:
 \code{\link[=ga_downcast_geometry]{ga_downcast_geometry()}},
 \code{\link[=ga_explode]{ga_explode()}},
-\code{\link[=ga_flatten]{ga_flatten()}}
+\code{\link[=ga_flatten]{ga_flatten()}},
+\code{\link[=ga_from_wkb]{ga_from_wkb()}}
 }
 \concept{cast}

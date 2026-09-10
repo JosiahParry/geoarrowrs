@@ -149,3 +149,71 @@ test_that("explode then flatten round trips a multipolygon column", {
 test_that("flatten rejects something that is not a list array", {
   expect_error(ga_flatten(pts()), "list array")
 })
+
+wkb_array <- function(sfc) {
+  skip_if_not_installed("wk")
+  skip_if_not_installed("arrow")
+  nanoarrow::as_nanoarrow_array(
+    arrow::Array$create(unclass(wk::as_wkb(sfc)), type = arrow::binary())
+  )
+}
+
+test_that("ga_from_wkb reads a bare binary column", {
+  skip_deps()
+  sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  res <- ga_from_wkb(wkb_array(sfc))
+
+  expect_equal(
+    nanoarrow::infer_nanoarrow_schema(res)$metadata[["ARROW:extension:name"]],
+    "geoarrow.point"
+  )
+  expect_equal(res$length, 2L)
+})
+
+test_that("ga_from_wkb unblocks the type specific functions", {
+  skip_deps()
+  sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  bin <- wkb_array(sfc)
+
+  expect_error(ga_dist_euclidean_pairwise(bin, bin), "Extension type name")
+  pts <- ga_from_wkb(bin)
+  expect_equal(
+    as.vector(nanoarrow::convert_array(ga_dist_euclidean_pairwise(pts, pts))),
+    c(0, 0)
+  )
+})
+
+test_that("ga_from_wkb records a crs", {
+  skip_deps()
+  sfc <- sf::st_sfc(sf::st_point(c(0, 0)))
+  res <- ga_from_wkb(wkb_array(sfc), crs = "EPSG:4326")
+
+  expect_equal(wk::wk_crs(geoarrow::as_geoarrow_vctr(res)), "EPSG:4326")
+})
+
+test_that("ga_from_wkb keeps mixed types as geometry", {
+  skip_deps()
+  sfc <- sf::st_sfc(
+    sf::st_point(c(0, 0)),
+    sf::st_linestring(cbind(c(0, 1), c(0, 1)))
+  )
+  res <- ga_from_wkb(wkb_array(sfc))
+
+  expect_match(
+    nanoarrow::infer_nanoarrow_schema(res)$metadata[["ARROW:extension:name"]],
+    "geoarrow\\."
+  )
+  expect_equal(res$length, 2L)
+})
+
+test_that("ga_from_wkb leaves a geoarrow array alone", {
+  skip_deps()
+  g <- ga(sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4))))
+
+  expect_equal(
+    nanoarrow::infer_nanoarrow_schema(ga_from_wkb(g))$metadata[[
+      "ARROW:extension:name"
+    ]],
+    "geoarrow.point"
+  )
+})
