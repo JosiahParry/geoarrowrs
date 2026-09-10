@@ -1,6 +1,9 @@
 default:
     just --list
 
+readme:
+    quarto render README.qmd --to gfm
+
 fmt:
     air format R tests
     cargo fmt --manifest-path src/rust/Cargo.toml
