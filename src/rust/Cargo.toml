@@ -5,12 +5,9 @@ edition = "2024"
 publish = false
 
 [lib]
-crate-type = ["rlib", "staticlib"]
+crate-type = ["staticlib"]
 name = "geoarrowrs"
 
-[[bin]]
-name = "document"
-path = "document.rs"
 
 [dependencies]
 anyhow = "1.0.102"
