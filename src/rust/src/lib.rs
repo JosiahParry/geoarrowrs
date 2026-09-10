@@ -31,6 +31,7 @@ pub(crate) mod length;
 pub(crate) mod misc;
 pub(crate) mod query;
 pub(crate) mod simplify;
+pub(crate) mod threads;
 pub(crate) mod topology;
 pub(crate) mod triangulate;
 pub(crate) mod validation;
@@ -170,8 +171,6 @@ pub(crate) fn as_geo_geometries(
         .map_err(|e| Error::Other(e.to_string()))
 }
 
-/// Check that a parameter array is length 1 or the same length as the geometry
-/// array, so that it can be recycled with `.cycle()` over `n` geometries.
 /// Check that two geometry arrays walked in lockstep have the same length, since zipping them would otherwise truncate to the shorter one.
 pub(crate) fn check_pair_len(
     a: usize,
@@ -187,6 +186,7 @@ pub(crate) fn check_pair_len(
     Ok(())
 }
 
+/// Check that a parameter array is length 1 or the same length as the geometry array, so that it can be recycled with `.cycle()` over `n` geometries.
 pub(crate) fn check_recycle_len(
     len: usize,
     n: usize,

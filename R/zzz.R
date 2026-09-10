@@ -1,4 +1,32 @@
+#' How many threads the parallel paths may use, when something caps them
+#'
+#' `NULL` means no cap, which is every core. `R CMD check` sets
+#' `_R_CHECK_LIMIT_CORES_`, and CRAN sets it on the check farm, so that is the
+#' signal to come down to two. `OMP_THREAD_LIMIT` is what CRAN sets on some
+#' check machines and is respected as a ceiling.
+#'
+#' @noRd
+geoarrowrs_thread_cap <- function() {
+  if (nzchar(Sys.getenv("_R_CHECK_LIMIT_CORES_"))) {
+    return(2L)
+  }
+
+  limit <- suppressWarnings(as.integer(Sys.getenv("OMP_THREAD_LIMIT")))
+  if (!is.na(limit) && limit > 0L) {
+    return(limit)
+  }
+
+  NULL
+}
+
 .onLoad <- function(libname, pkgname) {
+  if (is.null(getOption("geoarrowrs.thread_pool"))) {
+    cap <- geoarrowrs_thread_cap()
+    if (!is.null(cap)) {
+      options(geoarrowrs.thread_pool = cap)
+    }
+  }
+
   if (!isTRUE(getOption("geoarrowrs.register_udfs", TRUE))) {
     return(invisible(NULL))
   }

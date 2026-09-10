@@ -101,11 +101,13 @@ fn cast_chunks(
     }
 
     let slices = cast_slices(chunks);
-    let parts = slices
-        .par_iter()
-        .map(|slice| cast(slice.as_ref(), to_type))
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| Error::Other(e.to_string()))?;
+    let parts = crate::threads::with_pool(|| {
+        slices
+            .par_iter()
+            .map(|slice| cast(slice.as_ref(), to_type))
+            .collect::<Result<Vec<_>, _>>()
+    })
+    .map_err(|e| Error::Other(e.to_string()))?;
 
     concat_cast(parts, to_type)
 }
