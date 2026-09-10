@@ -16,6 +16,7 @@ pub(crate) mod boolean;
 pub(crate) mod boundary;
 pub(crate) mod cast;
 pub(crate) mod cluster;
+pub(crate) mod construct;
 pub(crate) mod convert;
 pub(crate) mod densify;
 pub(crate) mod destination;
@@ -204,6 +205,7 @@ extendr_module! {
     use boundary;
     use cast;
     use cluster;
+    use construct;
     use convert;
     use densify;
     use index;

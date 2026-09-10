@@ -1337,6 +1337,39 @@ ga_kmeans <- function(geometry, k, seed = NULL) .Call(wrap__ga_kmeans, geometry,
 #' nanoarrow::convert_array(ga_outlier_scores(g, k_neighbours = 2))
 ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_scores, geometry, k_neighbours)
 
+#' Build a point array from x and y coordinates
+#'
+#' Pairs two numeric vectors into a GeoArrow point array. The shorter of the
+#' two is recycled when it is length 1.
+#'
+#' @details
+#' A row where either coordinate is `NA` gives a null point rather than a
+#' point at an arbitrary location, so the result always has the same length as
+#' the longer input.
+#'
+#' `crs` is stored verbatim in the array's GeoArrow metadata and is never
+#' interpreted, so nothing here reprojects. Anything a reader would produce
+#' works, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
+#' Leaving it `NULL` produces an array with no CRS.
+#'
+#' @param x a numeric vector or float64 array of x coordinates
+#' @param y a numeric vector or float64 array of y coordinates; length 1 or
+#'   the same length as `x`
+#' @param crs a coordinate reference system to record, or `NULL` for none
+#' @returns a GeoArrow point array
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' pts <- ga_xy(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
+#'
+#' # a length 1 coordinate is recycled
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_xy(c(0, 1, 2), 0)))
+#'
+#' # NA in either coordinate gives a null point
+#' ga_xy(c(0, NA), c(0, 1))$null_count
+ga_xy <- function(x, y, crs = NULL) .Call(wrap__ga_xy, x, y, crs)
+
 #' Convert coordinates from radians to degrees
 #'
 #' Multiplies every x and y coordinate by `180 / pi`. The geometry type of the

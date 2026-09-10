@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_xy()`, which pairs two numeric vectors or float64 arrays into a GeoArrow point array. Either argument may be length 1 and is recycled, a row where either coordinate is `NA` gives a null point, and `crs` is recorded in the array metadata verbatim without reprojecting anything.
 * Every geometry function now carries a `ga_` prefix: `ga_centroid()`, `ga_intersects()`, `ga_simplify()`. Bare names masked `base::within()`, `stats::kmeans()`, `graphics::lines()`, `dplyr::contains()`, and `purrr::flatten()`. An `st_` prefix was considered and rejected, because 19 of the names collide head on with sf and return a different type. The readers `read_shapefile()`, `read_geojson()`, and `read_flatgeobuf()`, the `RTree` class, and `register_geoarrow_udfs()` keep their names. Registered Arrow kernels take the prefix too, so `mutate(a = ga_unsigned_area(geometry))` is the same name in and out of the engine.
 * Added `ga_line_intersection()` and `ga_self_intersections()`, the latter using the Bentley-Ottmann sweep to locate exactly where a geometry crosses itself.
 * Added `ga_affine_transform()`, the general form behind the other affine ops, taking six recyclable coefficients so a different transform can apply to every row.

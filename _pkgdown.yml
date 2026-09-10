@@ -36,6 +36,11 @@ reference:
   contents:
   - register_geoarrow_udfs
 
+- title: Construct
+  desc: Build geometry from plain coordinates.
+  contents:
+  - has_concept("construct")
+
 - title: Measure
   desc: Area, length, distance, and bearing. All return plain Arrow arrays.
   contents:
