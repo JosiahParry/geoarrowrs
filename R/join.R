@@ -33,6 +33,31 @@ is_geometry_column <- function(x) {
   inherits(x, "geoarrow_vctr") || inherits(x, "nanoarrow_vctr")
 }
 
+#' @noRd
+check_suffix <- function(suffix, call = rlang::caller_env()) {
+  if (!is.character(suffix) || length(suffix) != 2L) {
+    cli::cli_abort(
+      "{.arg suffix} must be a character vector of length 2.",
+      call = call
+    )
+  }
+}
+
+#' Bind the matched rows of two frames, suffixing the names they share
+#'
+#' @noRd
+bind_matches <- function(x, y, y_geo_col, x_ids, y_ids, suffix) {
+  y_keep <- y[-y_geo_col]
+  names <- suffix_names(names(x), names(y_keep), suffix)
+
+  out <- cbind(
+    rlang::set_names(x[x_ids, , drop = FALSE], names$x),
+    rlang::set_names(y_keep[y_ids, , drop = FALSE], names$y)
+  )
+  rownames(out) <- NULL
+  out
+}
+
 #' Disambiguate the names two joined frames share
 #'
 #' @noRd
@@ -112,9 +137,7 @@ ga_join <- function(
       "{.arg predicate} must be a function, such as {.fn ga_sparse_intersects}."
     )
   }
-  if (!is.character(suffix) || length(suffix) != 2L) {
-    cli::cli_abort("{.arg suffix} must be a character vector of length 2.")
-  }
+  check_suffix(suffix)
 
   hits <- as.vector(predicate(x[[x_geo_col]], y[[y_geo_col]]))
   if (length(hits) != nrow(x)) {
@@ -138,13 +161,97 @@ ga_join <- function(
   x_ids <- rep.int(seq_len(nrow(x)), n)
   y_ids <- if (is.null(y_ids)) integer() else y_ids
 
-  y_keep <- y[-y_geo_col]
-  names <- suffix_names(names(x), names(y_keep), suffix)
+  bind_matches(x, y, y_geo_col, x_ids, y_ids, suffix)
+}
 
-  out <- cbind(
-    rlang::set_names(x[x_ids, , drop = FALSE], names$x),
-    rlang::set_names(y_keep[y_ids, , drop = FALSE], names$y)
-  )
-  rownames(out) <- NULL
+#' Join two data frames on nearest neighbours
+#'
+#' Attaches the columns of the `k` rows of `y` nearest each row of `x`, the way
+#' [ga_join()] attaches the ones that relate to it. The distance between each
+#' pair comes along as a column.
+#'
+#' @details
+#' Each row of `x` is repeated once per neighbour and the neighbours are ordered
+#' nearest first, so the result is `nrow(x) * k` rows unless `max_distance`
+#' rules some out. A row left with no neighbour is kept once with `NA` when
+#' `left = TRUE` and dropped otherwise.
+#'
+#' Distance is Euclidean and measured between the geometries themselves, so a
+#' point joins to the polygon whose edge is nearest rather than to the one whose
+#' bounding box is. Both frames need exactly one GeoArrow geometry column.
+#'
+#' @inheritParams ga_join
+#' @param k how many neighbours to attach to each row of `x`
+#' @param max_distance the furthest a neighbour may be, or `NULL` for no limit
+#' @param distance the name of the distance column, or `NULL` to leave it out
+#' @returns a data frame with the columns of `x`, the non geometry columns of
+#'   `y`, and the distance between each pair
+#' @export
+#' @family index
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' counties <- nc[c("NAME", "geometry")]
+#' sites <- data.frame(
+#'   site = c("a", "b"),
+#'   geometry = geoarrow::as_geoarrow_vctr(
+#'     ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+#'   )
+#' )
+#'
+#' # the two counties nearest each site
+#' ga_knn_join(sites, counties, k = 2)[c("site", "NAME", "distance")]
+ga_knn_join <- function(
+  x,
+  y,
+  k = 1,
+  ...,
+  max_distance = NULL,
+  distance = "distance",
+  suffix = c("_x", "_y"),
+  left = TRUE
+) {
+  rlang::check_dots_empty()
+
+  x_geo_col <- geometry_column(x)
+  y_geo_col <- geometry_column(y)
+
+  check_suffix(suffix)
+  if (!is.null(distance) && !rlang::is_string(distance)) {
+    cli::cli_abort("{.arg distance} must be a single column name or `NULL`.")
+  }
+
+  hits <- as.vector(ga_sparse_knn(
+    x[[x_geo_col]],
+    y[[y_geo_col]],
+    k = k,
+    max_distance = max_distance
+  ))
+
+  # a null element means no bounding box to search with, which matches nothing
+  n <- vapply(hits, function(h) if (is.null(h)) 0L else nrow(h), integer(1))
+  pull <- function(field, empty) {
+    unlist(lapply(hits, function(h) {
+      if (is.null(h) || nrow(h) == 0L) empty else h[[field]]
+    }))
+  }
+
+  if (left) {
+    y_ids <- pull("row", NA_integer_)
+    dists <- pull("distance", NA_real_)
+    n[n == 0L] <- 1L
+  } else {
+    y_ids <- pull("row", NULL)
+    dists <- pull("distance", NULL)
+  }
+
+  x_ids <- rep.int(seq_len(nrow(x)), n)
+  y_ids <- if (is.null(y_ids)) integer() else as.integer(y_ids)
+
+  out <- bind_matches(x, y, y_geo_col, x_ids, y_ids, suffix)
+  if (!is.null(distance)) {
+    out[[distance]] <- if (is.null(dists)) numeric() else as.numeric(dists)
+  }
   out
 }

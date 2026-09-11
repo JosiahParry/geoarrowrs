@@ -48,27 +48,6 @@ fn target_type(to: &str, from: &GeoArrowType) -> extendr_api::Result<GeoArrowTyp
     Ok(ty)
 }
 
-/// Rows per rayon task. Parsing WKB is the expensive half of a cast, and below this the thread hand off costs more than the parse saves.
-const CAST_MIN_CHUNK: usize = 8192;
-
-/// Split the chunks into pieces big enough to be worth a thread each.
-fn cast_slices(chunks: &[Arc<dyn GeoArrowArray>]) -> Vec<Arc<dyn GeoArrowArray>> {
-    let mut slices = Vec::new();
-    for chunk in chunks {
-        let len = chunk.len();
-        let mut offset = 0;
-        while offset < len {
-            let take = CAST_MIN_CHUNK.min(len - offset);
-            slices.push(chunk.slice(offset, take));
-            offset += take;
-        }
-        if len == 0 {
-            slices.push(chunk.clone());
-        }
-    }
-    slices
-}
-
 /// Stitch the cast pieces back into the single array the R side expects.
 fn concat_cast(
     parts: Vec<Arc<dyn GeoArrowArray>>,
@@ -100,7 +79,7 @@ fn cast_chunks(
         return Err(Error::Other("empty array".to_string()));
     }
 
-    let slices = cast_slices(chunks);
+    let slices = crate::par_slices(chunks);
     let parts = crate::threads::with_pool(|| {
         slices
             .par_iter()

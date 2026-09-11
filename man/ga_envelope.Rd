@@ -43,6 +43,8 @@ identical(
 \seealso{
 Other index:
 \code{\link{KDTree}},
-\code{\link{RTree}}
+\code{\link{RTree}},
+\code{\link[=ga_knn_join]{ga_knn_join()}},
+\code{\link[=ga_sparse_knn]{ga_sparse_knn()}}
 }
 \concept{index}

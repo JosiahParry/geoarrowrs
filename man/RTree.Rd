@@ -131,6 +131,8 @@ head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
 \seealso{
 Other index:
 \code{\link{KDTree}},
-\code{\link[=ga_envelope]{ga_envelope()}}
+\code{\link[=ga_envelope]{ga_envelope()}},
+\code{\link[=ga_knn_join]{ga_knn_join()}},
+\code{\link[=ga_sparse_knn]{ga_sparse_knn()}}
 }
 \concept{index}

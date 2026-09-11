@@ -936,6 +936,41 @@ ga_sparse_overlaps <- function(x, y) .Call(wrap__ga_sparse_overlaps, x, y)
 #' @family topology
 ga_sparse_equals_topo <- function(x, y) .Call(wrap__ga_sparse_equals_topo, x, y)
 
+#' Find the rows of `y` nearest each row of `x`
+#'
+#' Returns the `k` rows of `y` closest to each row of `x`, nearest first, each
+#' paired with the distance between them. This is the sparse form of a nearest
+#' neighbour search, and the shape [ga_knn_join()] needs.
+#'
+#' @details
+#' Distance is Euclidean and measured between the geometries themselves, not
+#' between their bounding boxes, so the nearest edge of a polygon counts rather
+#' than the corner of the box around it. `y` is indexed in a packed Hilbert
+#' R-tree, which narrows the search to the rows that can win before any exact
+#' distance is computed, and the answer is the same as comparing every pair.
+#'
+#' A row matches fewer than `k` rows only when `max_distance` rules the rest
+#' out or `y` is shorter than `k`. A null or empty geometry in `x` gives a null
+#' element, and one in `y` is never returned.
+#'
+#' @param x a GeoArrow geometry array
+#' @param y a GeoArrow geometry array
+#' @param k how many rows of `y` to return per row of `x`
+#' @param max_distance the furthest a match may be, or `NULL` for no limit
+#' @returns a list array of `row` and `distance` pairs, the same length as `x`,
+#'   where `row` is a 1 based row number into `y`
+#' @export
+#' @family index
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' sites <- ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+#'
+#' # the three counties nearest each site, with their distances
+#' as.vector(ga_sparse_knn(sites, nc$geometry, k = 3))
+ga_sparse_knn <- function(x, y, k = 1, max_distance = NULL) .Call(wrap__ga_sparse_knn, x, y, k, max_distance)
+
 #' Test a topological relationship
 #'
 #' Each function compares `x` and `y` row by row and returns `TRUE` when the

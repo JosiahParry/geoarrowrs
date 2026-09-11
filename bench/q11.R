@@ -34,15 +34,3 @@ run(
     summarise(cross_zone_trip_count = n()) |>
     collect()
 )
-
-devtools::load_all("~/github/arcgislayers")
-
-furl <- "https://mapprod3.environment.nsw.gov.au/arcgis/rest/services/Planning/EPI_Primary_Planning_Layers/MapServer/2"
-
-flayer <- arc_open(furl)
-
-res <- arc_count(
-  flayer,
-  fields = "LAY_CLASS",
-  returnDistinctValues = "true"
-)

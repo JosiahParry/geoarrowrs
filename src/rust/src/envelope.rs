@@ -6,7 +6,7 @@ use geoarrow::datatypes::{BoxType, Dimension, GeoArrowType};
 use geoarrow_array::GeoArrowArray;
 use std::sync::Arc;
 
-use crate::{as_geo_geometries, as_geometry_chunks};
+use crate::as_geometry_chunks;
 
 /// The box of one geometry, taken as it is when the geometry is already a box.
 pub(crate) fn rect_of(geom: Option<&geo::Geometry<f64>>) -> Option<geo::Rect<f64>> {
@@ -24,13 +24,13 @@ pub(crate) fn rect_of(geom: Option<&geo::Geometry<f64>>) -> Option<geo::Rect<f64
 pub(crate) fn as_rects(
     chunks: &[Arc<dyn GeoArrowArray>],
 ) -> extendr_api::Result<Vec<Option<geo::Rect<f64>>>> {
-    let mut out = Vec::new();
-    for chunk in chunks {
-        for geom in as_geo_geometries(chunk.as_ref())? {
-            out.push(rect_of(geom.as_ref()));
-        }
-    }
-    Ok(out)
+    Ok(rects_of(&crate::as_geo_geometries_par(chunks)?))
+}
+
+/// The box of every geometry, one rayon task per slice.
+pub(crate) fn rects_of(geoms: &[Option<geo::Geometry<f64>>]) -> Vec<Option<geo::Rect<f64>>> {
+    use rayon::prelude::*;
+    crate::threads::with_pool(|| geoms.par_iter().map(|g| rect_of(g.as_ref())).collect())
 }
 
 /// Compute the bounding box of geometries

@@ -6,22 +6,19 @@ use geo::algorithm::relate::{IntersectionMatrix, Relate};
 use geo_index::rtree::sort::HilbertSort;
 use geo_index::rtree::{DEFAULT_RTREE_NODE_SIZE, RTree as GeoRTree, RTreeBuilder, RTreeIndex};
 use rayon::prelude::*;
+mod knn;
 
-use crate::envelope::rect_of;
+use crate::envelope::rects_of;
 use crate::threads::with_pool;
-use crate::{as_geo_geometries, as_geometry_chunks};
+use crate::{as_geo_geometries_par, as_geometry_chunks};
 
 /// One side of a sparse predicate: the geometries, and the boxes an index query needs.
 type GeomsAndRects = (Vec<Option<Geometry<f64>>>, Vec<Option<geo::Rect<f64>>>);
 
 /// Read a geometry argument as geometries alongside the boxes an index query needs.
 fn as_geoms_and_rects(robj: Robj) -> extendr_api::Result<GeomsAndRects> {
-    let chunks = as_geometry_chunks(robj)?;
-    let mut geoms = Vec::new();
-    for chunk in &chunks {
-        geoms.extend(as_geo_geometries(chunk.as_ref())?);
-    }
-    let rects = geoms.iter().map(|g| rect_of(g.as_ref())).collect();
+    let geoms = as_geo_geometries_par(&as_geometry_chunks(robj)?)?;
+    let rects = rects_of(&geoms);
     Ok((geoms, rects))
 }
 
@@ -233,4 +230,5 @@ extendr_module! {
     fn ga_sparse_crosses;
     fn ga_sparse_overlaps;
     fn ga_sparse_equals_topo;
+    use knn;
 }

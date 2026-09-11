@@ -94,6 +94,11 @@ right_rows <- function(hits) {
   call_function("list_flatten", as_arrow_array(hits))
 }
 
+#' The `row` and `distance` pairs a nearest neighbour search returns
+knn_pairs <- function(hits) {
+  call_function("list_flatten", as_arrow_array(hits))
+}
+
 #' Attach a computed Arrow column to a table
 with_column <- function(table, name, values) {
   table[[name]] <- as_arrow_array(values)
