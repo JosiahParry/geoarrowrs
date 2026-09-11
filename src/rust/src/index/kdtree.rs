@@ -95,7 +95,8 @@ impl KDTree {
     ///   `geometry`
     fn range(&self, geometry: Robj) -> anyhow::Result<Robj> {
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
-        let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let rects = as_rects(crate::threads::Threads::get(), &chunks)
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
 
         let mut bldr = ListBuilder::new(UInt32Builder::new());
         for rect in rects {

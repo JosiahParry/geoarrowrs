@@ -27,6 +27,11 @@ geoarrowrs_thread_cap <- function() {
     }
   }
 
+  # the Rust side holds the cap rather than reading the option when it needs
+  # it, because a kernel registered with Acero is called on one of Arrow's
+  # worker threads, and the R API may only be touched from R's own
+  ga_set_thread_pool(as.integer(getOption("geoarrowrs.thread_pool", 0L)))
+
   if (!isTRUE(getOption("geoarrowrs.register_udfs", TRUE))) {
     return(invisible(NULL))
   }

@@ -16,6 +16,7 @@ use crate::{as_geo_geometries_par, as_geometry_chunks, as_points};
 /// rather than through a builder: each row owns the `ys.len()` slots at its own
 /// offset and nothing has to be appended in order afterwards.
 fn cross<T, U>(
+    threads: crate::threads::Threads,
     xs: &[Option<T>],
     ys: &[Option<U>],
     metric: impl Fn(&T, &U) -> Option<f64> + Sync,
@@ -34,7 +35,7 @@ where
     let mut valid = vec![false; total];
 
     if width > 0 {
-        with_pool(|| {
+        with_pool(threads, || {
             values
                 .par_chunks_mut(width)
                 .zip(valid.par_chunks_mut(width))
@@ -107,20 +108,22 @@ fn ga_cross_distance(
     y: Robj,
     #[extendr(default = "\"euclidean\"")] metric: &str,
 ) -> extendr_api::Result<Robj> {
+    let threads = crate::threads::Threads::get();
+
     if metric == "euclidean" {
-        let xs = as_geo_geometries_par(&as_geometry_chunks(x)?)?;
-        let ys = as_geo_geometries_par(&as_geometry_chunks(y)?)?;
-        return cross(&xs, &ys, |a, b| Some(Euclidean.distance(a, b)));
+        let xs = as_geo_geometries_par(threads, &as_geometry_chunks(x)?)?;
+        let ys = as_geo_geometries_par(threads, &as_geometry_chunks(y)?)?;
+        return cross(threads, &xs, &ys, |a, b| Some(Euclidean.distance(a, b)));
     }
 
     let xs = as_points(x)?;
     let ys = as_points(y)?;
 
     match metric {
-        "haversine" => cross(&xs, &ys, |a, b| Some(Haversine.distance(*a, *b))),
-        "geodesic" => cross(&xs, &ys, |a, b| Some(Geodesic.distance(*a, *b))),
-        "rhumb" => cross(&xs, &ys, |a, b| Some(Rhumb.distance(*a, *b))),
-        "vincenty" => cross(&xs, &ys, |a, b| a.vincenty_distance(b).ok()),
+        "haversine" => cross(threads, &xs, &ys, |a, b| Some(Haversine.distance(*a, *b))),
+        "geodesic" => cross(threads, &xs, &ys, |a, b| Some(Geodesic.distance(*a, *b))),
+        "rhumb" => cross(threads, &xs, &ys, |a, b| Some(Rhumb.distance(*a, *b))),
+        "vincenty" => cross(threads, &xs, &ys, |a, b| a.vincenty_distance(b).ok()),
         other => Err(Error::Other(format!(
             "`metric` must be one of \"euclidean\", \"haversine\", \"geodesic\", \"rhumb\", or \"vincenty\", not {other:?}"
         ))),

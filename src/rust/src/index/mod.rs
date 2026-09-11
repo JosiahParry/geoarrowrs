@@ -73,7 +73,8 @@ impl RTree {
 
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
         let n: usize = chunks.iter().map(|c| c.len()).sum();
-        let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let rects = as_rects(crate::threads::Threads::get(), &chunks)
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
 
         let mut boxes = Vec::with_capacity(n);
         let mut positions = Vec::with_capacity(n);
@@ -122,7 +123,8 @@ impl RTree {
     ///   `geometry`
     fn search(&self, geometry: Robj) -> anyhow::Result<Robj> {
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
-        let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let rects = as_rects(crate::threads::Threads::get(), &chunks)
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
 
         let mut bldr = ListBuilder::new(UInt32Builder::new());
         for rect in rects {
@@ -181,7 +183,8 @@ impl RTree {
         };
 
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
-        let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let rects = as_rects(crate::threads::Threads::get(), &chunks)
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
         let mut bldr = ListBuilder::new(UInt32Builder::new());
 
         for rect in rects {

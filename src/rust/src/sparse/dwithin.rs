@@ -18,8 +18,9 @@ fn ga_sparse_dwithin_impl(
     metric: &str,
 ) -> extendr_api::Result<Robj> {
     let metric = Metric::parse(metric)?;
-    let (xs, x_rects) = as_geoms_and_rects(x)?;
-    let (ys, y_rects) = as_geoms_and_rects(y)?;
+    let threads = crate::threads::Threads::get();
+    let (xs, x_rects) = as_geoms_and_rects(threads, x)?;
+    let (ys, y_rects) = as_geoms_and_rects(threads, y)?;
     metric.check(&xs, "x")?;
     metric.check(&ys, "y")?;
 
@@ -36,7 +37,7 @@ fn ga_sparse_dwithin_impl(
     };
 
     let found = match index_rects(&y_rects) {
-        Some((tree, positions)) => with_pool(|| {
+        Some((tree, positions)) => with_pool(threads, || {
             (0..xs.len())
                 .into_par_iter()
                 .map(|i| {

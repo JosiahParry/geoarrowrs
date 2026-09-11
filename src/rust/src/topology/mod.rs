@@ -35,12 +35,13 @@ fn relate_map<T: Send>(
     y: Robj,
     map: impl Fn(&IntersectionMatrix) -> T + Sync,
 ) -> extendr_api::Result<Vec<Option<T>>> {
-    let geoms = as_geo_geometries_par(&as_geometry_chunks(x)?)?;
-    let others = as_recycled_geometries(y, geoms.len(), "y")?;
+    let threads = crate::threads::Threads::get();
+    let geoms = as_geo_geometries_par(threads, &as_geometry_chunks(x)?)?;
+    let others = as_recycled_geometries(threads, y, geoms.len(), "y")?;
 
     let values = match others.as_slice() {
         // one geometry against every row, so it is noded once per task rather than once per row
-        [Some(other)] => with_pool(|| {
+        [Some(other)] => with_pool(threads, || {
             geoms
                 .par_chunks(crate::PAR_MIN_CHUNK)
                 .map(|chunk| {
@@ -55,7 +56,7 @@ fn relate_map<T: Send>(
                 .flatten()
                 .collect::<Vec<_>>()
         }),
-        _ => with_pool(|| {
+        _ => with_pool(threads, || {
             geoms
                 .par_iter()
                 .enumerate()
@@ -363,7 +364,7 @@ fn ga_is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
 fn ga_coordinate_position(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let n: usize = chunks.iter().map(|c| c.len()).sum();
-    let points = as_recycled_geometries(point, n, "point")?;
+    let points = as_recycled_geometries(crate::threads::Threads::get(), point, n, "point")?;
     let mut bldr = StringBuilder::new();
 
     for chunk in &chunks {

@@ -24,9 +24,12 @@ use crate::{as_geo_geometries_par, as_geometry_chunks};
 type GeomsAndRects = (Vec<Option<Geometry<f64>>>, Vec<Option<geo::Rect<f64>>>);
 
 /// Read a geometry argument as geometries alongside the boxes an index query needs.
-fn as_geoms_and_rects(robj: Robj) -> extendr_api::Result<GeomsAndRects> {
-    let geoms = as_geo_geometries_par(&as_geometry_chunks(robj)?)?;
-    let rects = rects_of(&geoms);
+fn as_geoms_and_rects(
+    threads: crate::threads::Threads,
+    robj: Robj,
+) -> extendr_api::Result<GeomsAndRects> {
+    let geoms = as_geo_geometries_par(threads, &as_geometry_chunks(robj)?)?;
+    let rects = rects_of(threads, &geoms);
     Ok((geoms, rects))
 }
 
@@ -179,8 +182,9 @@ fn all_points(geoms: &[Option<Geometry<f64>>]) -> bool {
 
 /// Every sparse predicate is the same walk: narrow with the tree, confirm with DE-9IM.
 fn sparse_predicate(x: Robj, y: Robj, predicate: Predicate) -> extendr_api::Result<Robj> {
-    let (xs, x_rects) = as_geoms_and_rects(x)?;
-    let (ys, y_rects) = as_geoms_and_rects(y)?;
+    let threads = crate::threads::Threads::get();
+    let (xs, x_rects) = as_geoms_and_rects(threads, x)?;
+    let (ys, y_rects) = as_geoms_and_rects(threads, y)?;
 
     // a point on either side turns the matrix into a ray cast, which is the
     // difference between a graph per candidate pair and a walk of the edges
@@ -189,7 +193,7 @@ fn sparse_predicate(x: Robj, y: Robj, predicate: Predicate) -> extendr_api::Resu
         all_points(&xs) && predicate.at_position_swapped(CoordPos::Inside).is_some();
 
     let found = match index_rects(&y_rects) {
-        Some((tree, positions)) => with_pool(|| {
+        Some((tree, positions)) => with_pool(threads, || {
             xs.par_iter()
                 .zip(x_rects.par_iter())
                 .map(|(geom, rect)| {

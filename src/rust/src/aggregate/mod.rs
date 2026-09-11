@@ -86,7 +86,7 @@ fn ga_collect_agg(
 ) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(geometry)?;
     let metadata = chunks[0].data_type().metadata().clone();
-    let geoms = as_geo_geometries_par(&chunks)?;
+    let geoms = as_geo_geometries_par(crate::threads::Threads::get(), &chunks)?;
 
     let groups = if sizes.is_null() {
         vec![geoms.len()]

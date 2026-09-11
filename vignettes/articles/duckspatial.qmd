@@ -44,6 +44,105 @@ run by `bench/duckspatial/run-all.R` and read back here from
 `bench/duckspatial/last-run/`. Seconds, so lower is better.
 
 ```{r}
+#| fig-width: 11
+#| fig-height: 7
+#| fig-alt: "Five log-log panels, one per operation, of elapsed seconds against
+#|   input size. geoarrowrs is the lowest line in every panel. sf is the
+#|   highest. duckspatial sits between them and is flat from 100,000 to one
+#|   million rows, where its fixed startup cost is most of what is measured."
+#| fig-cap: "Elapsed seconds by input size. Both axes are log scaled."
+
+# base graphics rather than ggplot2, which 4.0.3 cannot load against the
+# development version of S7
+pal <- c(
+  "geoarrowrs" = "#0072B2",
+  "geoarrowrs (geodesic)" = "#56B4E9",
+  "duckspatial" = "#009E73",
+  "sf" = "#D55E00"
+)
+
+titles <- c(
+  join = "Point in polygon join",
+  filter = "Filter by polygon",
+  intersects = "Intersects predicate",
+  dissolve = "Dissolve by group",
+  distance = "Cross distance (n x n)"
+)
+
+si <- function(x) {
+  ifelse(
+    x >= 1e6,
+    paste0(x / 1e6, "M"),
+    ifelse(x >= 1e3, paste0(x / 1e3, "k"), as.character(x))
+  )
+}
+
+panel <- function(op) {
+  d <- measured[measured$op == op, ]
+  plot(
+    NA,
+    xlim = range(d$n),
+    ylim = range(d$seconds),
+    log = "xy",
+    xaxt = "n",
+    yaxt = "n",
+    xlab = "",
+    ylab = "",
+    main = titles[[op]],
+    font.main = 1,
+    bty = "n"
+  )
+  ticks <- axTicks(2)
+  abline(h = ticks, col = "grey92")
+  axis(1, unique(d$n), si(unique(d$n)), tick = FALSE, col.axis = "grey30")
+  axis(
+    2,
+    ticks,
+    format(ticks, trim = TRUE, scientific = FALSE, drop0trailing = TRUE),
+    las = 1,
+    tick = FALSE,
+    col.axis = "grey30"
+  )
+
+  for (pkg in names(pal)) {
+    s <- d[d$pkg == pkg, ]
+    if (!nrow(s)) next
+    s <- s[order(s$n), ]
+    lines(s$n, s$seconds, col = pal[[pkg]], lwd = 2)
+    points(s$n, s$seconds, col = pal[[pkg]], pch = 19, cex = 1.1)
+  }
+}
+
+withr::with_par(
+  list(
+    mfrow = c(2, 3),
+    mar = c(3.5, 4, 3, 1.5),
+    oma = c(2, 2, 0, 0),
+    col.axis = "grey30",
+    fg = "grey60"
+  ),
+  {
+    for (op in names(titles)) panel(op)
+
+    plot.new()
+    legend(
+      "center",
+      names(pal),
+      col = pal,
+      lwd = 2,
+      pch = 19,
+      bty = "n",
+      cex = 1.15,
+      text.col = "grey20"
+    )
+
+    mtext("input size", 1, outer = TRUE, line = 0.5, cex = 0.8, col = "grey30")
+    mtext("seconds", 2, outer = TRUE, line = 0.5, cex = 0.8, col = "grey30")
+  }
+)
+```
+
+```{r}
 knitr::kable(t(machine), col.names = "")
 knitr::kable(wide, row.names = FALSE)
 ```

@@ -156,8 +156,9 @@ fn ga_sparse_knn_impl(
     }
     let k = k as usize;
 
-    let (xs, x_rects) = as_geoms_and_rects(x)?;
-    let (ys, y_rects) = as_geoms_and_rects(y)?;
+    let threads = crate::threads::Threads::get();
+    let (xs, x_rects) = as_geoms_and_rects(threads, x)?;
+    let (ys, y_rects) = as_geoms_and_rects(threads, y)?;
     metric.check(&xs, "x")?;
     metric.check(&ys, "y")?;
 
@@ -168,7 +169,7 @@ fn ga_sparse_knn_impl(
     };
 
     let found = match index_rects(&y_rects) {
-        Some((tree, positions)) => with_pool(|| {
+        Some((tree, positions)) => with_pool(threads, || {
             xs.par_iter()
                 .zip(x_rects.par_iter())
                 .map(|(geom, rect)| {

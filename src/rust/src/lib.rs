@@ -218,13 +218,14 @@ pub(crate) fn par_slices(chunks: &[Arc<dyn GeoArrowArray>]) -> Vec<Arc<dyn GeoAr
 /// Materialising the geometries is the dominant cost of every walk over a large
 /// array, so it is the first thing worth threading.
 pub(crate) fn as_geo_geometries_par(
+    threads: threads::Threads,
     chunks: &[Arc<dyn GeoArrowArray>],
 ) -> extendr_api::Result<Vec<Option<geo::Geometry<f64>>>> {
     use rayon::prelude::*;
 
     let slices = par_slices(chunks);
     // extendr's error is not `Send`, so the message crosses the thread boundary as a string
-    let parts = threads::with_pool(|| {
+    let parts = threads::with_pool(threads, || {
         slices
             .par_iter()
             .map(|slice| as_geo_geometries(slice.as_ref()).map_err(|e| e.to_string()))
@@ -269,6 +270,7 @@ pub(crate) fn as_recycled_points(
 
 /// Pair each row with the value recycled against it, and apply one metric in parallel.
 fn par_metric<T, U>(
+    threads: threads::Threads,
     origins: &[Option<T>],
     dests: &[Option<U>],
     metric: impl Fn(&T, &U) -> Option<f64> + Sync,
@@ -283,7 +285,7 @@ where
         return vec![None; origins.len()];
     }
 
-    threads::with_pool(|| {
+    threads::with_pool(threads, || {
         origins
             .par_iter()
             .enumerate()
@@ -307,10 +309,11 @@ pub(crate) fn point_metric(
 ) -> extendr_api::Result<Robj> {
     use arrow_extendr::IntoArrowRobj;
 
+    let threads = threads::Threads::get();
     let origins = as_points(origin)?;
     let dests = as_recycled_points(dest, origins.len(), "dest")?;
 
-    Float64Array::from(par_metric(&origins, &dests, metric)).into_arrow_robj()
+    Float64Array::from(par_metric(threads, &origins, &dests, metric)).into_arrow_robj()
 }
 
 /// Walk two geometry arrays in lockstep, recycling `dest`, and apply one metric per row.
@@ -321,19 +324,24 @@ pub(crate) fn geometry_metric(
 ) -> extendr_api::Result<Robj> {
     use arrow_extendr::IntoArrowRobj;
 
-    let origins = as_geo_geometries_par(&as_geometry_chunks(origin)?)?;
-    let dests = as_recycled_geometries(dest, origins.len(), "dest")?;
+    let threads = threads::Threads::get();
+    let origins = as_geo_geometries_par(threads, &as_geometry_chunks(origin)?)?;
+    let dests = as_recycled_geometries(threads, dest, origins.len(), "dest")?;
 
-    Float64Array::from(par_metric(&origins, &dests, |o, d| Some(metric(o, d)))).into_arrow_robj()
+    Float64Array::from(par_metric(threads, &origins, &dests, |o, d| {
+        Some(metric(o, d))
+    }))
+    .into_arrow_robj()
 }
 
 /// Read a geometry argument as one geometry per row, recycled against `n`.
 pub(crate) fn as_recycled_geometries(
+    threads: threads::Threads,
     robj: Robj,
     n: usize,
     label: &'static str,
 ) -> extendr_api::Result<Vec<Option<geo::Geometry<f64>>>> {
-    let out = as_geo_geometries_par(&as_geometry_chunks(robj)?)?;
+    let out = as_geo_geometries_par(threads, &as_geometry_chunks(robj)?)?;
     check_recycle_len(out.len(), n, label)?;
     Ok(out)
 }
@@ -382,6 +390,7 @@ extendr_module! {
     use query;
     use simplify;
     use sparse;
+    use threads;
     use topology;
     use triangulate;
     use misc;

@@ -1027,6 +1027,23 @@ ga_sparse_knn_impl <- function(x, y, k, max_distance, metric) .Call(wrap__ga_spa
 #' ga_sparse_pairs(ga_sparse_intersects(x, y), left = TRUE)
 ga_sparse_pairs <- function(hits, left = FALSE) .Call(wrap__ga_sparse_pairs, hits, left)
 
+#' Set the thread cap, from `options(geoarrowrs.thread_pool = )`
+#'
+#' Called on load and whenever the option changes. `0` returns the parallel
+#' paths to rayon's own default, which is one thread per core.
+#'
+#' @param n the most threads to use, or `0` for rayon's default
+#' @returns `n`, invisibly
+#' @export
+#' @family index
+#' @examples
+#' # hold the parallel paths to two threads
+#' ga_set_thread_pool(2)
+#'
+#' # and back to one per core
+#' ga_set_thread_pool(0)
+ga_set_thread_pool <- function(n) .Call(wrap__ga_set_thread_pool, n)
+
 #' Test a topological relationship
 #'
 #' Each function compares `x` and `y` row by row and returns `TRUE` when the

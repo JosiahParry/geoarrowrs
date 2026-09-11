@@ -22,15 +22,24 @@ pub(crate) fn rect_of(geom: Option<&geo::Geometry<f64>>) -> Option<geo::Rect<f64
 /// A box array is returned untouched, so nothing recomputes what the caller
 /// already has.
 pub(crate) fn as_rects(
+    threads: crate::threads::Threads,
     chunks: &[Arc<dyn GeoArrowArray>],
 ) -> extendr_api::Result<Vec<Option<geo::Rect<f64>>>> {
-    Ok(rects_of(&crate::as_geo_geometries_par(chunks)?))
+    Ok(rects_of(
+        threads,
+        &crate::as_geo_geometries_par(threads, chunks)?,
+    ))
 }
 
 /// The box of every geometry, one rayon task per slice.
-pub(crate) fn rects_of(geoms: &[Option<geo::Geometry<f64>>]) -> Vec<Option<geo::Rect<f64>>> {
+pub(crate) fn rects_of(
+    threads: crate::threads::Threads,
+    geoms: &[Option<geo::Geometry<f64>>],
+) -> Vec<Option<geo::Rect<f64>>> {
     use rayon::prelude::*;
-    crate::threads::with_pool(|| geoms.par_iter().map(|g| rect_of(g.as_ref())).collect())
+    crate::threads::with_pool(threads, || {
+        geoms.par_iter().map(|g| rect_of(g.as_ref())).collect()
+    })
 }
 
 /// Compute the bounding box of geometries
@@ -76,7 +85,9 @@ fn ga_envelope(x: Robj) -> anyhow::Result<Robj> {
 
     let metadata = chunks[0].data_type().metadata().clone();
     let mut bldr = RectBuilder::new(BoxType::new(Dimension::XY, metadata));
-    for rect in as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))? {
+    for rect in
+        as_rects(crate::threads::Threads::get(), &chunks).map_err(|e| anyhow::anyhow!("{e}"))?
+    {
         bldr.push_rect(rect.as_ref());
     }
 

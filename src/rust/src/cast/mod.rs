@@ -80,7 +80,7 @@ fn cast_chunks(
     }
 
     let slices = crate::par_slices(chunks);
-    let parts = crate::threads::with_pool(|| {
+    let parts = crate::threads::with_pool(crate::threads::Threads::get(), || {
         slices
             .par_iter()
             .map(|slice| cast(slice.as_ref(), to_type))
