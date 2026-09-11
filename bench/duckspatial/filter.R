@@ -14,7 +14,9 @@ for (n in SIZES) {
     out$num_rows
   )
 
-  bench("filter", n, "sf", out <- st_filter(pts, polys), nrow(out))
+  if (RUN_SF) {
+    bench("filter", n, "sf", out <- st_filter(pts, polys), nrow(out))
+  }
 
   if (HAS_DUCKSPATIAL) {
     bench(
@@ -23,6 +25,25 @@ for (n in SIZES) {
       "duckspatial",
       out <- duckspatial::ddbs_filter(pts, polys, quiet = TRUE),
       ddbs_rows(out)
+    )
+  }
+
+  if (HAS_SEDONADB) {
+    bench(
+      "filter",
+      n,
+      "sedonadb",
+      {
+        sd_to_view(as_sedonadb_dataframe(pts), "pts", overwrite = TRUE)
+        sd_to_view(as_sedonadb_dataframe(polys), "polys", overwrite = TRUE)
+        out <- sd_compute(sd_sql(
+          "SELECT a.* FROM pts a
+           WHERE EXISTS (
+             SELECT 1 FROM polys b WHERE ST_Intersects(a.geometry, b.geometry)
+           )"
+        ))
+      },
+      sd_count(out)
     )
   }
 }

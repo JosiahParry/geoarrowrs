@@ -22,15 +22,17 @@ for (n in SIZES) {
     out$length
   )
 
-  bench(
-    "dissolve",
-    n,
-    "sf",
-    out <- pts |>
-      group_by(category) |>
-      summarise(geometry = st_union(geometry)),
-    nrow(out)
-  )
+  if (RUN_SF) {
+    bench(
+      "dissolve",
+      n,
+      "sf",
+      out <- pts |>
+        group_by(category) |>
+        summarise(geometry = st_union(geometry)),
+      nrow(out)
+    )
+  }
 
   if (HAS_DUCKSPATIAL) {
     bench(
@@ -39,6 +41,22 @@ for (n in SIZES) {
       "duckspatial",
       out <- duckspatial::ddbs_union_agg(pts, by = "category", quiet = TRUE),
       ddbs_rows(out)
+    )
+  }
+
+  if (HAS_SEDONADB) {
+    bench(
+      "dissolve",
+      n,
+      "sedonadb",
+      {
+        sd_to_view(as_sedonadb_dataframe(pts), "pts", overwrite = TRUE)
+        out <- sd_compute(sd_sql(
+          "SELECT category, ST_Collect_Agg(geometry) AS geometry
+           FROM pts GROUP BY category"
+        ))
+      },
+      sd_count(out)
     )
   }
 }

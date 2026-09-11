@@ -20,7 +20,9 @@ for (n in c(1000, 5000, 10000)) {
     out$length
   )
 
-  bench("distance", n, "sf", out <- st_distance(pts, pts), nrow(out))
+  if (RUN_SF) {
+    bench("distance", n, "sf", out <- st_distance(pts, pts), nrow(out))
+  }
 
   if (HAS_DUCKSPATIAL) {
     bench(
@@ -29,6 +31,22 @@ for (n in c(1000, 5000, 10000)) {
       "duckspatial",
       out <- duckspatial::ddbs_distance(pts, pts, quiet = TRUE),
       ddbs_rows(out)
+    )
+  }
+
+  if (HAS_SEDONADB) {
+    bench(
+      "distance",
+      n,
+      "sedonadb",
+      {
+        sd_to_view(as_sedonadb_dataframe(pts), "pts", overwrite = TRUE)
+        out <- sd_compute(sd_sql(
+          "SELECT ST_Distance(a.geometry, b.geometry) AS distance
+           FROM pts a CROSS JOIN pts b"
+        ))
+      },
+      sd_count(out)
     )
   }
 }

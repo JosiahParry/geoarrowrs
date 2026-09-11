@@ -1,6 +1,22 @@
 ---
-title: "duckspatial"
+title: "duckdbspatial"
 ---
+
+
+The wonderful [`{duckspatial}`](https://cidree.github.io/duckspatial/) R package—which delegates operations to [DuckDB](https://duckdb.org/) has published bench marks for operations.
+
+This article compares `{geoarrowrs}` implementations to `{sf}` and `{duckspatial}` by recreating the benchmark but including geoarrow-rs.
+
+See the original [duckspatial benchmark](https://cidree.github.io/duckspatial/articles/benchmark.html).
+
+### The earth is a sphere note a plane
+
+One of the issues the duckdbspatial benchmark—is that is calculates **incorrect** distances.
+`{sf}` delegates to `{s2}` to have very accurate spherical distance calculations—this comes at the cost of speed.
+
+Using planar distances for calculating the distance from Jakarta to New York calculates the distance _through_ the earth. 
+
+This issu
 
 ```{r}
 #| include: false
@@ -57,6 +73,7 @@ run by `bench/duckspatial/run-all.R` and read back here from
 pal <- c(
   "geoarrowrs" = "#0072B2",
   "geoarrowrs (geodesic)" = "#56B4E9",
+  "sedonadb" = "#CC79A7",
   "duckspatial" = "#009E73",
   "sf" = "#D55E00"
 )
@@ -106,7 +123,9 @@ panel <- function(op) {
 
   for (pkg in names(pal)) {
     s <- d[d$pkg == pkg, ]
-    if (!nrow(s)) next
+    if (!nrow(s)) {
+      next
+    }
     s <- s[order(s$n), ]
     lines(s$n, s$seconds, col = pal[[pkg]], lwd = 2)
     points(s$n, s$seconds, col = pal[[pkg]], pch = 19, cex = 1.1)
@@ -122,7 +141,9 @@ withr::with_par(
     fg = "grey60"
   ),
   {
-    for (op in names(titles)) panel(op)
+    for (op in names(titles)) {
+      panel(op)
+    }
 
     plot.new()
     legend(
@@ -172,8 +193,12 @@ for (i in seq_along(files)) {
   cat('<h3 class="accordion-header">\n')
   cat(
     '<button class="accordion-button collapsed" type="button" ',
-    'data-bs-toggle="collapse" data-bs-target="#', id, '" ',
-    'aria-expanded="false" aria-controls="', id, '">',
+    'data-bs-toggle="collapse" data-bs-target="#',
+    id,
+    '" ',
+    'aria-expanded="false" aria-controls="',
+    id,
+    '">',
     names(files)[[i]],
     "</button>\n",
     sep = ""
@@ -181,8 +206,12 @@ for (i in seq_along(files)) {
   cat("</h3>\n\n")
 
   cat(
-    ":::: {#", id, " .accordion-collapse .collapse ",
-    'data-bs-parent="#', accordion, '"}\n\n',
+    ":::: {#",
+    id,
+    " .accordion-collapse .collapse ",
+    'data-bs-parent="#',
+    accordion,
+    '"}\n\n',
     sep = ""
   )
   cat("::: {.accordion-body}\n\n")

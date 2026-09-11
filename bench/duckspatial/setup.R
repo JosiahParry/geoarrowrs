@@ -16,6 +16,12 @@ CACHE <- Sys.getenv(
 )
 
 HAS_DUCKSPATIAL <- requireNamespace("duckspatial", quietly = TRUE)
+HAS_SEDONADB <- requireNamespace("sedonadb", quietly = TRUE)
+RUN_SF <- nzchar(Sys.getenv("DUCKSPATIAL_BENCH_SF"))
+
+if (HAS_SEDONADB) {
+  library(sedonadb)
+}
 
 make_points <- function(n) {
   data.frame(

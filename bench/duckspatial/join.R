@@ -14,13 +14,15 @@ for (n in SIZES) {
     out$num_rows
   )
 
-  bench(
-    "join",
-    n,
-    "sf",
-    out <- st_join(pts, polys, join = st_within),
-    nrow(out)
-  )
+  if (RUN_SF) {
+    bench(
+      "join",
+      n,
+      "sf",
+      out <- st_join(pts, polys, join = st_within),
+      nrow(out)
+    )
+  }
 
   if (HAS_DUCKSPATIAL) {
     bench(
@@ -29,6 +31,23 @@ for (n in SIZES) {
       "duckspatial",
       out <- duckspatial::ddbs_join(pts, polys, join = "within", quiet = TRUE),
       ddbs_rows(out)
+    )
+  }
+
+  if (HAS_SEDONADB) {
+    bench(
+      "join",
+      n,
+      "sedonadb",
+      {
+        sd_to_view(as_sedonadb_dataframe(pts), "pts", overwrite = TRUE)
+        sd_to_view(as_sedonadb_dataframe(polys), "polys", overwrite = TRUE)
+        out <- sd_compute(sd_sql(
+          "SELECT a.*, b.poly_id, b.region, b.population
+           FROM pts a JOIN polys b ON ST_Within(a.geometry, b.geometry)"
+        ))
+      },
+      sd_count(out)
     )
   }
 }
