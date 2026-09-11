@@ -32,6 +32,7 @@ only in that pass through; the boxes themselves are the same.
 ## See also
 
 Other index:
+[`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md),
 [`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md)
 
 ## Examples

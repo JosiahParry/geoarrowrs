@@ -87,16 +87,28 @@ if the algorithm fails to converge. Results are in meters.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html" class="external-link">Length</a>,
-<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html" class="external-link">Euclidean</a></p>
-<p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html" class="external-link">Length</a>,
-<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html" class="external-link">Haversine</a></p>
-<p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html" class="external-link">Length</a>,
-<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html" class="external-link">Geodesic</a></p>
-<p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html" class="external-link">Length</a>,
+<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html" class="external-link">Euclidean</a>,
+<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html" class="external-link">Haversine</a>,
+<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html" class="external-link">Geodesic</a>,
 <a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html" class="external-link">Rhumb</a></p>
 <p><a href="https://docs.rs/geo/latest/geo/algorithm/vincenty_length/trait.VincentyLength.html" class="external-link">VincentyLength</a></p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Raleigh to Charlotte, and Raleigh to Wilmington</span></span></span>
+<span class="r-in"><span><span class="va">trips</span> <span class="op">&lt;-</span> <span class="fu">geoarrow</span><span class="fu">::</span><span class="fu"><a href="https://geoarrow.org/geoarrow-r/reference/as_geoarrow_array.html" class="external-link">as_geoarrow_array</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html" class="external-link">st_sfc</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html" class="external-link">st_linestring</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6382</span>, <span class="fl">35.7796</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">80.8431</span>, <span class="fl">35.2271</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html" class="external-link">st_linestring</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6382</span>, <span class="fl">35.7796</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">77.9447</span>, <span class="fl">34.2257</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># degrees, then meters</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">ga_length_euclidean</span><span class="op">(</span><span class="va">trips</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.273068 1.701631</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">ga_length_geodesic</span><span class="op">(</span><span class="va">trips</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 209216.6 183645.3</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

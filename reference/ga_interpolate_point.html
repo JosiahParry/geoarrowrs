@@ -93,6 +93,25 @@ is calculated.</p>
 <code><a href="ga_points_along_line.html">ga_points_along_line()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">line</span> <span class="op">&lt;-</span> <span class="fu">geoarrow</span><span class="fu">::</span><span class="fu"><a href="https://geoarrow.org/geoarrow-r/reference/as_geoarrow_array.html" class="external-link">as_geoarrow_array</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html" class="external-link">st_sfc</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html" class="external-link">st_linestring</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># halfway from the start, then two units in from the end</span></span></span>
+<span class="r-in"><span><span class="fu">geoarrow</span><span class="fu">::</span><span class="fu"><a href="https://geoarrow.org/geoarrow-r/reference/as_geoarrow_vctr.html" class="external-link">as_geoarrow_vctr</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">ga_interpolate_point</span><span class="op">(</span><span class="va">line</span>, <span class="fl">0.5</span>, <span class="st">"euclidean"</span>, <span class="st">"ratio"</span>, <span class="st">"start"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;geoarrow_vctr geoarrow.point{struct}[1]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] &lt;POINT (5 0)&gt;</span>
+<span class="r-in"><span><span class="fu">geoarrow</span><span class="fu">::</span><span class="fu"><a href="https://geoarrow.org/geoarrow-r/reference/as_geoarrow_vctr.html" class="external-link">as_geoarrow_vctr</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">ga_interpolate_point</span><span class="op">(</span><span class="va">line</span>, <span class="fl">2</span>, <span class="st">"euclidean"</span>, <span class="st">"distance"</span>, <span class="st">"end"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;geoarrow_vctr geoarrow.point{struct}[1]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] &lt;POINT (8 0)&gt;</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -7,7 +7,14 @@ and corners.
 ## Usage
 
 ``` r
-ga_buffer(geometry, distance, line_cap, line_join, miter_limit, round_segments)
+ga_buffer(
+  geometry,
+  distance,
+  line_cap = "round",
+  line_join = "round",
+  miter_limit = 2,
+  round_angle = 0.2
+)
 ```
 
 ## Arguments
@@ -33,10 +40,10 @@ ga_buffer(geometry, distance, line_cap, line_join, miter_limit, round_segments)
 
   the miter limit used when `line_join` is `"miter"`
 
-- round_segments:
+- round_angle:
 
-  the number of segments used to approximate curves when `line_cap` or
-  `line_join` is `"round"`
+  the angular step in radians used to approximate curves when `line_cap`
+  or `line_join` is `"round"`. Smaller is smoother
 
 ## Value
 
@@ -53,3 +60,23 @@ Other misc:
 [`ga_chaikin_smoothing()`](https://josiahparry.github.io/geoarrowrs/reference/ga_chaikin_smoothing.md),
 [`ga_line_segmentize()`](https://josiahparry.github.io/geoarrowrs/reference/ga_line_segmentize.md),
 [`ga_remove_repeated_points()`](https://josiahparry.github.io/geoarrowrs/reference/ga_remove_repeated_points.md)
+
+## Examples
+
+``` r
+sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+
+# the 2x2 square grows by 8 along its sides plus a unit circle at the corners
+as.vector(ga_unsigned_area(ga_buffer(sq, 1)))
+#> [1] 15.12145
+
+# a smaller angular step rounds the corners more finely
+as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.01)))
+#> [1] 15.14108
+
+# square corners instead
+as.vector(ga_unsigned_area(ga_buffer(sq, 1, line_join = "bevel")))
+#> [1] 14
+```

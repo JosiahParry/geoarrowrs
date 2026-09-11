@@ -38,3 +38,18 @@ Other affine:
 [`ga_scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.md),
 [`ga_skew_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew_xy.md),
 [`ga_translate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_translate.md)
+
+## Examples
+
+``` r
+sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+
+# a shear leaves the area unchanged
+geoarrow::as_geoarrow_vctr(ga_skew(sq, 30))
+#> <geoarrow_vctr geoarrow.polygon{list}[1]>
+#> [1] <POLYGON ((-0.5773503 -0.5773503, 1.4226497 0.5773503, 2.5773503 2.5773>
+as.vector(ga_unsigned_area(ga_skew(sq, 30)))
+#> [1] 2.666667
+```

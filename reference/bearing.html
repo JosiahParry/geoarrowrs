@@ -79,15 +79,25 @@ These functions differ in the metric space used for the calculation.</p>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html" class="external-link">Bearing</a>,
-<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html" class="external-link">Euclidean</a></p>
-<p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html" class="external-link">Bearing</a>,
-<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html" class="external-link">Haversine</a></p>
-<p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html" class="external-link">Bearing</a>,
-<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html" class="external-link">Geodesic</a></p>
-<p><a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html" class="external-link">Bearing</a>,
+<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html" class="external-link">Euclidean</a>,
+<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html" class="external-link">Haversine</a>,
+<a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html" class="external-link">Geodesic</a>,
 <a href="https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html" class="external-link">Rhumb</a></p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Raleigh to Charlotte, and Raleigh to Wilmington</span></span></span>
+<span class="r-in"><span><span class="va">origin</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6382</span>, <span class="op">-</span><span class="fl">78.6382</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">35.7796</span>, <span class="fl">35.7796</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dest</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">80.8431</span>, <span class="op">-</span><span class="fl">77.9447</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">35.2271</span>, <span class="fl">34.2257</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># west-southwest, then south-southeast</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">ga_bearing_haversine</span><span class="op">(</span><span class="va">origin</span>, <span class="va">dest</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 253.5337 159.7193</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">ga_bearing_rhumb</span><span class="op">(</span><span class="va">origin</span>, <span class="va">dest</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 252.8913 159.9201</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

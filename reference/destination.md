@@ -1,4 +1,4 @@
-# Compute a destination point from an origin, bearing, and distance
+# Destination from origin, bearing, distance
 
 Returns the point reached by travelling `distance` from `origin` along
 `bearing`. Each function uses a different metric space: `dest_euclidean`
@@ -40,3 +40,16 @@ a GeoArrow point array
 ## References
 
 [Destination](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html)
+
+## Examples
+
+``` r
+# 100km due north and due east of Raleigh
+raleigh <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+
+geoarrow::as_geoarrow_vctr(
+  ga_dest_geodesic(raleigh, bearing = c(0, 90), distance = c(1e5, 1e5))
+)
+#> <geoarrow_vctr geoarrow.point{struct}[2]>
+#> [1] <POINT (-78.6382 36.680799)>     <POINT (-77.5322223 35.7745143)>
+```

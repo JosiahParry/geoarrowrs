@@ -47,3 +47,19 @@ Other boundary:
 [`ga_convex_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_convex_hull.md),
 [`ga_extremes()`](https://josiahparry.github.io/geoarrowrs/reference/ga_extremes.md),
 [`ga_minimum_rotated_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_minimum_rotated_rect.md)
+
+## Examples
+
+``` r
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# lower concavity tightens the hull onto the shape
+loose <- ga_concave_hull(nc$geometry, concavity = 2, length_threshold = 0)
+tight <- ga_concave_hull(nc$geometry, concavity = 0.5, length_threshold = 0)
+
+head(as.vector(ga_unsigned_area(loose)), 3)
+#> [1] 0.11502123 0.06249588 0.12857049
+head(as.vector(ga_unsigned_area(tight)), 3)
+#> [1] 0.11428350 0.02801177 0.08427341
+```

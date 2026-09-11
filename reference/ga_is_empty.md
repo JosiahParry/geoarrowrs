@@ -33,7 +33,9 @@ Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
-[`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md)
+[`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
+[`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
 
 ## Examples
 

@@ -29,3 +29,16 @@ Other boundary:
 [`ga_concave_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_concave_hull.md),
 [`ga_extremes()`](https://josiahparry.github.io/geoarrowrs/reference/ga_extremes.md),
 [`ga_minimum_rotated_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_minimum_rotated_rect.md)
+
+## Examples
+
+``` r
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# the hull fills in every concavity, so it is never smaller
+head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
+#> [1] 0.12484563 0.07437819 0.15586877
+head(as.vector(ga_unsigned_area(nc$geometry)), 3)
+#> [1] 0.11428350 0.06139976 0.14301628
+```

@@ -1,4 +1,4 @@
-# Simplify geometries using the Visvalingam-Whyatt algorithm
+# Simplify with Visvalingam-Whyatt
 
 Reduces the number of points in each geometry by removing vertices whose
 effective area is below `epsilon`. Accepts linestrings,
@@ -44,3 +44,16 @@ a GeoArrow array of the same geometry type as the input
 Other simplify:
 [`ga_simplify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify.md),
 [`ga_simplify_idx()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.md)
+
+## Examples
+
+``` r
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# epsilon is an area here, not a distance as in ga_simplify()
+head(as.vector(ga_n_coords(nc$geometry)), 3)
+#> [1] 27 26 28
+head(as.vector(ga_n_coords(ga_simplify_vw(nc$geometry, 0.001))), 3)
+#> [1] 13 11 11
+```

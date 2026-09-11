@@ -51,7 +51,14 @@ corners.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ga_buffer</span><span class="op">(</span><span class="va">geometry</span>, <span class="va">distance</span>, <span class="va">line_cap</span>, <span class="va">line_join</span>, <span class="va">miter_limit</span>, <span class="va">round_segments</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ga_buffer</span><span class="op">(</span></span>
+<span>  <span class="va">geometry</span>,</span>
+<span>  <span class="va">distance</span>,</span>
+<span>  line_cap <span class="op">=</span> <span class="st">"round"</span>,</span>
+<span>  line_join <span class="op">=</span> <span class="st">"round"</span>,</span>
+<span>  miter_limit <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  round_angle <span class="op">=</span> <span class="fl">0.2</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,8 +85,8 @@ corners.</p>
 <dd><p>the miter limit used when <code>line_join</code> is <code>"miter"</code></p></dd>
 
 
-<dt id="arg-round-segments">round_segments<a class="anchor" aria-label="anchor" href="#arg-round-segments"></a></dt>
-<dd><p>the number of segments used to approximate curves when <code>line_cap</code> or <code>line_join</code> is <code>"round"</code></p></dd>
+<dt id="arg-round-angle">round_angle<a class="anchor" aria-label="anchor" href="#arg-round-angle"></a></dt>
+<dd><p>the angular step in radians used to approximate curves when <code>line_cap</code> or <code>line_join</code> is <code>"round"</code>. Smaller is smoother</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -99,6 +106,25 @@ corners.</p>
 <code><a href="ga_remove_repeated_points.html">ga_remove_repeated_points()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">sq</span> <span class="op">&lt;-</span> <span class="fu">geoarrow</span><span class="fu">::</span><span class="fu"><a href="https://geoarrow.org/geoarrow-r/reference/as_geoarrow_array.html" class="external-link">as_geoarrow_array</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html" class="external-link">st_sfc</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st.html" class="external-link">st_polygon</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">0</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the 2x2 square grows by 8 along its sides plus a unit circle at the corners</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="area.html">ga_unsigned_area</a></span><span class="op">(</span><span class="fu">ga_buffer</span><span class="op">(</span><span class="va">sq</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15.12145</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a smaller angular step rounds the corners more finely</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="area.html">ga_unsigned_area</a></span><span class="op">(</span><span class="fu">ga_buffer</span><span class="op">(</span><span class="va">sq</span>, <span class="fl">1</span>, round_angle <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15.14108</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># square corners instead</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu"><a href="area.html">ga_unsigned_area</a></span><span class="op">(</span><span class="fu">ga_buffer</span><span class="op">(</span><span class="va">sq</span>, <span class="fl">1</span>, line_join <span class="op">=</span> <span class="st">"bevel"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -81,6 +81,18 @@ whenever an element holds more or fewer than one geometry.</p>
 <code><a href="ga_from_wkb.html">ga_from_wkb()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"shape/nc.shp"</span>, package <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">nc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="read_shapefile.html">read_shapefile</a></span><span class="op">(</span><span class="va">fp</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># 100 counties in, one row per polygon part out</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">nc</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 100</span>
+<span class="r-in"><span><span class="fu">ga_flatten</span><span class="op">(</span><span class="fu"><a href="ga_explode.html">ga_explode</a></span><span class="op">(</span><span class="va">nc</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">length</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 108</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

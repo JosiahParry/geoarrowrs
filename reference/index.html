@@ -59,7 +59,7 @@
           <code><a href="read_geojson.html">read_geojson()</a></code>
 
         </dt>
-        <dd>Read a GeoJSON FeatureCollection into a record batch stream</dd>
+        <dd>Read a GeoJSON FeatureCollection</dd>
 
         <dt>
 
@@ -98,21 +98,21 @@
           <code><a href="area.html">ga_signed_area()</a></code> <code><a href="area.html">ga_unsigned_area()</a></code>
 
         </dt>
-        <dd>Compute the signed and unsigned planar area of geometries</dd>
+        <dd>Signed and unsigned planar area</dd>
 
         <dt>
 
           <code><a href="area_cd.html">ga_signed_area_cd()</a></code> <code><a href="area_cd.html">ga_unsigned_area_cd()</a></code>
 
         </dt>
-        <dd>Compute the signed and unsigned area using the Chamberlain-Duquette algorithm</dd>
+        <dd>Chamberlain-Duquette spherical area</dd>
 
         <dt>
 
-          <code><a href="area_geodesic.html">ga_signed_area_geodesic()</a></code> <code><a href="area_geodesic.html">ga_unsigned_area_geodesic()</a></code> <code><a href="area_geodesic.html">ga_perimeter_signed_geodesic()</a></code> <code><a href="area_geodesic.html">ga_perimeter_unsigned_geodesic()</a></code>
+          <code><a href="area_geodesic.html">ga_signed_area_geodesic()</a></code> <code><a href="area_geodesic.html">ga_unsigned_area_geodesic()</a></code> <code><a href="area_geodesic.html">ga_perimeter_geodesic()</a></code>
 
         </dt>
-        <dd>Compute the signed and unsigned geodesic area and perimeter of geometries</dd>
+        <dd>Geodesic area and perimeter</dd>
       </dl></div><div class="section level2">
       <h2 id="distance">Distance<a class="anchor" aria-label="anchor" href="#distance"></a></h2>
 
@@ -135,21 +135,21 @@
           <code><a href="ga_dist_frechet_pairwise.html">ga_dist_frechet_pairwise()</a></code>
 
         </dt>
-        <dd>Compute the pairwise Frechet distance between linestrings</dd>
+        <dd>Pairwise Frechet distance</dd>
 
         <dt>
 
           <code><a href="ga_dist_hausdorff_pairwise.html">ga_dist_hausdorff_pairwise()</a></code>
 
         </dt>
-        <dd>Compute the pairwise Hausdorff distance between geometries</dd>
+        <dd>Pairwise Hausdorff distance</dd>
 
         <dt>
 
           <code><a href="ga_dist_vincenty_pairwise.html">ga_dist_vincenty_pairwise()</a></code>
 
         </dt>
-        <dd>Compute the pairwise Vincenty distance between points</dd>
+        <dd>Pairwise Vincenty distance</dd>
       </dl></div><div class="section level2">
       <h2 id="measure">Measure<a class="anchor" aria-label="anchor" href="#measure"></a></h2>
 
@@ -179,7 +179,7 @@
           <code><a href="destination.html">ga_dest_rhumb()</a></code> <code><a href="destination.html">ga_dest_euclidean()</a></code> <code><a href="destination.html">ga_dest_haversine()</a></code> <code><a href="destination.html">ga_dest_geodesic()</a></code>
 
         </dt>
-        <dd>Compute a destination point from an origin, bearing, and distance</dd>
+        <dd>Destination from origin, bearing, distance</dd>
       </dl></div><div class="section level2">
       <h2 id="index">Index<a class="anchor" aria-label="anchor" href="#index"></a></h2>
 
@@ -192,10 +192,17 @@
 
       <dl><dt>
 
+          <code><a href="KDTree.html">KDTree</a></code>
+
+        </dt>
+        <dd>A k-d tree over a point array</dd>
+
+        <dt>
+
           <code><a href="RTree.html">RTree</a></code>
 
         </dt>
-        <dd>A packed Hilbert R-tree over the bounding boxes of a geometry array. A spatial index over a geometry array</dd>
+        <dd>A spatial index over a geometry array</dd>
 
         <dt>
 
@@ -236,17 +243,31 @@
 
         <dt>
 
+          <code><a href="ga_join.html">ga_join()</a></code>
+
+        </dt>
+        <dd>Join two data frames on a spatial relationship</dd>
+
+        <dt>
+
           <code><a href="ga_relate.html">ga_relate()</a></code>
 
         </dt>
-        <dd>Compute the DE-9IM relationship between two geometry arrays</dd>
+        <dd>DE-9IM relationship between geometries</dd>
+
+        <dt>
+
+          <code><a href="sparse.html">ga_sparse_intersects()</a></code> <code><a href="sparse.html">ga_sparse_contains()</a></code> <code><a href="sparse.html">ga_sparse_contains_properly()</a></code> <code><a href="sparse.html">ga_sparse_within()</a></code> <code><a href="sparse.html">ga_sparse_covers()</a></code> <code><a href="sparse.html">ga_sparse_covered_by()</a></code> <code><a href="sparse.html">ga_sparse_touches()</a></code> <code><a href="sparse.html">ga_sparse_crosses()</a></code> <code><a href="sparse.html">ga_sparse_overlaps()</a></code> <code><a href="sparse.html">ga_sparse_equals_topo()</a></code>
+
+        </dt>
+        <dd>Find which rows of <code>y</code> relate to each row of <code>x</code></dd>
 
         <dt>
 
           <code><a href="topology.html">ga_contains()</a></code> <code><a href="topology.html">ga_contains_properly()</a></code> <code><a href="topology.html">ga_within()</a></code> <code><a href="topology.html">ga_covers()</a></code> <code><a href="topology.html">ga_covered_by()</a></code> <code><a href="topology.html">ga_intersects()</a></code> <code><a href="topology.html">ga_disjoint()</a></code> <code><a href="topology.html">ga_touches()</a></code> <code><a href="topology.html">ga_crosses()</a></code> <code><a href="topology.html">ga_overlaps()</a></code> <code><a href="topology.html">ga_equals_topo()</a></code>
 
         </dt>
-        <dd>Test a topological relationship between two geometry arrays</dd>
+        <dd>Test a topological relationship</dd>
 
         <dt>
 
@@ -276,7 +297,7 @@
           <code><a href="ga_closest_point.html">ga_closest_point()</a></code> <code><a href="ga_closest_point.html">ga_closest_point_haversine()</a></code>
 
         </dt>
-        <dd>Find the point on a geometry closest to another point</dd>
+        <dd>Closest point on a geometry</dd>
 
         <dt>
 
@@ -297,7 +318,7 @@
           <code><a href="ga_line_locate_point.html">ga_line_locate_point()</a></code>
 
         </dt>
-        <dd>Locate a point along a line as a fraction of its length</dd>
+        <dd>Locate a point along a line</dd>
       </dl></div><div class="section level2">
       <h2 id="hulls-and-bounds">Hulls and bounds<a class="anchor" aria-label="anchor" href="#hulls-and-bounds"></a></h2>
 
@@ -313,7 +334,7 @@
           <code><a href="ga_bounding_rect.html">ga_bounding_rect()</a></code>
 
         </dt>
-        <dd>Compute the axis-aligned bounding rectangle of geometries</dd>
+        <dd>Axis-aligned bounding rectangle</dd>
 
         <dt>
 
@@ -341,7 +362,7 @@
           <code><a href="ga_minimum_rotated_rect.html">ga_minimum_rotated_rect()</a></code>
 
         </dt>
-        <dd>Compute the minimum rotated bounding rectangle of geometries</dd>
+        <dd>Minimum rotated bounding rectangle</dd>
       </dl></div><div class="section level2">
       <h2 id="tessellate">Tessellate<a class="anchor" aria-label="anchor" href="#tessellate"></a></h2>
 
@@ -357,7 +378,7 @@
           <code><a href="ga_triangulate_delaunay.html">ga_triangulate_delaunay()</a></code>
 
         </dt>
-        <dd>Triangulate geometries with a Delaunay triangulation</dd>
+        <dd>Delaunay triangulation</dd>
 
         <dt>
 
@@ -371,14 +392,14 @@
           <code><a href="ga_voronoi_cells.html">ga_voronoi_cells()</a></code>
 
         </dt>
-        <dd>Compute Voronoi cells from the vertices of geometries</dd>
+        <dd>Voronoi cells from geometry vertices</dd>
 
         <dt>
 
           <code><a href="ga_voronoi_edges.html">ga_voronoi_edges()</a></code>
 
         </dt>
-        <dd>Compute Voronoi edges from the vertices of geometries</dd>
+        <dd>Voronoi edges from geometry vertices</dd>
       </dl></div><div class="section level2">
       <h2 id="cluster">Cluster<a class="anchor" aria-label="anchor" href="#cluster"></a></h2>
 
@@ -454,7 +475,7 @@
           <code><a href="ga_rotate_around_center.html">ga_rotate_around_center()</a></code>
 
         </dt>
-        <dd>Rotate geometries around the center of their bounding box</dd>
+        <dd>Rotate around the bounding box center</dd>
 
         <dt>
 
@@ -468,7 +489,7 @@
           <code><a href="ga_scale_xy.html">ga_scale_xy()</a></code>
 
         </dt>
-        <dd>Scale geometries independently in x and y about their centroid</dd>
+        <dd>Scale geometries in x and y</dd>
 
         <dt>
 
@@ -482,7 +503,7 @@
           <code><a href="ga_skew_xy.html">ga_skew_xy()</a></code>
 
         </dt>
-        <dd>Skew geometries independently in x and y about their centroid</dd>
+        <dd>Skew geometries in x and y</dd>
 
         <dt>
 
@@ -496,7 +517,7 @@
           <code><a href="ga_simplify.html">ga_simplify()</a></code>
 
         </dt>
-        <dd>Simplify geometries using the Ramer-Douglas-Peucker algorithm</dd>
+        <dd>Simplify with Ramer-Douglas-Peucker</dd>
 
         <dt>
 
@@ -510,7 +531,7 @@
           <code><a href="ga_simplify_vw.html">ga_simplify_vw()</a></code> <code><a href="ga_simplify_vw.html">ga_simplify_vw_preserve()</a></code>
 
         </dt>
-        <dd>Simplify geometries using the Visvalingam-Whyatt algorithm</dd>
+        <dd>Simplify with Visvalingam-Whyatt</dd>
 
         <dt>
 
@@ -547,21 +568,21 @@
           <code><a href="ga_points_along_line.html">ga_points_along_line()</a></code>
 
         </dt>
-        <dd>Generate points at regular intervals along the line between two points</dd>
+        <dd>Points at regular intervals along a line</dd>
 
         <dt>
 
           <code><a href="interpolate_between.html">ga_point_at_distance_between()</a></code> <code><a href="interpolate_between.html">ga_point_at_ratio_between()</a></code>
 
         </dt>
-        <dd>Interpolate a point at a given distance between two points</dd>
+        <dd>Interpolate a point between two points</dd>
 
         <dt>
 
           <code><a href="ga_densify.html">ga_densify()</a></code>
 
         </dt>
-        <dd>Add intermediate points to geometries so no segment exceeds a maximum length</dd>
+        <dd>Add points so no segment exceeds a length</dd>
       </dl></div><div class="section level2">
       <h2 id="winding">Winding<a class="anchor" aria-label="anchor" href="#winding"></a></h2>
 
@@ -658,7 +679,7 @@
           <code><a href="ga_downcast_geometry.html">ga_downcast_geometry()</a></code>
 
         </dt>
-        <dd>Cast geometries to the narrowest type that fits them</dd>
+        <dd>Cast to the narrowest geometry type</dd>
 
         <dt>
 
@@ -716,7 +737,7 @@
           <code><a href="ga_line_segmentize.html">ga_line_segmentize()</a></code> <code><a href="ga_line_segmentize.html">ga_line_segmentize_haversine()</a></code>
 
         </dt>
-        <dd>Split linestrings into a given number of equal-length segments</dd>
+        <dd>Split linestrings into equal segments</dd>
 
         <dt>
 

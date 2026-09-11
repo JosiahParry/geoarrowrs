@@ -46,3 +46,23 @@ a GeoArrow point array
 Other interpolate:
 [`ga_point_at_distance_between()`](https://josiahparry.github.io/geoarrowrs/reference/interpolate_between.md),
 [`ga_points_along_line()`](https://josiahparry.github.io/geoarrowrs/reference/ga_points_along_line.md)
+
+## Examples
+
+``` r
+line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+))
+
+# halfway from the start, then two units in from the end
+geoarrow::as_geoarrow_vctr(
+  ga_interpolate_point(line, 0.5, "euclidean", "ratio", "start")
+)
+#> <geoarrow_vctr geoarrow.point{struct}[1]>
+#> [1] <POINT (5 0)>
+geoarrow::as_geoarrow_vctr(
+  ga_interpolate_point(line, 2, "euclidean", "distance", "end")
+)
+#> <geoarrow_vctr geoarrow.point{struct}[1]>
+#> [1] <POINT (8 0)>
+```

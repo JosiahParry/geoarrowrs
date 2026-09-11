@@ -78,6 +78,15 @@ since the conversion goes through a two dimensional representation.</p>
 <code><a href="ga_to_radians.html">ga_to_radians()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">rad</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">pi</span> <span class="op">/</span> <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">pi</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">geoarrow</span><span class="fu">::</span><span class="fu"><a href="https://geoarrow.org/geoarrow-r/reference/as_geoarrow_vctr.html" class="external-link">as_geoarrow_vctr</a></span><span class="op">(</span><span class="fu">ga_to_degrees</span><span class="op">(</span><span class="va">rad</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;geoarrow_vctr geoarrow.point{struct}[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] &lt;POINT (0 0)&gt;   &lt;POINT (45 90)&gt;</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

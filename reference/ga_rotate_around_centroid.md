@@ -38,3 +38,16 @@ Other affine:
 [`ga_skew()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew.md),
 [`ga_skew_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew_xy.md),
 [`ga_translate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_translate.md)
+
+## Examples
+
+``` r
+# a right triangle, whose centroid is not its bounding box center
+tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
+))
+
+geoarrow::as_geoarrow_vctr(ga_rotate_around_centroid(tri, 90))
+#> <geoarrow_vctr geoarrow.polygon{list}[1]>
+#> [1] <POLYGON ((2.3333333 -0.3333333, 2.3333333 3.6666667, -0.6666667 -0.333>
+```

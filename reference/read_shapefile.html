@@ -85,20 +85,39 @@ emitted, because an Arrow column cannot mix dimensions.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"shape/nc.shp"</span>, package <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">read_shapefile</span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># the .dbf attribute columns, followed by `geometry`</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 100  15</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NAME"</span>, <span class="st">"BIR74"</span>, <span class="st">"geometry"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        NAME BIR74</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      Ashe  1091</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Alleghany   487</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     Surry  3188</span>
+<span class="r-in"><span><span class="co"># read into a nanoarrow array stream</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">read_shapefile</span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;nanoarrow_array_stream struct&lt;AREA: double, PERIMETER: double, CNTY_: double, CNTY_ID: double, NAME: string, FIPS: string, FIPSNO: double, CRESS_ID: double, BIR74: double, SID74: double, NWBIR74: double, BIR79: double, SID79: double, NWBIR79: double, geometry: geoarrow.multipolygon{list&lt;polygons: list&lt;rings: list&lt;vertices: struct&lt;x: double, y: double&gt;&gt;&gt;&gt;}&gt;&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ get_schema:function ()  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ get_next  :function (schema = x$get_schema(), validate = TRUE)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ release   :function ()  </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># convert to a df</span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    AREA PERIMETER CNTY_ CNTY_ID        NAME  FIPS FIPSNO CRESS_ID BIR74 SID74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.114     1.442  1825    1825        Ashe 37009  37009        5  1091     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.061     1.231  1827    1827   Alleghany 37005  37005        3   487     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.143     1.630  1828    1828       Surry 37171  37171       86  3188     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.070     2.968  1831    1831   Currituck 37053  37053       27   508     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.153     2.206  1832    1832 Northampton 37131  37131       66  1421     9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.097     1.670  1833    1833    Hertford 37091  37091       46  1452     7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   NWBIR74 BIR79 SID79 NWBIR79</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      10  1364     0      19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      10   542     3      12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     208  3616     6     260</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     123   830     2     145</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    1066  1606     3    1197</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     954  1838     5    1237</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   geometry</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 &lt;MULTIPOLYGON (((-81.4727554 36.2343559, -81.5408401 36.2725067, -81.56&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 &lt;MULTIPOLYGON (((-81.2398911 36.3653641, -81.2406921 36.3794174, -81.26&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 &lt;MULTIPOLYGON (((-80.4563446 36.2425575, -80.476387 36.2547264, -80.536&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 &lt;MULTIPOLYGON (((-76.0089722 36.3195953, -76.0173492 36.3377304, -76.03&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 &lt;MULTIPOLYGON (((-77.2176666 36.2409821, -77.2346115 36.2145996, -77.29&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 &lt;MULTIPOLYGON (((-76.7450638 36.2339172, -76.98069 36.2302361, -76.9947&gt;</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

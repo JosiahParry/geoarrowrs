@@ -37,15 +37,25 @@ a double vector of length values in meters
 ## References
 
 [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-[Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
-
-[Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-[Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
-
-[Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-[Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
-
-[Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
+[Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html),
+[Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html),
+[Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html),
 [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 
 [VincentyLength](https://docs.rs/geo/latest/geo/algorithm/vincenty_length/trait.VincentyLength.html)
+
+## Examples
+
+``` r
+# Raleigh to Charlotte, and Raleigh to Wilmington
+trips <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-80.8431, 35.2271))),
+  sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-77.9447, 34.2257)))
+))
+
+# degrees, then meters
+as.vector(ga_length_euclidean(trips))
+#> [1] 2.273068 1.701631
+as.vector(ga_length_geodesic(trips))
+#> [1] 209216.6 183645.3
+```

@@ -2,25 +2,48 @@
 
 ## geoarrowrs (development version)
 
-- [`ga_dbscan()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dbscan.md),
-  [`ga_kmeans()`](https://josiahparry.github.io/geoarrowrs/reference/ga_kmeans.md),
+- Added
+  [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
+  which attaches the columns of one data frame to each row of another
+  that it relates to spatially. A row matching several rows is repeated
+  once per match, unmatched rows are kept with `NA` unless
+  `left = FALSE`, shared column names are suffixed, and the geometry
+  comes from `x`. The relationship is any of the sparse predicates, so
+  points in polygons is `ga_join(sites, counties, ga_sparse_within)`.
+- Added the sparse predicates
+  [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_contains()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_contains_properly()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_within()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_covers()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_covered_by()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_touches()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_crosses()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+  [`ga_sparse_overlaps()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
   and
-  [`ga_outlier_scores()`](https://josiahparry.github.io/geoarrowrs/reference/ga_outlier_scores.md)
-  now cluster over the whole array and return one value per row, rather
-  than clustering within each row and returning a list per row. A point
-  array of 10,000 locations gives 10,000 labels, which is what these are
-  for. `eps`, `min_points`, `k`, and `k_neighbours` are single values
-  now, since the operation spans the array rather than a row. A row that
-  is not a single point takes no part and comes back null. They are no
-  longer registered as Arrow kernels, because a kernel sees one batch at
-  a time and would cluster each batch separately.
-- `RTree$new()` takes a `sort` argument, either `"hilbert"` (the
-  default) or `"str"`, choosing how the tree is packed.
-- `RTree$query()` looks up a whole array at once and returns one list of
-  candidate rows per element, which is the shape a spatial join needs.
-  It accepts any GeoArrow array and reduces it to bounding boxes itself,
-  so points, polygons and box arrays all work. The scalar `$search()` is
-  unchanged.
+  [`ga_sparse_equals_topo()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md).
+  Each returns the rows of `y` that relate to each row of `x`, rather
+  than comparing the two row by row. `y` is indexed in an R-tree and
+  only candidates are relate tested, so the cost follows the number of
+  overlapping boxes rather than `length(x) * length(y)`. There is no
+  `ga_sparse_disjoint()`: a bounding box cannot narrow disjointness, so
+  the answer would be nearly every row.
+- Added `KDTree`, a k-d tree over a point array. `$range(geometry)`
+  finds the points inside each geometry’s box and `$within(geometry, r)`
+  the points within `r` of each point. Both take an array and return one
+  list of rows per row, so a whole distance band join is one call; a
+  single lookup is an array of one via
+  [`ga_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_xy.md).
+  `RTree` cannot answer a radius query directly, which is why this
+  exists.
+- Added `RTree`, a packed Hilbert R-tree over the bounding box of each
+  geometry, built on the `geo-index` crate. `$query()` looks up a whole
+  array at once and returns one list of candidate rows per element,
+  which is the shape a spatial join needs; it accepts any GeoArrow array
+  and reduces it to boxes itself. `$search()` takes a single box and
+  `$neighbors()` the rows nearest a point. `$new()` takes `node_size`
+  and a `sort` of `"hilbert"` or `"str"`. Queries return candidates to
+  confirm with an exact predicate.
 - Added
   [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md),
   which returns the axis aligned bounding box of each geometry as a
@@ -28,27 +51,21 @@
   [`ga_bounding_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_bounding_rect.md)
   it passes a box array straight through instead of recomputing it, so
   it is safe to call before a query without paying for it twice.
-- The parallel paths use every core by default. Set
-  `options(geoarrowrs.thread_pool = n)` for a cap, which takes effect
-  immediately rather than at load. Under `R CMD check` the cap defaults
-  to two, since CRAN sets `_R_CHECK_LIMIT_CORES_` and asks for no more
-  than that; `OMP_THREAD_LIMIT` is honoured as a ceiling too. Setting
-  the option yourself overrides both.
-- Casting between geometry types now runs in parallel, in rayon jobs of
-  at least 8192 rows. Parsing WKB is most of the cost of reading a plain
-  Parquet geometry column, and Arrow cannot thread a user-defined
-  function because it has to call back into R on the main thread, so the
-  parallelism has to live inside the Rust. On ten cores a 3M row WKB to
-  point cast goes from 2.0s to 0.32s, and a distance over 6M rows from
-  9.6s to 3.3s.
-- The pairwise distance and bearing functions now error on a length
-  mismatch instead of silently truncating.
-  [`ga_dist_euclidean_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md)
-  given two origins and one destination returned a single value,
-  breaking the length preserving guarantee without saying anything. All
-  eleven affected functions across `distance/` and `bearing/` now check,
-  and `check_pair_len()` moved to the crate root so `interpolate_point/`
-  shares it.
+- Added
+  [`ga_dbscan()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dbscan.md),
+  [`ga_kmeans()`](https://josiahparry.github.io/geoarrowrs/reference/ga_kmeans.md),
+  and
+  [`ga_outlier_scores()`](https://josiahparry.github.io/geoarrowrs/reference/ga_outlier_scores.md),
+  which cluster over the whole array and return one value per row, so a
+  point array of 10,000 locations gives 10,000 labels. A row that is not
+  a single point takes no part and comes back null. They are not
+  registered as Arrow kernels, because a kernel sees one batch at a time
+  and would cluster each batch separately. Added
+  [`ga_simplify_idx()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.md)
+  and
+  [`ga_simplify_vw_idx()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.md)
+  alongside, which return the coordinate positions simplification keeps
+  rather than the simplified geometry.
 - Added
   [`ga_as_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_as_point.md),
   [`ga_as_linestring()`](https://josiahparry.github.io/geoarrowrs/reference/ga_as_point.md),
@@ -62,52 +79,41 @@
   than by the data, these are the only geometry producing casts Arrow
   can run inside a query, so a plain Parquet column can be turned into
   native GeoArrow once and computed on after that.
-- Registered Arrow kernels now accept a bare `binary` or `large_binary`
-  WKB column, the kind plain Parquet writes, so
-  `mutate(d = ga_dist_euclidean_pairwise(pickup, dropoff))` runs on a
-  Dataset without converting the column first. A geometry result from a
-  WKB input comes back as WKB, since the kernel cannot declare a type
-  that depends on what the column turns out to hold.
-- Loading the package now registers the Arrow kernels for CRS-less data
-  automatically, so `mutate(a = ga_unsigned_area(geometry))` works on a
-  `Table` or `Dataset` with no setup. Data carrying a CRS still needs
-  `register_geoarrow_udfs(crs = ...)`. Set
-  `options(geoarrowrs.register_udfs = FALSE)` to skip it and avoid
-  loading arrow at all.
 - Added
   [`ga_from_wkb()`](https://josiahparry.github.io/geoarrowrs/reference/ga_from_wkb.md),
   which reads a bare `binary` WKB column, the kind plain Parquet writes,
-  into the narrowest GeoArrow type that fits it. Functions needing a
-  specific geometry type, such as
-  [`ga_dist_euclidean_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md),
-  could not read those columns at all.
+  into the narrowest GeoArrow type that fits it.
 - Added
   [`ga_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_xy.md),
   which pairs two numeric vectors or float64 arrays into a GeoArrow
   point array. Either argument may be length 1 and is recycled, a row
   where either coordinate is `NA` gives a null point, and `crs` is
   recorded in the array metadata verbatim without reprojecting anything.
-- Every geometry function now carries a `ga_` prefix:
-  [`ga_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_centroid.md),
-  [`ga_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
-  [`ga_simplify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify.md).
-  Bare names masked
-  [`base::within()`](https://rdrr.io/r/base/with.html),
-  [`stats::kmeans()`](https://rdrr.io/r/stats/kmeans.html),
-  [`graphics::lines()`](https://rdrr.io/r/graphics/lines.html),
-  [`dplyr::contains()`](https://tidyselect.r-lib.org/reference/starts_with.html),
-  and `purrr::flatten()`. An `st_` prefix was considered and rejected,
-  because 19 of the names collide head on with sf and return a different
-  type. The readers
-  [`read_shapefile()`](https://josiahparry.github.io/geoarrowrs/reference/read_shapefile.md),
-  [`read_geojson()`](https://josiahparry.github.io/geoarrowrs/reference/read_geojson.md),
+- Added
+  [`register_geoarrow_udfs()`](https://josiahparry.github.io/geoarrowrs/reference/register_geoarrow_udfs.md),
+  which registers geoarrowrs functions as Arrow scalar kernels so they
+  run inside `dplyr` verbs on a `Table` or `Dataset` rather than pulling
+  the geometry into R. It registers for a CRS rather than for a table:
+  one call covers every GeoArrow geometry type, and functions taking
+  numeric or option arguments, such as
+  [`ga_simplify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify.md),
+  [`ga_densify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_densify.md),
   and
-  [`read_flatgeobuf()`](https://josiahparry.github.io/geoarrowrs/reference/read_flatgeobuf.md),
-  the `RTree` class, and
-  [`register_geoarrow_udfs()`](https://josiahparry.github.io/geoarrowrs/reference/register_geoarrow_udfs.md)
-  keep their names. Registered Arrow kernels take the prefix too, so
-  `mutate(a = ga_unsigned_area(geometry))` is the same name in and out
-  of the engine.
+  [`ga_buffer()`](https://josiahparry.github.io/geoarrowrs/reference/ga_buffer.md),
+  are registered alongside the geometry-only ones. 101 functions in
+  total.
+- Loading the package registers the Arrow kernels for CRS-less data
+  automatically, so `mutate(a = ga_unsigned_area(geometry))` works on a
+  `Table` or `Dataset` with no setup. Data carrying a CRS still needs
+  `register_geoarrow_udfs(crs = ...)`. Set
+  `options(geoarrowrs.register_udfs = FALSE)` to skip it and avoid
+  loading arrow at all.
+- Registered Arrow kernels accept a bare `binary` or `large_binary` WKB
+  column, the kind plain Parquet writes, so
+  `mutate(d = ga_dist_euclidean_pairwise(pickup, dropoff))` runs on a
+  Dataset without converting the column first. A geometry result from a
+  WKB input comes back as WKB, since the kernel cannot declare a type
+  that depends on what the column turns out to hold.
 - Added
   [`ga_line_intersection()`](https://josiahparry.github.io/geoarrowrs/reference/ga_line_intersection.md)
   and
@@ -119,17 +125,6 @@
   the general form behind the other affine ops, taking six recyclable
   coefficients so a different transform can apply to every row.
 - Added
-  [`ga_dbscan()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dbscan.md),
-  [`ga_kmeans()`](https://josiahparry.github.io/geoarrowrs/reference/ga_kmeans.md),
-  and
-  [`ga_outlier_scores()`](https://josiahparry.github.io/geoarrowrs/reference/ga_outlier_scores.md)
-  for clustering the points within each row, plus
-  [`ga_simplify_idx()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.md)
-  and
-  [`ga_simplify_vw_idx()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.md),
-  which return the coordinate positions simplification keeps rather than
-  the simplified geometry.
-- Added
   [`ga_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coords.md),
   [`ga_exterior_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coords.md),
   [`ga_n_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_n_coords.md),
@@ -139,9 +134,6 @@
   [`ga_is_valid()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
   and
   [`ga_validation_error()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md).
-- Added an `RTree` spatial index built on the `geo-index` crate, with
-  `$search()` for bounding box queries and `$neighbors()` for nearest
-  rows. Queries return candidates to confirm with an exact predicate.
 - Added
   [`ga_voronoi_cells()`](https://josiahparry.github.io/geoarrowrs/reference/ga_voronoi_cells.md)
   and
@@ -157,19 +149,6 @@
   [`ga_is_cw()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_ccw.md).
   A multi part geometry reports a winding only when all of its parts
   agree.
-- Added
-  [`register_geoarrow_udfs()`](https://josiahparry.github.io/geoarrowrs/reference/register_geoarrow_udfs.md),
-  which registers geoarrowrs functions as Arrow scalar kernels so they
-  run inside `dplyr` verbs on a `Table` or `Dataset` rather than pulling
-  the geometry into R. It registers for a CRS rather than for a table:
-  one call covers every GeoArrow geometry type, and functions taking
-  numeric or option arguments, such as
-  [`ga_simplify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify.md),
-  [`ga_densify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_densify.md),
-  and
-  [`ga_buffer()`](https://josiahparry.github.io/geoarrowrs/reference/ga_buffer.md),
-  are registered alongside the geometry-only ones. 101 functions in
-  total.
 - Added the topological predicates
   [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
   [`ga_contains_properly()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
@@ -247,23 +226,7 @@
   and
   [`ga_skew_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew_xy.md).
 - Added
-  [`ga_to_degrees()`](https://josiahparry.github.io/geoarrowrs/reference/ga_to_degrees.md)
-  and
-  [`ga_to_radians()`](https://josiahparry.github.io/geoarrowrs/reference/ga_to_radians.md).
-- Numeric arguments now accept a plain R numeric vector as well as an
-  Arrow array, so `ga_simplify(x, 0.01)` works without wrapping the
-  value.
-- Geometry arguments now accept any GeoArrow array rather than only a
-  mixed `geometry` array.
-  [`ga_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_centroid.md),
-  [`ga_signed_area()`](https://josiahparry.github.io/geoarrowrs/reference/area.md),
-  [`ga_buffer()`](https://josiahparry.github.io/geoarrowrs/reference/ga_buffer.md)
-  and ten others previously errored on the multipolygon arrays the
-  readers produce.
-- Empty points no longer crash. Every geo-backed function panicked on an
-  array containing one, because `to_geometry()` cannot represent an
-  empty point.
-- [`ga_densify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_densify.md),
+  [`ga_densify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_densify.md),
   [`ga_interpolate_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_interpolate_point.md),
   [`ga_point_at_distance_between()`](https://josiahparry.github.io/geoarrowrs/reference/interpolate_between.md),
   [`ga_point_at_ratio_between()`](https://josiahparry.github.io/geoarrowrs/reference/interpolate_between.md),
@@ -271,8 +234,30 @@
   [`ga_dest_euclidean()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md),
   [`ga_dest_haversine()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md),
   and
-  [`ga_dest_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md)
-  are now exported. They were written but never registered.
-- [`ga_point_at_ratio_between()`](https://josiahparry.github.io/geoarrowrs/reference/interpolate_between.md)
-  returned `NULL` instead of its result, and the `interpolate_point`
-  functions ignored recycling despite documenting it.
+  [`ga_dest_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md).
+- Added
+  [`ga_to_degrees()`](https://josiahparry.github.io/geoarrowrs/reference/ga_to_degrees.md)
+  and
+  [`ga_to_radians()`](https://josiahparry.github.io/geoarrowrs/reference/ga_to_radians.md).
+- Casting between geometry types runs in parallel, in rayon jobs of at
+  least 8192 rows. Parsing WKB is most of the cost of reading a plain
+  Parquet geometry column, and Arrow cannot thread a user-defined
+  function because it has to call back into R on the main thread, so the
+  parallelism has to live inside the Rust. On ten cores a 3M row WKB to
+  point cast goes from 2.0s to 0.32s, and a distance over 6M rows from
+  9.6s to 3.3s.
+- The parallel paths use every core by default. Set
+  `options(geoarrowrs.thread_pool = n)` for a cap, which takes effect
+  immediately rather than at load. Under `R CMD check` the cap defaults
+  to two, since CRAN sets `_R_CHECK_LIMIT_CORES_` and asks for no more
+  than that; `OMP_THREAD_LIMIT` is honoured as a ceiling too. Setting
+  the option yourself overrides both.
+- Every function is vectorized and length preserving: `n` geometries in,
+  `n` out. The pairwise distance and bearing functions error on a length
+  mismatch rather than truncating to the shorter side.
+- Numeric arguments accept a plain R numeric vector as well as an Arrow
+  array, so `ga_simplify(x, 0.01)` works without wrapping the value.
+  Length 1 is recycled.
+- Geometry arguments accept any GeoArrow array rather than only a mixed
+  `geometry` array, so the concrete arrays the readers produce work
+  directly.

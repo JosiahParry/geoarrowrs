@@ -1,4 +1,4 @@
-# Compute Voronoi cells from the vertices of geometries
+# Voronoi cells from geometry vertices
 
 Returns one multipolygon per input geometry, whose parts are the Voronoi
 cells of that geometry's vertices. The output has the same length as the

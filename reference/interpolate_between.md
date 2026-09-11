@@ -1,4 +1,4 @@
-# Interpolate a point at a given distance between two points
+# Interpolate a point between two points
 
 Returns the point located at `distance` along the path from `start` to
 `end`. The metric determines how distance is measured.
@@ -48,10 +48,27 @@ a GeoArrow point array
 
 [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 
-[InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
-
 ## See also
 
 Other interpolate:
 [`ga_interpolate_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_interpolate_point.md),
 [`ga_points_along_line()`](https://josiahparry.github.io/geoarrowrs/reference/ga_points_along_line.md)
+
+## Examples
+
+``` r
+start <- ga_xy(c(0, 0), c(0, 0))
+end <- ga_xy(c(10, 10), c(0, 0))
+
+# three units along, then a third of the way along
+geoarrow::as_geoarrow_vctr(
+  ga_point_at_distance_between(start, end, c(3, 3), "euclidean")
+)
+#> <geoarrow_vctr geoarrow.point{struct}[2]>
+#> [1] <POINT (3 0)> <POINT (3 0)>
+geoarrow::as_geoarrow_vctr(
+  ga_point_at_ratio_between(start, end, c(1 / 3, 1 / 3), "euclidean")
+)
+#> <geoarrow_vctr geoarrow.point{struct}[2]>
+#> [1] <POINT (3.3333333 0)> <POINT (3.3333333 0)>
+```

@@ -65,7 +65,7 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 - [`read_flatgeobuf()`](https://josiahparry.github.io/geoarrowrs/reference/read_flatgeobuf.md)
   : Read a FlatGeobuf file into a record batch stream
 - [`read_geojson()`](https://josiahparry.github.io/geoarrowrs/reference/read_geojson.md)
-  : Read a GeoJSON FeatureCollection into a record batch stream
+  : Read a GeoJSON FeatureCollection
 - [`read_shapefile()`](https://josiahparry.github.io/geoarrowrs/reference/read_shapefile.md)
   : Read an ESRI Shapefile into a record batch stream
 
@@ -78,17 +78,14 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 
 - [`ga_signed_area()`](https://josiahparry.github.io/geoarrowrs/reference/area.md)
   [`ga_unsigned_area()`](https://josiahparry.github.io/geoarrowrs/reference/area.md)
-  : Compute the signed and unsigned planar area of geometries
+  : Signed and unsigned planar area
 - [`ga_signed_area_cd()`](https://josiahparry.github.io/geoarrowrs/reference/area_cd.md)
   [`ga_unsigned_area_cd()`](https://josiahparry.github.io/geoarrowrs/reference/area_cd.md)
-  : Compute the signed and unsigned area using the Chamberlain-Duquette
-  algorithm
+  : Chamberlain-Duquette spherical area
 - [`ga_signed_area_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
   [`ga_unsigned_area_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
-  [`ga_perimeter_signed_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
-  [`ga_perimeter_unsigned_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
-  : Compute the signed and unsigned geodesic area and perimeter of
-  geometries
+  [`ga_perimeter_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
+  : Geodesic area and perimeter
 
 ## Distance
 
@@ -98,11 +95,11 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
   [`ga_dist_rhumb_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md)
   : Compute pairwise distances between points
 - [`ga_dist_frechet_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_frechet_pairwise.md)
-  : Compute the pairwise Frechet distance between linestrings
+  : Pairwise Frechet distance
 - [`ga_dist_hausdorff_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_hausdorff_pairwise.md)
-  : Compute the pairwise Hausdorff distance between geometries
+  : Pairwise Hausdorff distance
 - [`ga_dist_vincenty_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_vincenty_pairwise.md)
-  : Compute the pairwise Vincenty distance between points
+  : Pairwise Vincenty distance
 
 ## Measure
 
@@ -121,13 +118,14 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
   [`ga_dest_euclidean()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md)
   [`ga_dest_haversine()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md)
   [`ga_dest_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/destination.md)
-  : Compute a destination point from an origin, bearing, and distance
+  : Destination from origin, bearing, distance
 
 ## Index
 
+- [`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md)
+  : A k-d tree over a point array
 - [`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md)
-  : A packed Hilbert R-tree over the bounding boxes of a geometry array.
-  A spatial index over a geometry array
+  : A spatial index over a geometry array
 - [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md)
   : Compute the bounding box of geometries
 
@@ -135,13 +133,34 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 
 - [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md)
   : Locate a point relative to a geometry
+
 - [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md)
   [`ga_boundary_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md)
   : Determine the topological dimension of geometries
+
 - [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md)
   : Test whether geometries are empty
+
+- [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md)
+  : Join two data frames on a spatial relationship
+
 - [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md)
-  : Compute the DE-9IM relationship between two geometry arrays
+  : DE-9IM relationship between geometries
+
+- [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_contains()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_contains_properly()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_within()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_covers()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_covered_by()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_touches()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_crosses()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_overlaps()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  [`ga_sparse_equals_topo()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+  :
+
+  Find which rows of `y` relate to each row of `x`
+
 - [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
   [`ga_contains_properly()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
   [`ga_within()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
@@ -153,9 +172,11 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
   [`ga_crosses()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
   [`ga_overlaps()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
   [`ga_equals_topo()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
-  : Test a topological relationship between two geometry arrays
+  : Test a topological relationship
+
 - [`ga_line_intersection()`](https://josiahparry.github.io/geoarrowrs/reference/ga_line_intersection.md)
   : Intersect pairs of two point lines
+
 - [`ga_self_intersections()`](https://josiahparry.github.io/geoarrowrs/reference/ga_self_intersections.md)
   : Find where a geometry crosses itself
 
@@ -163,18 +184,18 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 
 - [`ga_closest_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_closest_point.md)
   [`ga_closest_point_haversine()`](https://josiahparry.github.io/geoarrowrs/reference/ga_closest_point.md)
-  : Find the point on a geometry closest to another point
+  : Closest point on a geometry
 - [`ga_interior_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_interior_point.md)
   : Compute a representative point inside a geometry
 - [`ga_is_convex()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_convex.md)
   : Test whether a ring is convex
 - [`ga_line_locate_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_line_locate_point.md)
-  : Locate a point along a line as a fraction of its length
+  : Locate a point along a line
 
 ## Hulls and bounds
 
 - [`ga_bounding_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_bounding_rect.md)
-  : Compute the axis-aligned bounding rectangle of geometries
+  : Axis-aligned bounding rectangle
 - [`ga_concave_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_concave_hull.md)
   : Compute the concave hull of geometries
 - [`ga_convex_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_convex_hull.md)
@@ -182,18 +203,18 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 - [`ga_extremes()`](https://josiahparry.github.io/geoarrowrs/reference/ga_extremes.md)
   : Compute the extreme coordinates of geometries
 - [`ga_minimum_rotated_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_minimum_rotated_rect.md)
-  : Compute the minimum rotated bounding rectangle of geometries
+  : Minimum rotated bounding rectangle
 
 ## Tessellate
 
 - [`ga_triangulate_delaunay()`](https://josiahparry.github.io/geoarrowrs/reference/ga_triangulate_delaunay.md)
-  : Triangulate geometries with a Delaunay triangulation
+  : Delaunay triangulation
 - [`ga_triangulate_earcut()`](https://josiahparry.github.io/geoarrowrs/reference/ga_triangulate_earcut.md)
   : Triangulate polygons with the earcut algorithm
 - [`ga_voronoi_cells()`](https://josiahparry.github.io/geoarrowrs/reference/ga_voronoi_cells.md)
-  : Compute Voronoi cells from the vertices of geometries
+  : Voronoi cells from geometry vertices
 - [`ga_voronoi_edges()`](https://josiahparry.github.io/geoarrowrs/reference/ga_voronoi_edges.md)
-  : Compute Voronoi edges from the vertices of geometries
+  : Voronoi edges from geometry vertices
 
 ## Cluster
 
@@ -219,25 +240,25 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 - [`ga_affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/ga_affine_transform.md)
   : Apply an arbitrary affine transform
 - [`ga_rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_center.md)
-  : Rotate geometries around the center of their bounding box
+  : Rotate around the bounding box center
 - [`ga_rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.md)
   : Rotate geometries around their centroid
 - [`ga_scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.md)
-  : Scale geometries independently in x and y about their centroid
+  : Scale geometries in x and y
 - [`ga_skew()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew.md)
   : Skew geometries uniformly about their centroid
 - [`ga_skew_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew_xy.md)
-  : Skew geometries independently in x and y about their centroid
+  : Skew geometries in x and y
 - [`ga_translate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_translate.md)
   : Translate geometries along the x and y axes
 - [`ga_simplify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify.md)
-  : Simplify geometries using the Ramer-Douglas-Peucker algorithm
+  : Simplify with Ramer-Douglas-Peucker
 - [`ga_simplify_idx()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.md)
   [`ga_simplify_vw_idx()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.md)
   : Find which coordinates simplification would keep
 - [`ga_simplify_vw()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_vw.md)
   [`ga_simplify_vw_preserve()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_vw.md)
-  : Simplify geometries using the Visvalingam-Whyatt algorithm
+  : Simplify with Visvalingam-Whyatt
 - [`ga_to_degrees()`](https://josiahparry.github.io/geoarrowrs/reference/ga_to_degrees.md)
   : Convert coordinates from radians to degrees
 - [`ga_to_radians()`](https://josiahparry.github.io/geoarrowrs/reference/ga_to_radians.md)
@@ -248,14 +269,12 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 - [`ga_interpolate_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_interpolate_point.md)
   : Interpolate a point along a linestring
 - [`ga_points_along_line()`](https://josiahparry.github.io/geoarrowrs/reference/ga_points_along_line.md)
-  : Generate points at regular intervals along the line between two
-  points
+  : Points at regular intervals along a line
 - [`ga_point_at_distance_between()`](https://josiahparry.github.io/geoarrowrs/reference/interpolate_between.md)
   [`ga_point_at_ratio_between()`](https://josiahparry.github.io/geoarrowrs/reference/interpolate_between.md)
-  : Interpolate a point at a given distance between two points
+  : Interpolate a point between two points
 - [`ga_densify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_densify.md)
-  : Add intermediate points to geometries so no segment exceeds a
-  maximum length
+  : Add points so no segment exceeds a length
 
 ## Winding
 
@@ -292,7 +311,7 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
 - [`ga_cast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cast_geometry.md)
   : Cast geometries to another GeoArrow geometry type
 - [`ga_downcast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_downcast_geometry.md)
-  : Cast geometries to the narrowest type that fits them
+  : Cast to the narrowest geometry type
 - [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md)
   : Split multi-part geometries into their parts
 - [`ga_flatten()`](https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.md)
@@ -310,7 +329,7 @@ taken to work with {arrow} and it’s Acero / {dplyr} engines.
   : Smooth geometries using the Chaikin algorithm
 - [`ga_line_segmentize()`](https://josiahparry.github.io/geoarrowrs/reference/ga_line_segmentize.md)
   [`ga_line_segmentize_haversine()`](https://josiahparry.github.io/geoarrowrs/reference/ga_line_segmentize.md)
-  : Split linestrings into a given number of equal-length segments
+  : Split linestrings into equal segments
 - [`ga_remove_repeated_points()`](https://josiahparry.github.io/geoarrowrs/reference/ga_remove_repeated_points.md)
   : Remove repeated consecutive points from geometries
 - [`register_geoarrow_udfs()`](https://josiahparry.github.io/geoarrowrs/reference/register_geoarrow_udfs.md)

@@ -59,3 +59,60 @@ Other cast:
 [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md),
 [`ga_flatten()`](https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.md),
 [`ga_from_wkb()`](https://josiahparry.github.io/geoarrowrs/reference/ga_from_wkb.md)
+
+## Examples
+
+``` r
+pts <- ga_xy(c(0, 1), c(0, 1))
+
+# widening always works
+ga_cast_geometry(pts, "multipoint")
+#> <nanoarrow_array geoarrow.multipoint{list}[2]>
+#>  $ length    : int 2
+#>  $ null_count: int 0
+#>  $ offset    : int 0
+#>  $ buffers   :List of 2
+#>   ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>   ..$ :<nanoarrow_buffer data_offset<int32>[3][12 b]> `0 1 2`
+#>  $ children  :List of 1
+#>   ..$ points:<nanoarrow_array struct[2]>
+#>   .. ..$ length    : int 2
+#>   .. ..$ null_count: int 0
+#>   .. ..$ offset    : int 0
+#>   .. ..$ buffers   :List of 1
+#>   .. .. ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>   .. ..$ children  :List of 2
+#>   .. .. ..$ x:<nanoarrow_array double[2]>
+#>   .. .. .. ..$ length    : int 2
+#>   .. .. .. ..$ null_count: int 0
+#>   .. .. .. ..$ offset    : int 0
+#>   .. .. .. ..$ buffers   :List of 2
+#>   .. .. .. .. ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>   .. .. .. .. ..$ :<nanoarrow_buffer data<double>[2][16 b]> `0 1`
+#>   .. .. .. ..$ dictionary: NULL
+#>   .. .. .. ..$ children  : list()
+#>   .. .. ..$ y:<nanoarrow_array double[2]>
+#>   .. .. .. ..$ length    : int 2
+#>   .. .. .. ..$ null_count: int 0
+#>   .. .. .. ..$ offset    : int 0
+#>   .. .. .. ..$ buffers   :List of 2
+#>   .. .. .. .. ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>   .. .. .. .. ..$ :<nanoarrow_buffer data<double>[2][16 b]> `0 1`
+#>   .. .. .. ..$ dictionary: NULL
+#>   .. .. .. ..$ children  : list()
+#>   .. ..$ dictionary: NULL
+#>  $ dictionary: NULL
+
+# so does going out to wkb, which is what plain Parquet stores
+ga_cast_geometry(pts, "wkb")
+#> <nanoarrow_array geoarrow.wkb{binary}[2]>
+#>  $ length    : int 2
+#>  $ null_count: int 0
+#>  $ offset    : int 0
+#>  $ buffers   :List of 3
+#>   ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>   ..$ :<nanoarrow_buffer data_offset<int32>[3][12 b]> `0 21 42`
+#>   ..$ :<nanoarrow_buffer data<binary>[42 b]> `01 01 00 00 00 00 00 00 00 00 ...`
+#>  $ dictionary: NULL
+#>  $ children  : list()
+```

@@ -88,6 +88,23 @@ leftmost. Use <code><a href="ga_bounding_rect.html">ga_bounding_rect()</a></code
 <code><a href="ga_minimum_rotated_rect.html">ga_minimum_rotated_rect()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"shape/nc.shp"</span>, package <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">nc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu"><a href="read_shapefile.html">read_shapefile</a></span><span class="op">(</span><span class="va">fp</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># one row per county, four point columns</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">ga_extremes</span><span class="op">(</span><span class="va">nc</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              x_min                            x_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 &lt;POINT (-81.7410736 36.3917847)&gt; &lt;POINT (-81.2398911 36.3653641)&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 &lt;POINT (-81.3475418 36.5379143)&gt; &lt;POINT (-80.9034424 36.5652122)&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 &lt;POINT (-80.9657745 36.4672203)&gt; &lt;POINT (-80.4353104 36.5510445)&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                              y_min                            y_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 &lt;POINT (-81.4727554 36.2343559)&gt; &lt;POINT (-81.6699982 36.5896492)&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 &lt;POINT (-81.2398911 36.3653641)&gt; &lt;POINT (-81.3452988 36.5728645)&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  &lt;POINT (-80.874382 36.2338829)&gt; &lt;POINT (-80.9034424 36.5652122)&gt;</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

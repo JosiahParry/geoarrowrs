@@ -35,3 +35,16 @@ Other cast:
 [`ga_downcast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_downcast_geometry.md),
 [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md),
 [`ga_from_wkb()`](https://josiahparry.github.io/geoarrowrs/reference/ga_from_wkb.md)
+
+## Examples
+
+``` r
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# 100 counties in, one row per polygon part out
+length(nc$geometry)
+#> [1] 100
+ga_flatten(ga_explode(nc$geometry))$length
+#> [1] 108
+```

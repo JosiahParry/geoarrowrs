@@ -1,4 +1,4 @@
-# Test a topological relationship between two geometry arrays
+# Test a topological relationship
 
 Each function compares `x` and `y` row by row and returns `TRUE` when
 the named DE-9IM relationship holds. `y` is recycled against `x`.
@@ -72,7 +72,9 @@ Other topology:
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
-[`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md)
+[`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
+[`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
 
 ## Examples
 

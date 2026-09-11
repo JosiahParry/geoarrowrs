@@ -1,4 +1,4 @@
-# Triangulate geometries with a Delaunay triangulation
+# Delaunay triangulation
 
 Returns one multipolygon per input geometry, whose parts are that
 geometry's triangles. The output has the same length as the input.
@@ -48,3 +48,22 @@ element.
 
 Other triangulate:
 [`ga_triangulate_earcut()`](https://josiahparry.github.io/geoarrowrs/reference/ga_triangulate_earcut.md)
+
+## Examples
+
+``` r
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# constrained keeps the triangles inside the county boundary
+tri <- ga_triangulate_delaunay(nc$geometry)
+tri$length
+#> [1] 100
+
+# unconstrained fills the convex hull instead, so it covers more
+hull <- ga_triangulate_delaunay(nc$geometry, constrained = FALSE)
+head(as.vector(ga_unsigned_area(tri)), 3)
+#> [1] 0.11428350 0.06139976 0.14301628
+head(as.vector(ga_unsigned_area(hull)), 3)
+#> [1] 0.12484563 0.07437819 0.15586877
+```

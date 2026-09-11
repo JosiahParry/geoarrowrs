@@ -1,4 +1,4 @@
-# Cast geometries to the narrowest type that fits them
+# Cast to the narrowest geometry type
 
 Inspects the geometries and casts to the most specific type that can
 hold every one of them. A `geometry` array holding only points becomes a
@@ -34,3 +34,39 @@ Other cast:
 [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md),
 [`ga_flatten()`](https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.md),
 [`ga_from_wkb()`](https://josiahparry.github.io/geoarrowrs/reference/ga_from_wkb.md)
+
+## Examples
+
+``` r
+pts <- ga_xy(c(0, 1), c(0, 1))
+wide <- ga_cast_geometry(pts, "geometry")
+
+# only points in there, so it narrows back to a point array
+ga_downcast_geometry(wide)
+#> <nanoarrow_array geoarrow.point{struct}[2]>
+#>  $ length    : int 2
+#>  $ null_count: int 0
+#>  $ offset    : int 0
+#>  $ buffers   :List of 1
+#>   ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>  $ children  :List of 2
+#>   ..$ x:<nanoarrow_array double[2]>
+#>   .. ..$ length    : int 2
+#>   .. ..$ null_count: int 0
+#>   .. ..$ offset    : int 0
+#>   .. ..$ buffers   :List of 2
+#>   .. .. ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>   .. .. ..$ :<nanoarrow_buffer data<double>[2][16 b]> `0 1`
+#>   .. ..$ dictionary: NULL
+#>   .. ..$ children  : list()
+#>   ..$ y:<nanoarrow_array double[2]>
+#>   .. ..$ length    : int 2
+#>   .. ..$ null_count: int 0
+#>   .. ..$ offset    : int 0
+#>   .. ..$ buffers   :List of 2
+#>   .. .. ..$ :<nanoarrow_buffer validity<bool>[null] ``
+#>   .. .. ..$ :<nanoarrow_buffer data<double>[2][16 b]> `0 1`
+#>   .. ..$ dictionary: NULL
+#>   .. ..$ children  : list()
+#>  $ dictionary: NULL
+```

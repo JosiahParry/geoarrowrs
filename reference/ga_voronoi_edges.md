@@ -1,4 +1,4 @@
-# Compute Voronoi edges from the vertices of geometries
+# Voronoi edges from geometry vertices
 
 Returns one multilinestring per input geometry, whose parts are the
 boundaries between that geometry's Voronoi cells. The output has the

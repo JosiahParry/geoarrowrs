@@ -74,13 +74,10 @@ columns followed by a <code>geometry</code> column.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The geometry type and the property schema are taken from the file header.
-If the header carries no column information, up to 1000 features are scanned
-to infer one.</p>
-<p>Passing <code>bbox</code> uses the file's packed Hilbert R-tree index to skip features
-that fall outside it, so a spatial subset does not read the whole file.</p>
-<p>Features come back in the order the file stores them, which for an indexed
-file is Hilbert R-tree order rather than the order they were written in.</p>
+    <p>Passing <code>bbox</code> uses the file's packed Hilbert R-tree index to skip features
+that fall outside it, so a spatial subset does not read the whole file.
+Features come back in the order the file stores them, which for an indexed
+file is that R-tree order rather than the order they were written in.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -92,16 +89,69 @@ file is Hilbert R-tree order rather than the order they were written in.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".fgb"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html" class="external-link">st_write</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"shape/nc.shp"</span>, package <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>             <span class="va">path</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"shape/nc.shp"</span>, package <span class="op">=</span> <span class="st">"sf"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html" class="external-link">st_write</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="va">fp</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="va">path</span>,</span></span>
+<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">read_flatgeobuf</span><span class="op">(</span><span class="va">path</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 100  15</span>
+<span class="r-in"><span><span class="co"># read into a nanoarrow array stream</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">read_flatgeobuf</span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;nanoarrow_array_stream struct&lt;AREA: double, PERIMETER: double, CNTY_: double, CNTY_ID: double, NAME: string_view, FIPS: string_view, FIPSNO: double, CRESS_ID: int32, BIR74: double, SID74: double, NWBIR74: double, BIR79: double, SID79: double, NWBIR79: double, geometry: geoarrow.multipolygon{list&lt;polygons: list&lt;rings: list&lt;vertices: struct&lt;x: double, y: double&gt;&gt;&gt;&gt;}&gt;&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ get_schema:function ()  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ get_next  :function (schema = x$get_schema(), validate = TRUE)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ release   :function ()  </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># only the features intersecting the box</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">read_flatgeobuf</span><span class="op">(</span><span class="va">path</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">79</span>, <span class="fl">35</span>, <span class="op">-</span><span class="fl">78</span>, <span class="fl">36</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
+<span class="r-in"><span><span class="co"># convert to a df</span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    AREA PERIMETER CNTY_ CNTY_ID        NAME  FIPS FIPSNO CRESS_ID BIR74 SID74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.212     2.024  2241    2241   Brunswick 37019  37019       10  2181     5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.240     2.365  2232    2232    Columbus 37047  37047       24  3350    15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.042     0.999  2238    2238 New Hanover 37129  37129       65  5526    12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.214     2.152  2185    2185      Pender 37141  37141       71  1228     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.225     2.107  2162    2162      Bladen 37017  37017        9  1782     8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.240     2.004  2150    2150     Robeson 37155  37155       78  7889    31</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   NWBIR74 BIR79 SID79 NWBIR79</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     659  2655     6     841</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1431  4144    17    1832</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    1633  6917     9    2100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     580  1602     3     763</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     818  2052     5    1023</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    5904  9087    26    6899</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   geometry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 &lt;MULTIPOLYGON (((-78.6557159 33.9486732, -78.6347198 33.9779778, -78.63&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 &lt;MULTIPOLYGON (((-78.6557159 33.9486732, -79.074501 34.3045731, -79.040&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 &lt;MULTIPOLYGON (((-77.9607315 34.1892433, -77.9658661 34.2422867, -77.97&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 &lt;MULTIPOLYGON (((-78.0259247 34.3287697, -78.1302414 34.3641243, -78.15&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 &lt;MULTIPOLYGON (((-78.2614975 34.3947868, -78.3289795 34.3644218, -78.43&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 &lt;MULTIPOLYGON (((-78.8645096 34.4771957, -78.9194717 34.45364, -78.9507&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># only the features intersecting a box</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="fu">read_flatgeobuf</span><span class="op">(</span><span class="va">path</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">79</span>, <span class="fl">35</span>, <span class="op">-</span><span class="fl">78</span>, <span class="fl">36</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    AREA PERIMETER CNTY_ CNTY_ID       NAME  FIPS FIPSNO CRESS_ID BIR74 SID74</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.172     1.835  2090    2090 Cumberland 37051  37051       26 20366    38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.241     2.214  2083    2083    Sampson 37163  37163       82  3025     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.204     1.871  2100    2100     Duplin 37061  37061       31  2483     4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.190     2.204  1846    1846    Halifax 37083  37083       42  3608    18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.142     1.640  1913    1913       Nash 37127  37127       64  4021     8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.128     1.554  1897    1897   Franklin 37069  37069       35  1399     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   NWBIR74 BIR79 SID79 NWBIR79</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    7043 26370    57   10614</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    1396  3447     4    1524</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    1061  2777     7    1227</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    2365  4463    17    2980</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    1851  5189     7    2274</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     736  1863     0     950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                   geometry</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 &lt;MULTIPOLYGON (((-78.4992905 34.8551064, -78.5174408 34.8435287, -78.83&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 &lt;MULTIPOLYGON (((-78.1137695 34.7209854, -78.113739 34.6991806, -78.156&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 &lt;MULTIPOLYGON (((-77.6898346 34.7201958, -77.9266739 34.7110062, -77.93&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 &lt;MULTIPOLYGON (((-77.3322067 36.0679817, -77.4053116 35.9947166, -77.42&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 &lt;MULTIPOLYGON (((-78.1869278 35.7251129, -78.2056198 35.7253952, -78.21&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 &lt;MULTIPOLYGON (((-78.2545471 35.8155251, -78.2668457 35.8483772, -78.30&gt;</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -66,9 +66,8 @@ Other affine:
 ## Examples
 
 ``` r
-square <- sf::st_polygon(list(matrix(
-  c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0), ncol = 2, byrow = TRUE
-)))
+ring <- rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 1), c(0, 0))
+square <- sf::st_polygon(list(ring))
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
 
 # double the width and shift right by 10

@@ -30,3 +30,17 @@ Other misc:
 [`ga_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_centroid.md),
 [`ga_chaikin_smoothing()`](https://josiahparry.github.io/geoarrowrs/reference/ga_chaikin_smoothing.md),
 [`ga_line_segmentize()`](https://josiahparry.github.io/geoarrowrs/reference/ga_line_segmentize.md)
+
+## Examples
+
+``` r
+# the middle vertex is recorded twice
+line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(1, 1), c(1, 1), c(2, 2)))
+))
+
+as.vector(ga_n_coords(line))
+#> [1] 4
+as.vector(ga_n_coords(ga_remove_repeated_points(line)))
+#> [1] 3
+```

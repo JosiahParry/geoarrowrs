@@ -1,4 +1,4 @@
-# A packed Hilbert R-tree over the bounding boxes of a geometry array. A spatial index over a geometry array
+# A spatial index over a geometry array
 
 Indexes the bounding box of each geometry so that queries can skip the
 rows that cannot match.
@@ -155,6 +155,7 @@ the number of indexed rows
 ## See also
 
 Other index:
+[`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md),
 [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md)
 
 ## Examples

@@ -43,3 +43,14 @@ Other affine:
 [`ga_scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.md),
 [`ga_skew()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew.md),
 [`ga_skew_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew_xy.md)
+
+## Examples
+
+``` r
+pts <- ga_xy(c(0, 1), c(0, 1))
+
+# offsets are per row, so each point shifts by its own amount
+geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
+#> <geoarrow_vctr geoarrow.point{struct}[2]>
+#> [1] <POINT (10 0)>  <POINT (101 6)>
+```

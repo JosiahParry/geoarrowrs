@@ -42,18 +42,14 @@ since fixing it often resolves the rest.
 
 [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
 
-[Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
-
 ## Examples
 
 ``` r
-good <- sf::st_polygon(list(matrix(
-  c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-)))
-bowtie <- sf::st_polygon(list(matrix(
-  c(0, 0, 2, 2, 2, 0, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-)))
-g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
+square <- rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))
+bowtie <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
+good <- sf::st_polygon(list(square))
+bad <- sf::st_polygon(list(bowtie))
+g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bad))
 
 as.vector(ga_is_valid(g))
 #> [1]  TRUE FALSE

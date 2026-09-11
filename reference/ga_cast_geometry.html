@@ -85,6 +85,62 @@ dimensions is not supported.</p>
 <code><a href="ga_from_wkb.html">ga_from_wkb()</a></code></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pts</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># widening always works</span></span></span>
+<span class="r-in"><span><span class="fu">ga_cast_geometry</span><span class="op">(</span><span class="va">pts</span>, <span class="st">"multipoint"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;nanoarrow_array geoarrow.multipoint{list}[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ length    : int 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ null_count: int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ offset    : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ buffers   :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :&lt;nanoarrow_buffer validity&lt;bool&gt;[null] ``</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :&lt;nanoarrow_buffer data_offset&lt;int32&gt;[3][12 b]&gt; `0 1 2`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ children  :List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ points:&lt;nanoarrow_array struct[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ length    : int 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ null_count: int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ offset    : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ buffers   :List of 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ :&lt;nanoarrow_buffer validity&lt;bool&gt;[null] ``</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ children  :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ x:&lt;nanoarrow_array double[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ length    : int 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ null_count: int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ offset    : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ buffers   :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ :&lt;nanoarrow_buffer validity&lt;bool&gt;[null] ``</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ :&lt;nanoarrow_buffer data&lt;double&gt;[2][16 b]&gt; `0 1`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ dictionary: NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ children  : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. ..$ y:&lt;nanoarrow_array double[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ length    : int 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ null_count: int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ offset    : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ buffers   :List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ :&lt;nanoarrow_buffer validity&lt;bool&gt;[null] ``</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. .. ..$ :&lt;nanoarrow_buffer data&lt;double&gt;[2][16 b]&gt; `0 1`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ dictionary: NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. .. .. ..$ children  : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ dictionary: NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ dictionary: NULL</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># so does going out to wkb, which is what plain Parquet stores</span></span></span>
+<span class="r-in"><span><span class="fu">ga_cast_geometry</span><span class="op">(</span><span class="va">pts</span>, <span class="st">"wkb"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;nanoarrow_array geoarrow.wkb{binary}[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ length    : int 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ null_count: int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ offset    : int 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ buffers   :List of 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :&lt;nanoarrow_buffer validity&lt;bool&gt;[null] ``</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :&lt;nanoarrow_buffer data_offset&lt;int32&gt;[3][12 b]&gt; `0 21 42`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..$ :&lt;nanoarrow_buffer data&lt;binary&gt;[42 b]&gt; `01 01 00 00 00 00 00 00 00 00 ...`</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ dictionary: NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ children  : list()</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -1,4 +1,4 @@
-# Locate a point along a line as a fraction of its length
+# Locate a point along a line
 
 Returns how far along each line the closest position to the
 corresponding point lies, as a fraction between 0 and 1.

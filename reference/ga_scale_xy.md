@@ -1,4 +1,4 @@
-# Scale geometries independently in x and y about their centroid
+# Scale geometries in x and y
 
 Scales each geometry by `x_factor` along the x axis and `y_factor` along
 the y axis, about the geometry's own centroid. The geometry type of the
@@ -44,3 +44,18 @@ Other affine:
 [`ga_skew()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew.md),
 [`ga_skew_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew_xy.md),
 [`ga_translate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_translate.md)
+
+## Examples
+
+``` r
+sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+
+# twice as wide, same height, so the area doubles
+geoarrow::as_geoarrow_vctr(ga_scale_xy(sq, 2, 1))
+#> <geoarrow_vctr geoarrow.polygon{list}[1]>
+#> [1] <POLYGON ((-1 0, 3 0, 3 2, -1 2, -1 0))>
+as.vector(ga_unsigned_area(ga_scale_xy(sq, 2, 1)))
+#> [1] 8
+```

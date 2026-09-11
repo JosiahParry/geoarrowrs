@@ -32,3 +32,13 @@ since the conversion goes through a two dimensional representation.
 
 Other convert:
 [`ga_to_radians()`](https://josiahparry.github.io/geoarrowrs/reference/ga_to_radians.md)
+
+## Examples
+
+``` r
+rad <- ga_xy(c(0, pi / 4), c(0, pi / 2))
+
+geoarrow::as_geoarrow_vctr(ga_to_degrees(rad))
+#> <geoarrow_vctr geoarrow.point{struct}[2]>
+#> [1] <POINT (0 0)>   <POINT (45 90)>
+```

@@ -1,4 +1,4 @@
-# Find the point on a geometry closest to another point
+# Closest point on a geometry
 
 Returns the position on each geometry nearest the corresponding point,
 using planar distance. `ga_closest_point_haversine()` measures on a

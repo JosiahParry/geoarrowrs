@@ -43,11 +43,12 @@ Other boolean:
 ## Examples
 
 ``` r
-bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
-  c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
-)))
-x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2), bx(1, 1, 3, 3)))
+x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0)))),
+  sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
+))
 
-sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_unary_union(x))))
+# 4 + 4 less the 1 they share
+as.vector(ga_unsigned_area(ga_unary_union(x)))
 #> [1] 7
 ```

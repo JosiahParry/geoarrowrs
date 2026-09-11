@@ -40,3 +40,17 @@ when triangle quality matters.
 
 Other triangulate:
 [`ga_triangulate_delaunay()`](https://josiahparry.github.io/geoarrowrs/reference/ga_triangulate_delaunay.md)
+
+## Examples
+
+``` r
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# one multipolygon of triangles per county, so length is preserved
+tri <- ga_triangulate_earcut(nc$geometry)
+tri$length
+#> [1] 100
+head(as.vector(ga_n_coords(tri)), 3)
+#> [1]  96  92 100
+```
