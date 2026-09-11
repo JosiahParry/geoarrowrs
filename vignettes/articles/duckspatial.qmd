@@ -1,7 +1,6 @@
 ---
-title: "duckdbspatial"
+title: "Benchmark: duckdbspatial"
 ---
-
 
 The wonderful [`{duckspatial}`](https://cidree.github.io/duckspatial/) R package—which delegates operations to [DuckDB](https://duckdb.org/) has published bench marks for operations.
 
@@ -9,14 +8,18 @@ This article compares `{geoarrowrs}` implementations to `{sf}` and `{duckspatial
 
 See the original [duckspatial benchmark](https://cidree.github.io/duckspatial/articles/benchmark.html).
 
+This version of the benchmark compares the peformance of: 
+
+- duckspatial
+- [{sedonadb}](https://github.com/apache/sedona-db/tree/main/r/sedonadb)
+- geoarrowrs
+
 ### The earth is a sphere note a plane
 
 One of the issues the duckdbspatial benchmark—is that is calculates **incorrect** distances.
 `{sf}` delegates to `{s2}` to have very accurate spherical distance calculations—this comes at the cost of speed.
 
 Using planar distances for calculating the distance from Jakarta to New York calculates the distance _through_ the earth. 
-
-This issu
 
 ```{r}
 #| include: false
@@ -60,10 +63,6 @@ wide <- wide[order(match(wide$op, ops), wide$n), ]
 wide$n <- format(wide$n, scientific = FALSE, big.mark = ",", trim = TRUE)
 ```
 
-The five operations of the
-[duckspatial benchmark](https://cidree.github.io/duckspatial/articles/benchmark.html),
-run by `bench/duckspatial/run-all.R` and read back here from
-`bench/duckspatial/last-run/`. Seconds, so lower is better.
 
 ```{r}
 #| fig-width: 11
@@ -182,9 +181,6 @@ knitr::kable(t(machine), col.names = "")
 knitr::kable(wide, row.names = FALSE)
 ```
 
-Each implementation is timed until its answer exists in whatever form that
-package keeps answers, starting from the same `sf` objects. The three do not
-all return the same shape, and `rows` in `timings.csv` says what each produced.
 
 ```{r}
 #| results: asis
