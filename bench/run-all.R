@@ -15,11 +15,11 @@ dir.create(OUT, showWarnings = FALSE, recursive = TRUE)
 timings <- file.path(OUT, "timings.csv")
 unlink(timings)
 
-rscript <- file.path(R.home("bin"), "Rscript")
+r <- file.path(R.home("bin"), "R")
 for (query in sprintf("bench/q%d.R", 1:12)) {
   out <- system2(
-    rscript,
-    query,
+    r,
+    c("-q", "-f", query),
     stdout = TRUE,
     env = paste0("SPATIALBENCH_LOG=", timings)
   )

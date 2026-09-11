@@ -1,55 +1,44 @@
-# Dissolve: one geometry per category, from n points in four groups.
-#
-# This is the one operation the three do not answer alike. `ST_Union_Agg` and
-# `sf::st_union()` both give a MULTIPOINT per group. `ga_collect_agg()` gives a
-# GEOMETRYCOLLECTION: the same grouping and the same assembly of n points into
-# four geometries, but not the same output type, because `ga_unary_union()`
-# unions polygons only and returns an empty multipolygon for points. Treat the
-# geoarrowrs column here as the cost of the grouped aggregate, not as the same
-# call.
-#
-# The run lengths come from the ordering, which is what `ga_collect_agg()`
-# takes: sort by the group, count each run, and the geometry follows.
-
 source("bench/duckspatial/setup.R")
 
 for (n in SIZES) {
   pts <- points_sf(n)
 
-  out <- NULL
-  t_ours <- elapsed({
-    tbl <- as_arrow(pts)
-    kernel <- elapsed({
-      # the run lengths ga_collect_agg() takes are what the same ordering gives
+  bench(
+    "dissolve",
+    n,
+    "geoarrowrs",
+    {
+      tbl <- as_arrow_table(st_drop_geometry(pts))
+      tbl$geometry <- as_arrow_array(wk::as_wkb(st_geometry(pts)))$cast(
+        arrow::binary()
+      )
       groups <- tbl |> count(category) |> arrange(category) |> compute()
       rows <- tbl |> arrange(category) |> compute()
       out <- ga_collect_agg(
         as_nanoarrow_array(rows$geometry),
         sizes = as.vector(groups$n)
       )
-    })
-  })
-  report("dissolve", n, "geoarrowrs", t_ours, out$length, kernel)
-  rm(out, tbl, rows)
-  invisible(gc())
+    },
+    out$length
+  )
 
-  out <- NULL
-  t_sf <- elapsed({
+  bench(
+    "dissolve",
+    n,
+    "sf",
     out <- pts |>
-      dplyr::group_by(category) |>
-      dplyr::summarise(geometry = sf::st_union(geometry))
-  })
-  report("dissolve", n, "sf", t_sf, nrow(out))
-  rm(out)
-  invisible(gc())
+      group_by(category) |>
+      summarise(geometry = st_union(geometry)),
+    nrow(out)
+  )
 
   if (HAS_DUCKSPATIAL) {
-    out <- NULL
-    t_ddbs <- elapsed(
-      out <- duckspatial::ddbs_union_agg(pts, by = "category", quiet = TRUE)
+    bench(
+      "dissolve",
+      n,
+      "duckspatial",
+      out <- duckspatial::ddbs_union_agg(pts, by = "category", quiet = TRUE),
+      ddbs_rows(out)
     )
-    report("dissolve", n, "duckspatial", t_ddbs, ddbs_rows(out))
-    rm(out)
-    invisible(gc())
   }
 }
