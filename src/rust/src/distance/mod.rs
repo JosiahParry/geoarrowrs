@@ -25,7 +25,18 @@ use crate::{
 /// @family distance
 /// @references
 ///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
+///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html),
+///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html),
+///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html),
+///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// # Raleigh to Charlotte, and Raleigh to Wilmington
+/// origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+/// dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+///
+/// # degrees, then meters
+/// as.vector(ga_dist_euclidean_pairwise(origin, dest))
+/// as.vector(ga_dist_geodesic_pairwise(origin, dest))
 // TODO: use rayon with min chunk size of 4096
 #[extendr]
 fn ga_dist_euclidean_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
@@ -61,9 +72,6 @@ fn dist_euclidean_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
 /// @export
 /// @rdname dist_pairwise
 /// @family distance
-/// @references
-///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
 fn ga_dist_haversine_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -98,9 +106,6 @@ fn dist_haversine_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
 /// @export
 /// @rdname dist_pairwise
 /// @family distance
-/// @references
-///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
 fn ga_dist_geodesic_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -135,9 +140,6 @@ fn dist_geodesic_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 /// @export
 /// @rdname dist_pairwise
 /// @family distance
-/// @references
-///   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
 fn ga_dist_rhumb_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -169,7 +171,7 @@ fn dist_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointA
     }
 }
 
-/// Compute the pairwise Hausdorff distance between geometries
+/// Pairwise Hausdorff distance
 ///
 /// The Hausdorff distance measures how far two geometries are from each other
 /// by taking the maximum of all minimum distances between points on the two shapes.
@@ -180,6 +182,12 @@ fn dist_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointA
 /// @export
 /// @family distance
 /// @references [HausdorffDistance](https://docs.rs/geo/latest/geo/algorithm/hausdorff_distance/trait.HausdorffDistance.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// # how far apart are neighbouring counties at their worst?
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// as.vector(ga_dist_hausdorff_pairwise(nc$geometry[1:5], nc$geometry[2:6]))
 #[extendr]
 fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_geometry_chunks(origin)?;
@@ -207,7 +215,7 @@ fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
     bldr.finish().into_arrow_robj()
 }
 
-/// Compute the pairwise Vincenty distance between points
+/// Pairwise Vincenty distance
 ///
 /// The Vincenty formula computes the geodesic distance between two points on
 /// an ellipsoidal model of the earth. Returns `NA` if the algorithm fails to
@@ -219,6 +227,12 @@ fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
 /// @export
 /// @family distance
 /// @references [VincentyDistance](https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// # Raleigh to Charlotte, and Raleigh to Wilmington
+/// origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+/// dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+///
+/// as.vector(ga_dist_vincenty_pairwise(origin, dest))
 #[extendr]
 fn ga_dist_vincenty_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_point_chunks(origin)?;
@@ -252,7 +266,7 @@ fn dist_vincenty_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
     }
 }
 
-/// Compute the pairwise Frechet distance between linestrings
+/// Pairwise Frechet distance
 ///
 /// The Frechet distance measures the similarity between two curves by
 /// considering the location and ordering of points along each curve.
@@ -264,6 +278,16 @@ fn dist_vincenty_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 /// @export
 /// @family distance
 /// @references [FrechetDistance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// # a straight route against one that detours north
+/// direct <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(2, 0), c(4, 0)))
+/// ))
+/// detour <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(2, 1), c(4, 0)))
+/// ))
+///
+/// as.vector(ga_dist_frechet_pairwise(direct, detour))
 #[extendr]
 fn ga_dist_frechet_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_linestring_chunks(origin)?;

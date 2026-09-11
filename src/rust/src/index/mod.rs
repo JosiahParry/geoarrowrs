@@ -5,11 +5,12 @@ use extendr_api::prelude::*;
 use geo_index::rtree::sort::{HilbertSort, STRSort};
 use geo_index::rtree::{DEFAULT_RTREE_NODE_SIZE, RTree as GeoRTree, RTreeBuilder, RTreeIndex};
 use geoarrow_array::GeoArrowArray;
+mod kdtree;
 
 use crate::as_geometry_chunks;
 use crate::envelope::as_rects;
 
-/// A packed Hilbert R-tree over the bounding boxes of a geometry array.
+// Spatial index over a geometry array
 #[extendr]
 pub struct RTree {
     tree: GeoRTree<f64>,
@@ -258,4 +259,5 @@ impl RTree {
 extendr_module! {
     mod index;
     impl RTree;
+    use kdtree;
 }

@@ -285,7 +285,7 @@ fn build_geometry(
     }
 }
 
-/// Read a GeoJSON FeatureCollection into a record batch stream
+/// Read a GeoJSON FeatureCollection
 ///
 /// Reads the geometries together with the feature properties. Properties are
 /// untyped in GeoJSON, so each column's arrow type is inferred by scanning
@@ -332,12 +332,20 @@ fn build_geometry(
 ///   property columns followed by a `geometry` column.
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// path <- tempfile(fileext = ".geojson")
-/// sf::st_write(sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE),
-///              path, quiet = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// sf::st_write(
+///   sf::st_read(fp, quiet = TRUE),
+///   path,
+///   quiet = TRUE
+/// )
 ///
-/// df <- as.data.frame(read_geojson(path))
-/// dim(df)
-/// head(df[, c("NAME", "BIR74", "geometry")], 3)
+/// # read into a nanoarrow array stream
+/// res <- read_geojson(path)
+/// res
+///
+/// # convert to a df
+/// df <- as.data.frame(res)
+/// head(df)
 /// @export
 /// @family io
 #[extendr]

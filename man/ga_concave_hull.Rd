@@ -25,6 +25,19 @@ larger values approach the convex hull.
 Accepts multipoints, linestrings, multilinestrings, polygons, and
 multipolygons. \code{geo} does not define a concave hull for a single point.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# lower concavity tightens the hull onto the shape
+loose <- ga_concave_hull(nc$geometry, concavity = 2, length_threshold = 0)
+tight <- ga_concave_hull(nc$geometry, concavity = 0.5, length_threshold = 0)
+
+head(as.vector(ga_unsigned_area(loose)), 3)
+head(as.vector(ga_unsigned_area(tight)), 3)
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/concave_hull/trait.ConcaveHull.html}{ConcaveHull}
 }

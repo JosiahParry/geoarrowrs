@@ -3,7 +3,7 @@
 \name{ga_simplify_vw}
 \alias{ga_simplify_vw}
 \alias{ga_simplify_vw_preserve}
-\title{Simplify geometries using the Visvalingam-Whyatt algorithm}
+\title{Simplify with Visvalingam-Whyatt}
 \usage{
 ga_simplify_vw(geometry, epsilon)
 
@@ -27,6 +27,16 @@ polygons, and multipolygons.
 Like \code{ga_simplify_vw()} but preserves topology by preventing self-intersections
 during simplification. Accepts linestrings, multilinestrings, polygons, and
 multipolygons.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# epsilon is an area here, not a distance as in ga_simplify()
+head(as.vector(ga_n_coords(nc$geometry)), 3)
+head(as.vector(ga_n_coords(ga_simplify_vw(nc$geometry, 0.001))), 3)
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVw.html}{SimplifyVw}

@@ -32,6 +32,11 @@ use crate::{
 /// @export
 /// @family affine
 /// @references [Translate](https://docs.rs/geo/latest/geo/algorithm/translate/trait.Translate.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// pts <- ga_xy(c(0, 1), c(0, 1))
+///
+/// # offsets are per row, so each point shifts by its own amount
+/// geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
 #[extendr]
 fn ga_translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::Result<Robj> {
     let xs = try_float_array(x_offset, "x_offset")?;

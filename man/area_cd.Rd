@@ -3,7 +3,7 @@
 \name{ga_signed_area_cd}
 \alias{ga_signed_area_cd}
 \alias{ga_unsigned_area_cd}
-\title{Compute the signed and unsigned area using the Chamberlain-Duquette algorithm}
+\title{Chamberlain-Duquette spherical area}
 \usage{
 ga_signed_area_cd(x)
 
@@ -19,9 +19,17 @@ a double vector of area values in square meters
 These functions use the Chamberlain-Duquette formula, which is suitable for
 geographic coordinates on a sphere. Results are in square meters.
 }
-\references{
-\href{https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html}{ChamberlainDuquetteArea}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
 
+# square meters, not square degrees
+head(as.vector(ga_unsigned_area_cd(nc$geometry)))
+head(as.vector(ga_signed_area_cd(nc$geometry)))
+\dontshow{\}) # examplesIf}
+}
+\references{
 \href{https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html}{ChamberlainDuquetteArea}
 }
 \seealso{

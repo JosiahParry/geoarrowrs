@@ -28,17 +28,22 @@ Calculate the bearing in degrees from \code{origin} to \code{dest} for each pair
 points. Bearing is measured clockwise from north (0 degrees) to 360 degrees.
 These functions differ in the metric space used for the calculation.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# Raleigh to Charlotte, and Raleigh to Wilmington
+origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+
+# west-southwest, then south-southeast
+as.vector(ga_bearing_haversine(origin, dest))
+as.vector(ga_bearing_rhumb(origin, dest))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html}{Bearing},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html}{Euclidean}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html}{Bearing},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html}{Haversine}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html}{Bearing},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html}{Geodesic}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html}{Bearing},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html}{Euclidean},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html}{Haversine},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html}{Geodesic},
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html}{Rhumb}
 }
 \concept{bearing}

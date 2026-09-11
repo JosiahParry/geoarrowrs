@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{read_geojson}
 \alias{read_geojson}
-\title{Read a GeoJSON FeatureCollection into a record batch stream}
+\title{Read a GeoJSON FeatureCollection}
 \usage{
 read_geojson(path)
 }
@@ -57,12 +57,20 @@ is set on the geometry column without reading anything from the file.
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 path <- tempfile(fileext = ".geojson")
-sf::st_write(sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE),
-             path, quiet = TRUE)
+fp <- system.file("shape/nc.shp", package = "sf")
+sf::st_write(
+  sf::st_read(fp, quiet = TRUE),
+  path,
+  quiet = TRUE
+)
 
-df <- as.data.frame(read_geojson(path))
-dim(df)
-head(df[, c("NAME", "BIR74", "geometry")], 3)
+# read into a nanoarrow array stream
+res <- read_geojson(path)
+res
+
+# convert to a df
+df <- as.data.frame(res)
+head(df)
 \dontshow{\}) # examplesIf}
 }
 \seealso{

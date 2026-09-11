@@ -25,6 +25,21 @@ Returns the point at a given ratio or distance along each linestring,
 measured from either the start or end. The metric determines how distance
 is calculated.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+))
+
+# halfway from the start, then two units in from the end
+geoarrow::as_geoarrow_vctr(
+  ga_interpolate_point(line, 0.5, "euclidean", "ratio", "start")
+)
+geoarrow::as_geoarrow_vctr(
+  ga_interpolate_point(line, 2, "euclidean", "distance", "end")
+)
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html}{InterpolateLine}
 }

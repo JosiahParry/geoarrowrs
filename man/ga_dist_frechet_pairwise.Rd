@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_dist_frechet_pairwise}
 \alias{ga_dist_frechet_pairwise}
-\title{Compute the pairwise Frechet distance between linestrings}
+\title{Pairwise Frechet distance}
 \usage{
 ga_dist_frechet_pairwise(origin, dest)
 }
@@ -18,6 +18,19 @@ a double vector of Frechet distance values
 The Frechet distance measures the similarity between two curves by
 considering the location and ordering of points along each curve.
 Uses the Euclidean metric.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# a straight route against one that detours north
+direct <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(2, 0), c(4, 0)))
+))
+detour <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(2, 1), c(4, 0)))
+))
+
+as.vector(ga_dist_frechet_pairwise(direct, detour))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html}{FrechetDistance}

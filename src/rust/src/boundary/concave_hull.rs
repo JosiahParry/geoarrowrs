@@ -31,6 +31,16 @@ use crate::{
 /// @export
 /// @family boundary
 /// @references [ConcaveHull](https://docs.rs/geo/latest/geo/algorithm/concave_hull/trait.ConcaveHull.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # lower concavity tightens the hull onto the shape
+/// loose <- ga_concave_hull(nc$geometry, concavity = 2, length_threshold = 0)
+/// tight <- ga_concave_hull(nc$geometry, concavity = 0.5, length_threshold = 0)
+///
+/// head(as.vector(ga_unsigned_area(loose)), 3)
+/// head(as.vector(ga_unsigned_area(tight)), 3)
 #[extendr]
 fn ga_concave_hull(
     geometry: Robj,

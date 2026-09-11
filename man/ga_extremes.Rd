@@ -23,6 +23,15 @@ Note these are the extreme \emph{coordinates}, not the corners of the bounding
 box: the \code{x_min} point carries the y value of whichever vertex was
 leftmost. Use \code{\link[=ga_bounding_rect]{ga_bounding_rect()}} for the envelope.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# one row per county, four point columns
+head(as.data.frame(ga_extremes(nc$geometry)), 3)
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/extremes/trait.Extremes.html}{Extremes}
 }

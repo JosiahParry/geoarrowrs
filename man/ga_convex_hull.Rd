@@ -15,6 +15,16 @@ a GeoArrow polygon array
 \description{
 Returns the smallest convex polygon that contains each geometry.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# the hull fills in every concavity, so it is never smaller
+head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
+head(as.vector(ga_unsigned_area(nc$geometry)), 3)
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/convex_hull/trait.ConvexHull.html}{ConvexHull}
 }

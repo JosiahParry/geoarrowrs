@@ -15,7 +15,7 @@ use geoarrow::{
 };
 use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
-/// Add intermediate points to geometries so no segment exceeds a maximum length
+/// Add points so no segment exceeds a length
 ///
 /// Densifies linestrings, multilinestrings, polygons, and multipolygons by
 /// inserting additional points along each segment until no segment exceeds
@@ -28,6 +28,14 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 /// @export
 /// @family densify
 /// @references [Densifiable](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+/// ))
+///
+/// # a 10 unit segment capped at 2 units needs four new vertices
+/// as.vector(ga_n_coords(line))
+/// as.vector(ga_n_coords(ga_densify(line, 2, "euclidean")))
 #[extendr]
 fn ga_densify(geometry: Robj, max_segment_length: Robj, metric: &str) -> extendr_api::Result<Robj> {
     let msl = try_float_array(max_segment_length, "max_segment_length")?;

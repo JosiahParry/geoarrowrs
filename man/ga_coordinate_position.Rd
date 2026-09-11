@@ -24,14 +24,12 @@ recycled against \code{geometry}. A null geometry or a null point gives \code{NA
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-square <- sf::st_polygon(list(
-  matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
-))
+ring <- rbind(c(0, 0), c(4, 0), c(4, 4), c(0, 4), c(0, 0))
+square <- sf::st_polygon(list(ring))
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(square, square, square))
-p <- geoarrow::as_geoarrow_array(sf::st_sfc(
-  sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
-))
 
+# inside, on the edge, and outside
+p <- ga_xy(c(2, 0, 9), c(2, 2, 9))
 as.vector(ga_coordinate_position(g, p))
 \dontshow{\}) # examplesIf}
 }
@@ -43,6 +41,8 @@ Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
-\code{\link[=ga_relate]{ga_relate()}}
+\code{\link[=ga_join]{ga_join()}},
+\code{\link[=ga_relate]{ga_relate()}},
+\code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}}
 }
 \concept{topology}

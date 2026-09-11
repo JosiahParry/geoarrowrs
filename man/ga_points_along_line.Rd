@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_points_along_line}
 \alias{ga_points_along_line}
-\title{Generate points at regular intervals along the line between two points}
+\title{Points at regular intervals along a line}
 \usage{
 ga_points_along_line(start, end, max_distance, include_ends, metric)
 }
@@ -23,6 +23,17 @@ a GeoArrow multipoint array
 \description{
 Returns a multipoint array where each element contains all points spaced
 at most \code{max_distance} apart along the path from \code{start} to \code{end}.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+start <- ga_xy(0, 0)
+end <- ga_xy(10, 0)
+
+# one multipoint row, spaced at most 3 units apart
+geoarrow::as_geoarrow_vctr(
+  ga_points_along_line(start, end, 3, TRUE, "euclidean")
+)
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html}{InterpolatePoint}

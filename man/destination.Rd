@@ -5,7 +5,7 @@
 \alias{ga_dest_euclidean}
 \alias{ga_dest_haversine}
 \alias{ga_dest_geodesic}
-\title{Compute a destination point from an origin, bearing, and distance}
+\title{Destination from origin, bearing, distance}
 \usage{
 ga_dest_rhumb(origin, bearing, distance)
 
@@ -31,6 +31,16 @@ Returns the point reached by travelling \code{distance} from \code{origin} along
 treats coordinates as planar, \code{dest_haversine} assumes a sphere,
 \code{dest_geodesic} an ellipsoid, and \code{dest_rhumb} follows a line of constant
 bearing.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# 100km due north and due east of Raleigh
+raleigh <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+
+geoarrow::as_geoarrow_vctr(
+  ga_dest_geodesic(raleigh, bearing = c(0, 90), distance = c(1e5, 1e5))
+)
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html}{Destination}

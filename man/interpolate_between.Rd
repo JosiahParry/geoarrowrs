@@ -3,7 +3,7 @@
 \name{ga_point_at_distance_between}
 \alias{ga_point_at_distance_between}
 \alias{ga_point_at_ratio_between}
-\title{Interpolate a point at a given distance between two points}
+\title{Interpolate a point between two points}
 \usage{
 ga_point_at_distance_between(start, end, distance, metric)
 
@@ -33,9 +33,21 @@ Returns the point located at \code{ratio} of the way from \code{start} to \code{
 where 0.0 is the start and 1.0 is the end. The metric determines how
 the interpolation is computed.
 }
-\references{
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html}{InterpolatePoint}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+start <- ga_xy(c(0, 0), c(0, 0))
+end <- ga_xy(c(10, 10), c(0, 0))
 
+# three units along, then a third of the way along
+geoarrow::as_geoarrow_vctr(
+  ga_point_at_distance_between(start, end, c(3, 3), "euclidean")
+)
+geoarrow::as_geoarrow_vctr(
+  ga_point_at_ratio_between(start, end, c(1 / 3, 1 / 3), "euclidean")
+)
+\dontshow{\}) # examplesIf}
+}
+\references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html}{InterpolatePoint}
 }
 \seealso{

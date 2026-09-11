@@ -40,15 +40,15 @@ erase it entirely.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
-  c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
-)))
-x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2)))
-y <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(1, 1, 3, 3)))
+x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+y <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
+))
 
-sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
-  ga_boolean_intersection(x, y)
-)))
+# two 2x2 squares offset by 1, so the overlap is a 1x1 square
+as.vector(ga_unsigned_area(ga_boolean_intersection(x, y)))
 \dontshow{\}) # examplesIf}
 }
 \references{

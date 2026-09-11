@@ -3,7 +3,7 @@
 \name{ga_signed_area}
 \alias{ga_signed_area}
 \alias{ga_unsigned_area}
-\title{Compute the signed and unsigned planar area of geometries}
+\title{Signed and unsigned planar area}
 \usage{
 ga_signed_area(x)
 
@@ -20,9 +20,17 @@ a double vector of area values in the units of the coordinate system
 negative values for clockwise winding. \code{ga_unsigned_area()} always returns a
 non-negative value.
 }
-\references{
-\href{https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html}{Area}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
 
+# nc rings wind clockwise, so the signed area is negative
+head(as.vector(ga_signed_area(nc$geometry)))
+head(as.vector(ga_unsigned_area(nc$geometry)))
+\dontshow{\}) # examplesIf}
+}
+\references{
 \href{https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html}{Area}
 }
 \seealso{

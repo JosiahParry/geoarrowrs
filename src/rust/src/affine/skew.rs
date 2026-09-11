@@ -32,6 +32,14 @@ use crate::{
 /// @export
 /// @family affine
 /// @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+/// ))
+///
+/// # a shear leaves the area unchanged
+/// geoarrow::as_geoarrow_vctr(ga_skew(sq, 30))
+/// as.vector(ga_unsigned_area(ga_skew(sq, 30)))
 #[extendr]
 fn ga_skew(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
     let ds = try_float_array(degrees, "degrees")?;
@@ -135,7 +143,7 @@ fn ga_skew(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
     ))
 }
 
-/// Skew geometries independently in x and y about their centroid
+/// Skew geometries in x and y
 ///
 /// Shears each geometry by `degrees_x` along the x dimension and `degrees_y`
 /// along the y dimension, about the geometry's own centroid. The geometry type
@@ -148,6 +156,13 @@ fn ga_skew(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
 /// @export
 /// @family affine
 /// @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+/// ))
+///
+/// # shear along x only, leaving y untouched
+/// geoarrow::as_geoarrow_vctr(ga_skew_xy(sq, 30, 0))
 #[extendr]
 fn ga_skew_xy(geometry: Robj, degrees_x: Robj, degrees_y: Robj) -> extendr_api::Result<Robj> {
     let xs = try_float_array(degrees_x, "degrees_x")?;

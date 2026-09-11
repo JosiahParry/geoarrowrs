@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_triangulate_delaunay}
 \alias{ga_triangulate_delaunay}
-\title{Triangulate geometries with a Delaunay triangulation}
+\title{Delaunay triangulation}
 \usage{
 ga_triangulate_delaunay(x, constrained = TRUE, snap_radius = 1e-04)
 }
@@ -31,6 +31,21 @@ so it may cross holes and concavities.
 
 A null geometry, or one that cannot be triangulated, becomes a null
 element.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# constrained keeps the triangles inside the county boundary
+tri <- ga_triangulate_delaunay(nc$geometry)
+tri$length
+
+# unconstrained fills the convex hull instead, so it covers more
+hull <- ga_triangulate_delaunay(nc$geometry, constrained = FALSE)
+head(as.vector(ga_unsigned_area(tri)), 3)
+head(as.vector(ga_unsigned_area(hull)), 3)
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/triangulate_delaunay/trait.TriangulateDelaunay.html}{TriangulateDelaunay}

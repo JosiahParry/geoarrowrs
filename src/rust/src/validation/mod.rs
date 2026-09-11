@@ -26,13 +26,11 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// @family validation
 /// @references [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// good <- sf::st_polygon(list(matrix(
-///   c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-/// )))
-/// bowtie <- sf::st_polygon(list(matrix(
-///   c(0, 0, 2, 2, 2, 0, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-/// )))
-/// g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
+/// square <- rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))
+/// bowtie <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
+/// good <- sf::st_polygon(list(square))
+/// bad <- sf::st_polygon(list(bowtie))
+/// g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bad))
 ///
 /// as.vector(ga_is_valid(g))
 /// as.vector(ga_validation_error(g))
@@ -71,7 +69,6 @@ fn ga_is_valid(geometry: Robj) -> anyhow::Result<Robj> {
 /// @export
 /// @rdname validation
 /// @family validation
-/// @references [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
 #[extendr]
 fn ga_validation_error(geometry: Robj) -> anyhow::Result<Robj> {
     let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;

@@ -18,6 +18,11 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// @export
 /// @family misc
 /// @references [Centroid](https://docs.rs/geo/latest/geo/algorithm/centroid/trait.Centroid.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// head(geoarrow::as_geoarrow_vctr(ga_centroid(nc$geometry)), 3)
 #[extendr]
 fn ga_centroid(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;

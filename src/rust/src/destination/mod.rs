@@ -9,7 +9,7 @@ use geoarrow::{
     datatypes::PointType,
 };
 
-/// Compute a destination point from an origin, bearing, and distance
+/// Destination from origin, bearing, distance
 ///
 /// Returns the point reached by travelling `distance` from `origin` along
 /// `bearing`. Each function uses a different metric space: `dest_euclidean`
@@ -25,6 +25,13 @@ use geoarrow::{
 /// @rdname destination
 /// @family destination
 /// @references [Destination](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// # 100km due north and due east of Raleigh
+/// raleigh <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+///
+/// geoarrow::as_geoarrow_vctr(
+///   ga_dest_geodesic(raleigh, bearing = c(0, 90), distance = c(1e5, 1e5))
+/// )
 #[extendr]
 fn ga_dest_rhumb(origin: Robj, bearing: Robj, distance: Robj) -> extendr_api::Result<Robj> {
     let origin = as_point_chunks(origin)?;

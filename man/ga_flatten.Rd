@@ -21,6 +21,16 @@ array of length \code{m}.
 Null elements contribute nothing, so the result is shorter than the input
 whenever an element holds more or fewer than one geometry.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# 100 counties in, one row per polygon part out
+length(nc$geometry)
+ga_flatten(ga_explode(nc$geometry))$length
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other cast:
 \code{\link[=ga_as_point]{ga_as_point()}},

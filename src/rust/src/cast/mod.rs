@@ -147,6 +147,14 @@ fn cast_chunks(
 /// @returns a GeoArrow array of the requested type, the same length as `x`
 /// @export
 /// @family cast
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// pts <- ga_xy(c(0, 1), c(0, 1))
+///
+/// # widening always works
+/// ga_cast_geometry(pts, "multipoint")
+///
+/// # so does going out to wkb, which is what plain Parquet stores
+/// ga_cast_geometry(pts, "wkb")
 #[extendr]
 fn ga_cast_geometry(x: Robj, to: &str) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -209,7 +217,7 @@ fn promote_to_multi(
     bldr.finish().into_arrow_robj()
 }
 
-/// Cast geometries to the narrowest type that fits them
+/// Cast to the narrowest geometry type
 ///
 /// Inspects the geometries and casts to the most specific type that can hold
 /// every one of them. A `geometry` array holding only points becomes a `point`
@@ -223,6 +231,12 @@ fn promote_to_multi(
 /// @returns a GeoArrow array of the narrowest type that fits, the same length as `x`
 /// @export
 /// @family cast
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// pts <- ga_xy(c(0, 1), c(0, 1))
+/// wide <- ga_cast_geometry(pts, "geometry")
+///
+/// # only points in there, so it narrows back to a point array
+/// ga_downcast_geometry(wide)
 #[extendr]
 fn ga_downcast_geometry(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;

@@ -20,7 +20,7 @@ use crate::{
     as_polygon_chunks, check_recycle_len, try_float_array,
 };
 
-/// Scale geometries independently in x and y about their centroid
+/// Scale geometries in x and y
 ///
 /// Scales each geometry by `x_factor` along the x axis and `y_factor` along the
 /// y axis, about the geometry's own centroid. The geometry type of the output
@@ -33,6 +33,14 @@ use crate::{
 /// @export
 /// @family affine
 /// @references [Scale](https://docs.rs/geo/latest/geo/algorithm/scale/trait.Scale.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+/// ))
+///
+/// # twice as wide, same height, so the area doubles
+/// geoarrow::as_geoarrow_vctr(ga_scale_xy(sq, 2, 1))
+/// as.vector(ga_unsigned_area(ga_scale_xy(sq, 2, 1)))
 #[extendr]
 fn ga_scale_xy(geometry: Robj, x_factor: Robj, y_factor: Robj) -> extendr_api::Result<Robj> {
     let xs = try_float_array(x_factor, "x_factor")?;

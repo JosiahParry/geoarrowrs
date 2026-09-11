@@ -31,8 +31,7 @@ geoarrow_udf_catalogue <- function() {
     "ga_unsigned_area_cd",
     "ga_signed_area_geodesic",
     "ga_unsigned_area_geodesic",
-    "ga_perimeter_signed_geodesic",
-    "ga_perimeter_unsigned_geodesic",
+    "ga_perimeter_geodesic",
     "ga_length_euclidean",
     "ga_length_haversine",
     "ga_length_geodesic",
@@ -165,7 +164,7 @@ geoarrow_udf_catalogue <- function() {
         line_cap = "string=round",
         line_join = "string=round",
         miter_limit = "num=2",
-        round_segments = "num=8"
+        round_angle = "num=0.2"
       ),
       ga_triangulate_delaunay = c(
         x = "geometry",

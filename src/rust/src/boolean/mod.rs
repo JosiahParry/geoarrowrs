@@ -99,15 +99,15 @@ fn boolean_pairwise(x: Robj, y: Robj, op: Op) -> extendr_api::Result<Robj> {
 /// @family boolean
 /// @references [BooleanOps](https://docs.rs/geo/latest/geo/algorithm/bool_ops/trait.BooleanOps.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
-///   c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
-/// )))
-/// x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2)))
-/// y <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(1, 1, 3, 3)))
+/// x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+/// ))
+/// y <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
+/// ))
 ///
-/// sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
-///   ga_boolean_intersection(x, y)
-/// )))
+/// # two 2x2 squares offset by 1, so the overlap is a 1x1 square
+/// as.vector(ga_unsigned_area(ga_boolean_intersection(x, y)))
 #[extendr]
 fn ga_boolean_intersection(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     boolean_pairwise(x, y, Op::Intersection)
@@ -157,12 +157,13 @@ fn ga_boolean_xor(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @family boolean
 /// @references [unary_union](https://docs.rs/geo/latest/geo/algorithm/bool_ops/fn.unary_union.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
-///   c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
-/// )))
-/// x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2), bx(1, 1, 3, 3)))
+/// x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0)))),
+///   sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
+/// ))
 ///
-/// sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_unary_union(x))))
+/// # 4 + 4 less the 1 they share
+/// as.vector(ga_unsigned_area(ga_unary_union(x)))
 #[extendr]
 fn ga_unary_union(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;

@@ -88,6 +88,18 @@ impl From<WhereFrom> for Robj {
 /// @export
 /// @family interpolate
 /// @references [InterpolateLine](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+/// ))
+///
+/// # halfway from the start, then two units in from the end
+/// geoarrow::as_geoarrow_vctr(
+///   ga_interpolate_point(line, 0.5, "euclidean", "ratio", "start")
+/// )
+/// geoarrow::as_geoarrow_vctr(
+///   ga_interpolate_point(line, 2, "euclidean", "distance", "end")
+/// )
 #[extendr]
 fn ga_interpolate_point(
     line: Robj,

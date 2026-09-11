@@ -27,17 +27,22 @@ a double vector of distance values
 Calculate the distance between each pair of points in \code{origin} and \code{dest}.
 These functions differ in the metric space used for the calculation.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# Raleigh to Charlotte, and Raleigh to Wilmington
+origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+
+# degrees, then meters
+as.vector(ga_dist_euclidean_pairwise(origin, dest))
+as.vector(ga_dist_geodesic_pairwise(origin, dest))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html}{Distance},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html}{Euclidean}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html}{Distance},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html}{Haversine}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html}{Distance},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html}{Geodesic}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html}{Distance},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html}{Euclidean},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html}{Haversine},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html}{Geodesic},
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html}{Rhumb}
 }
 \seealso{

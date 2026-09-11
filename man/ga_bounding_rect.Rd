@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_bounding_rect}
 \alias{ga_bounding_rect}
-\title{Compute the axis-aligned bounding rectangle of geometries}
+\title{Axis-aligned bounding rectangle}
 \usage{
 ga_bounding_rect(x)
 }
@@ -14,6 +14,14 @@ a GeoArrow rect array
 }
 \description{
 Returns the smallest axis-aligned rectangle that contains each geometry.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+head(geoarrow::as_geoarrow_vctr(ga_bounding_rect(nc$geometry)), 3)
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html}{BoundingRect}

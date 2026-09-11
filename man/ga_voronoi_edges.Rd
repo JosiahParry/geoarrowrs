@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_voronoi_edges}
 \alias{ga_voronoi_edges}
-\title{Compute Voronoi edges from the vertices of geometries}
+\title{Voronoi edges from geometry vertices}
 \usage{
 ga_voronoi_edges(geometry, clip = "padded", tolerance = 0, boundary = NULL)
 }

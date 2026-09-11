@@ -141,9 +141,8 @@ fn ga_line_intersection(x: Robj, y: Robj) -> anyhow::Result<Robj> {
 /// @family intersection
 /// @references [Intersections](https://docs.rs/geo/latest/geo/sweep/struct.Intersections.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// bowtie <- sf::st_polygon(list(matrix(
-///   c(0, 0, 2, 2, 2, 0, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-/// )))
+/// ring <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
+/// bowtie <- sf::st_polygon(list(ring))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
 ///
 /// as.vector(ga_is_valid(g))

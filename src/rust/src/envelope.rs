@@ -8,6 +8,15 @@ use std::sync::Arc;
 
 use crate::{as_geo_geometries, as_geometry_chunks};
 
+/// The box of one geometry, taken as it is when the geometry is already a box.
+pub(crate) fn rect_of(geom: Option<&geo::Geometry<f64>>) -> Option<geo::Rect<f64>> {
+    match geom {
+        Some(geo::Geometry::Rect(r)) => Some(*r),
+        Some(g) => g.bounding_rect(),
+        None => None,
+    }
+}
+
 /// Read any geoarrow array as the axis aligned boxes an index query needs.
 ///
 /// A box array is returned untouched, so nothing recomputes what the caller
@@ -18,11 +27,7 @@ pub(crate) fn as_rects(
     let mut out = Vec::new();
     for chunk in chunks {
         for geom in as_geo_geometries(chunk.as_ref())? {
-            out.push(match geom {
-                Some(geo::Geometry::Rect(r)) => Some(r),
-                Some(g) => g.bounding_rect(),
-                None => None,
-            });
+            out.push(rect_of(geom.as_ref()));
         }
     }
     Ok(out)

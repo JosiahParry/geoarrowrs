@@ -20,24 +20,37 @@ use crate::{as_geo_geometries, as_geometry_chunks, try_float_array};
 /// @param line_cap one of `"round"`, `"square"`, or `"butt"`
 /// @param line_join one of `"round"`, `"miter"`, or `"bevel"`
 /// @param miter_limit the miter limit used when `line_join` is `"miter"`
-/// @param round_segments the number of segments used to approximate curves when `line_cap` or `line_join` is `"round"`
+/// @param round_angle the angular step in radians used to approximate curves when `line_cap` or `line_join` is `"round"`. Smaller is smoother
 /// @returns a GeoArrow multipolygon array
 /// @export
 /// @family misc
 /// @references [Buffer](https://docs.rs/geo/latest/geo/algorithm/buffer/trait.Buffer.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+/// ))
+///
+/// # the 2x2 square grows by 8 along its sides plus a unit circle at the corners
+/// as.vector(ga_unsigned_area(ga_buffer(sq, 1)))
+///
+/// # a smaller angular step rounds the corners more finely
+/// as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.01)))
+///
+/// # square corners instead
+/// as.vector(ga_unsigned_area(ga_buffer(sq, 1, line_join = "bevel")))
 #[extendr]
 fn ga_buffer(
     geometry: Robj,
     distance: Robj,
-    line_cap: &str,
-    line_join: &str,
-    miter_limit: f64,
-    round_segments: f64,
+    #[extendr(default = "\"round\"")] line_cap: &str,
+    #[extendr(default = "\"round\"")] line_join: &str,
+    #[extendr(default = "2.0")] miter_limit: f64,
+    #[extendr(default = "0.2")] round_angle: f64,
 ) -> extendr_api::Result<Robj> {
     let dist = try_float_array(distance, "distance")?;
 
     let parsed_cap = match line_cap {
-        "round" => LineCap::Round(round_segments),
+        "round" => LineCap::Round(round_angle),
         "square" => LineCap::Square,
         "butt" => LineCap::Butt,
         other => {
@@ -48,7 +61,7 @@ fn ga_buffer(
     };
 
     let parsed_join = match line_join {
-        "round" => LineJoin::Round(round_segments),
+        "round" => LineJoin::Round(round_angle),
         "miter" => LineJoin::Miter(miter_limit),
         "bevel" => LineJoin::Bevel,
         other => {

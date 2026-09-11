@@ -12,7 +12,7 @@ name = "geoarrowrs"
 [dependencies]
 anyhow = "1.0.102"
 arrow = "58.3.0"
-arrow_extendr = { version = "58.1.0", features = ["arrow", "geoarrow-08"] }
+arrow_extendr = { version = "58.1.1", features = ["arrow", "geoarrow-08"] }
 # extendr-api = { version = "*", features = ["either"] }
 extendr-api = { git = "https://github.com/extendr/extendr", features = [
     "either",

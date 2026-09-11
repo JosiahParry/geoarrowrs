@@ -35,17 +35,24 @@ Calculates the geodesic length of each linestring or multilinestring using
 the Vincenty formula on an ellipsoidal model of the earth. Returns \code{NA}
 if the algorithm fails to converge. Results are in meters.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# Raleigh to Charlotte, and Raleigh to Wilmington
+trips <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-80.8431, 35.2271))),
+  sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-77.9447, 34.2257)))
+))
+
+# degrees, then meters
+as.vector(ga_length_euclidean(trips))
+as.vector(ga_length_geodesic(trips))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html}{Length},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html}{Euclidean}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html}{Length},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html}{Haversine}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html}{Length},
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html}{Geodesic}
-
-\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html}{Length},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html}{Euclidean},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html}{Haversine},
+\href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html}{Geodesic},
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html}{Rhumb}
 
 \href{https://docs.rs/geo/latest/geo/algorithm/vincenty_length/trait.VincentyLength.html}{VincentyLength}

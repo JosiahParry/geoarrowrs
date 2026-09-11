@@ -20,7 +20,20 @@ mod vicenty_length;
 /// @family length
 /// @references
 ///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
+///   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html),
+///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html),
+///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html),
+///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// # Raleigh to Charlotte, and Raleigh to Wilmington
+/// trips <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-80.8431, 35.2271))),
+///   sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-77.9447, 34.2257)))
+/// ))
+///
+/// # degrees, then meters
+/// as.vector(ga_length_euclidean(trips))
+/// as.vector(ga_length_geodesic(trips))
 #[extendr]
 fn ga_length_euclidean(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
@@ -47,9 +60,6 @@ fn length_euclidean_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
 /// @export
 /// @rdname length
 /// @family length
-/// @references
-///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-///   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 #[extendr]
 fn ga_length_haversine(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
@@ -76,9 +86,6 @@ fn length_haversine_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
 /// @export
 /// @rdname length
 /// @family length
-/// @references
-///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-///   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 #[extendr]
 fn ga_length_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;
@@ -105,9 +112,6 @@ fn length_geodesic_impl(bldr: &mut Float64Builder, x: &LineStringArray) {
 /// @export
 /// @rdname length
 /// @family length
-/// @references
-///   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #[extendr]
 fn ga_length_rhumb(x: Robj) -> extendr_api::Result<Robj> {
     let x_chunks = as_linestring_chunks(x)?;

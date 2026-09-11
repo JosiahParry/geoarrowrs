@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_rotate_around_center}
 \alias{ga_rotate_around_center}
-\title{Rotate geometries around the center of their bounding box}
+\title{Rotate around the bounding box center}
 \usage{
 ga_rotate_around_center(geometry, degrees)
 }
@@ -18,6 +18,16 @@ a GeoArrow array of the same geometry type as the input
 Rotates each geometry counter-clockwise by \code{degrees} about the center of its
 own axis-aligned bounding rectangle. The geometry type of the output matches
 the geometry type of the input.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# the same triangle, turned about its bounding box center instead
+tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
+))
+
+geoarrow::as_geoarrow_vctr(ga_rotate_around_center(tri, 90))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html}{Rotate}

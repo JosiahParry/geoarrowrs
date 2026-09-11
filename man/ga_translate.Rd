@@ -20,6 +20,14 @@ a GeoArrow array of the same geometry type as the input
 Shifts every coordinate of each geometry by \code{x_offset} and \code{y_offset}. The
 geometry type of the output matches the geometry type of the input.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+pts <- ga_xy(c(0, 1), c(0, 1))
+
+# offsets are per row, so each point shifts by its own amount
+geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/translate/trait.Translate.html}{Translate}
 }

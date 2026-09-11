@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_line_locate_point}
 \alias{ga_line_locate_point}
-\title{Locate a point along a line as a fraction of its length}
+\title{Locate a point along a line}
 \usage{
 ga_line_locate_point(geometry, point)
 }

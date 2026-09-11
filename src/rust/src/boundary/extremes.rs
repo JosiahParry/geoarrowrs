@@ -50,6 +50,12 @@ fn extremes_of(array: &dyn GeoArrowArray) -> GeoArrowResult<Vec<Option<Outcome<f
 /// @export
 /// @family boundary
 /// @references [Extremes](https://docs.rs/geo/latest/geo/algorithm/extremes/trait.Extremes.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # one row per county, four point columns
+/// head(as.data.frame(ga_extremes(nc$geometry)), 3)
 #[extendr]
 fn ga_extremes(x: Robj) -> extendr_api::Result<Robj> {
     let err = |e: GeoArrowError| Error::Other(e.to_string());

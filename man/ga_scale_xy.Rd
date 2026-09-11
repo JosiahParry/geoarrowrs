@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_scale_xy}
 \alias{ga_scale_xy}
-\title{Scale geometries independently in x and y about their centroid}
+\title{Scale geometries in x and y}
 \usage{
 ga_scale_xy(geometry, x_factor, y_factor)
 }
@@ -20,6 +20,17 @@ a GeoArrow array of the same geometry type as the input
 Scales each geometry by \code{x_factor} along the x axis and \code{y_factor} along the
 y axis, about the geometry's own centroid. The geometry type of the output
 matches the geometry type of the input.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+
+# twice as wide, same height, so the area doubles
+geoarrow::as_geoarrow_vctr(ga_scale_xy(sq, 2, 1))
+as.vector(ga_unsigned_area(ga_scale_xy(sq, 2, 1)))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/scale/trait.Scale.html}{Scale}

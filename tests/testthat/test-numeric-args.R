@@ -70,6 +70,42 @@ test_that("geometry args accept concrete arrays, not just mixed ones", {
   expect_no_error(ga_convex_hull(g))
   expect_no_error(ga_minimum_rotated_rect(g))
   expect_no_error(ga_extremes(g))
-  expect_no_error(ga_perimeter_unsigned_geodesic(g))
-  expect_no_error(ga_buffer(g, 0.1, "round", "round", 5, 8))
+  expect_no_error(ga_perimeter_geodesic(g))
+  expect_no_error(ga_buffer(g, 0.1))
+})
+
+test_that("ga_buffer defaults to a round cap and join", {
+  sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+    sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+  ))
+
+  # the sides add 8, the four corners add a unit circle
+  expect_equal(
+    as.vector(ga_unsigned_area(ga_buffer(sq, 1))),
+    12 + pi,
+    tolerance = 0.01
+  )
+  expect_equal(
+    as.vector(ga_unsigned_area(ga_buffer(sq, 1, line_join = "bevel"))),
+    14
+  )
+})
+
+test_that("round_angle is an angle, so a smaller step is smoother", {
+  sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+    sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+  ))
+
+  coarse <- as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.5)))
+  fine <- as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.01)))
+
+  expect_lt(coarse, fine)
+  expect_lt(fine, 12 + pi)
+})
+
+test_that("a point buffers to a disc", {
+  res <- ga_buffer(ga_xy(0, 0), 1)
+
+  expect_equal(res$length, 1L)
+  expect_equal(as.vector(ga_unsigned_area(res)), pi, tolerance = 0.01)
 })

@@ -17,7 +17,7 @@ use crate::{
     try_float_array,
 };
 
-/// Simplify geometries using the Ramer-Douglas-Peucker algorithm
+/// Simplify with Ramer-Douglas-Peucker
 ///
 /// Reduces the number of points in each geometry by removing vertices that
 /// deviate less than `epsilon` from the simplified path. Accepts linestrings,
@@ -29,6 +29,14 @@ use crate::{
 /// @export
 /// @family simplify
 /// @references [Simplify](https://docs.rs/geo/latest/geo/algorithm/simplify/trait.Simplify.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # a bigger epsilon drops more vertices
+/// head(as.vector(ga_n_coords(nc$geometry)), 3)
+/// head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.01))), 3)
+/// head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.1))), 3)
 #[extendr]
 fn ga_simplify(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
     let eps = try_float_array(epsilon, "epsilon")?;

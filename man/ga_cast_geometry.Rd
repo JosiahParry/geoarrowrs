@@ -43,6 +43,17 @@ such as a \code{multipoint} holding two points cast to \code{point}:\tabular{ll}
 The dimension is carried over from the input, and casting between different
 dimensions is not supported.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+pts <- ga_xy(c(0, 1), c(0, 1))
+
+# widening always works
+ga_cast_geometry(pts, "multipoint")
+
+# so does going out to wkb, which is what plain Parquet stores
+ga_cast_geometry(pts, "wkb")
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other cast:
 \code{\link[=ga_as_point]{ga_as_point()}},

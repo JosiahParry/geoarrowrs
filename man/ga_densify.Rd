@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_densify}
 \alias{ga_densify}
-\title{Add intermediate points to geometries so no segment exceeds a maximum length}
+\title{Add points so no segment exceeds a length}
 \usage{
 ga_densify(geometry, max_segment_length, metric)
 }
@@ -20,6 +20,17 @@ a GeoArrow array of the same geometry type as the input
 Densifies linestrings, multilinestrings, polygons, and multipolygons by
 inserting additional points along each segment until no segment exceeds
 \code{max_segment_length}. The metric determines how segment length is measured.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+))
+
+# a 10 unit segment capped at 2 units needs four new vertices
+as.vector(ga_n_coords(line))
+as.vector(ga_n_coords(ga_densify(line, 2, "euclidean")))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html}{Densifiable}

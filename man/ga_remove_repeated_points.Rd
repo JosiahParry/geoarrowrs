@@ -16,6 +16,17 @@ a GeoArrow array of the same geometry type as the input
 Removes consecutive duplicate coordinates from each geometry. Accepts
 linestrings, multilinestrings, polygons, and multipolygons.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# the middle vertex is recorded twice
+line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(1, 1), c(1, 1), c(2, 2)))
+))
+
+as.vector(ga_n_coords(line))
+as.vector(ga_n_coords(ga_remove_repeated_points(line)))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html}{RemoveRepeatedPoints}
 }

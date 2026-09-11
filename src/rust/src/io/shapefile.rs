@@ -416,11 +416,14 @@ fn build_geometry(
 ///   `.dbf` attribute columns followed by a `geometry` column.
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// path <- system.file("shape/nc.shp", package = "sf")
-/// df <- as.data.frame(read_shapefile(path))
 ///
-/// # the .dbf attribute columns, followed by `geometry`
-/// dim(df)
-/// head(df[, c("NAME", "BIR74", "geometry")], 3)
+/// # read into a nanoarrow array stream
+/// res <- read_shapefile(path)
+/// res
+///
+/// # convert to a df
+/// df <- as.data.frame(res)
+/// head(df)
 /// @export
 /// @family io
 #[extendr]

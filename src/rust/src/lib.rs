@@ -32,6 +32,7 @@ pub(crate) mod length;
 pub(crate) mod misc;
 pub(crate) mod query;
 pub(crate) mod simplify;
+pub(crate) mod sparse;
 pub(crate) mod threads;
 pub(crate) mod topology;
 pub(crate) mod triangulate;
@@ -214,6 +215,7 @@ extendr_module! {
     use destination;
     use query;
     use simplify;
+    use sparse;
     use topology;
     use triangulate;
     use misc;

@@ -4,7 +4,14 @@
 \alias{ga_buffer}
 \title{Buffer geometries by a given distance}
 \usage{
-ga_buffer(geometry, distance, line_cap, line_join, miter_limit, round_segments)
+ga_buffer(
+  geometry,
+  distance,
+  line_cap = "round",
+  line_join = "round",
+  miter_limit = 2,
+  round_angle = 0.2
+)
 }
 \arguments{
 \item{geometry}{a GeoArrow geometry array}
@@ -17,7 +24,7 @@ ga_buffer(geometry, distance, line_cap, line_join, miter_limit, round_segments)
 
 \item{miter_limit}{the miter limit used when \code{line_join} is \code{"miter"}}
 
-\item{round_segments}{the number of segments used to approximate curves when \code{line_cap} or \code{line_join} is \code{"round"}}
+\item{round_angle}{the angular step in radians used to approximate curves when \code{line_cap} or \code{line_join} is \code{"round"}. Smaller is smoother}
 }
 \value{
 a GeoArrow multipolygon array
@@ -26,6 +33,22 @@ a GeoArrow multipolygon array
 Expands each geometry outward by \code{distance} to produce a multipolygon.
 Line cap and join styles control the shape of the buffer at endpoints and
 corners.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+
+# the 2x2 square grows by 8 along its sides plus a unit circle at the corners
+as.vector(ga_unsigned_area(ga_buffer(sq, 1)))
+
+# a smaller angular step rounds the corners more finely
+as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.01)))
+
+# square corners instead
+as.vector(ga_unsigned_area(ga_buffer(sq, 1, line_join = "bevel")))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/buffer/trait.Buffer.html}{Buffer}

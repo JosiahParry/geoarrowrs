@@ -89,7 +89,7 @@ fn closest_impl(geometry: Robj, point: Robj, haversine: bool) -> extendr_api::Re
     bldr.finish().into_arrow_robj()
 }
 
-/// Find the point on a geometry closest to another point
+/// Closest point on a geometry
 ///
 /// Returns the position on each geometry nearest the corresponding point,
 /// using planar distance. `ga_closest_point_haversine()` measures on a sphere
@@ -208,7 +208,7 @@ fn ga_is_convex(geometry: Robj) -> extendr_api::Result<Robj> {
     bldr.finish().into_data().into_arrow_robj()
 }
 
-/// Locate a point along a line as a fraction of its length
+/// Locate a point along a line
 ///
 /// Returns how far along each line the closest position to the corresponding
 /// point lies, as a fraction between 0 and 1.

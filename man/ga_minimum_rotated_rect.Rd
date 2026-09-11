@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_minimum_rotated_rect}
 \alias{ga_minimum_rotated_rect}
-\title{Compute the minimum rotated bounding rectangle of geometries}
+\title{Minimum rotated bounding rectangle}
 \usage{
 ga_minimum_rotated_rect(x)
 }
@@ -15,6 +15,17 @@ a GeoArrow polygon array
 \description{
 Returns the smallest rectangle of arbitrary rotation that contains each
 geometry, as a polygon array.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# free to rotate, so it hugs the county tighter than the envelope
+rot <- ga_minimum_rotated_rect(nc$geometry)
+head(as.vector(ga_unsigned_area(rot)), 3)
+head(as.vector(ga_unsigned_area(ga_bounding_rect(nc$geometry))), 3)
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html}{MinimumRotatedRect}

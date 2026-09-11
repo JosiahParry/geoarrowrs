@@ -42,6 +42,7 @@ identical(
 }
 \seealso{
 Other index:
+\code{\link{KDTree}},
 \code{\link{RTree}}
 }
 \concept{index}

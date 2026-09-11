@@ -35,9 +35,8 @@ NULL
 #' @family affine
 #' @references [AffineOps](https://docs.rs/geo/latest/geo/algorithm/affine_ops/trait.AffineOps.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' square <- sf::st_polygon(list(matrix(
-#'   c(0, 0, 1, 0, 1, 1, 0, 1, 0, 0), ncol = 2, byrow = TRUE
-#' )))
+#' ring <- rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 1), c(0, 0))
+#' square <- sf::st_polygon(list(ring))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(square))
 #'
 #' # double the width and shift right by 10
@@ -56,9 +55,16 @@ ga_affine_transform <- function(geometry, a, b, xoff, d, e, yoff) .Call(wrap__ga
 #' @export
 #' @family affine
 #' @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # a right triangle, whose centroid is not its bounding box center
+#' tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
+#' ))
+#'
+#' geoarrow::as_geoarrow_vctr(ga_rotate_around_centroid(tri, 90))
 ga_rotate_around_centroid <- function(geometry, degrees) .Call(wrap__ga_rotate_around_centroid, geometry, degrees)
 
-#' Rotate geometries around the center of their bounding box
+#' Rotate around the bounding box center
 #'
 #' Rotates each geometry counter-clockwise by `degrees` about the center of its
 #' own axis-aligned bounding rectangle. The geometry type of the output matches
@@ -70,9 +76,16 @@ ga_rotate_around_centroid <- function(geometry, degrees) .Call(wrap__ga_rotate_a
 #' @export
 #' @family affine
 #' @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # the same triangle, turned about its bounding box center instead
+#' tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
+#' ))
+#'
+#' geoarrow::as_geoarrow_vctr(ga_rotate_around_center(tri, 90))
 ga_rotate_around_center <- function(geometry, degrees) .Call(wrap__ga_rotate_around_center, geometry, degrees)
 
-#' Scale geometries independently in x and y about their centroid
+#' Scale geometries in x and y
 #'
 #' Scales each geometry by `x_factor` along the x axis and `y_factor` along the
 #' y axis, about the geometry's own centroid. The geometry type of the output
@@ -85,6 +98,14 @@ ga_rotate_around_center <- function(geometry, degrees) .Call(wrap__ga_rotate_aro
 #' @export
 #' @family affine
 #' @references [Scale](https://docs.rs/geo/latest/geo/algorithm/scale/trait.Scale.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+#' ))
+#'
+#' # twice as wide, same height, so the area doubles
+#' geoarrow::as_geoarrow_vctr(ga_scale_xy(sq, 2, 1))
+#' as.vector(ga_unsigned_area(ga_scale_xy(sq, 2, 1)))
 ga_scale_xy <- function(geometry, x_factor, y_factor) .Call(wrap__ga_scale_xy, geometry, x_factor, y_factor)
 
 #' Skew geometries uniformly about their centroid
@@ -99,9 +120,17 @@ ga_scale_xy <- function(geometry, x_factor, y_factor) .Call(wrap__ga_scale_xy, g
 #' @export
 #' @family affine
 #' @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+#' ))
+#'
+#' # a shear leaves the area unchanged
+#' geoarrow::as_geoarrow_vctr(ga_skew(sq, 30))
+#' as.vector(ga_unsigned_area(ga_skew(sq, 30)))
 ga_skew <- function(geometry, degrees) .Call(wrap__ga_skew, geometry, degrees)
 
-#' Skew geometries independently in x and y about their centroid
+#' Skew geometries in x and y
 #'
 #' Shears each geometry by `degrees_x` along the x dimension and `degrees_y`
 #' along the y dimension, about the geometry's own centroid. The geometry type
@@ -114,6 +143,13 @@ ga_skew <- function(geometry, degrees) .Call(wrap__ga_skew, geometry, degrees)
 #' @export
 #' @family affine
 #' @references [Skew](https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+#' ))
+#'
+#' # shear along x only, leaving y untouched
+#' geoarrow::as_geoarrow_vctr(ga_skew_xy(sq, 30, 0))
 ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, geometry, degrees_x, degrees_y)
 
 #' Translate geometries along the x and y axes
@@ -128,9 +164,14 @@ ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, g
 #' @export
 #' @family affine
 #' @references [Translate](https://docs.rs/geo/latest/geo/algorithm/translate/trait.Translate.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- ga_xy(c(0, 1), c(0, 1))
+#'
+#' # offsets are per row, so each point shifts by its own amount
+#' geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
 ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate, geometry, x_offset, y_offset)
 
-#' Compute the signed and unsigned planar area of geometries
+#' Signed and unsigned planar area
 #'
 #' `ga_signed_area()` returns positive values for counter-clockwise winding and
 #' negative values for clockwise winding. `ga_unsigned_area()` always returns a
@@ -142,15 +183,21 @@ ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate,
 #' @rdname area
 #' @family area
 #' @references [Area](https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # nc rings wind clockwise, so the signed area is negative
+#' head(as.vector(ga_signed_area(nc$geometry)))
+#' head(as.vector(ga_unsigned_area(nc$geometry)))
 ga_signed_area <- function(x) .Call(wrap__ga_signed_area, x)
 
 #' @export
 #' @rdname area
 #' @family area
-#' @references [Area](https://docs.rs/geo/latest/geo/algorithm/area/trait.Area.html)
 ga_unsigned_area <- function(x) .Call(wrap__ga_unsigned_area, x)
 
-#' Compute the signed and unsigned area using the Chamberlain-Duquette algorithm
+#' Chamberlain-Duquette spherical area
 #'
 #' These functions use the Chamberlain-Duquette formula, which is suitable for
 #' geographic coordinates on a sphere. Results are in square meters.
@@ -161,19 +208,32 @@ ga_unsigned_area <- function(x) .Call(wrap__ga_unsigned_area, x)
 #' @rdname area_cd
 #' @family area
 #' @references [ChamberlainDuquetteArea](https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # square meters, not square degrees
+#' head(as.vector(ga_unsigned_area_cd(nc$geometry)))
+#' head(as.vector(ga_signed_area_cd(nc$geometry)))
 ga_signed_area_cd <- function(x) .Call(wrap__ga_signed_area_cd, x)
 
 #' @export
 #' @rdname area_cd
 #' @family area
-#' @references [ChamberlainDuquetteArea](https://docs.rs/geo/latest/geo/algorithm/chamberlain_duquette_area/trait.ChamberlainDuquetteArea.html)
 ga_unsigned_area_cd <- function(x) .Call(wrap__ga_unsigned_area_cd, x)
 
-#' Compute the signed and unsigned geodesic area and perimeter of geometries
+#' Geodesic area and perimeter
 #'
 #' These functions use the geodesic formula for computing area and perimeter on
 #' an ellipsoidal model of the earth. Results are in square meters for area and
 #' meters for perimeter.
+#'
+#' @details
+#' `geo` assumes Simple Features winding, so an exterior ring must run
+#' counter-clockwise. A clockwise ring names the rest of the earth instead,
+#' and `ga_unsigned_area_geodesic()` returns a value near 5.1e14. Shapefiles
+#' wind clockwise, so orient with [ga_orient()] first or read the sign off
+#' `ga_signed_area_geodesic()`, which is unaffected.
 #'
 #' @param x a GeoArrow geometry array
 #' @returns a double vector of area values in square meters, or perimeter values in meters
@@ -181,25 +241,27 @@ ga_unsigned_area_cd <- function(x) .Call(wrap__ga_unsigned_area_cd, x)
 #' @rdname area_geodesic
 #' @family area
 #' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' head(as.vector(ga_signed_area_geodesic(nc$geometry)))
+#' head(as.vector(ga_perimeter_geodesic(nc$geometry)))
+#'
+#' # nc winds clockwise, so orient before taking the unsigned area
+#' ccw <- ga_orient(nc$geometry, "default")
+#' head(as.vector(ga_unsigned_area_geodesic(ccw)))
 ga_signed_area_geodesic <- function(x) .Call(wrap__ga_signed_area_geodesic, x)
 
 #' @export
 #' @rdname area_geodesic
 #' @family area
-#' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
 ga_unsigned_area_geodesic <- function(x) .Call(wrap__ga_unsigned_area_geodesic, x)
 
 #' @export
 #' @rdname area_geodesic
 #' @family area
-#' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
-ga_perimeter_signed_geodesic <- function(x) .Call(wrap__ga_perimeter_signed_geodesic, x)
-
-#' @export
-#' @rdname area_geodesic
-#' @family area
-#' @references [GeodesicArea](https://docs.rs/geo/latest/geo/algorithm/geodesic_area/trait.GeodesicArea.html)
-ga_perimeter_unsigned_geodesic <- function(x) .Call(wrap__ga_perimeter_unsigned_geodesic, x)
+ga_perimeter_geodesic <- function(x) .Call(wrap__ga_perimeter_geodesic, x)
 
 #' Compute pairwise distances between points
 #'
@@ -214,34 +276,36 @@ ga_perimeter_unsigned_geodesic <- function(x) .Call(wrap__ga_perimeter_unsigned_
 #' @family distance
 #' @references
 #'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
+#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html),
+#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html),
+#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html),
+#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # Raleigh to Charlotte, and Raleigh to Wilmington
+#' origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#' dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+#'
+#' # degrees, then meters
+#' as.vector(ga_dist_euclidean_pairwise(origin, dest))
+#' as.vector(ga_dist_geodesic_pairwise(origin, dest))
 ga_dist_euclidean_pairwise <- function(origin, dest) .Call(wrap__ga_dist_euclidean_pairwise, origin, dest)
 
 #' @export
 #' @rdname dist_pairwise
 #' @family distance
-#' @references
-#'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 ga_dist_haversine_pairwise <- function(origin, dest) .Call(wrap__ga_dist_haversine_pairwise, origin, dest)
 
 #' @export
 #' @rdname dist_pairwise
 #' @family distance
-#' @references
-#'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 ga_dist_geodesic_pairwise <- function(origin, dest) .Call(wrap__ga_dist_geodesic_pairwise, origin, dest)
 
 #' @export
 #' @rdname dist_pairwise
 #' @family distance
-#' @references
-#'   [Distance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Distance.html),
-#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 ga_dist_rhumb_pairwise <- function(origin, dest) .Call(wrap__ga_dist_rhumb_pairwise, origin, dest)
 
-#' Compute the pairwise Hausdorff distance between geometries
+#' Pairwise Hausdorff distance
 #'
 #' The Hausdorff distance measures how far two geometries are from each other
 #' by taking the maximum of all minimum distances between points on the two shapes.
@@ -252,9 +316,15 @@ ga_dist_rhumb_pairwise <- function(origin, dest) .Call(wrap__ga_dist_rhumb_pairw
 #' @export
 #' @family distance
 #' @references [HausdorffDistance](https://docs.rs/geo/latest/geo/algorithm/hausdorff_distance/trait.HausdorffDistance.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # how far apart are neighbouring counties at their worst?
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' as.vector(ga_dist_hausdorff_pairwise(nc$geometry[1:5], nc$geometry[2:6]))
 ga_dist_hausdorff_pairwise <- function(origin, dest) .Call(wrap__ga_dist_hausdorff_pairwise, origin, dest)
 
-#' Compute the pairwise Vincenty distance between points
+#' Pairwise Vincenty distance
 #'
 #' The Vincenty formula computes the geodesic distance between two points on
 #' an ellipsoidal model of the earth. Returns `NA` if the algorithm fails to
@@ -266,9 +336,15 @@ ga_dist_hausdorff_pairwise <- function(origin, dest) .Call(wrap__ga_dist_hausdor
 #' @export
 #' @family distance
 #' @references [VincentyDistance](https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # Raleigh to Charlotte, and Raleigh to Wilmington
+#' origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#' dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+#'
+#' as.vector(ga_dist_vincenty_pairwise(origin, dest))
 ga_dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__ga_dist_vincenty_pairwise, origin, dest)
 
-#' Compute the pairwise Frechet distance between linestrings
+#' Pairwise Frechet distance
 #'
 #' The Frechet distance measures the similarity between two curves by
 #' considering the location and ordering of points along each curve.
@@ -280,6 +356,16 @@ ga_dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__ga_dist_vincenty
 #' @export
 #' @family distance
 #' @references [FrechetDistance](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.FrechetDistance.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # a straight route against one that detours north
+#' direct <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(2, 0), c(4, 0)))
+#' ))
+#' detour <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(2, 1), c(4, 0)))
+#' ))
+#'
+#' as.vector(ga_dist_frechet_pairwise(direct, detour))
 ga_dist_frechet_pairwise <- function(origin, dest) .Call(wrap__ga_dist_frechet_pairwise, origin, dest)
 
 #' Collect a geometry's coordinates as points
@@ -368,31 +454,35 @@ ga_lines <- function(geometry) .Call(wrap__ga_lines, geometry)
 #' @family length
 #' @references
 #'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
+#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html),
+#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html),
+#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html),
+#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # Raleigh to Charlotte, and Raleigh to Wilmington
+#' trips <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-80.8431, 35.2271))),
+#'   sf::st_linestring(rbind(c(-78.6382, 35.7796), c(-77.9447, 34.2257)))
+#' ))
+#'
+#' # degrees, then meters
+#' as.vector(ga_length_euclidean(trips))
+#' as.vector(ga_length_geodesic(trips))
 ga_length_euclidean <- function(x) .Call(wrap__ga_length_euclidean, x)
 
 #' @export
 #' @rdname length
 #' @family length
-#' @references
-#'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 ga_length_haversine <- function(x) .Call(wrap__ga_length_haversine, x)
 
 #' @export
 #' @rdname length
 #' @family length
-#' @references
-#'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 ga_length_geodesic <- function(x) .Call(wrap__ga_length_geodesic, x)
 
 #' @export
 #' @rdname length
 #' @family length
-#' @references
-#'   [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html),
-#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 ga_length_rhumb <- function(x) .Call(wrap__ga_length_rhumb, x)
 
 #' Compute the Vincenty length of linestrings or multilinestrings
@@ -423,34 +513,36 @@ ga_length_vincenty <- function(x) .Call(wrap__ga_length_vincenty, x)
 #' @family bearing
 #' @references
 #'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
-#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html)
+#'   [Euclidean](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Euclidean.html),
+#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html),
+#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html),
+#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # Raleigh to Charlotte, and Raleigh to Wilmington
+#' origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#' dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+#'
+#' # west-southwest, then south-southeast
+#' as.vector(ga_bearing_haversine(origin, dest))
+#' as.vector(ga_bearing_rhumb(origin, dest))
 ga_bearing_euclidean <- function(origin, dest) .Call(wrap__ga_bearing_euclidean, origin, dest)
 
 #' @export
 #' @rdname bearing
 #' @family bearing
-#' @references
-#'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
-#'   [Haversine](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/constant.Haversine.html)
 ga_bearing_haversine <- function(origin, dest) .Call(wrap__ga_bearing_haversine, origin, dest)
 
 #' @export
 #' @rdname bearing
 #' @family bearing
-#' @references
-#'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
-#'   [Geodesic](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/static.Geodesic.html)
 ga_bearing_geodesic <- function(origin, dest) .Call(wrap__ga_bearing_geodesic, origin, dest)
 
 #' @export
 #' @rdname bearing
 #' @family bearing
-#' @references
-#'   [Bearing](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Bearing.html),
-#'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 ga_bearing_rhumb <- function(origin, dest) .Call(wrap__ga_bearing_rhumb, origin, dest)
 
-#' Compute a destination point from an origin, bearing, and distance
+#' Destination from origin, bearing, distance
 #'
 #' Returns the point reached by travelling `distance` from `origin` along
 #' `bearing`. Each function uses a different metric space: `dest_euclidean`
@@ -466,6 +558,13 @@ ga_bearing_rhumb <- function(origin, dest) .Call(wrap__ga_bearing_rhumb, origin,
 #' @rdname destination
 #' @family destination
 #' @references [Destination](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # 100km due north and due east of Raleigh
+#' raleigh <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#'
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_dest_geodesic(raleigh, bearing = c(0, 90), distance = c(1e5, 1e5))
+#' )
 ga_dest_rhumb <- function(origin, bearing, distance) .Call(wrap__ga_dest_rhumb, origin, bearing, distance)
 
 #' @export
@@ -480,7 +579,7 @@ ga_dest_haversine <- function(origin, bearing, distance) .Call(wrap__ga_dest_hav
 #' @rdname destination
 ga_dest_geodesic <- function(origin, bearing, distance) .Call(wrap__ga_dest_geodesic, origin, bearing, distance)
 
-#' Find the point on a geometry closest to another point
+#' Closest point on a geometry
 #'
 #' Returns the position on each geometry nearest the corresponding point,
 #' using planar distance. `ga_closest_point_haversine()` measures on a sphere
@@ -562,7 +661,7 @@ ga_interior_point <- function(geometry) .Call(wrap__ga_interior_point, geometry)
 #' as.vector(ga_is_convex(g))
 ga_is_convex <- function(geometry) .Call(wrap__ga_is_convex, geometry)
 
-#' Locate a point along a line as a fraction of its length
+#' Locate a point along a line
 #'
 #' Returns how far along each line the closest position to the corresponding
 #' point lies, as a fraction between 0 and 1.
@@ -588,7 +687,7 @@ ga_is_convex <- function(geometry) .Call(wrap__ga_is_convex, geometry)
 #' as.vector(ga_line_locate_point(line, pt))
 ga_line_locate_point <- function(geometry, point) .Call(wrap__ga_line_locate_point, geometry, point)
 
-#' Simplify geometries using the Ramer-Douglas-Peucker algorithm
+#' Simplify with Ramer-Douglas-Peucker
 #'
 #' Reduces the number of points in each geometry by removing vertices that
 #' deviate less than `epsilon` from the simplified path. Accepts linestrings,
@@ -600,9 +699,17 @@ ga_line_locate_point <- function(geometry, point) .Call(wrap__ga_line_locate_poi
 #' @export
 #' @family simplify
 #' @references [Simplify](https://docs.rs/geo/latest/geo/algorithm/simplify/trait.Simplify.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # a bigger epsilon drops more vertices
+#' head(as.vector(ga_n_coords(nc$geometry)), 3)
+#' head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.01))), 3)
+#' head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.1))), 3)
 ga_simplify <- function(geometry, epsilon) .Call(wrap__ga_simplify, geometry, epsilon)
 
-#' Simplify geometries using the Visvalingam-Whyatt algorithm
+#' Simplify with Visvalingam-Whyatt
 #'
 #' Reduces the number of points in each geometry by removing vertices whose
 #' effective area is below `epsilon`. Accepts linestrings, multilinestrings,
@@ -615,6 +722,13 @@ ga_simplify <- function(geometry, epsilon) .Call(wrap__ga_simplify, geometry, ep
 #' @rdname ga_simplify_vw
 #' @family simplify
 #' @references [SimplifyVw](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVw.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # epsilon is an area here, not a distance as in ga_simplify()
+#' head(as.vector(ga_n_coords(nc$geometry)), 3)
+#' head(as.vector(ga_n_coords(ga_simplify_vw(nc$geometry, 0.001))), 3)
 ga_simplify_vw <- function(geometry, epsilon) .Call(wrap__ga_simplify_vw, geometry, epsilon)
 
 #' Simplify geometries using the topology-preserving Visvalingam-Whyatt algorithm
@@ -670,7 +784,93 @@ ga_simplify_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_idx, geom
 #' @references [SimplifyVwIdx](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwIdx.html)
 ga_simplify_vw_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_vw_idx, geometry, epsilon)
 
-#' Test a topological relationship between two geometry arrays
+#' Find which rows of `y` relate to each row of `x`
+#'
+#' Each function compares every row of `x` against every row of `y` and returns
+#' the row numbers of `y` for which the named DE-9IM relationship holds. This is
+#' the sparse form of the pairwise predicates in [ga_intersects()], and the
+#' shape [ga_join()] needs.
+#'
+#' @details
+#' The comparison is not the full cross product. `y` is indexed in a packed
+#' Hilbert R-tree and only the rows whose bounding box overlaps are relate
+#' tested, so the cost scales with the number of candidates rather than with
+#' `length(x) * length(y)`.
+#'
+#' A row of `x` that matches nothing gives a zero length element, not a null. A
+#' null or empty geometry in `x` gives a null element, and one in `y` is never
+#' returned.
+#'
+#' [ga_disjoint()] has no sparse form. Disjointness is the one relationship a
+#' bounding box cannot narrow, so the answer is almost every row of `y` and the
+#' result is denser than the input.
+#'
+#' @param x a GeoArrow geometry array
+#' @param y a GeoArrow geometry array
+#' @returns a list array of 1 based row numbers into `y`, the same length as `x`
+#' @export
+#' @rdname sparse
+#' @family topology
+#' @references [Relate](https://docs.rs/geo/latest/geo/algorithm/relate/trait.Relate.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#'
+#' # which counties each county touches
+#' nbrs <- as.vector(ga_sparse_touches(nc$geometry, nc$geometry))
+#' nbrs[[1]]
+#'
+#' # how many neighbours each has
+#' summary(lengths(nbrs))
+ga_sparse_intersects <- function(x, y) .Call(wrap__ga_sparse_intersects, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_contains <- function(x, y) .Call(wrap__ga_sparse_contains, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_contains_properly <- function(x, y) .Call(wrap__ga_sparse_contains_properly, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_within <- function(x, y) .Call(wrap__ga_sparse_within, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_covers <- function(x, y) .Call(wrap__ga_sparse_covers, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_covered_by <- function(x, y) .Call(wrap__ga_sparse_covered_by, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_touches <- function(x, y) .Call(wrap__ga_sparse_touches, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_crosses <- function(x, y) .Call(wrap__ga_sparse_crosses, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_overlaps <- function(x, y) .Call(wrap__ga_sparse_overlaps, x, y)
+
+#' @export
+#' @rdname sparse
+#' @family topology
+ga_sparse_equals_topo <- function(x, y) .Call(wrap__ga_sparse_equals_topo, x, y)
+
+#' Test a topological relationship
 #'
 #' Each function compares `x` and `y` row by row and returns `TRUE` when the
 #' named DE-9IM relationship holds. `y` is recycled against `x`.
@@ -760,7 +960,7 @@ ga_overlaps <- function(x, y) .Call(wrap__ga_overlaps, x, y)
 #' @family topology
 ga_equals_topo <- function(x, y) .Call(wrap__ga_equals_topo, x, y)
 
-#' Compute the DE-9IM relationship between two geometry arrays
+#' DE-9IM relationship between geometries
 #'
 #' Returns the nine character DE-9IM matrix describing how each pair of
 #' geometries relates, from which every named predicate can be derived.
@@ -852,14 +1052,12 @@ ga_is_empty <- function(geometry) .Call(wrap__ga_is_empty, geometry)
 #' @family topology
 #' @references [CoordinatePosition](https://docs.rs/geo/latest/geo/algorithm/coordinate_position/trait.CoordinatePosition.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' square <- sf::st_polygon(list(
-#'   matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
-#' ))
+#' ring <- rbind(c(0, 0), c(4, 0), c(4, 4), c(0, 4), c(0, 0))
+#' square <- sf::st_polygon(list(ring))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(square, square, square))
-#' p <- geoarrow::as_geoarrow_array(sf::st_sfc(
-#'   sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
-#' ))
 #'
+#' # inside, on the edge, and outside
+#' p <- ga_xy(c(2, 0, 9), c(2, 2, 9))
 #' as.vector(ga_coordinate_position(g, p))
 ga_coordinate_position <- function(geometry, point) .Call(wrap__ga_coordinate_position, geometry, point)
 
@@ -884,9 +1082,17 @@ ga_coordinate_position <- function(geometry, point) .Call(wrap__ga_coordinate_po
 #' @export
 #' @family triangulate
 #' @references [TriangulateEarcut](https://docs.rs/geo/latest/geo/algorithm/triangulate_earcut/trait.TriangulateEarcut.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # one multipolygon of triangles per county, so length is preserved
+#' tri <- ga_triangulate_earcut(nc$geometry)
+#' tri$length
+#' head(as.vector(ga_n_coords(tri)), 3)
 ga_triangulate_earcut <- function(x) .Call(wrap__ga_triangulate_earcut, x)
 
-#' Triangulate geometries with a Delaunay triangulation
+#' Delaunay triangulation
 #'
 #' Returns one multipolygon per input geometry, whose parts are that
 #' geometry's triangles. The output has the same length as the input.
@@ -910,6 +1116,18 @@ ga_triangulate_earcut <- function(x) .Call(wrap__ga_triangulate_earcut, x)
 #' @export
 #' @family triangulate
 #' @references [TriangulateDelaunay](https://docs.rs/geo/latest/geo/algorithm/triangulate_delaunay/trait.TriangulateDelaunay.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # constrained keeps the triangles inside the county boundary
+#' tri <- ga_triangulate_delaunay(nc$geometry)
+#' tri$length
+#'
+#' # unconstrained fills the convex hull instead, so it covers more
+#' hull <- ga_triangulate_delaunay(nc$geometry, constrained = FALSE)
+#' head(as.vector(ga_unsigned_area(tri)), 3)
+#' head(as.vector(ga_unsigned_area(hull)), 3)
 ga_triangulate_delaunay <- function(x, constrained = TRUE, snap_radius = 1e-4) .Call(wrap__ga_triangulate_delaunay, x, constrained, snap_radius)
 
 #' Buffer geometries by a given distance
@@ -923,12 +1141,25 @@ ga_triangulate_delaunay <- function(x, constrained = TRUE, snap_radius = 1e-4) .
 #' @param line_cap one of `"round"`, `"square"`, or `"butt"`
 #' @param line_join one of `"round"`, `"miter"`, or `"bevel"`
 #' @param miter_limit the miter limit used when `line_join` is `"miter"`
-#' @param round_segments the number of segments used to approximate curves when `line_cap` or `line_join` is `"round"`
+#' @param round_angle the angular step in radians used to approximate curves when `line_cap` or `line_join` is `"round"`. Smaller is smoother
 #' @returns a GeoArrow multipolygon array
 #' @export
 #' @family misc
 #' @references [Buffer](https://docs.rs/geo/latest/geo/algorithm/buffer/trait.Buffer.html)
-ga_buffer <- function(geometry, distance, line_cap, line_join, miter_limit, round_segments) .Call(wrap__ga_buffer, geometry, distance, line_cap, line_join, miter_limit, round_segments)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+#' ))
+#'
+#' # the 2x2 square grows by 8 along its sides plus a unit circle at the corners
+#' as.vector(ga_unsigned_area(ga_buffer(sq, 1)))
+#'
+#' # a smaller angular step rounds the corners more finely
+#' as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.01)))
+#'
+#' # square corners instead
+#' as.vector(ga_unsigned_area(ga_buffer(sq, 1, line_join = "bevel")))
+ga_buffer <- function(geometry, distance, line_cap = "round", line_join = "round", miter_limit = 2.0, round_angle = 0.2) .Call(wrap__ga_buffer, geometry, distance, line_cap, line_join, miter_limit, round_angle)
 
 #' Compute the centroid of geometries
 #'
@@ -939,6 +1170,11 @@ ga_buffer <- function(geometry, distance, line_cap, line_join, miter_limit, roun
 #' @export
 #' @family misc
 #' @references [Centroid](https://docs.rs/geo/latest/geo/algorithm/centroid/trait.Centroid.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' head(geoarrow::as_geoarrow_vctr(ga_centroid(nc$geometry)), 3)
 ga_centroid <- function(x) .Call(wrap__ga_centroid, x)
 
 #' Smooth geometries using the Chaikin algorithm
@@ -953,6 +1189,16 @@ ga_centroid <- function(x) .Call(wrap__ga_centroid, x)
 #' @export
 #' @family misc
 #' @references [ChaikinSmoothing](https://docs.rs/geo/latest/geo/algorithm/chaikin_smoothing/trait.ChaikinSmoothing.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' zigzag <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(1, 2), c(2, 0), c(3, 2)))
+#' ))
+#'
+#' # each iteration cuts every corner, so the vertex count grows
+#' as.vector(ga_n_coords(zigzag))
+#' as.vector(ga_n_coords(ga_chaikin_smoothing(zigzag, 2)))
+#'
+#' geoarrow::as_geoarrow_vctr(ga_chaikin_smoothing(zigzag, 1))
 ga_chaikin_smoothing <- function(geometry, n_iterations) .Call(wrap__ga_chaikin_smoothing, geometry, n_iterations)
 
 #' Remove repeated consecutive points from geometries
@@ -965,9 +1211,17 @@ ga_chaikin_smoothing <- function(geometry, n_iterations) .Call(wrap__ga_chaikin_
 #' @export
 #' @family misc
 #' @references [RemoveRepeatedPoints](https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' # the middle vertex is recorded twice
+#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(1, 1), c(1, 1), c(2, 2)))
+#' ))
+#'
+#' as.vector(ga_n_coords(line))
+#' as.vector(ga_n_coords(ga_remove_repeated_points(line)))
 ga_remove_repeated_points <- function(geometry) .Call(wrap__ga_remove_repeated_points, geometry)
 
-#' Split linestrings into a given number of equal-length segments
+#' Split linestrings into equal segments
 #'
 #' Divides each linestring into `segment_count` segments of equal length,
 #' returning a multilinestring. Returns `NA` if segmentation fails.
@@ -981,6 +1235,13 @@ ga_remove_repeated_points <- function(geometry) .Call(wrap__ga_remove_repeated_p
 #' @rdname ga_line_segmentize
 #' @family misc
 #' @references [LineStringSegmentize](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentize.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(9, 0)))
+#' ))
+#'
+#' # one multilinestring of three equal pieces
+#' geoarrow::as_geoarrow_vctr(ga_line_segmentize(line, 3))
 ga_line_segmentize <- function(geometry, segment_count) .Call(wrap__ga_line_segmentize, geometry, segment_count)
 
 #' @export
@@ -1013,15 +1274,15 @@ ga_line_segmentize_haversine <- function(geometry, segment_count) .Call(wrap__ga
 #' @family boolean
 #' @references [BooleanOps](https://docs.rs/geo/latest/geo/algorithm/bool_ops/trait.BooleanOps.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
-#'   c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
-#' )))
-#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2)))
-#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(1, 1, 3, 3)))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+#' ))
+#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
+#' ))
 #'
-#' sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
-#'   ga_boolean_intersection(x, y)
-#' )))
+#' # two 2x2 squares offset by 1, so the overlap is a 1x1 square
+#' as.vector(ga_unsigned_area(ga_boolean_intersection(x, y)))
 ga_boolean_intersection <- function(x, y) .Call(wrap__ga_boolean_intersection, x, y)
 
 #' @export
@@ -1059,15 +1320,16 @@ ga_boolean_xor <- function(x, y) .Call(wrap__ga_boolean_xor, x, y)
 #' @family boolean
 #' @references [unary_union](https://docs.rs/geo/latest/geo/algorithm/bool_ops/fn.unary_union.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' bx <- function(a, b, c, d) sf::st_polygon(list(matrix(
-#'   c(a, b, c, b, c, d, a, d, a, b), ncol = 2, byrow = TRUE
-#' )))
-#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(bx(0, 0, 2, 2), bx(1, 1, 3, 3)))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0)))),
+#'   sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
+#' ))
 #'
-#' sf::st_area(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_unary_union(x))))
+#' # 4 + 4 less the 1 they share
+#' as.vector(ga_unsigned_area(ga_unary_union(x)))
 ga_unary_union <- function(x) .Call(wrap__ga_unary_union, x)
 
-#' Compute the axis-aligned bounding rectangle of geometries
+#' Axis-aligned bounding rectangle
 #'
 #' Returns the smallest axis-aligned rectangle that contains each geometry.
 #'
@@ -1076,9 +1338,14 @@ ga_unary_union <- function(x) .Call(wrap__ga_unary_union, x)
 #' @export
 #' @family boundary
 #' @references [BoundingRect](https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' head(geoarrow::as_geoarrow_vctr(ga_bounding_rect(nc$geometry)), 3)
 ga_bounding_rect <- function(x) .Call(wrap__ga_bounding_rect, x)
 
-#' Compute the minimum rotated bounding rectangle of geometries
+#' Minimum rotated bounding rectangle
 #'
 #' Returns the smallest rectangle of arbitrary rotation that contains each
 #' geometry, as a polygon array.
@@ -1088,6 +1355,14 @@ ga_bounding_rect <- function(x) .Call(wrap__ga_bounding_rect, x)
 #' @export
 #' @family boundary
 #' @references [MinimumRotatedRect](https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # free to rotate, so it hugs the county tighter than the envelope
+#' rot <- ga_minimum_rotated_rect(nc$geometry)
+#' head(as.vector(ga_unsigned_area(rot)), 3)
+#' head(as.vector(ga_unsigned_area(ga_bounding_rect(nc$geometry))), 3)
 ga_minimum_rotated_rect <- function(x) .Call(wrap__ga_minimum_rotated_rect, x)
 
 #' Compute the convex hull of geometries
@@ -1099,6 +1374,13 @@ ga_minimum_rotated_rect <- function(x) .Call(wrap__ga_minimum_rotated_rect, x)
 #' @export
 #' @family boundary
 #' @references [ConvexHull](https://docs.rs/geo/latest/geo/algorithm/convex_hull/trait.ConvexHull.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # the hull fills in every concavity, so it is never smaller
+#' head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
+#' head(as.vector(ga_unsigned_area(nc$geometry)), 3)
 ga_convex_hull <- function(x) .Call(wrap__ga_convex_hull, x)
 
 #' Compute the concave hull of geometries
@@ -1117,6 +1399,16 @@ ga_convex_hull <- function(x) .Call(wrap__ga_convex_hull, x)
 #' @export
 #' @family boundary
 #' @references [ConcaveHull](https://docs.rs/geo/latest/geo/algorithm/concave_hull/trait.ConcaveHull.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # lower concavity tightens the hull onto the shape
+#' loose <- ga_concave_hull(nc$geometry, concavity = 2, length_threshold = 0)
+#' tight <- ga_concave_hull(nc$geometry, concavity = 0.5, length_threshold = 0)
+#'
+#' head(as.vector(ga_unsigned_area(loose)), 3)
+#' head(as.vector(ga_unsigned_area(tight)), 3)
 ga_concave_hull <- function(geometry, concavity, length_threshold) .Call(wrap__ga_concave_hull, geometry, concavity, length_threshold)
 
 #' Compute the extreme coordinates of geometries
@@ -1135,6 +1427,12 @@ ga_concave_hull <- function(geometry, concavity, length_threshold) .Call(wrap__g
 #' @export
 #' @family boundary
 #' @references [Extremes](https://docs.rs/geo/latest/geo/algorithm/extremes/trait.Extremes.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # one row per county, four point columns
+#' head(as.data.frame(ga_extremes(nc$geometry)), 3)
 ga_extremes <- function(x) .Call(wrap__ga_extremes, x)
 
 #' Cast geometries to another GeoArrow geometry type
@@ -1172,9 +1470,17 @@ ga_extremes <- function(x) .Call(wrap__ga_extremes, x)
 #' @returns a GeoArrow array of the requested type, the same length as `x`
 #' @export
 #' @family cast
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- ga_xy(c(0, 1), c(0, 1))
+#'
+#' # widening always works
+#' ga_cast_geometry(pts, "multipoint")
+#'
+#' # so does going out to wkb, which is what plain Parquet stores
+#' ga_cast_geometry(pts, "wkb")
 ga_cast_geometry <- function(x, to) .Call(wrap__ga_cast_geometry, x, to)
 
-#' Cast geometries to the narrowest type that fits them
+#' Cast to the narrowest geometry type
 #'
 #' Inspects the geometries and casts to the most specific type that can hold
 #' every one of them. A `geometry` array holding only points becomes a `point`
@@ -1188,6 +1494,12 @@ ga_cast_geometry <- function(x, to) .Call(wrap__ga_cast_geometry, x, to)
 #' @returns a GeoArrow array of the narrowest type that fits, the same length as `x`
 #' @export
 #' @family cast
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- ga_xy(c(0, 1), c(0, 1))
+#' wide <- ga_cast_geometry(pts, "geometry")
+#'
+#' # only points in there, so it narrows back to a point array
+#' ga_downcast_geometry(wide)
 ga_downcast_geometry <- function(x) .Call(wrap__ga_downcast_geometry, x)
 
 #' Read well known binary as a GeoArrow array
@@ -1323,6 +1635,14 @@ ga_as_multipolygon <- function(x) .Call(wrap__ga_as_multipolygon, x)
 #' @returns a list array of the same length as `x`, whose elements are GeoArrow arrays
 #' @export
 #' @family cast
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # one list element per county, holding that county's polygon parts
+#' parts <- ga_explode(nc$geometry)
+#' parts$length
+#' head(lengths(as.vector(parts)))
 ga_explode <- function(x) .Call(wrap__ga_explode, x)
 
 #' Collapse a list of geometries into a single array
@@ -1338,6 +1658,13 @@ ga_explode <- function(x) .Call(wrap__ga_explode, x)
 #' @returns a GeoArrow array holding every part, flattened
 #' @export
 #' @family cast
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#'
+#' # 100 counties in, one row per polygon part out
+#' length(nc$geometry)
+#' ga_flatten(ga_explode(nc$geometry))$length
 ga_flatten <- function(x) .Call(wrap__ga_flatten, x)
 
 #' Assign points to clusters by density
@@ -1481,6 +1808,10 @@ ga_xy <- function(x, y, crs = NULL) .Call(wrap__ga_xy, x, y, crs)
 #' @export
 #' @family convert
 #' @references [ToDegrees](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToDegrees.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' rad <- ga_xy(c(0, pi / 4), c(0, pi / 2))
+#'
+#' geoarrow::as_geoarrow_vctr(ga_to_degrees(rad))
 ga_to_degrees <- function(geometry) .Call(wrap__ga_to_degrees, geometry)
 
 #' Convert coordinates from degrees to radians
@@ -1497,9 +1828,13 @@ ga_to_degrees <- function(geometry) .Call(wrap__ga_to_degrees, geometry)
 #' @export
 #' @family convert
 #' @references [ToRadians](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToRadians.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' deg <- ga_xy(c(0, 45), c(0, 90))
+#'
+#' geoarrow::as_geoarrow_vctr(ga_to_radians(deg))
 ga_to_radians <- function(geometry) .Call(wrap__ga_to_radians, geometry)
 
-#' Add intermediate points to geometries so no segment exceeds a maximum length
+#' Add points so no segment exceeds a length
 #'
 #' Densifies linestrings, multilinestrings, polygons, and multipolygons by
 #' inserting additional points along each segment until no segment exceeds
@@ -1512,6 +1847,14 @@ ga_to_radians <- function(geometry) .Call(wrap__ga_to_radians, geometry)
 #' @export
 #' @family densify
 #' @references [Densifiable](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Densifiable.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+#' ))
+#'
+#' # a 10 unit segment capped at 2 units needs four new vertices
+#' as.vector(ga_n_coords(line))
+#' as.vector(ga_n_coords(ga_densify(line, 2, "euclidean")))
 ga_densify <- function(geometry, max_segment_length, metric) .Call(wrap__ga_densify, geometry, max_segment_length, metric)
 
 #' Compute the bounding box of geometries
@@ -1602,9 +1945,8 @@ ga_line_intersection <- function(x, y) .Call(wrap__ga_line_intersection, x, y)
 #' @family intersection
 #' @references [Intersections](https://docs.rs/geo/latest/geo/sweep/struct.Intersections.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' bowtie <- sf::st_polygon(list(matrix(
-#'   c(0, 0, 2, 2, 2, 0, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-#' )))
+#' ring <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
+#' bowtie <- sf::st_polygon(list(ring))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
 #'
 #' as.vector(ga_is_valid(g))
@@ -1626,9 +1968,21 @@ ga_self_intersections <- function(geometry) .Call(wrap__ga_self_intersections, g
 #' @export
 #' @family interpolate
 #' @references [InterpolateLine](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+#' ))
+#'
+#' # halfway from the start, then two units in from the end
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_interpolate_point(line, 0.5, "euclidean", "ratio", "start")
+#' )
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_interpolate_point(line, 2, "euclidean", "distance", "end")
+#' )
 ga_interpolate_point <- function(line, value, metric, measure, from) .Call(wrap__ga_interpolate_point, line, value, metric, measure, from)
 
-#' Interpolate a point at a given distance between two points
+#' Interpolate a point between two points
 #'
 #' Returns the point located at `distance` along the path from `start` to `end`.
 #' The metric determines how distance is measured.
@@ -1642,6 +1996,17 @@ ga_interpolate_point <- function(line, value, metric, measure, from) .Call(wrap_
 #' @rdname interpolate_between
 #' @family interpolate
 #' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' start <- ga_xy(c(0, 0), c(0, 0))
+#' end <- ga_xy(c(10, 10), c(0, 0))
+#'
+#' # three units along, then a third of the way along
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_point_at_distance_between(start, end, c(3, 3), "euclidean")
+#' )
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_point_at_ratio_between(start, end, c(1 / 3, 1 / 3), "euclidean")
+#' )
 ga_point_at_distance_between <- function(start, end, distance, metric) .Call(wrap__ga_point_at_distance_between, start, end, distance, metric)
 
 #' Interpolate a point at a given ratio between two points
@@ -1658,10 +2023,9 @@ ga_point_at_distance_between <- function(start, end, distance, metric) .Call(wra
 #' @export
 #' @rdname interpolate_between
 #' @family interpolate
-#' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 ga_point_at_ratio_between <- function(start, end, ratio, metric) .Call(wrap__ga_point_at_ratio_between, start, end, ratio, metric)
 
-#' Generate points at regular intervals along the line between two points
+#' Points at regular intervals along a line
 #'
 #' Returns a multipoint array where each element contains all points spaced
 #' at most `max_distance` apart along the path from `start` to `end`.
@@ -1675,6 +2039,14 @@ ga_point_at_ratio_between <- function(start, end, ratio, metric) .Call(wrap__ga_
 #' @export
 #' @family interpolate
 #' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' start <- ga_xy(0, 0)
+#' end <- ga_xy(10, 0)
+#'
+#' # one multipoint row, spaced at most 3 units apart
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_points_along_line(start, end, 3, TRUE, "euclidean")
+#' )
 ga_points_along_line <- function(start, end, max_distance, include_ends, metric) .Call(wrap__ga_points_along_line, start, end, max_distance, include_ends, metric)
 
 #' Read a FlatGeobuf file into a record batch stream
@@ -1684,15 +2056,10 @@ ga_points_along_line <- function(start, end, max_distance, include_ends, metric)
 #' held in memory at once.
 #'
 #' @details
-#' The geometry type and the property schema are taken from the file header.
-#' If the header carries no column information, up to 1000 features are scanned
-#' to infer one.
-#'
 #' Passing `bbox` uses the file's packed Hilbert R-tree index to skip features
 #' that fall outside it, so a spatial subset does not read the whole file.
-#'
 #' Features come back in the order the file stores them, which for an indexed
-#' file is Hilbert R-tree order rather than the order they were written in.
+#' file is that R-tree order rather than the order they were written in.
 #'
 #' @param path path to a `.fgb` file.
 #' @param bbox optionally a length 4 numeric vector of `c(xmin, ymin, xmax, ymax)`
@@ -1701,19 +2068,28 @@ ga_points_along_line <- function(start, end, max_distance, include_ends, metric)
 #'   columns followed by a `geometry` column.
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' path <- tempfile(fileext = ".fgb")
-#' sf::st_write(sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE),
-#'              path, quiet = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' sf::st_write(
+#'   sf::st_read(fp, quiet = TRUE),
+#'   path,
+#'   quiet = TRUE
+#' )
 #'
-#' df <- as.data.frame(read_flatgeobuf(path))
-#' dim(df)
+#' # read into a nanoarrow array stream
+#' res <- read_flatgeobuf(path)
+#' res
 #'
-#' # only the features intersecting the box
-#' nrow(as.data.frame(read_flatgeobuf(path, c(-79, 35, -78, 36))))
+#' # convert to a df
+#' df <- as.data.frame(res)
+#' head(df)
+#'
+#' # only the features intersecting a box
+#' head(as.data.frame(read_flatgeobuf(path, c(-79, 35, -78, 36))))
 #' @export
 #' @family io
 read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path, bbox)
 
-#' Read a GeoJSON FeatureCollection into a record batch stream
+#' Read a GeoJSON FeatureCollection
 #'
 #' Reads the geometries together with the feature properties. Properties are
 #' untyped in GeoJSON, so each column's arrow type is inferred by scanning
@@ -1760,12 +2136,20 @@ read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path
 #'   property columns followed by a `geometry` column.
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' path <- tempfile(fileext = ".geojson")
-#' sf::st_write(sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE),
-#'              path, quiet = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' sf::st_write(
+#'   sf::st_read(fp, quiet = TRUE),
+#'   path,
+#'   quiet = TRUE
+#' )
 #'
-#' df <- as.data.frame(read_geojson(path))
-#' dim(df)
-#' head(df[, c("NAME", "BIR74", "geometry")], 3)
+#' # read into a nanoarrow array stream
+#' res <- read_geojson(path)
+#' res
+#'
+#' # convert to a df
+#' df <- as.data.frame(res)
+#' head(df)
 #' @export
 #' @family io
 read_geojson <- function(path) .Call(wrap__read_geojson, path)
@@ -1802,11 +2186,14 @@ read_geojson <- function(path) .Call(wrap__read_geojson, path)
 #'   `.dbf` attribute columns followed by a `geometry` column.
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' path <- system.file("shape/nc.shp", package = "sf")
-#' df <- as.data.frame(read_shapefile(path))
 #'
-#' # the .dbf attribute columns, followed by `geometry`
-#' dim(df)
-#' head(df[, c("NAME", "BIR74", "geometry")], 3)
+#' # read into a nanoarrow array stream
+#' res <- read_shapefile(path)
+#' res
+#'
+#' # convert to a df
+#' df <- as.data.frame(res)
+#' head(df)
 #' @export
 #' @family io
 read_shapefile <- function(path) .Call(wrap__read_shapefile, path)
@@ -1831,13 +2218,11 @@ read_shapefile <- function(path) .Call(wrap__read_shapefile, path)
 #' @family validation
 #' @references [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' good <- sf::st_polygon(list(matrix(
-#'   c(0, 0, 2, 0, 2, 2, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-#' )))
-#' bowtie <- sf::st_polygon(list(matrix(
-#'   c(0, 0, 2, 2, 2, 0, 0, 2, 0, 0), ncol = 2, byrow = TRUE
-#' )))
-#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bowtie))
+#' square <- rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))
+#' bowtie <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
+#' good <- sf::st_polygon(list(square))
+#' bad <- sf::st_polygon(list(bowtie))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(good, bad))
 #'
 #' as.vector(ga_is_valid(g))
 #' as.vector(ga_validation_error(g))
@@ -1856,10 +2241,9 @@ ga_is_valid <- function(geometry) .Call(wrap__ga_is_valid, geometry)
 #' @export
 #' @rdname validation
 #' @family validation
-#' @references [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
 ga_validation_error <- function(geometry) .Call(wrap__ga_validation_error, geometry)
 
-#' Compute Voronoi cells from the vertices of geometries
+#' Voronoi cells from geometry vertices
 #'
 #' Returns one multipolygon per input geometry, whose parts are the Voronoi
 #' cells of that geometry's vertices. The output has the same length as the
@@ -1897,7 +2281,7 @@ ga_validation_error <- function(geometry) .Call(wrap__ga_validation_error, geome
 #' lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(cells)))
 ga_voronoi_cells <- function(geometry, clip = "padded", tolerance = 0, boundary = NULL) .Call(wrap__ga_voronoi_cells, geometry, clip, tolerance, boundary)
 
-#' Compute Voronoi edges from the vertices of geometries
+#' Voronoi edges from geometry vertices
 #'
 #' Returns one multilinestring per input geometry, whose parts are the
 #' boundaries between that geometry's Voronoi cells. The output has the same
@@ -1945,9 +2329,8 @@ ga_voronoi_edges <- function(geometry, clip = "padded", tolerance = 0, boundary 
 #' @references [Orient](https://docs.rs/geo/latest/geo/algorithm/orient/trait.Orient.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' # a clockwise square
-#' p <- sf::st_polygon(list(matrix(
-#'   c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE
-#' )))
+#' ring <- rbind(c(0, 0), c(0, 1), c(1, 1), c(1, 0), c(0, 0))
+#' p <- sf::st_polygon(list(ring))
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(p))
 #'
 #' ga_winding_order(g)
@@ -2007,7 +2390,6 @@ ga_is_ccw <- function(geometry) .Call(wrap__ga_is_ccw, geometry)
 #' @family winding
 ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 
-#' A packed Hilbert R-tree over the bounding boxes of a geometry array.
 #' A spatial index over a geometry array
 #'
 #' Indexes the bounding box of each geometry so that queries can skip the rows
@@ -2168,5 +2550,92 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 
 #' @export
 `[[.RTree` <- `$.RTree`
+
+#' A k-d tree over a point array
+#'
+#' Finds which points sit in a box, or near another point.
+#'
+#' @returns a `KDTree` object
+#' @export
+#' @family index
+#' @references [geo-index](https://docs.rs/geo-index/latest/geo_index/kdtree/index.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' fp <- system.file("shape/nc.shp", package = "sf")
+#' nc <- as.data.frame(read_shapefile(fp))
+#' pts <- ga_centroid(nc$geometry)
+#' idx <- KDTree$new(pts)
+#'
+#' # every centroid within half a degree of every other
+#' head(as.vector(idx$within(pts, 0.5)), 3)
+#'
+#' # a single lookup is an array of one
+#' as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+#' @section Methods:
+#'\subsection{Method `new`}{
+#'Build the index. A bigger `node_size` builds quicker but searches slower.
+#'}
+#'
+#'\subsection{Method `range`}{
+#'Which points fall inside each geometry's box
+#'
+#' \subsection{Arguments}{
+#'\describe{
+#'\item{`geometry`}{a GeoArrow array to look up}
+#'}}
+#' \subsection{returns}{
+#'a list array of 1 based row numbers, the same length as
+#'`geometry`
+#'}
+#'}
+#'
+#'\subsection{Method `within`}{
+#'Which points are within `r` of each point, measured flat in coordinate units
+#'
+#' \subsection{Arguments}{
+#'\describe{
+#'\item{`geometry`}{a GeoArrow point array to look up}
+#'\item{`r`}{the radius; length 1 or the same length as `geometry`}
+#'}}
+#' \subsection{returns}{
+#'a list array of 1 based row numbers, the same length as
+#'`geometry`
+#'}
+#'}
+#'
+#'\subsection{Method `size`}{
+#'How many rows went in
+#'
+#' \subsection{returns}{
+#'the length of the array the index was built from
+#'}
+#'}
+#'
+#'\subsection{Method `n_indexed`}{
+#'How many rows made it into the tree, skipping null and empty points
+#'
+#' \subsection{returns}{
+#'the number of indexed rows
+#'}
+#'}
+#'
+KDTree <- new.env(parent = emptyenv())
+
+KDTree$new <- function(geometry, node_size = 64) .Call(wrap__KDTree__new, geometry, node_size)
+
+KDTree$range <- function(geometry) .Call(wrap__KDTree__range, self, geometry)
+
+KDTree$within <- function(geometry, r) .Call(wrap__KDTree__within, self, geometry, r)
+
+KDTree$size <- function() .Call(wrap__KDTree__size, self)
+
+KDTree$n_indexed <- function() .Call(wrap__KDTree__n_indexed, self)
+
+#' @rdname KDTree
+#' @usage NULL
+#' @export
+`$.KDTree` <- function (self, name) { func <- KDTree[[name]]; environment(func) <- environment(); func }
+
+#' @export
+`[[.KDTree` <- `$.KDTree`
 
 # nolint end

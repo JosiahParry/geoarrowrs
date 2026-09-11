@@ -54,6 +54,14 @@ fn constrained_of(
 /// @export
 /// @family triangulate
 /// @references [TriangulateEarcut](https://docs.rs/geo/latest/geo/algorithm/triangulate_earcut/trait.TriangulateEarcut.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # one multipolygon of triangles per county, so length is preserved
+/// tri <- ga_triangulate_earcut(nc$geometry)
+/// tri$length
+/// head(as.vector(ga_n_coords(tri)), 3)
 #[extendr]
 fn ga_triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -83,7 +91,7 @@ fn ga_triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
     bldr.finish().into_arrow_robj()
 }
 
-/// Triangulate geometries with a Delaunay triangulation
+/// Delaunay triangulation
 ///
 /// Returns one multipolygon per input geometry, whose parts are that
 /// geometry's triangles. The output has the same length as the input.
@@ -107,6 +115,18 @@ fn ga_triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
 /// @export
 /// @family triangulate
 /// @references [TriangulateDelaunay](https://docs.rs/geo/latest/geo/algorithm/triangulate_delaunay/trait.TriangulateDelaunay.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # constrained keeps the triangles inside the county boundary
+/// tri <- ga_triangulate_delaunay(nc$geometry)
+/// tri$length
+///
+/// # unconstrained fills the convex hull instead, so it covers more
+/// hull <- ga_triangulate_delaunay(nc$geometry, constrained = FALSE)
+/// head(as.vector(ga_unsigned_area(tri)), 3)
+/// head(as.vector(ga_unsigned_area(hull)), 3)
 #[extendr]
 fn ga_triangulate_delaunay(
     x: Robj,

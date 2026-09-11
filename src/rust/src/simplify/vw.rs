@@ -12,7 +12,7 @@ use geoarrow::{
 };
 use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
-/// Simplify geometries using the Visvalingam-Whyatt algorithm
+/// Simplify with Visvalingam-Whyatt
 ///
 /// Reduces the number of points in each geometry by removing vertices whose
 /// effective area is below `epsilon`. Accepts linestrings, multilinestrings,
@@ -25,6 +25,13 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 /// @rdname ga_simplify_vw
 /// @family simplify
 /// @references [SimplifyVw](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVw.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # epsilon is an area here, not a distance as in ga_simplify()
+/// head(as.vector(ga_n_coords(nc$geometry)), 3)
+/// head(as.vector(ga_n_coords(ga_simplify_vw(nc$geometry, 0.001))), 3)
 #[extendr]
 fn ga_simplify_vw(geometry: Robj, epsilon: Robj) -> extendr_api::Result<Robj> {
     let eps = try_float_array(epsilon, "epsilon")?;

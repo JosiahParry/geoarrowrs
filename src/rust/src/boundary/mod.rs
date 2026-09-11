@@ -12,7 +12,7 @@ use geoarrow_array::GeoArrowArray;
 
 use crate::{as_geo_geometries, as_geometry_chunks};
 
-/// Compute the axis-aligned bounding rectangle of geometries
+/// Axis-aligned bounding rectangle
 ///
 /// Returns the smallest axis-aligned rectangle that contains each geometry.
 ///
@@ -21,6 +21,11 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// @export
 /// @family boundary
 /// @references [BoundingRect](https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// head(geoarrow::as_geoarrow_vctr(ga_bounding_rect(nc$geometry)), 3)
 #[extendr]
 fn ga_bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -42,7 +47,7 @@ fn ga_bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
     bldr.finish().into_arrow_robj()
 }
 
-/// Compute the minimum rotated bounding rectangle of geometries
+/// Minimum rotated bounding rectangle
 ///
 /// Returns the smallest rectangle of arbitrary rotation that contains each
 /// geometry, as a polygon array.
@@ -52,6 +57,14 @@ fn ga_bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
 /// @export
 /// @family boundary
 /// @references [MinimumRotatedRect](https://docs.rs/geo/latest/geo/algorithm/minimum_rotated_rect/trait.MinimumRotatedRect.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # free to rotate, so it hugs the county tighter than the envelope
+/// rot <- ga_minimum_rotated_rect(nc$geometry)
+/// head(as.vector(ga_unsigned_area(rot)), 3)
+/// head(as.vector(ga_unsigned_area(ga_bounding_rect(nc$geometry))), 3)
 #[extendr]
 fn ga_minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -82,6 +95,13 @@ fn ga_minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
 /// @export
 /// @family boundary
 /// @references [ConvexHull](https://docs.rs/geo/latest/geo/algorithm/convex_hull/trait.ConvexHull.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # the hull fills in every concavity, so it is never smaller
+/// head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
+/// head(as.vector(ga_unsigned_area(nc$geometry)), 3)
 #[extendr]
 fn ga_convex_hull(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;

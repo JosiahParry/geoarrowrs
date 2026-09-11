@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_voronoi_cells}
 \alias{ga_voronoi_cells}
-\title{Compute Voronoi cells from the vertices of geometries}
+\title{Voronoi cells from geometry vertices}
 \usage{
 ga_voronoi_cells(geometry, clip = "padded", tolerance = 0, boundary = NULL)
 }

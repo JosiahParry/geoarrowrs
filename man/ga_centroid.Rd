@@ -15,6 +15,14 @@ a GeoArrow point array
 \description{
 Returns the centroid point of each geometry. Returns \code{NA} for empty geometries.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+head(geoarrow::as_geoarrow_vctr(ga_centroid(nc$geometry)), 3)
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/centroid/trait.Centroid.html}{Centroid}
 }

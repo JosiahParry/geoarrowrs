@@ -13,7 +13,7 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
 use crate::{as_point_chunks, check_pair_len, check_recycle_len, try_float_array};
 
-/// Interpolate a point at a given distance between two points
+/// Interpolate a point between two points
 ///
 /// Returns the point located at `distance` along the path from `start` to `end`.
 /// The metric determines how distance is measured.
@@ -27,6 +27,17 @@ use crate::{as_point_chunks, check_pair_len, check_recycle_len, try_float_array}
 /// @rdname interpolate_between
 /// @family interpolate
 /// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// start <- ga_xy(c(0, 0), c(0, 0))
+/// end <- ga_xy(c(10, 10), c(0, 0))
+///
+/// # three units along, then a third of the way along
+/// geoarrow::as_geoarrow_vctr(
+///   ga_point_at_distance_between(start, end, c(3, 3), "euclidean")
+/// )
+/// geoarrow::as_geoarrow_vctr(
+///   ga_point_at_ratio_between(start, end, c(1 / 3, 1 / 3), "euclidean")
+/// )
 #[extendr]
 fn ga_point_at_distance_between(
     start: Robj,
@@ -94,7 +105,6 @@ fn ga_point_at_distance_between(
 /// @export
 /// @rdname interpolate_between
 /// @family interpolate
-/// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #[extendr]
 fn ga_point_at_ratio_between(
     start: Robj,
@@ -147,7 +157,7 @@ fn ga_point_at_ratio_between(
     res.into_arrow_robj()
 }
 
-/// Generate points at regular intervals along the line between two points
+/// Points at regular intervals along a line
 ///
 /// Returns a multipoint array where each element contains all points spaced
 /// at most `max_distance` apart along the path from `start` to `end`.
@@ -161,6 +171,14 @@ fn ga_point_at_ratio_between(
 /// @export
 /// @family interpolate
 /// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// start <- ga_xy(0, 0)
+/// end <- ga_xy(10, 0)
+///
+/// # one multipoint row, spaced at most 3 units apart
+/// geoarrow::as_geoarrow_vctr(
+///   ga_points_along_line(start, end, 3, TRUE, "euclidean")
+/// )
 #[extendr]
 fn ga_points_along_line(
     start: Robj,

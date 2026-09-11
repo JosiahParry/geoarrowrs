@@ -22,27 +22,31 @@ shapefile and GeoJSON readers this one streams, so the whole file is never
 held in memory at once.
 }
 \details{
-The geometry type and the property schema are taken from the file header.
-If the header carries no column information, up to 1000 features are scanned
-to infer one.
-
 Passing \code{bbox} uses the file's packed Hilbert R-tree index to skip features
 that fall outside it, so a spatial subset does not read the whole file.
-
 Features come back in the order the file stores them, which for an indexed
-file is Hilbert R-tree order rather than the order they were written in.
+file is that R-tree order rather than the order they were written in.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 path <- tempfile(fileext = ".fgb")
-sf::st_write(sf::st_read(system.file("shape/nc.shp", package = "sf"), quiet = TRUE),
-             path, quiet = TRUE)
+fp <- system.file("shape/nc.shp", package = "sf")
+sf::st_write(
+  sf::st_read(fp, quiet = TRUE),
+  path,
+  quiet = TRUE
+)
 
-df <- as.data.frame(read_flatgeobuf(path))
-dim(df)
+# read into a nanoarrow array stream
+res <- read_flatgeobuf(path)
+res
 
-# only the features intersecting the box
-nrow(as.data.frame(read_flatgeobuf(path, c(-79, 35, -78, 36))))
+# convert to a df
+df <- as.data.frame(res)
+head(df)
+
+# only the features intersecting a box
+head(as.data.frame(read_flatgeobuf(path, c(-79, 35, -78, 36))))
 \dontshow{\}) # examplesIf}
 }
 \seealso{

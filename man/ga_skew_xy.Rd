@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_skew_xy}
 \alias{ga_skew_xy}
-\title{Skew geometries independently in x and y about their centroid}
+\title{Skew geometries in x and y}
 \usage{
 ga_skew_xy(geometry, degrees_x, degrees_y)
 }
@@ -20,6 +20,16 @@ a GeoArrow array of the same geometry type as the input
 Shears each geometry by \code{degrees_x} along the x dimension and \code{degrees_y}
 along the y dimension, about the geometry's own centroid. The geometry type
 of the output matches the geometry type of the input.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+
+# shear along x only, leaving y untouched
+geoarrow::as_geoarrow_vctr(ga_skew_xy(sq, 30, 0))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html}{Skew}

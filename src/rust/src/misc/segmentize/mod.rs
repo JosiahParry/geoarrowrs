@@ -11,7 +11,7 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
 use crate::as_linestring_chunks;
 
-/// Split linestrings into a given number of equal-length segments
+/// Split linestrings into equal segments
 ///
 /// Divides each linestring into `segment_count` segments of equal length,
 /// returning a multilinestring. Returns `NA` if segmentation fails.
@@ -25,6 +25,13 @@ use crate::as_linestring_chunks;
 /// @rdname ga_line_segmentize
 /// @family misc
 /// @references [LineStringSegmentize](https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentize.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(9, 0)))
+/// ))
+///
+/// # one multilinestring of three equal pieces
+/// geoarrow::as_geoarrow_vctr(ga_line_segmentize(line, 3))
 #[extendr]
 fn ga_line_segmentize(geometry: Robj, segment_count: i32) -> extendr_api::Result<Robj> {
     if segment_count <= 0 {

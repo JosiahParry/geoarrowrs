@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_dist_hausdorff_pairwise}
 \alias{ga_dist_hausdorff_pairwise}
-\title{Compute the pairwise Hausdorff distance between geometries}
+\title{Pairwise Hausdorff distance}
 \usage{
 ga_dist_hausdorff_pairwise(origin, dest)
 }
@@ -17,6 +17,15 @@ a double vector of Hausdorff distance values
 \description{
 The Hausdorff distance measures how far two geometries are from each other
 by taking the maximum of all minimum distances between points on the two shapes.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# how far apart are neighbouring counties at their worst?
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+as.vector(ga_dist_hausdorff_pairwise(nc$geometry[1:5], nc$geometry[2:6]))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/hausdorff_distance/trait.HausdorffDistance.html}{HausdorffDistance}

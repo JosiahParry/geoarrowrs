@@ -19,6 +19,17 @@ Shears each geometry by \code{degrees} along both the x and y dimensions, about
 the geometry's own centroid. The geometry type of the output matches the
 geometry type of the input.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+))
+
+# a shear leaves the area unchanged
+geoarrow::as_geoarrow_vctr(ga_skew(sq, 30))
+as.vector(ga_unsigned_area(ga_skew(sq, 30)))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/skew/trait.Skew.html}{Skew}
 }

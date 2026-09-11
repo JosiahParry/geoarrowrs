@@ -19,6 +19,19 @@ Applies Chaikin's corner-cutting algorithm for the given number of iterations
 to produce smoother curves. Accepts linestrings, multilinestrings, polygons,
 and multipolygons.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+zigzag <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(1, 2), c(2, 0), c(3, 2)))
+))
+
+# each iteration cuts every corner, so the vertex count grows
+as.vector(ga_n_coords(zigzag))
+as.vector(ga_n_coords(ga_chaikin_smoothing(zigzag, 2)))
+
+geoarrow::as_geoarrow_vctr(ga_chaikin_smoothing(zigzag, 1))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/chaikin_smoothing/trait.ChaikinSmoothing.html}{ChaikinSmoothing}
 }

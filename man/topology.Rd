@@ -12,7 +12,7 @@
 \alias{ga_crosses}
 \alias{ga_overlaps}
 \alias{ga_equals_topo}
-\title{Test a topological relationship between two geometry arrays}
+\title{Test a topological relationship}
 \usage{
 ga_contains(x, y)
 
@@ -85,6 +85,8 @@ Other topology:
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
-\code{\link[=ga_relate]{ga_relate()}}
+\code{\link[=ga_join]{ga_join()}},
+\code{\link[=ga_relate]{ga_relate()}},
+\code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}}
 }
 \concept{topology}

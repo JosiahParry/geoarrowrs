@@ -64,6 +64,14 @@ fn finish_list(
 /// @returns a list array of the same length as `x`, whose elements are GeoArrow arrays
 /// @export
 /// @family cast
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # one list element per county, holding that county's polygon parts
+/// parts <- ga_explode(nc$geometry)
+/// parts$length
+/// head(lengths(as.vector(parts)))
 #[extendr]
 fn ga_explode(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -200,6 +208,13 @@ fn ga_explode(x: Robj) -> extendr_api::Result<Robj> {
 /// @returns a GeoArrow array holding every part, flattened
 /// @export
 /// @family cast
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// fp <- system.file("shape/nc.shp", package = "sf")
+/// nc <- as.data.frame(read_shapefile(fp))
+///
+/// # 100 counties in, one row per polygon part out
+/// length(nc$geometry)
+/// ga_flatten(ga_explode(nc$geometry))$length
 #[extendr]
 fn ga_flatten(x: Robj) -> extendr_api::Result<Robj> {
     let data = arrow::array::ArrayData::from_arrow_robj(&x)

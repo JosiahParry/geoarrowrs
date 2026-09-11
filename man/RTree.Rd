@@ -3,8 +3,7 @@
 \name{RTree}
 \alias{RTree}
 \alias{$.RTree}
-\title{A packed Hilbert R-tree over the bounding boxes of a geometry array.
-A spatial index over a geometry array}
+\title{A spatial index over a geometry array}
 \usage{
 RTree
 }
@@ -155,6 +154,7 @@ as.vector(idx$neighbors(-79, 35, max_results = 3))
 }
 \seealso{
 Other index:
+\code{\link{KDTree}},
 \code{\link[=ga_envelope]{ga_envelope()}}
 }
 \concept{index}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_relate}
 \alias{ga_relate}
-\title{Compute the DE-9IM relationship between two geometry arrays}
+\title{DE-9IM relationship between geometries}
 \usage{
 ga_relate(x, y)
 }
@@ -43,6 +43,8 @@ Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
-\code{\link[=ga_is_empty]{ga_is_empty()}}
+\code{\link[=ga_is_empty]{ga_is_empty()}},
+\code{\link[=ga_join]{ga_join()}},
+\code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}}
 }
 \concept{topology}

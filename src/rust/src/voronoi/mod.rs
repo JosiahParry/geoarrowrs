@@ -64,7 +64,7 @@ fn clip_for<'a>(
     }
 }
 
-/// Compute Voronoi cells from the vertices of geometries
+/// Voronoi cells from geometry vertices
 ///
 /// Returns one multipolygon per input geometry, whose parts are the Voronoi
 /// cells of that geometry's vertices. The output has the same length as the
@@ -147,7 +147,7 @@ fn ga_voronoi_cells(
     bldr.finish().into_arrow_robj()
 }
 
-/// Compute Voronoi edges from the vertices of geometries
+/// Voronoi edges from geometry vertices
 ///
 /// Returns one multilinestring per input geometry, whose parts are the
 /// boundaries between that geometry's Voronoi cells. The output has the same

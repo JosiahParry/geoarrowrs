@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_downcast_geometry}
 \alias{ga_downcast_geometry}
-\title{Cast geometries to the narrowest type that fits them}
+\title{Cast to the narrowest geometry type}
 \usage{
 ga_downcast_geometry(x)
 }
@@ -21,6 +21,15 @@ type fits.
 \details{
 This is the inverse of casting up to \code{geometry}, and is useful after
 reading a format that does not record a single geometry type.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+pts <- ga_xy(c(0, 1), c(0, 1))
+wide <- ga_cast_geometry(pts, "geometry")
+
+# only points in there, so it narrows back to a point array
+ga_downcast_geometry(wide)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 Other cast:

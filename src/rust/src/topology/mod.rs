@@ -67,7 +67,7 @@ fn relate_predicate(
     bldr.finish().into_data().into_arrow_robj()
 }
 
-/// Test a topological relationship between two geometry arrays
+/// Test a topological relationship
 ///
 /// Each function compares `x` and `y` row by row and returns `TRUE` when the
 /// named DE-9IM relationship holds. `y` is recycled against `x`.
@@ -190,7 +190,7 @@ fn ga_equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
     relate_predicate(x, y, IntersectionMatrix::is_equal_topo)
 }
 
-/// Compute the DE-9IM relationship between two geometry arrays
+/// DE-9IM relationship between geometries
 ///
 /// Returns the nine character DE-9IM matrix describing how each pair of
 /// geometries relates, from which every named predicate can be derived.
@@ -351,14 +351,12 @@ fn ga_is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
 /// @family topology
 /// @references [CoordinatePosition](https://docs.rs/geo/latest/geo/algorithm/coordinate_position/trait.CoordinatePosition.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// square <- sf::st_polygon(list(
-///   matrix(c(0, 0, 4, 0, 4, 4, 0, 4, 0, 0), ncol = 2, byrow = TRUE)
-/// ))
+/// ring <- rbind(c(0, 0), c(4, 0), c(4, 4), c(0, 4), c(0, 0))
+/// square <- sf::st_polygon(list(ring))
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(square, square, square))
-/// p <- geoarrow::as_geoarrow_array(sf::st_sfc(
-///   sf::st_point(c(2, 2)), sf::st_point(c(0, 2)), sf::st_point(c(9, 9))
-/// ))
 ///
+/// # inside, on the edge, and outside
+/// p <- ga_xy(c(2, 0, 9), c(2, 2, 9))
 /// as.vector(ga_coordinate_position(g, p))
 #[extendr]
 fn ga_coordinate_position(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {

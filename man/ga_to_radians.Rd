@@ -20,6 +20,13 @@ output matches the geometry type of the input.
 Only the x and y coordinates are converted. Z and M values are dropped,
 since the conversion goes through a two dimensional representation.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+deg <- ga_xy(c(0, 45), c(0, 90))
+
+geoarrow::as_geoarrow_vctr(ga_to_radians(deg))
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToRadians.html}{ToRadians}
 }

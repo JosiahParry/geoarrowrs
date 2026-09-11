@@ -22,6 +22,14 @@ use crate::{
 /// @export
 /// @family misc
 /// @references [RemoveRepeatedPoints](https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// # the middle vertex is recorded twice
+/// line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(1, 1), c(1, 1), c(2, 2)))
+/// ))
+///
+/// as.vector(ga_n_coords(line))
+/// as.vector(ga_n_coords(ga_remove_repeated_points(line)))
 #[extendr]
 fn ga_remove_repeated_points(geometry: Robj) -> extendr_api::Result<Robj> {
     if let Ok(chunks) = as_linestring_chunks(geometry.clone()) {

@@ -3,7 +3,7 @@
 \name{ga_line_segmentize}
 \alias{ga_line_segmentize}
 \alias{ga_line_segmentize_haversine}
-\title{Split linestrings into a given number of equal-length segments}
+\title{Split linestrings into equal segments}
 \usage{
 ga_line_segmentize(geometry, segment_count)
 
@@ -22,6 +22,16 @@ Divides each linestring into \code{segment_count} segments of equal length,
 returning a multilinestring. Returns \code{NA} if segmentation fails.
 \code{ga_line_segmentize_haversine()} uses the Haversine formula for geographic
 coordinates; \code{ga_line_segmentize()} uses planar Euclidean distance.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+  sf::st_linestring(rbind(c(0, 0), c(9, 0)))
+))
+
+# one multilinestring of three equal pieces
+geoarrow::as_geoarrow_vctr(ga_line_segmentize(line, 3))
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/linestring_segment/trait.LineStringSegmentize.html}{LineStringSegmentize}

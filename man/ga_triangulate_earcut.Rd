@@ -27,6 +27,17 @@ Earcut is fast and respects interior rings, but the triangles it produces
 are not Delaunay. Use \code{\link[=ga_triangulate_delaunay]{ga_triangulate_delaunay()}} when triangle quality
 matters.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# one multipolygon of triangles per county, so length is preserved
+tri <- ga_triangulate_earcut(nc$geometry)
+tri$length
+head(as.vector(ga_n_coords(tri)), 3)
+\dontshow{\}) # examplesIf}
+}
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/triangulate_earcut/trait.TriangulateEarcut.html}{TriangulateEarcut}
 }

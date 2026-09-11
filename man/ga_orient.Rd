@@ -30,9 +30,8 @@ its coordinates are stored in. A null geometry stays null.
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 # a clockwise square
-p <- sf::st_polygon(list(matrix(
-  c(0, 0, 0, 1, 1, 1, 1, 0, 0, 0), ncol = 2, byrow = TRUE
-)))
+ring <- rbind(c(0, 0), c(0, 1), c(1, 1), c(1, 0), c(0, 0))
+p <- sf::st_polygon(list(ring))
 g <- geoarrow::as_geoarrow_array(sf::st_sfc(p))
 
 ga_winding_order(g)

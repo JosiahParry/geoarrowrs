@@ -39,6 +39,17 @@ Because the length is preserved, the result lines up with the row it came
 from and can sit alongside the other columns of a table. Use \code{\link[=ga_flatten]{ga_flatten()}} to
 collapse it into a single array with one row per part.
 }
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# one list element per county, holding that county's polygon parts
+parts <- ga_explode(nc$geometry)
+parts$length
+head(lengths(as.vector(parts)))
+\dontshow{\}) # examplesIf}
+}
 \seealso{
 Other cast:
 \code{\link[=ga_as_point]{ga_as_point()}},

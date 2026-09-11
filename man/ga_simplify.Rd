@@ -2,7 +2,7 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_simplify}
 \alias{ga_simplify}
-\title{Simplify geometries using the Ramer-Douglas-Peucker algorithm}
+\title{Simplify with Ramer-Douglas-Peucker}
 \usage{
 ga_simplify(geometry, epsilon)
 }
@@ -18,6 +18,17 @@ a GeoArrow array of the same geometry type as the input
 Reduces the number of points in each geometry by removing vertices that
 deviate less than \code{epsilon} from the simplified path. Accepts linestrings,
 multilinestrings, polygons, and multipolygons.
+}
+\examples{
+\dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+fp <- system.file("shape/nc.shp", package = "sf")
+nc <- as.data.frame(read_shapefile(fp))
+
+# a bigger epsilon drops more vertices
+head(as.vector(ga_n_coords(nc$geometry)), 3)
+head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.01))), 3)
+head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.1))), 3)
+\dontshow{\}) # examplesIf}
 }
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/simplify/trait.Simplify.html}{Simplify}

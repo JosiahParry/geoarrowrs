@@ -3,7 +3,7 @@
 \name{ga_closest_point}
 \alias{ga_closest_point}
 \alias{ga_closest_point_haversine}
-\title{Find the point on a geometry closest to another point}
+\title{Closest point on a geometry}
 \usage{
 ga_closest_point(geometry, point)
 
