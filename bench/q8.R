@@ -4,6 +4,13 @@
 # radius, then measures the candidates exactly. Buffering and intersecting
 # instead would undercount, because a buffer approximates its arcs with
 # segments. Counting the matches per building is a group_by in Acero.
+#
+# The query asks for 500m and this passes 0.0045 degrees, which is 500m of
+# latitude and about 414m of longitude at this latitude. That is wrong, and it
+# is what the committed answer measures: Sedona's ST_DWithin is planar on the
+# raw coordinates, so `metric = "euclidean"` is what reproduces it. The right
+# answer for longitude and latitude is `metric = "geodesic"` with 500, which
+# this deliberately does not use, because the point here is to match.
 
 source("bench/setup.R")
 
@@ -13,7 +20,8 @@ b <- scan_cols("building", c("b_buildingkey", "b_name"))
 near <- ga_sparse_dwithin(
   geometry("building", "b_boundary"),
   geometry("trip", "t_pickuploc"),
-  0.0045
+  0.0045,
+  metric = "euclidean"
 )
 
 building_row <- left_rows(near)

@@ -36,8 +36,10 @@ Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
+\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_join]{ga_join()}},
 \code{\link[=ga_relate]{ga_relate()}},
-\code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}}
+\code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}},
+\code{\link[=ga_sparse_pairs]{ga_sparse_pairs()}}
 }
 \concept{topology}

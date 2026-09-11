@@ -10,6 +10,8 @@ use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor};
 
 use crate::{as_linestring_chunks, check_recycle_len, geometry_metric, point_metric};
 
+mod cross;
+
 /// Read a linestring argument as one linestring per row, recycled against `n`.
 fn as_recycled_linestrings(
     robj: Robj,
@@ -190,4 +192,5 @@ extendr_module! {
     fn ga_dist_hausdorff_pairwise;
     fn ga_dist_vincenty_pairwise;
     fn ga_dist_frechet_pairwise;
+    use cross;
 }

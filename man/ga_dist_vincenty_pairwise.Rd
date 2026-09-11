@@ -33,6 +33,7 @@ as.vector(ga_dist_vincenty_pairwise(origin, dest))
 }
 \seealso{
 Other distance:
+\code{\link[=ga_cross_distance]{ga_cross_distance()}},
 \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}},
 \code{\link[=ga_dist_frechet_pairwise]{ga_dist_frechet_pairwise()}},
 \code{\link[=ga_dist_hausdorff_pairwise]{ga_dist_hausdorff_pairwise()}}

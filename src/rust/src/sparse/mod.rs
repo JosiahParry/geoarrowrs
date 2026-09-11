@@ -13,6 +13,8 @@ use rayon::prelude::*;
 use std::borrow::Cow;
 mod dwithin;
 mod knn;
+mod metric;
+mod pairs;
 
 use crate::envelope::rects_of;
 use crate::threads::with_pool;
@@ -412,4 +414,5 @@ extendr_module! {
     fn ga_sparse_equals_topo;
     use dwithin;
     use knn;
+    use pairs;
 }

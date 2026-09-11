@@ -29,7 +29,7 @@ ga_knn_join(
 \item{left}{whether to keep rows of \code{x} that match nothing}
 }
 \value{
-a data frame with the columns of \code{x}, the non geometry columns of
+an Arrow table with the columns of \code{x}, the non geometry columns of
 \code{y}, and the distance between each pair
 }
 \description{

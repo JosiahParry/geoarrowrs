@@ -32,6 +32,7 @@ as.vector(ga_dist_hausdorff_pairwise(nc$geometry[1:5], nc$geometry[2:6]))
 }
 \seealso{
 Other distance:
+\code{\link[=ga_cross_distance]{ga_cross_distance()}},
 \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}},
 \code{\link[=ga_dist_frechet_pairwise]{ga_dist_frechet_pairwise()}},
 \code{\link[=ga_dist_vincenty_pairwise]{ga_dist_vincenty_pairwise()}}

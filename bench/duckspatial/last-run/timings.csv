@@ -1,0 +1,51 @@
+"op","n","pkg","seconds","kernel","rows"
+"connect",2,"duckspatial",0.438,NA,2
+"connect",2,"duckspatial (second call)",0.031,NA,2
+"join",100000,"geoarrowrs",0.023,0.02,47309
+"join",100000,"sf",0.663,NA,111132
+"join",100000,"duckspatial",0.333,NA,47309
+"join",1000000,"geoarrowrs",0.108,0.097,472649
+"join",1000000,"sf",6.596,NA,1110506
+"join",1000000,"duckspatial",0.362,NA,472649
+"join",3000000,"geoarrowrs",0.288,0.27,1417547
+"join",3000000,"sf",22.973,NA,3331557
+"join",3000000,"duckspatial",1.034,NA,1417547
+"filter",100000,"geoarrowrs",0.017,0.014,36161
+"filter",100000,"sf",0.761,NA,36156
+"filter",100000,"duckspatial",0.335,NA,36161
+"filter",1000000,"geoarrowrs",0.07,0.062,362117
+"filter",1000000,"sf",7.705,NA,362125
+"filter",1000000,"duckspatial",0.359,NA,362117
+"filter",3000000,"geoarrowrs",0.197,0.179,1085965
+"filter",3000000,"sf",27.487,NA,1086018
+"filter",3000000,"duckspatial",0.971,NA,1085965
+"intersects",100000,"geoarrowrs",0.008,0.005,100000
+"intersects",100000,"sf",0.743,NA,100000
+"intersects",100000,"duckspatial",0.335,NA,47309
+"intersects",1000000,"geoarrowrs",0.041,0.032,1000000
+"intersects",1000000,"sf",7.708,NA,1000000
+"intersects",1000000,"duckspatial",0.563,NA,472649
+"intersects",3000000,"geoarrowrs",0.145,0.126,3000000
+"intersects",3000000,"sf",25.076,NA,3000000
+"intersects",3000000,"duckspatial",2.071,NA,1417547
+"dissolve",100000,"geoarrowrs",0.107,0.09,4
+"dissolve",100000,"sf",0.464,NA,4
+"dissolve",100000,"duckspatial",0.306,NA,4
+"dissolve",1000000,"geoarrowrs",0.373,0.135,4
+"dissolve",1000000,"sf",4.755,NA,4
+"dissolve",1000000,"duckspatial",0.447,NA,4
+"dissolve",3000000,"geoarrowrs",1.161,0.476,4
+"dissolve",3000000,"sf",16.884,NA,4
+"dissolve",3000000,"duckspatial",1.498,NA,4
+"distance",1000,"geoarrowrs",0.017,0.005,1000
+"distance",1000,"geoarrowrs (geodesic)",0.059,0.058,1000
+"distance",1000,"sf",0.283,NA,1000
+"distance",1000,"duckspatial",0.315,NA,1e+06
+"distance",5000,"geoarrowrs",0.129,0.128,5000
+"distance",5000,"geoarrowrs (geodesic)",1.487,1.486,5000
+"distance",5000,"sf",6.766,NA,5000
+"distance",5000,"duckspatial",1.968,NA,2.5e+07
+"distance",10000,"geoarrowrs",0.572,0.571,10000
+"distance",10000,"geoarrowrs (geodesic)",6.484,6.482,10000
+"distance",10000,"sf",30.196,NA,10000
+"distance",10000,"duckspatial",8.367,NA,1e+08

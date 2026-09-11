@@ -15,17 +15,20 @@ sites <- data.frame(
 
 test_that("points join to the county holding them", {
   res <- ga_join(sites, counties, ga_sparse_within)
+  expect_s3_class(res, "Table")
+
+  res <- as.data.frame(res)
   expect_identical(res$site, c("a", "b", "z"))
   expect_identical(res$NAME, c("Wake", "Mecklenburg", NA_character_))
 })
 
 test_that("left = FALSE drops rows that match nothing", {
-  res <- ga_join(sites, counties, ga_sparse_within, left = FALSE)
+  res <- as.data.frame(ga_join(sites, counties, ga_sparse_within, left = FALSE))
   expect_identical(res$site, c("a", "b"))
 })
 
 test_that("a row matching several rows is repeated", {
-  res <- ga_join(counties, counties, ga_sparse_touches)
+  res <- as.data.frame(ga_join(counties, counties, ga_sparse_touches))
   n <- lengths(as.vector(ga_sparse_touches(nc$geometry, nc$geometry)))
   expect_identical(nrow(res), sum(n))
   expect_identical(res$NAME_x, rep.int(counties$NAME, n))
@@ -34,17 +37,20 @@ test_that("a row matching several rows is repeated", {
 test_that("shared names are suffixed and geometry comes from x", {
   res <- ga_join(counties, counties, ga_sparse_touches)
   expect_identical(names(res), c("NAME_x", "geometry", "NAME_y"))
-  expect_s3_class(res$geometry, "geoarrow_vctr")
+  expect_match(
+    res$schema$GetFieldByName("geometry")$type$ToString(),
+    "geoarrow"
+  )
 
   res <- ga_join(counties, counties, ga_sparse_touches, suffix = c("_l", "_r"))
   expect_identical(names(res), c("NAME_l", "geometry", "NAME_r"))
 })
 
 test_that("the default predicate is intersects", {
-  expect_identical(
-    ga_join(sites, counties),
-    ga_join(sites, counties, ga_sparse_intersects)
-  )
+  # the geometry column holds pointers, so it is the attributes that compare
+  default <- as.data.frame(ga_join(sites, counties))
+  explicit <- as.data.frame(ga_join(sites, counties, ga_sparse_intersects))
+  expect_equal(default[c("site", "NAME")], explicit[c("site", "NAME")])
 })
 
 test_that("a frame with no geometry column is an error", {

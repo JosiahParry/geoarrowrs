@@ -45,17 +45,35 @@ check_suffix <- function(suffix, call = rlang::caller_env()) {
 
 #' Bind the matched rows of two frames, suffixing the names they share
 #'
+#' Both sides are taken in Arrow rather than subset in R. Row subsetting a data
+#' frame of a few million rows costs seconds and `Take()` costs milliseconds,
+#' and the result is the Arrow table every other function here returns.
+#' `x_idx` and `y_idx` are zero based, and a null in `y_idx` gives a row of
+#' `NA`, which is what an unmatched row of `x` needs.
+#'
 #' @noRd
-bind_matches <- function(x, y, y_geo_col, x_ids, y_ids, suffix) {
-  y_keep <- y[-y_geo_col]
-  names <- suffix_names(names(x), names(y_keep), suffix)
+bind_matches <- function(x, y, y_geo_col, x_idx, y_idx, suffix) {
+  x_tbl <- arrow::as_arrow_table(x)
+  y_tbl <- arrow::as_arrow_table(y[-y_geo_col])
+  names <- suffix_names(names(x_tbl), names(y_tbl), suffix)
 
-  out <- cbind(
-    rlang::set_names(x[x_ids, , drop = FALSE], names$x),
-    rlang::set_names(y_keep[y_ids, , drop = FALSE], names$y)
-  )
-  rownames(out) <- NULL
+  out <- x_tbl$Take(x_idx)$RenameColumns(names$x)
+  taken <- y_tbl$Take(y_idx)
+  for (i in seq_along(names$y)) {
+    out[[names$y[[i]]]] <- taken[[i]]
+  }
   out
+}
+
+#' The zero based index `Take()` wants, from the one based rows we return
+#'
+#' @noRd
+take_index <- function(rows) {
+  arrow::call_function(
+    "subtract",
+    arrow::as_arrow_array(rows)$cast(arrow::int64()),
+    arrow::Scalar$create(1L, arrow::int64())
+  )
 }
 
 #' Disambiguate the names two joined frames share
@@ -98,7 +116,7 @@ suffix_names <- function(x_names, y_names, suffix) {
 #' @param predicate a sparse predicate, by default [ga_sparse_intersects()]
 #' @param suffix the pair of suffixes added to column names found in both frames
 #' @param left whether to keep rows of `x` that match nothing
-#' @returns a data frame with the columns of `x` followed by the non geometry
+#' @returns an Arrow table with the columns of `x` followed by the non geometry
 #'   columns of `y`
 #' @export
 #' @family topology
@@ -139,29 +157,22 @@ ga_join <- function(
   }
   check_suffix(suffix)
 
-  hits <- as.vector(predicate(x[[x_geo_col]], y[[y_geo_col]]))
-  if (length(hits) != nrow(x)) {
+  hits <- arrow::as_arrow_array(predicate(x[[x_geo_col]], y[[y_geo_col]]))
+  if (hits$length() != nrow(x)) {
     cli::cli_abort(
-      "{.arg predicate} must return one element per row of {.arg x}, not {length(hits)}."
+      "{.arg predicate} must return one element per row of {.arg x}, not {hits$length()}."
     )
   }
 
-  # a null element means no bounding box to search with, which matches nothing
-  hits <- lapply(hits, function(h) if (is.null(h)) integer() else as.integer(h))
-  n <- lengths(hits)
-
-  if (left) {
-    n[n == 0L] <- 1L
-    y_ids <- unlist(lapply(hits, function(h) {
-      if (length(h) == 0L) NA_integer_ else h
-    }))
-  } else {
-    y_ids <- unlist(hits)
-  }
-  x_ids <- rep.int(seq_len(nrow(x)), n)
-  y_ids <- if (is.null(y_ids)) integer() else y_ids
-
-  bind_matches(x, y, y_geo_col, x_ids, y_ids, suffix)
+  pairs <- arrow::as_arrow_array(ga_sparse_pairs(hits, left = left))
+  bind_matches(
+    x,
+    y,
+    y_geo_col,
+    take_index(pairs$GetFieldByName("x")),
+    take_index(pairs$GetFieldByName("y")),
+    suffix
+  )
 }
 
 #' Join two data frames on nearest neighbours
@@ -184,7 +195,7 @@ ga_join <- function(
 #' @param k how many neighbours to attach to each row of `x`
 #' @param max_distance the furthest a neighbour may be, or `NULL` for no limit
 #' @param distance the name of the distance column, or `NULL` to leave it out
-#' @returns a data frame with the columns of `x`, the non geometry columns of
+#' @returns an Arrow table with the columns of `x`, the non geometry columns of
 #'   `y`, and the distance between each pair
 #' @export
 #' @family index
@@ -249,9 +260,75 @@ ga_knn_join <- function(
   x_ids <- rep.int(seq_len(nrow(x)), n)
   y_ids <- if (is.null(y_ids)) integer() else as.integer(y_ids)
 
-  out <- bind_matches(x, y, y_geo_col, x_ids, y_ids, suffix)
+  out <- bind_matches(
+    x,
+    y,
+    y_geo_col,
+    take_index(x_ids),
+    take_index(y_ids),
+    suffix
+  )
   if (!is.null(distance)) {
-    out[[distance]] <- if (is.null(dists)) numeric() else as.numeric(dists)
+    out[[distance]] <- arrow::as_arrow_array(
+      if (is.null(dists)) numeric() else as.numeric(dists)
+    )
   }
   out
+}
+
+#' Keep the rows of a data frame that relate to another spatially
+#'
+#' Filters `x` down to the rows whose geometry relates to any row of `y`. The
+#' columns of `y` are not attached, which is the difference from [ga_join()].
+#'
+#' @details
+#' A row of `x` is kept when the predicate finds it at least one match in `y`,
+#' so `ga_filter(sites, counties, ga_sparse_within)` keeps the sites that fall
+#' in any county. This is `ST_Filter()`, and the same answer as
+#' `ga_join(x, y, predicate, left = FALSE)` with the columns of `y` dropped and
+#' the rows of `x` not repeated.
+#'
+#' @inheritParams ga_join
+#' @returns an Arrow table holding the rows of `x` that matched
+#' @export
+#' @family topology
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' sites <- data.frame(
+#'   site = c("a", "b", "c"),
+#'   geometry = geoarrow::as_geoarrow_vctr(
+#'     ga_xy(c(-78.6, -80.8, 0), c(35.8, 35.2, 0))
+#'   )
+#' )
+#'
+#' # the third site is in the Atlantic, so it goes
+#' ga_filter(sites, nc, ga_sparse_within)
+ga_filter <- function(x, y, predicate = ga_sparse_intersects, ...) {
+  rlang::check_dots_empty()
+
+  x_geo_col <- geometry_column(x)
+  y_geo_col <- geometry_column(y)
+
+  if (!is.function(predicate)) {
+    cli::cli_abort(
+      "{.arg predicate} must be a function, such as {.fn ga_sparse_intersects}."
+    )
+  }
+
+  hits <- arrow::as_arrow_array(predicate(x[[x_geo_col]], y[[y_geo_col]]))
+  if (hits$length() != nrow(x)) {
+    cli::cli_abort(
+      "{.arg predicate} must return one element per row of {.arg x}, not {hits$length()}."
+    )
+  }
+
+  # a null element is a row with no box to search with, which matched nothing
+  keep <- arrow::call_function(
+    "greater",
+    arrow::call_function("list_value_length", hits),
+    arrow::Scalar$create(0L)
+  )
+  arrow::as_arrow_table(x)$Filter(keep)
 }

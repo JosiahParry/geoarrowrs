@@ -3,19 +3,31 @@ use arrow::buffer::{NullBuffer, OffsetBuffer};
 use arrow::datatypes::{DataType, Field, Fields};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::{Distance, Euclidean, Geometry};
+use geo::Geometry;
 use geo_index::rtree::{RTree as GeoRTree, RTreeIndex};
 use rayon::prelude::*;
 use std::sync::Arc;
 
+use super::metric::Metric;
 use super::{as_geoms_and_rects, index_rects};
 use crate::threads::with_pool;
 
 /// The exact distance from one geometry to an indexed row.
-fn distance_to(geom: &Geometry<f64>, ys: &[Option<Geometry<f64>>], row: u32) -> Option<f64> {
-    ys.get(row as usize)?
-        .as_ref()
-        .map(|y| Euclidean.distance(geom, y))
+fn distance_to(
+    metric: Metric,
+    geom: &Geometry<f64>,
+    ys: &[Option<Geometry<f64>>],
+    row: u32,
+) -> Option<f64> {
+    metric.distance(geom, ys.get(row as usize)?.as_ref()?)
+}
+
+/// What a nearest neighbour search is looking for.
+#[derive(Clone, Copy)]
+struct Query {
+    k: usize,
+    max_distance: Option<f64>,
+    metric: Metric,
 }
 
 /// The rows of `y` nearest one geometry, nearest first, each with its distance.
@@ -25,9 +37,13 @@ fn nearest(
     tree: &GeoRTree<f64>,
     positions: &[u32],
     ys: &[Option<Geometry<f64>>],
-    k: usize,
-    max_distance: Option<f64>,
+    query: Query,
 ) -> Vec<(u32, f64)> {
+    let Query {
+        k,
+        max_distance,
+        metric,
+    } = query;
     // the tree ranks by distance to the box, so its k rows only bound the true k
     let centre = rect.center();
     let seed = tree.neighbors(centre.x, centre.y, Some(k), None);
@@ -36,7 +52,7 @@ fn nearest(
         let mut seen = seed
             .iter()
             .filter_map(|i| positions.get(*i as usize).copied())
-            .filter_map(|row| distance_to(geom, ys, row))
+            .filter_map(|row| distance_to(metric, geom, ys, row))
             .collect::<Vec<_>>();
         seen.sort_by(f64::total_cmp);
         if let Some(d) = seen.get(k - 1) {
@@ -47,13 +63,14 @@ fn nearest(
         bound = bound.min(limit);
     }
 
-    // nothing closer than `bound` can sit outside the box grown by `bound`
+    // nothing closer than `bound` can sit outside the box grown to reach it
     let candidates = if bound.is_finite() {
+        let (lon, lat) = metric.pad(bound, rect);
         tree.search(
-            rect.min().x - bound,
-            rect.min().y - bound,
-            rect.max().x + bound,
-            rect.max().y + bound,
+            rect.min().x - lon,
+            rect.min().y - lat,
+            rect.max().x + lon,
+            rect.max().y + lat,
         )
         .into_iter()
         .filter_map(|i| positions.get(i as usize).copied())
@@ -65,7 +82,7 @@ fn nearest(
     let mut found = candidates
         .into_iter()
         .filter_map(|row| {
-            distance_to(geom, ys, row)
+            distance_to(metric, geom, ys, row)
                 .filter(|d| *d <= bound)
                 .map(|d| (row + 1, d))
         })
@@ -118,46 +135,17 @@ fn as_list_array(found: Vec<Option<Vec<(u32, f64)>>>) -> ListArray {
     )
 }
 
-/// Find the rows of `y` nearest each row of `x`
-///
-/// Returns the `k` rows of `y` closest to each row of `x`, nearest first, each
-/// paired with the distance between them. This is the sparse form of a nearest
-/// neighbour search, and the shape [ga_knn_join()] needs.
-///
-/// @details
-/// Distance is Euclidean and measured between the geometries themselves, not
-/// between their bounding boxes, so the nearest edge of a polygon counts rather
-/// than the corner of the box around it. `y` is indexed in a packed Hilbert
-/// R-tree, which narrows the search to the rows that can win before any exact
-/// distance is computed, and the answer is the same as comparing every pair.
-///
-/// A row matches fewer than `k` rows only when `max_distance` rules the rest
-/// out or `y` is shorter than `k`. A null or empty geometry in `x` gives a null
-/// element, and one in `y` is never returned.
-///
-/// @param x a GeoArrow geometry array
-/// @param y a GeoArrow geometry array
-/// @param k how many rows of `y` to return per row of `x`
-/// @param max_distance the furthest a match may be, or `NULL` for no limit
-/// @returns a list array of `row` and `distance` pairs, the same length as `x`,
-///   where `row` is a 1 based row number into `y`
-/// @export
-/// @family index
-/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// nc <- as.data.frame(read_shapefile(
-///   system.file("shape/nc.shp", package = "sf")
-/// ))
-/// sites <- ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
-///
-/// # the three counties nearest each site, with their distances
-/// as.vector(ga_sparse_knn(sites, nc$geometry, k = 3))
+/// Rows of `y` nearest each row of `x`, validated in R
+/// @noRd
 #[extendr]
-fn ga_sparse_knn(
+fn ga_sparse_knn_impl(
     x: Robj,
     y: Robj,
-    #[extendr(default = "1")] k: i32,
-    #[extendr(default = "NULL")] max_distance: Option<f64>,
+    k: i32,
+    max_distance: Option<f64>,
+    metric: &str,
 ) -> extendr_api::Result<Robj> {
+    let metric = Metric::parse(metric)?;
     if k < 1 {
         return Err(Error::Other("`k` must be at least 1".to_string()));
     }
@@ -170,6 +158,14 @@ fn ga_sparse_knn(
 
     let (xs, x_rects) = as_geoms_and_rects(x)?;
     let (ys, y_rects) = as_geoms_and_rects(y)?;
+    metric.check(&xs, "x")?;
+    metric.check(&ys, "y")?;
+
+    let query = Query {
+        k,
+        max_distance,
+        metric,
+    };
 
     let found = match index_rects(&y_rects) {
         Some((tree, positions)) => with_pool(|| {
@@ -179,7 +175,7 @@ fn ga_sparse_knn(
                     let (Some(geom), Some(rect)) = (geom, rect) else {
                         return None;
                     };
-                    Some(nearest(geom, rect, &tree, &positions, &ys, k, max_distance))
+                    Some(nearest(geom, rect, &tree, &positions, &ys, query))
                 })
                 .collect::<Vec<_>>()
         }),
@@ -195,5 +191,5 @@ fn ga_sparse_knn(
 
 extendr_module! {
     mod knn;
-    fn ga_sparse_knn;
+    fn ga_sparse_knn_impl;
 }

@@ -24,9 +24,14 @@ for (query in sprintf("bench/q%d.R", 1:12)) {
     env = paste0("SPATIALBENCH_LOG=", timings)
   )
   cat(out, sep = "\n")
-  # a query that dies writes no row, so say so rather than leaving a short table
   if (!is.null(attr(out, "status"))) {
     stop(query, " exited with status ", attr(out, "status"), call. = FALSE)
+  }
+  # a query has been seen to die, exit clean and print nothing, so the row it
+  # wrote is what says it ran rather than the status it returned
+  name <- tools::file_path_sans_ext(basename(query))
+  if (!file.exists(timings) || !name %in% read.csv(timings)$query) {
+    stop(query, " wrote no result", call. = FALSE)
   }
 }
 

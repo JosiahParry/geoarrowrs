@@ -420,6 +420,44 @@ ga_dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__ga_dist_vincenty
 #' as.vector(ga_dist_frechet_pairwise(direct, detour))
 ga_dist_frechet_pairwise <- function(origin, dest) .Call(wrap__ga_dist_frechet_pairwise, origin, dest)
 
+#' Distance from every row of `x` to every row of `y`
+#'
+#' Measures the full cross product rather than walking the two arrays in
+#' lockstep, giving one list of `length(y)` distances per row of `x`.
+#'
+#' @details
+#' This is the shape [ga_dist_euclidean_pairwise()] cannot express, and it
+#' costs `length(x) * length(y)` distances to hold: ten thousand rows against
+#' ten thousand is a hundred million doubles, or eight hundred megabytes. Where
+#' the distances are only wanted to pick a nearest row or a threshold,
+#' [ga_sparse_knn()] and [ga_sparse_dwithin()] answer that against an R-tree
+#' without ever forming the product.
+#'
+#' `"euclidean"` measures between geometries of any type. The spherical and
+#' ellipsoidal metrics take points only, because `geo` defines them between
+#' points alone. `"vincenty"` gives a null where the algorithm fails to
+#' converge.
+#'
+#' A null row of `x` gives a null element. A null row of `y` gives a null in
+#' that position of every element.
+#'
+#' @param x a GeoArrow geometry array for `metric = "euclidean"`, a point array
+#'   for the others
+#' @param y a GeoArrow array matching `x`
+#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, `"rhumb"`,
+#'   or `"vincenty"`
+#' @returns a list array with one element per row of `x`, each holding
+#'   `length(y)` distances
+#' @export
+#' @family distance
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
+#' x <- ga_xy(c(-78.6382, -80.8431), c(35.7796, 35.2271))
+#' y <- ga_xy(c(-77.9447, -78.6382, -80.8431), c(34.2257, 35.7796, 35.2271))
+#'
+#' # two elements of three distances each, in meters
+#' ga_cross_distance(x, y, "haversine")
+ga_cross_distance <- function(x, y, metric = "euclidean") .Call(wrap__ga_cross_distance, x, y, metric)
+
 #' Collect a geometry's coordinates as points
 #'
 #' Returns one multipoint per input geometry, holding that geometry's
@@ -951,79 +989,43 @@ ga_sparse_overlaps <- function(x, y) .Call(wrap__ga_sparse_overlaps, x, y)
 #' @family topology
 ga_sparse_equals_topo <- function(x, y) .Call(wrap__ga_sparse_equals_topo, x, y)
 
-#' Find which rows of `y` lie within a distance of each row of `x`
-#'
-#' Returns the row numbers of `y` whose geometry is no further than `distance`
-#' from each row of `x`. This is the sparse form of a distance band join, and
-#' the same test as PostGIS `ST_DWithin()`.
-#'
-#' @details
-#' Distance is Euclidean and measured between the geometries themselves, so a
-#' point counts when it is within `distance` of the nearest edge of a polygon,
-#' not of the box around it. This is why it differs from buffering `x` and
-#' intersecting: a buffer approximates its curves with segments, so a point
-#' just inside the true radius can fall outside the buffer.
-#'
-#' The bounding box of each row of `x` is grown by `distance` before the tree
-#' is searched, so nothing within reach is missed and only the rows that could
-#' qualify are measured. `distance` is recycled, so one value covers every row
-#' or a different radius can apply to each.
-#'
-#' A row that matches nothing gives a zero length element, not a null. A null
-#' or empty geometry in `x`, or a null `distance`, gives a null element, and a
-#' null geometry in `y` is never returned.
-#'
-#' @param x a GeoArrow geometry array
-#' @param y a GeoArrow geometry array
-#' @param distance the furthest a row of `y` may be; length 1 or the same
-#'   length as `x`
-#' @returns a list array of 1 based row numbers into `y`, the same length as `x`
-#' @export
-#' @family index
-#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' nc <- as.data.frame(read_shapefile(
-#'   system.file("shape/nc.shp", package = "sf")
-#' ))
-#' sites <- ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
-#'
-#' # the counties within a quarter degree of each site
-#' as.vector(ga_sparse_dwithin(sites, nc$geometry, 0.25))
-ga_sparse_dwithin <- function(x, y, distance) .Call(wrap__ga_sparse_dwithin, x, y, distance)
+#' Rows of `y` within a distance of each row of `x`, validated in R
+#' @noRd
+ga_sparse_dwithin_impl <- function(x, y, distance, metric) .Call(wrap__ga_sparse_dwithin_impl, x, y, distance, metric)
 
-#' Find the rows of `y` nearest each row of `x`
+#' Rows of `y` nearest each row of `x`, validated in R
+#' @noRd
+ga_sparse_knn_impl <- function(x, y, k, max_distance, metric) .Call(wrap__ga_sparse_knn_impl, x, y, k, max_distance, metric)
+
+#' Expand a sparse predicate into the row pairs a join needs
 #'
-#' Returns the `k` rows of `y` closest to each row of `x`, nearest first, each
-#' paired with the distance between them. This is the sparse form of a nearest
-#' neighbour search, and the shape [ga_knn_join()] needs.
+#' Turns the list of matches each sparse predicate returns into two columns,
+#' one row per pair, which is the shape [ga_join()] takes and the shape a
+#' database returns a spatial join in.
 #'
 #' @details
-#' Distance is Euclidean and measured between the geometries themselves, not
-#' between their bounding boxes, so the nearest edge of a polygon counts rather
-#' than the corner of the box around it. `y` is indexed in a packed Hilbert
-#' R-tree, which narrows the search to the rows that can win before any exact
-#' distance is computed, and the answer is the same as comparing every pair.
+#' Everything but the padding is expressible with Arrow's own `list_flatten()`
+#' and `list_parent_indices()`. What they cannot do is `left = TRUE`, which has
+#' to put back a row for each row of `x` that matched nothing, so the whole
+#' expansion happens here rather than half here and half in R.
 #'
-#' A row matches fewer than `k` rows only when `max_distance` rules the rest
-#' out or `y` is shorter than `k`. A null or empty geometry in `x` gives a null
-#' element, and one in `y` is never returned.
+#' Rows are 1 based, matching what the sparse predicates return. A row of `x`
+#' that matched nothing appears once with a null `y` when `left = TRUE`, and
+#' not at all otherwise.
 #'
-#' @param x a GeoArrow geometry array
-#' @param y a GeoArrow geometry array
-#' @param k how many rows of `y` to return per row of `x`
-#' @param max_distance the furthest a match may be, or `NULL` for no limit
-#' @returns a list array of `row` and `distance` pairs, the same length as `x`,
-#'   where `row` is a 1 based row number into `y`
+#' @param hits a list array from one of the sparse predicates
+#' @param left whether to keep the rows of `x` that matched nothing
+#' @returns a struct array of `x` and `y` row numbers
 #' @export
-#' @family index
-#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' nc <- as.data.frame(read_shapefile(
-#'   system.file("shape/nc.shp", package = "sf")
-#' ))
-#' sites <- ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+#' @family topology
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
+#' x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
+#' y <- ga_xy(c(0, 1), c(0, 1))
 #'
-#' # the three counties nearest each site, with their distances
-#' as.vector(ga_sparse_knn(sites, nc$geometry, k = 3))
-ga_sparse_knn <- function(x, y, k = 1, max_distance = NULL) .Call(wrap__ga_sparse_knn, x, y, k, max_distance)
+#' # the middle row of x matches nothing, so it is only there with left = TRUE
+#' ga_sparse_pairs(ga_sparse_intersects(x, y))
+#' ga_sparse_pairs(ga_sparse_intersects(x, y), left = TRUE)
+ga_sparse_pairs <- function(hits, left = FALSE) .Call(wrap__ga_sparse_pairs, hits, left)
 
 #' Test a topological relationship
 #'

@@ -1,0 +1,97 @@
+---
+title: "duckspatial"
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(echo = FALSE)
+
+# pkgdown renders an article from the directory it lives in
+root <- if (file.exists("bench/setup.R")) "." else "../.."
+last_run <- file.path(root, "bench", "duckspatial", "last-run")
+
+timings <- read.csv(file.path(last_run, "timings.csv"))
+machine <- read.csv(file.path(last_run, "machine.csv"))
+
+ops <- c("connect", "join", "filter", "intersects", "dissolve", "distance")
+files <- c(
+  "Shared setup" = "bench/duckspatial/setup.R",
+  stats::setNames(
+    file.path("bench/duckspatial", paste0(ops, ".R")),
+    tools::toTitleCase(ops)
+  )
+)
+
+# connect is a fixed charge rather than a row of the comparison, so it is read
+# out on its own instead of becoming two mostly empty columns
+connect <- timings[timings$op == "connect", ]
+measured <- timings[timings$op != "connect", ]
+
+wide <- stats::reshape(
+  measured[c("op", "n", "pkg", "seconds")],
+  idvar = c("op", "n"),
+  timevar = "pkg",
+  direction = "wide"
+)
+names(wide) <- sub("^seconds\\.", "", names(wide))
+wide <- wide[order(match(wide$op, ops), wide$n), ]
+wide$n <- format(wide$n, scientific = FALSE, big.mark = ",", trim = TRUE)
+```
+
+The five operations of the
+[duckspatial benchmark](https://cidree.github.io/duckspatial/articles/benchmark.html),
+run by `bench/duckspatial/run-all.R` and read back here from
+`bench/duckspatial/last-run/`. Seconds, so lower is better.
+
+```{r}
+knitr::kable(t(machine), col.names = "")
+knitr::kable(wide, row.names = FALSE)
+```
+
+Each implementation is timed until its answer exists in whatever form that
+package keeps answers, starting from the same `sf` objects. The three do not
+all return the same shape, and `rows` in `timings.csv` says what each produced.
+
+```{r}
+#| results: asis
+
+# the accordion of https://pkg.garrickadenbuie.com/quarto-panel-accordion,
+# written out rather than filtered in: that extension steps aside unless quarto
+# supplies bootstrap itself, and pkgdown renders with `theme: none` because the
+# site template brings its own. Divs rather than raw html throughout, so the
+# code blocks inside still reach pandoc and get highlighted.
+accordion <- "duckspatial-accordion"
+fence <- strrep("`", 3)
+
+cat("\n:::::: {.accordion #", accordion, "}\n\n", sep = "")
+
+for (i in seq_along(files)) {
+  id <- paste0(accordion, "-", i)
+  path <- files[[i]]
+
+  cat("::::: {.accordion-item}\n\n")
+  cat('<h3 class="accordion-header">\n')
+  cat(
+    '<button class="accordion-button collapsed" type="button" ',
+    'data-bs-toggle="collapse" data-bs-target="#', id, '" ',
+    'aria-expanded="false" aria-controls="', id, '">',
+    names(files)[[i]],
+    "</button>\n",
+    sep = ""
+  )
+  cat("</h3>\n\n")
+
+  cat(
+    ":::: {#", id, " .accordion-collapse .collapse ",
+    'data-bs-parent="#', accordion, '"}\n\n',
+    sep = ""
+  )
+  cat("::: {.accordion-body}\n\n")
+  cat(fence, '{.r filename="', path, '"}\n', sep = "")
+  cat(readLines(file.path(root, path)), sep = "\n")
+  cat("\n", fence, "\n\n", sep = "")
+  cat(":::\n\n::::\n\n:::::\n\n")
+}
+
+cat("::::::\n")
+```

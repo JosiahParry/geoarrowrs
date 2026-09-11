@@ -137,7 +137,7 @@ test_that("ga_knn_join attaches k rows per row of x with their distance", {
     geometry = geoarrow::as_geoarrow_vctr(ga_xy(c(-78.6, -80.8), c(35.8, 35.2)))
   )
 
-  out <- ga_knn_join(sites, counties, k = 3)
+  out <- as.data.frame(ga_knn_join(sites, counties, k = 3))
 
   expect_equal(nrow(out), 6L)
   expect_equal(out$site, rep(c("a", "b"), each = 3))
@@ -158,8 +158,8 @@ test_that("ga_knn_join keeps unmatched rows only when left", {
     geometry = geoarrow::as_geoarrow_vctr(ga_xy(c(0.5, 100), c(0.5, 100)))
   )
 
-  left <- ga_knn_join(x, y, max_distance = 1)
-  inner <- ga_knn_join(x, y, max_distance = 1, left = FALSE)
+  left <- as.data.frame(ga_knn_join(x, y, max_distance = 1))
+  inner <- as.data.frame(ga_knn_join(x, y, max_distance = 1, left = FALSE))
 
   expect_equal(nrow(left), 2L)
   expect_true(is.na(left$distance[2]))
