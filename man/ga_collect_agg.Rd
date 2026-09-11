@@ -2,25 +2,37 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_collect_agg}
 \alias{ga_collect_agg}
-\title{Collect a whole array into one geometry}
+\title{Collect an array into one geometry, or one per group}
 \usage{
-ga_collect_agg(geometry)
+ga_collect_agg(geometry, sizes = NULL)
 }
 \arguments{
 \item{geometry}{a GeoArrow geometry array}
+
+\item{sizes}{the rows in each group, in order, or \code{NULL} for one group}
 }
 \value{
-a GeoArrow geometry collection array of length 1
+a GeoArrow geometry collection array, of length 1 or of one element
+per group
 }
 \description{
-Gathers every geometry in the array into a single geometry collection,
-returning an array of length 1. This is the aggregate a \code{summarise()} wants,
-not a row by row operation.
+Gathers the geometries into a single geometry collection, returning an array
+of length 1, or one collection per group when \code{sizes} says how the rows are
+grouped. This is the aggregate a \code{summarise()} wants, not a row by row
+operation.
 }
 \details{
 Nothing is dissolved and nothing is reordered, so overlapping parts stay
 overlapping and the collection holds one member per non null input row. Use
 \code{\link[=ga_unary_union]{ga_unary_union()}} to merge overlapping polygons into one outline instead.
+
+\code{sizes} is the number of rows in each group, in order, which is what a
+\code{group_by()} and \code{summarise(n = n())} over the same ordering gives. The rows
+have to already be sorted by the grouping, since the runs are taken as they
+come: group \code{i} of the result is the \code{i}th run of \code{sizes} rows. Nothing is
+returned about the groups themselves, so keep the keys from the same
+\code{summarise()} to say what each row is. \code{NULL} collects everything as one
+group.
 
 Being an aggregate, this is one of the few functions here that does not
 preserve length, and it is not registered as an Arrow kernel: a kernel sees
@@ -36,6 +48,10 @@ pts <- ga_centroid(nc$geometry)
 # every centroid as one geometry, then the shape they span
 collected <- ga_collect_agg(pts)
 as.vector(ga_unsigned_area(ga_convex_hull(collected)))
+
+# the same, in groups of twenty rows
+grouped <- ga_collect_agg(pts, sizes = rep(20, 5))
+as.vector(ga_unsigned_area(ga_convex_hull(grouped)))
 \dontshow{\}) # examplesIf}
 }
 \seealso{

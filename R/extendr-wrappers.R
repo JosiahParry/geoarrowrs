@@ -171,23 +171,34 @@ ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, g
 #' geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
 ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate, geometry, x_offset, y_offset)
 
-#' Collect a whole array into one geometry
+#' Collect an array into one geometry, or one per group
 #'
-#' Gathers every geometry in the array into a single geometry collection,
-#' returning an array of length 1. This is the aggregate a `summarise()` wants,
-#' not a row by row operation.
+#' Gathers the geometries into a single geometry collection, returning an array
+#' of length 1, or one collection per group when `sizes` says how the rows are
+#' grouped. This is the aggregate a `summarise()` wants, not a row by row
+#' operation.
 #'
 #' @details
 #' Nothing is dissolved and nothing is reordered, so overlapping parts stay
 #' overlapping and the collection holds one member per non null input row. Use
 #' [ga_unary_union()] to merge overlapping polygons into one outline instead.
 #'
+#' `sizes` is the number of rows in each group, in order, which is what a
+#' `group_by()` and `summarise(n = n())` over the same ordering gives. The rows
+#' have to already be sorted by the grouping, since the runs are taken as they
+#' come: group `i` of the result is the `i`th run of `sizes` rows. Nothing is
+#' returned about the groups themselves, so keep the keys from the same
+#' `summarise()` to say what each row is. `NULL` collects everything as one
+#' group.
+#'
 #' Being an aggregate, this is one of the few functions here that does not
 #' preserve length, and it is not registered as an Arrow kernel: a kernel sees
 #' one batch at a time and would collect each batch separately.
 #'
 #' @param geometry a GeoArrow geometry array
-#' @returns a GeoArrow geometry collection array of length 1
+#' @param sizes the rows in each group, in order, or `NULL` for one group
+#' @returns a GeoArrow geometry collection array, of length 1 or of one element
+#'   per group
 #' @export
 #' @family aggregate
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
@@ -199,7 +210,11 @@ ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate,
 #' # every centroid as one geometry, then the shape they span
 #' collected <- ga_collect_agg(pts)
 #' as.vector(ga_unsigned_area(ga_convex_hull(collected)))
-ga_collect_agg <- function(geometry) .Call(wrap__ga_collect_agg, geometry)
+#'
+#' # the same, in groups of twenty rows
+#' grouped <- ga_collect_agg(pts, sizes = rep(20, 5))
+#' as.vector(ga_unsigned_area(ga_convex_hull(grouped)))
+ga_collect_agg <- function(geometry, sizes = NULL) .Call(wrap__ga_collect_agg, geometry, sizes)
 
 #' Signed and unsigned planar area
 #'
@@ -935,6 +950,45 @@ ga_sparse_overlaps <- function(x, y) .Call(wrap__ga_sparse_overlaps, x, y)
 #' @rdname sparse
 #' @family topology
 ga_sparse_equals_topo <- function(x, y) .Call(wrap__ga_sparse_equals_topo, x, y)
+
+#' Find which rows of `y` lie within a distance of each row of `x`
+#'
+#' Returns the row numbers of `y` whose geometry is no further than `distance`
+#' from each row of `x`. This is the sparse form of a distance band join, and
+#' the same test as PostGIS `ST_DWithin()`.
+#'
+#' @details
+#' Distance is Euclidean and measured between the geometries themselves, so a
+#' point counts when it is within `distance` of the nearest edge of a polygon,
+#' not of the box around it. This is why it differs from buffering `x` and
+#' intersecting: a buffer approximates its curves with segments, so a point
+#' just inside the true radius can fall outside the buffer.
+#'
+#' The bounding box of each row of `x` is grown by `distance` before the tree
+#' is searched, so nothing within reach is missed and only the rows that could
+#' qualify are measured. `distance` is recycled, so one value covers every row
+#' or a different radius can apply to each.
+#'
+#' A row that matches nothing gives a zero length element, not a null. A null
+#' or empty geometry in `x`, or a null `distance`, gives a null element, and a
+#' null geometry in `y` is never returned.
+#'
+#' @param x a GeoArrow geometry array
+#' @param y a GeoArrow geometry array
+#' @param distance the furthest a row of `y` may be; length 1 or the same
+#'   length as `x`
+#' @returns a list array of 1 based row numbers into `y`, the same length as `x`
+#' @export
+#' @family index
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' sites <- ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+#'
+#' # the counties within a quarter degree of each site
+#' as.vector(ga_sparse_dwithin(sites, nc$geometry, 0.25))
+ga_sparse_dwithin <- function(x, y, distance) .Call(wrap__ga_sparse_dwithin, x, y, distance)
 
 #' Find the rows of `y` nearest each row of `x`
 #'

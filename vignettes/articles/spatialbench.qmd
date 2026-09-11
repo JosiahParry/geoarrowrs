@@ -1,0 +1,74 @@
+---
+title: "SpatialBench"
+---
+
+```{r}
+#| include: false
+knitr::opts_chunk$set(echo = FALSE)
+
+# pkgdown renders an article from the directory it lives in
+root <- if (file.exists("bench/setup.R")) "." else "../.."
+last_run <- file.path(root, "bench", "last-run")
+
+timings <- read.csv(file.path(last_run, "timings.csv"))
+machine <- read.csv(file.path(last_run, "machine.csv"))
+
+queries <- sprintf("bench/q%d.R", seq_len(nrow(timings)))
+files <- c(
+  "Shared setup" = "bench/setup.R",
+  stats::setNames(queries, paste("Query", seq_along(queries)))
+)
+```
+
+The twelve queries of
+[SpatialBench](https://github.com/apache/sedona-spatialbench), run by
+`bench/run-all.R` and read back here from `bench/last-run/`.
+
+```{r}
+knitr::kable(t(machine), col.names = "")
+knitr::kable(timings)
+```
+
+```{r}
+#| results: asis
+
+# the accordion of https://pkg.garrickadenbuie.com/quarto-panel-accordion,
+# written out rather than filtered in: that extension steps aside unless quarto
+# supplies bootstrap itself, and pkgdown renders with `theme: none` because the
+# site template brings its own. Divs rather than raw html throughout, so the
+# code blocks inside still reach pandoc and get highlighted.
+accordion <- "bench-accordion"
+fence <- strrep("`", 3)
+
+cat("\n:::::: {.accordion #", accordion, "}\n\n", sep = "")
+
+for (i in seq_along(files)) {
+  id <- paste0(accordion, "-", i)
+  path <- files[[i]]
+
+  cat("::::: {.accordion-item}\n\n")
+  cat('<h3 class="accordion-header">\n')
+  cat(
+    '<button class="accordion-button collapsed" type="button" ',
+    'data-bs-toggle="collapse" data-bs-target="#', id, '" ',
+    'aria-expanded="false" aria-controls="', id, '">',
+    names(files)[[i]],
+    "</button>\n",
+    sep = ""
+  )
+  cat("</h3>\n\n")
+
+  cat(
+    ":::: {#", id, " .accordion-collapse .collapse ",
+    'data-bs-parent="#', accordion, '"}\n\n',
+    sep = ""
+  )
+  cat("::: {.accordion-body}\n\n")
+  cat(fence, '{.r filename="', path, '"}\n', sep = "")
+  cat(readLines(file.path(root, path)), sep = "\n")
+  cat("\n", fence, "\n\n", sep = "")
+  cat(":::\n\n::::\n\n:::::\n\n")
+}
+
+cat("::::::\n")
+```

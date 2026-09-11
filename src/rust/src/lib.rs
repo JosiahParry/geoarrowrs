@@ -177,14 +177,32 @@ pub(crate) fn as_geo_geometries(
 /// Rows per rayon task. Parsing a geometry is the expensive part, and below this the thread hand off costs more than the parse saves.
 pub(crate) const PAR_MIN_CHUNK: usize = 8192;
 
+/// The fewest rows worth handing to a thread of its own.
+const PAR_CHUNK_FLOOR: usize = 256;
+
+/// Tasks per thread to aim for, so that work stealing has something to steal.
+const PAR_TASKS_PER_THREAD: usize = 16;
+
+/// Rows per rayon task, aiming for several tasks per thread.
+///
+/// A fixed size balances badly when the rows do: a table of polygons can run
+/// from four coordinates to hundreds of thousands, so a few large tasks leave
+/// cores idle behind whichever one drew the biggest geometries. Many smaller
+/// tasks give rayon something to steal.
+fn par_chunk_size(total: usize) -> usize {
+    let target = rayon::current_num_threads().max(1) * PAR_TASKS_PER_THREAD;
+    (total / target.max(1)).clamp(PAR_CHUNK_FLOOR, PAR_MIN_CHUNK)
+}
+
 /// Split the chunks into pieces big enough to be worth a thread each.
 pub(crate) fn par_slices(chunks: &[Arc<dyn GeoArrowArray>]) -> Vec<Arc<dyn GeoArrowArray>> {
+    let size = par_chunk_size(chunks.iter().map(|c| c.len()).sum());
     let mut slices = Vec::new();
     for chunk in chunks {
         let len = chunk.len();
         let mut offset = 0;
         while offset < len {
-            let take = PAR_MIN_CHUNK.min(len - offset);
+            let take = size.min(len - offset);
             slices.push(chunk.slice(offset, take));
             offset += take;
         }

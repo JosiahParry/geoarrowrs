@@ -1,11 +1,17 @@
-# Shared setup for the SpatialBench queries.
+# Helpers for the SpatialBench queries.
 #
 # Queries come from spatialbench-queries/print_queries.py in
 # https://github.com/apache/sedona-spatialbench and the answers from
-# benchmark/answers/sf<n>/q<k>.csv. Each query is its own file, run on its own
-# from the repository root:
+# benchmark/answers/sf<n>/q<k>.csv. Each query is its own file, reads its own
+# tables, and times itself, run from the repository root:
 #
 #   SPATIALBENCH_DATA=~/github/spatialbench-data/v0.1.0 Rscript bench/q1.R
+#
+# Install a release build first. `devtools::load_all()` and `rextendr::document()`
+# set `DEBUG`, which `tools/config.R` turns into a cargo debug build, and geo's
+# relate is roughly ten times slower there:
+#
+#   env -u DEBUG NOT_CRAN=true R CMD INSTALL --no-multiarch .
 #
 # Nothing is brought into R. Relational work runs in Acero, geometry work runs
 # in geoarrowrs, and the two meet as Arrow arrays. The one thing Acero cannot
@@ -13,6 +19,9 @@
 # made by a sparse predicate and handed back as a list array, which
 # `list_parent_indices` and `list_flatten` turn into row pairs without ever
 # materialising them.
+#
+# This file defines functions only. It reads no data and starts no clock, so
+# what a query costs is what the query file itself does.
 
 library(arrow)
 library(dplyr)
@@ -41,10 +50,17 @@ scan_cols <- function(name, columns) {
   Scanner$create(dataset(name), projection = columns)$ToTable()
 }
 
-trip <- dataset("trip")
-building <- dataset("building")
-customer <- dataset("customer")
-zone <- scan_cols("zone", c("z_zonekey", "z_name"))
+#' A stored timestamp, ready to render as the value it holds
+#'
+#' The stored timestamps are naive and the answers read them as UTC. Acero's
+#' `strftime()` renders in the session's own zone unless it is told otherwise,
+#' so every call on one of these has to pass `tz = "UTC"` as well, or the
+#' result silently follows whatever zone the machine is set to. Seconds rather
+#' than milliseconds, because `strftime()` gives a millisecond timestamp a
+#' `.000` the answers do not have.
+utc_time <- function(column) {
+  cast(column, timestamp(unit = "s", timezone = "UTC"))
+}
 
 # the literal shapes two of the queries measure against
 BOX_Q3_WKT <- paste0(
@@ -59,16 +75,27 @@ BOX_Q6_WKT <- paste0(
 #' A literal geometry, as the length 1 array a kernel recycles
 literal <- function(wkt) as_geoarrow_array(wk::wkt(wkt))
 
-#' One geometry column as a GeoArrow array
+#' One geometry column as an Arrow WKB array
 #'
-#' A spatial predicate needs the whole array at once, which is the one thing
-#' Acero cannot hand it.
-geometry <- function(name, column, as = ga_from_wkb) {
+#' The `zone` table stores its geometry as `binary_view`, which has to be cast
+#' before anything will read it.
+wkb <- function(name, column) {
   col <- scan_cols(name, column)[[column]]
   if (grepl("view", col$type$ToString(), fixed = TRUE)) {
     col <- col$cast(arrow::binary())
   }
-  as(as_nanoarrow_array(col))
+  col
+}
+
+#' One geometry column, ready to hand to geoarrowrs
+#'
+#' A spatial predicate needs the whole array at once, which is the one thing
+#' Acero cannot hand it. The WKB goes straight in rather than through
+#' `ga_from_wkb()`: every function here reads WKB, and converting to a native
+#' encoding first parses every coordinate twice, once into the native array and
+#' again into the geometries the predicate walks.
+geometry <- function(name, column) {
+  as_nanoarrow_array(wkb(name, column))
 }
 
 #' Rows of an Arrow column, by the 1 based index a predicate returns
@@ -167,11 +194,36 @@ check <- function(name, got) {
   }
 }
 
-#' Time a query and check it
-run <- function(name, expr) {
-  t0 <- Sys.time()
-  out <- force(expr)
-  cat(sprintf("%s: %.2fs\n", name, as.numeric(Sys.time() - t0, units = "secs")))
-  check(name, out)
-  invisible(out)
+#' Report how long a query took and whether it is right
+#'
+#' `t0` is taken in the query file, so the time covers the reads, the geometry
+#' and the aggregation rather than whichever step happens to come last. With
+#' `SPATIALBENCH_LOG` set the same row is appended there, which is how
+#' `bench/run-all.R` collects a run without parsing this output back.
+report <- function(name, t0, got) {
+  seconds <- as.numeric(Sys.time() - t0, units = "secs")
+  cat(sprintf("%s: %.2fs\n", name, seconds))
+  matches <- check(name, got)
+
+  log <- Sys.getenv("SPATIALBENCH_LOG", "")
+  if (nzchar(log)) {
+    started <- file.exists(log)
+    row <- data.frame(
+      query = name,
+      seconds = round(seconds, 2),
+      rows = nrow(got),
+      matches = matches
+    )
+    write.table(
+      row,
+      log,
+      append = started,
+      col.names = !started,
+      row.names = FALSE,
+      sep = ",",
+      qmethod = "double"
+    )
+  }
+
+  invisible(got)
 }

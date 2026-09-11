@@ -6,16 +6,18 @@
 
 source("bench/setup.R")
 
+t0 <- Sys.time()
+
 b <- scan_cols("building", "b_boundary")
 t <- scan_cols("trip", c("t_tripkey", "t_pickuploc"))
 
 nearest <- ga_sparse_knn(
-  ga_as_point(as_nanoarrow_array(t$t_pickuploc)),
-  ga_from_wkb(as_nanoarrow_array(b$b_boundary)),
+  as_nanoarrow_array(t$t_pickuploc),
+  as_nanoarrow_array(b$b_boundary),
   k = 5
 )
 
-run("q12", arrow_table(
+out <- arrow_table(
   t_tripkey = take(t$t_tripkey, left_rows(nearest)),
   distance = knn_pairs(nearest)$GetFieldByName("distance")
 ) |>
@@ -23,4 +25,6 @@ run("q12", arrow_table(
   summarise(avg_distance_to_5_nearest = mean(distance)) |>
   arrange(desc(avg_distance_to_5_nearest), t_tripkey) |>
   head(100) |>
-  collect())
+  collect()
+
+report("q12", t0, out)

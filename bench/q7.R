@@ -5,7 +5,9 @@
 
 source("bench/setup.R")
 
-run("q7", trip |>
+t0 <- Sys.time()
+
+out <- dataset("trip") |>
   mutate(
     reported_distance_m = t_distance,
     # the benchmark converts degrees to metres with a flat factor
@@ -16,4 +18,6 @@ run("q7", trip |>
   select(t_tripkey, reported_distance_m, line_distance_m, detour_ratio) |>
   arrange(desc(detour_ratio), desc(reported_distance_m), t_tripkey) |>
   head(100) |>
-  collect())
+  collect()
+
+report("q7", t0, out)

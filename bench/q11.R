@@ -6,15 +6,18 @@
 
 source("bench/setup.R")
 
+t0 <- Sys.time()
+
+zone <- scan_cols("zone", c("z_zonekey", "z_name"))
 boundaries <- geometry("zone", "z_boundary")
 
 from <- ga_sparse_contains(
   boundaries,
-  geometry("trip", "t_pickuploc", ga_as_point)
+  geometry("trip", "t_pickuploc")
 )
 to <- ga_sparse_contains(
   boundaries,
-  geometry("trip", "t_dropoffloc", ga_as_point)
+  geometry("trip", "t_dropoffloc")
 )
 
 pickups <- arrow_table(
@@ -26,11 +29,10 @@ dropoffs <- arrow_table(
   dropoff_zone = take(zone$z_zonekey, left_rows(to))
 )
 
-run(
-  "q11",
-  pickups |>
-    inner_join(dropoffs, by = "trip_row") |>
-    filter(pickup_zone != dropoff_zone) |>
-    summarise(cross_zone_trip_count = n()) |>
-    collect()
-)
+out <- pickups |>
+  inner_join(dropoffs, by = "trip_row") |>
+  filter(pickup_zone != dropoff_zone) |>
+  summarise(cross_zone_trip_count = n()) |>
+  collect()
+
+report("q11", t0, out)

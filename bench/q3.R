@@ -6,22 +6,26 @@
 
 source("bench/setup.R")
 
+t0 <- Sys.time()
+
 t <- scan_cols("trip", c(
   "t_tripkey", "t_pickuptime", "t_dropofftime", "t_distance", "t_fare"
 ))
 t <- with_column(t, "distance_to_box", ga_dist_euclidean_pairwise(
-  geometry("trip", "t_pickuploc", ga_as_point),
+  geometry("trip", "t_pickuploc"),
   literal(BOX_Q3_WKT)
 ))
 
-run("q3", t |>
+out <- t |>
   filter(distance_to_box <= 0.045) |>
   mutate(
     pickup_month = strftime(
-      cast(t_pickuptime, timestamp(unit = "s", timezone = "UTC")),
-      format = "%Y-%m-01"
+      utc_time(t_pickuptime),
+      format = "%Y-%m-01",
+      tz = "UTC"
     ),
-    duration = (cast(t_dropofftime, int64()) - cast(t_pickuptime, int64())) / 1000
+    duration = (cast(t_dropofftime, int64()) - cast(t_pickuptime, int64())) /
+      1000
   ) |>
   group_by(pickup_month) |>
   summarise(
@@ -31,4 +35,6 @@ run("q3", t |>
     avg_fare = mean(cast(t_fare, float64()))
   ) |>
   arrange(pickup_month) |>
-  collect())
+  collect()
+
+report("q3", t0, out)

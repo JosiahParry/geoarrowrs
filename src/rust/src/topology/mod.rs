@@ -1,13 +1,16 @@
-use arrow::array::{Array, BooleanBuilder, Int32Builder, StringBuilder};
+use arrow::array::{Array, BooleanArray, BooleanBuilder, Int32Builder, StringArray, StringBuilder};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::algorithm::dimensions::{Dimensions, HasDimensions};
 use geo::algorithm::relate::{IntersectionMatrix, Relate};
+use geo::indexed::PreparedGeometry;
 use geo::{Coord, Geometry};
 use geoarrow_array::GeoArrowArray;
+use rayon::prelude::*;
 
-use crate::{as_geo_geometries, as_geometry_chunks, as_recycled_geometries};
+use crate::threads::with_pool;
+use crate::{as_geo_geometries, as_geo_geometries_par, as_geometry_chunks, as_recycled_geometries};
 
 /// Build the nine character DE-9IM string; Debug wraps it in the type name, so read the cells.
 fn de9im(m: &IntersectionMatrix) -> String {
@@ -26,30 +29,58 @@ fn de9im(m: &IntersectionMatrix) -> String {
     out
 }
 
+/// Every relate walk is the same: recycle `y`, then read one DE-9IM matrix per row.
+fn relate_map<T: Send>(
+    x: Robj,
+    y: Robj,
+    map: impl Fn(&IntersectionMatrix) -> T + Sync,
+) -> extendr_api::Result<Vec<Option<T>>> {
+    let geoms = as_geo_geometries_par(&as_geometry_chunks(x)?)?;
+    let others = as_recycled_geometries(y, geoms.len(), "y")?;
+
+    let values = match others.as_slice() {
+        // one geometry against every row, so it is noded once per task rather than once per row
+        [Some(other)] => with_pool(|| {
+            geoms
+                .par_chunks(crate::PAR_MIN_CHUNK)
+                .map(|chunk| {
+                    let prepared = PreparedGeometry::from(other);
+                    chunk
+                        .iter()
+                        .map(|geom| geom.as_ref().map(|g| map(&g.relate(&prepared))))
+                        .collect::<Vec<_>>()
+                })
+                .collect::<Vec<_>>()
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>()
+        }),
+        _ => with_pool(|| {
+            geoms
+                .par_iter()
+                .enumerate()
+                .map(
+                    |(i, geom)| match (geom, others[i % others.len()].as_ref()) {
+                        (Some(g), Some(o)) => Some(map(&g.relate(o))),
+                        _ => None,
+                    },
+                )
+                .collect::<Vec<_>>()
+        }),
+    };
+
+    Ok(values)
+}
+
 /// Every binary predicate is the same pairwise walk over one DE-9IM matrix per row.
 fn relate_predicate(
     x: Robj,
     y: Robj,
     test: fn(&IntersectionMatrix) -> bool,
 ) -> extendr_api::Result<Robj> {
-    let chunks = as_geometry_chunks(x)?;
-    let n: usize = chunks.iter().map(|c| c.len()).sum();
-    let others = as_recycled_geometries(y, n, "y")?;
-    let mut bldr = BooleanBuilder::with_capacity(n);
-
-    for chunk in &chunks {
-        for (geom, other) in as_geo_geometries(chunk.as_ref())?
-            .into_iter()
-            .zip(others.iter().cycle())
-        {
-            match (geom, other) {
-                (Some(g), Some(o)) => bldr.append_value(test(&g.relate(o))),
-                _ => bldr.append_null(),
-            }
-        }
-    }
-
-    bldr.finish().into_data().into_arrow_robj()
+    BooleanArray::from(relate_map(x, y, test)?)
+        .into_data()
+        .into_arrow_robj()
 }
 
 /// Test a topological relationship
@@ -201,24 +232,9 @@ fn ga_equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// as.vector(ga_relate(x, y))
 #[extendr]
 fn ga_relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
-    let chunks = as_geometry_chunks(x)?;
-    let n: usize = chunks.iter().map(|c| c.len()).sum();
-    let others = as_recycled_geometries(y, n, "y")?;
-    let mut bldr = StringBuilder::new();
-
-    for chunk in &chunks {
-        for (geom, other) in as_geo_geometries(chunk.as_ref())?
-            .into_iter()
-            .zip(others.iter().cycle())
-        {
-            match (geom, other) {
-                (Some(g), Some(o)) => bldr.append_value(de9im(&g.relate(o))),
-                _ => bldr.append_null(),
-            }
-        }
-    }
-
-    bldr.finish().into_data().into_arrow_robj()
+    StringArray::from(relate_map(x, y, de9im)?)
+        .into_data()
+        .into_arrow_robj()
 }
 
 /// Determine the topological dimension of geometries

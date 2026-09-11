@@ -1,14 +1,17 @@
 # Q10: zone statistics for the trips starting inside each zone.
 #
 # A left join: every zone appears, including those no trip starts in. The
-# spatial match gives the pairs, Acero aggregates them, and a right_join back
+# spatial match gives the pairs, Acero aggregates them, and a left_join back
 # onto the zone table restores the zones with no trips.
 
 source("bench/setup.R")
 
+t0 <- Sys.time()
+
+zone <- scan_cols("zone", c("z_zonekey", "z_name"))
 hits <- ga_sparse_contains(
   geometry("zone", "z_boundary"),
-  geometry("trip", "t_pickuploc", ga_as_point)
+  geometry("trip", "t_pickuploc")
 )
 
 t <- scan_cols("trip", c("t_pickuptime", "t_dropofftime", "t_distance"))
@@ -32,13 +35,21 @@ stats <- arrow_table(
   ) |>
   compute()
 
-run("q10", zone |>
+out <- zone |>
   left_join(stats, by = "z_zonekey") |>
   mutate(
     pickup_zone = z_name,
     num_trips = coalesce(num_trips, 0L)
   ) |>
-  select(z_zonekey, pickup_zone, avg_duration_seconds, avg_distance, num_trips) |>
+  select(
+    z_zonekey,
+    pickup_zone,
+    avg_duration_seconds,
+    avg_distance,
+    num_trips
+  ) |>
   arrange(is.na(avg_duration_seconds), desc(avg_duration_seconds), z_zonekey) |>
   head(100) |>
-  collect())
+  collect()
+
+report("q10", t0, out)

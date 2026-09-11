@@ -1,24 +1,32 @@
 # Q2: count trips starting within Coconino County.
 #
-# One county against 6M pickups. The predicate puts the county's bounding box
-# through an R-tree first, so only the pickups whose box overlaps are relate
-# tested, and the answer is the length of the one list it returns.
+# One county against 6M pickups. Only the one county's WKB is parsed: the row is
+# found on the name column and `take`n out of the boundary column first, so the
+# other 156k polygons are never turned into geometries. The predicate then puts
+# that county's bounding box through an R-tree, so only the pickups whose box
+# overlaps are tested.
 
 source("bench/setup.R")
 
-row <- call_function(
+t0 <- Sys.time()
+
+z <- scan_cols("zone", c("z_name", "z_boundary"))
+row <- as.vector(call_function(
   "index",
-  zone$z_name,
+  z$z_name,
   options = list(value = Scalar$create("Coconino County"))
-)
-county <- as_geoarrow_vctr(geometry("zone", "z_boundary"))[as.vector(row) + 1L]
+))
+county_wkb <- z$z_boundary$Slice(row, 1)$cast(arrow::binary())
+county <- as_nanoarrow_array(county_wkb)
 
 inside <- ga_sparse_intersects(
   county,
-  geometry("trip", "t_pickuploc", ga_as_point)
+  geometry("trip", "t_pickuploc")
 )
 
-run("q2", arrow_table(
+out <- arrow_table(
   trip_count_in_coconino_county = Array$create(right_rows(inside)$length())
 ) |>
-  collect())
+  collect()
+
+report("q2", t0, out)

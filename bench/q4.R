@@ -7,22 +7,27 @@
 
 source("bench/setup.R")
 
-top <- trip |>
+t0 <- Sys.time()
+
+top <- dataset("trip") |>
   arrange(desc(t_tip), t_tripkey) |>
   head(1000) |>
   select(t_pickuploc) |>
   compute()
 
+zone <- scan_cols("zone", c("z_zonekey", "z_name"))
 hits <- ga_sparse_within(
-  ga_as_point(as_nanoarrow_array(top$t_pickuploc)),
+  as_nanoarrow_array(top$t_pickuploc),
   geometry("zone", "z_boundary")
 )
 matched <- right_rows(hits)
 
-run("q4", arrow_table(
+out <- arrow_table(
   z_zonekey = take(zone$z_zonekey, matched),
   z_name = take(zone$z_name, matched)
 ) |>
   count(z_zonekey, z_name, name = "trip_count") |>
   arrange(desc(trip_count), z_zonekey) |>
-  collect())
+  collect()
+
+report("q4", t0, out)

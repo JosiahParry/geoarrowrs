@@ -7,19 +7,23 @@
 
 source("bench/setup.R")
 
+t0 <- Sys.time()
+
 b <- scan_cols("building", c("b_buildingkey", "b_boundary"))
 boundaries <- ga_from_wkb(as_nanoarrow_array(b$b_boundary))
 hits <- ga_sparse_intersects(boundaries, boundaries)
 
-# each unordered pair once, the way `b1.id < b2.id` does
+# each unordered pair once, the way `b1.id < b2.id` does. The keys are taken
+# before the filter, since `take` is not an expression Acero can plan.
+left <- left_rows(hits)
+right <- right_rows(hits)
+
 ordered <- arrow_table(
-  left = left_rows(hits),
-  right = right_rows(hits)
+  left = left,
+  right = right,
+  key_1 = take(b$b_buildingkey, left),
+  key_2 = take(b$b_buildingkey, right)
 ) |>
-  mutate(
-    key_1 = take(b$b_buildingkey, left),
-    key_2 = take(b$b_buildingkey, right)
-  ) |>
   filter(key_1 < key_2) |>
   compute()
 
@@ -29,15 +33,12 @@ overlap <- ga_boolean_intersection(
 )
 area <- as_arrow_array(ga_unsigned_area(boundaries))
 
-run("q9", ordered |>
-  mutate(
-    building_1 = key_1,
-    building_2 = key_2,
-    area1 = take(area, left),
-    area2 = take(area, right)
-  ) |>
-  select(building_1, building_2, area1, area2) |>
-  compute() |>
+out <- arrow_table(
+  building_1 = ordered$key_1,
+  building_2 = ordered$key_2,
+  area1 = take(area, ordered$left),
+  area2 = take(area, ordered$right)
+) |>
   with_column("overlap_area", ga_unsigned_area(overlap)) |>
   mutate(
     iou = if_else(
@@ -48,4 +49,6 @@ run("q9", ordered |>
   ) |>
   arrange(desc(iou), building_1, building_2) |>
   head(100) |>
-  collect())
+  collect()
+
+report("q9", t0, out)
