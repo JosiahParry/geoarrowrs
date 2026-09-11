@@ -14,10 +14,6 @@ for (n in SIZES) {
     out$num_rows
   )
 
-  if (RUN_SF) {
-    bench("filter", n, "sf", out <- st_filter(pts, polys), nrow(out))
-  }
-
   if (HAS_DUCKSPATIAL) {
     bench(
       "filter",

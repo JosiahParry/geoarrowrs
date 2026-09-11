@@ -22,18 +22,6 @@ for (n in SIZES) {
     out$length
   )
 
-  if (RUN_SF) {
-    bench(
-      "dissolve",
-      n,
-      "sf",
-      out <- pts |>
-        group_by(category) |>
-        summarise(geometry = st_union(geometry)),
-      nrow(out)
-    )
-  }
-
   if (HAS_DUCKSPATIAL) {
     bench(
       "dissolve",

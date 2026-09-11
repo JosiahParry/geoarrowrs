@@ -43,8 +43,14 @@ files <- c(
 connect <- timings[timings$op == "connect", ]
 measured <- timings[timings$op != "connect", ]
 
+medians <- aggregate(
+  seconds ~ op + n + pkg,
+  data = measured,
+  FUN = stats::median
+)
+
 wide <- stats::reshape(
-  measured[c("op", "n", "pkg", "seconds")],
+  medians[c("op", "n", "pkg", "seconds")],
   idvar = c("op", "n"),
   timevar = "pkg",
   direction = "wide"
@@ -126,9 +132,17 @@ panel <- function(op) {
     if (!nrow(s)) {
       next
     }
-    s <- s[order(s$n), ]
-    lines(s$n, s$seconds, col = pal[[pkg]], lwd = 2)
-    points(s$n, s$seconds, col = pal[[pkg]], pch = 19, cex = 1.1)
+    m <- aggregate(seconds ~ n, data = s, FUN = stats::median)
+    m <- m[order(m$n), ]
+    points(
+      s$n * exp(stats::runif(nrow(s), -0.035, 0.035)),
+      s$seconds,
+      col = adjustcolor(pal[[pkg]], alpha.f = 0.3),
+      pch = 19,
+      cex = 0.65
+    )
+    lines(m$n, m$seconds, col = pal[[pkg]], lwd = 2)
+    points(m$n, m$seconds, col = pal[[pkg]], pch = 19, cex = 1.1)
   }
 }
 

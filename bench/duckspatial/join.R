@@ -14,16 +14,6 @@ for (n in SIZES) {
     out$num_rows
   )
 
-  if (RUN_SF) {
-    bench(
-      "join",
-      n,
-      "sf",
-      out <- st_join(pts, polys, join = st_within),
-      nrow(out)
-    )
-  }
-
   if (HAS_DUCKSPATIAL) {
     bench(
       "join",

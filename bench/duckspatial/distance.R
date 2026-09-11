@@ -20,10 +20,6 @@ for (n in c(1000, 5000, 10000)) {
     out$length
   )
 
-  if (RUN_SF) {
-    bench("distance", n, "sf", out <- st_distance(pts, pts), nrow(out))
-  }
-
   if (HAS_DUCKSPATIAL) {
     bench(
       "distance",

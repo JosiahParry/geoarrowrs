@@ -12,7 +12,7 @@ name = "geoarrowrs"
 [dependencies]
 anyhow = "1.0.102"
 arrow = "58.3.0"
-arrow_extendr = { version = "58.1.1", features = ["arrow", "geoarrow-08"] }
+arrow_extendr = { version = "58.1.2", features = ["arrow", "geoarrow-08"] }
 # extendr-api = { version = "*", features = ["either"] }
 extendr-api = { git = "https://github.com/extendr/extendr", features = [
     "either",
@@ -47,6 +47,3 @@ codegen-units = 1
 [patch.crates-io]
 extendr-api = { git = "https://github.com/extendr/extendr" }
 extendr-ffi = { git = "https://github.com/extendr/extendr" }
-# development override while arrow_extendr and geoarrowrs move together; drop
-# this and bump the version above once the changes are released
-arrow_extendr = { path = "/Users/josi/github/arrow-extendr" }

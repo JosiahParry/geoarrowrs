@@ -5,7 +5,7 @@ library(sf)
 library(geoarrowrs)
 
 SIZES <- as.numeric(strsplit(
-  Sys.getenv("DUCKSPATIAL_BENCH_SIZES", "1e5,1e6,3e6"),
+  Sys.getenv("DUCKSPATIAL_BENCH_SIZES", "1e5,1e6,3e6,5e6"),
   ",",
   fixed = TRUE
 )[[1]])
@@ -15,9 +15,9 @@ CACHE <- Sys.getenv(
   tools::R_user_dir("geoarrowrs", "cache")
 )
 
+REPS <- as.integer(Sys.getenv("DUCKSPATIAL_BENCH_REPS", "15"))
 HAS_DUCKSPATIAL <- requireNamespace("duckspatial", quietly = TRUE)
 HAS_SEDONADB <- requireNamespace("sedonadb", quietly = TRUE)
-RUN_SF <- nzchar(Sys.getenv("DUCKSPATIAL_BENCH_SF"))
 
 if (HAS_SEDONADB) {
   library(sedonadb)
@@ -79,33 +79,52 @@ as_ga_frame <- function(x) {
 ddbs_rows <- function(x) pull(count(x), n)
 
 bench <- function(op, n, pkg, expr, rows) {
-  t0 <- Sys.time()
-  force(expr)
-  seconds <- as.numeric(Sys.time() - t0, units = "secs")
-  rows <- force(rows)
+  work <- substitute(expr)
+  count <- substitute(rows)
+  caller <- parent.frame()
+  log <- Sys.getenv("DUCKSPATIAL_BENCH_LOG", "")
+  seconds <- numeric(REPS)
+  n_rows <- NA_integer_
+
+  for (rep in seq_len(REPS)) {
+    t0 <- Sys.time()
+    eval(work, caller)
+    seconds[rep] <- as.numeric(Sys.time() - t0, units = "secs")
+    if (rep == 1L) {
+      n_rows <- eval(count, caller)
+    }
+
+    if (nzchar(log)) {
+      started <- file.exists(log)
+      write.table(
+        data.frame(
+          op,
+          n = as.integer(n),
+          pkg,
+          rep,
+          seconds = round(seconds[rep], 4),
+          rows = n_rows
+        ),
+        log,
+        append = started,
+        col.names = !started,
+        row.names = FALSE,
+        sep = ",",
+        qmethod = "double"
+      )
+    }
+  }
 
   cat(sprintf(
-    "%-10s n = %-9s %-22s %7.2fs  %s rows\n",
+    "%-10s n = %-9s %-22s %7.2fs median (%.2f-%.2f)  %s rows\n",
     op,
     format(n, scientific = FALSE),
     pkg,
-    seconds,
-    format(rows, big.mark = ",")
+    median(seconds),
+    min(seconds),
+    max(seconds),
+    format(n_rows, big.mark = ",")
   ))
-
-  log <- Sys.getenv("DUCKSPATIAL_BENCH_LOG", "")
-  if (nzchar(log)) {
-    started <- file.exists(log)
-    write.table(
-      data.frame(op, n = as.integer(n), pkg, seconds = round(seconds, 3), rows),
-      log,
-      append = started,
-      col.names = !started,
-      row.names = FALSE,
-      sep = ",",
-      qmethod = "double"
-    )
-  }
 
   invisible(gc())
 }

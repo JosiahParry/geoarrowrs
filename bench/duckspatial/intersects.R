@@ -17,10 +17,6 @@ for (n in SIZES) {
     out$length
   )
 
-  if (RUN_SF) {
-    bench("intersects", n, "sf", out <- st_intersects(pts, polys), length(out))
-  }
-
   if (HAS_DUCKSPATIAL) {
     bench(
       "intersects",
