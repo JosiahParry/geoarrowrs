@@ -7,22 +7,7 @@ use geo::algorithm::relate::{IntersectionMatrix, Relate};
 use geo::{Coord, Geometry};
 use geoarrow_array::GeoArrowArray;
 
-use crate::{as_geo_geometries, as_geometry_chunks, check_recycle_len};
-
-/// Read a geometry argument as one geometry per row, recycled against `n`.
-fn as_recycled_geometries(
-    robj: Robj,
-    n: usize,
-    label: &'static str,
-) -> extendr_api::Result<Vec<Option<Geometry<f64>>>> {
-    let chunks = as_geometry_chunks(robj)?;
-    let mut out = Vec::new();
-    for chunk in &chunks {
-        out.extend(as_geo_geometries(chunk.as_ref())?);
-    }
-    check_recycle_len(out.len(), n, label)?;
-    Ok(out)
-}
+use crate::{as_geo_geometries, as_geometry_chunks, as_recycled_geometries};
 
 /// Build the nine character DE-9IM string; Debug wraps it in the type name, so read the cells.
 fn de9im(m: &IntersectionMatrix) -> String {

@@ -2,23 +2,48 @@ use arrow::array::Float64Builder;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::{
-    Distance, Euclidean, Geodesic, HausdorffDistance, Haversine, Rhumb, VincentyDistance,
-    line_measures::FrechetDistance,
+    Distance, Euclidean, Geodesic, HausdorffDistance, Haversine, LineString, Rhumb,
+    VincentyDistance, line_measures::FrechetDistance,
 };
-use geo_traits::to_geo::{ToGeoLineString, ToGeoPoint};
-use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, LineStringArray, PointArray};
+use geo_traits::to_geo::ToGeoLineString;
+use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor};
 
-use crate::{
-    as_geo_geometries, as_geometry_chunks, as_linestring_chunks, as_point_chunks, check_pair_len,
-};
+use crate::{as_linestring_chunks, check_recycle_len, geometry_metric, point_metric};
+
+/// Read a linestring argument as one linestring per row, recycled against `n`.
+fn as_recycled_linestrings(
+    robj: Robj,
+    n: usize,
+    label: &'static str,
+) -> extendr_api::Result<Vec<Option<LineString<f64>>>> {
+    let chunks = as_linestring_chunks(robj)?;
+    let mut out = Vec::new();
+    for chunk in &chunks {
+        for item in chunk.iter() {
+            out.push(match item {
+                Some(Ok(l)) => Some(l.to_line_string()),
+                _ => None,
+            });
+        }
+    }
+    check_recycle_len(out.len(), n, label)?;
+    Ok(out)
+}
 
 /// Compute pairwise distances between points
 ///
-/// Calculate the distance between each pair of points in `origin` and `dest`.
-/// These functions differ in the metric space used for the calculation.
+/// Calculate the distance between each pair of geometries in `origin` and
+/// `dest`. These functions differ in the metric space used for the calculation.
 ///
-/// @param origin a GeoArrow point array of origin points
-/// @param dest a GeoArrow point array of destination points
+/// @details
+/// `ga_dist_euclidean_pairwise()` measures between geometries of any type, so
+/// the distance from a point to the nearest edge of a polygon is one call. The
+/// spherical and ellipsoidal metrics take points only, because `geo` defines
+/// them between points alone.
+///
+/// @param origin a GeoArrow geometry array for `ga_dist_euclidean_pairwise()`,
+///   a point array for the others
+/// @param dest a GeoArrow array matching `origin`; length 1 or the same length
 /// @returns a double vector of distance values
 /// @export
 /// @rdname dist_pairwise
@@ -40,33 +65,7 @@ use crate::{
 // TODO: use rayon with min chunk size of 4096
 #[extendr]
 fn ga_dist_euclidean_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
-    let origin_chunks = as_point_chunks(origin)?;
-    let dest_chunks = as_point_chunks(dest)?;
-    let n = origin_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(
-        n,
-        dest_chunks.iter().map(|c| c.len()).sum(),
-        "origin",
-        "dest",
-    )?;
-    let mut bldr = Float64Builder::with_capacity(n);
-
-    for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        dist_euclidean_impl(&mut bldr, orig, dst);
-    }
-
-    bldr.finish().into_arrow_robj()
-}
-
-fn dist_euclidean_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointArray) {
-    for (xi, yi) in origin.iter().zip(dest.iter()) {
-        if let (Some(Ok(x)), Some(Ok(y))) = (xi, yi) {
-            let dist = Euclidean.distance(x.to_point(), y.to_point());
-            bldr.append_value(dist);
-        } else {
-            bldr.append_null();
-        }
-    }
+    geometry_metric(origin, dest, |a, b| Euclidean.distance(a, b))
 }
 
 /// @export
@@ -74,33 +73,7 @@ fn dist_euclidean_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
 /// @family distance
 #[extendr]
 fn ga_dist_haversine_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
-    let origin_chunks = as_point_chunks(origin)?;
-    let dest_chunks = as_point_chunks(dest)?;
-    let n = origin_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(
-        n,
-        dest_chunks.iter().map(|c| c.len()).sum(),
-        "origin",
-        "dest",
-    )?;
-    let mut bldr = Float64Builder::with_capacity(n);
-
-    for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        dist_haversine_impl(&mut bldr, orig, dst);
-    }
-
-    bldr.finish().into_arrow_robj()
-}
-
-fn dist_haversine_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointArray) {
-    for (xi, yi) in origin.iter().zip(dest.iter()) {
-        if let (Some(Ok(x)), Some(Ok(y))) = (xi, yi) {
-            let dist = Haversine.distance(x.to_point(), y.to_point());
-            bldr.append_value(dist);
-        } else {
-            bldr.append_null();
-        }
-    }
+    point_metric(origin, dest, |a, b| Some(Haversine.distance(*a, *b)))
 }
 
 /// @export
@@ -108,33 +81,7 @@ fn dist_haversine_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Po
 /// @family distance
 #[extendr]
 fn ga_dist_geodesic_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
-    let origin_chunks = as_point_chunks(origin)?;
-    let dest_chunks = as_point_chunks(dest)?;
-    let n = origin_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(
-        n,
-        dest_chunks.iter().map(|c| c.len()).sum(),
-        "origin",
-        "dest",
-    )?;
-    let mut bldr = Float64Builder::with_capacity(n);
-
-    for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        dist_geodesic_impl(&mut bldr, orig, dst);
-    }
-
-    bldr.finish().into_arrow_robj()
-}
-
-fn dist_geodesic_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointArray) {
-    for (xi, yi) in origin.iter().zip(dest.iter()) {
-        if let (Some(Ok(x)), Some(Ok(y))) = (xi, yi) {
-            let dist = Geodesic.distance(x.to_point(), y.to_point());
-            bldr.append_value(dist);
-        } else {
-            bldr.append_null();
-        }
-    }
+    point_metric(origin, dest, |a, b| Some(Geodesic.distance(*a, *b)))
 }
 
 /// @export
@@ -142,33 +89,7 @@ fn dist_geodesic_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 /// @family distance
 #[extendr]
 fn ga_dist_rhumb_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
-    let origin_chunks = as_point_chunks(origin)?;
-    let dest_chunks = as_point_chunks(dest)?;
-    let n = origin_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(
-        n,
-        dest_chunks.iter().map(|c| c.len()).sum(),
-        "origin",
-        "dest",
-    )?;
-    let mut bldr = Float64Builder::with_capacity(n);
-
-    for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        dist_rhumb_impl(&mut bldr, orig, dst);
-    }
-
-    bldr.finish().into_arrow_robj()
-}
-
-fn dist_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointArray) {
-    for (xi, yi) in origin.iter().zip(dest.iter()) {
-        if let (Some(Ok(x)), Some(Ok(y))) = (xi, yi) {
-            let dist = Rhumb.distance(x.to_point(), y.to_point());
-            bldr.append_value(dist);
-        } else {
-            bldr.append_null();
-        }
-    }
+    point_metric(origin, dest, |a, b| Some(Rhumb.distance(*a, *b)))
 }
 
 /// Pairwise Hausdorff distance
@@ -177,7 +98,7 @@ fn dist_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointA
 /// by taking the maximum of all minimum distances between points on the two shapes.
 ///
 /// @param origin a GeoArrow geometry array
-/// @param dest a GeoArrow geometry array
+/// @param dest a GeoArrow geometry array; length 1 or the same length as `origin`
 /// @returns a double vector of Hausdorff distance values
 /// @export
 /// @family distance
@@ -190,29 +111,7 @@ fn dist_rhumb_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointA
 /// as.vector(ga_dist_hausdorff_pairwise(nc$geometry[1:5], nc$geometry[2:6]))
 #[extendr]
 fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
-    let origin_chunks = as_geometry_chunks(origin)?;
-    let dest_chunks = as_geometry_chunks(dest)?;
-    let n = origin_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(
-        n,
-        dest_chunks.iter().map(|c| c.len()).sum(),
-        "origin",
-        "dest",
-    )?;
-    let mut bldr = Float64Builder::with_capacity(n);
-
-    for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        let origin = as_geo_geometries(orig.as_ref())?;
-        let dest = as_geo_geometries(dst.as_ref())?;
-        for (x, y) in origin.into_iter().zip(dest) {
-            match (x, y) {
-                (Some(x), Some(y)) => bldr.append_value(x.hausdorff_distance(&y)),
-                _ => bldr.append_null(),
-            }
-        }
-    }
-
-    bldr.finish().into_arrow_robj()
+    geometry_metric(origin, dest, |a, b| a.hausdorff_distance(b))
 }
 
 /// Pairwise Vincenty distance
@@ -222,7 +121,7 @@ fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
 /// converge.
 ///
 /// @param origin a GeoArrow point array of origin points
-/// @param dest a GeoArrow point array of destination points
+/// @param dest a GeoArrow point array; length 1 or the same length as `origin`
 /// @returns a double vector of distance values in meters
 /// @export
 /// @family distance
@@ -235,35 +134,7 @@ fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
 /// as.vector(ga_dist_vincenty_pairwise(origin, dest))
 #[extendr]
 fn ga_dist_vincenty_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
-    let origin_chunks = as_point_chunks(origin)?;
-    let dest_chunks = as_point_chunks(dest)?;
-    let n = origin_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(
-        n,
-        dest_chunks.iter().map(|c| c.len()).sum(),
-        "origin",
-        "dest",
-    )?;
-    let mut bldr = Float64Builder::with_capacity(n);
-
-    for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        dist_vincenty_impl(&mut bldr, orig, dst);
-    }
-
-    bldr.finish().into_arrow_robj()
-}
-
-fn dist_vincenty_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &PointArray) {
-    for (xi, yi) in origin.iter().zip(dest.iter()) {
-        if let (Some(Ok(x)), Some(Ok(y))) = (xi, yi) {
-            match x.to_point().vincenty_distance(&y.to_point()) {
-                Ok(dist) => bldr.append_value(dist),
-                Err(_) => bldr.append_null(),
-            }
-        } else {
-            bldr.append_null();
-        }
-    }
+    point_metric(origin, dest, |a, b| a.vincenty_distance(b).ok())
 }
 
 /// Pairwise Frechet distance
@@ -273,7 +144,7 @@ fn dist_vincenty_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 /// Uses the Euclidean metric.
 ///
 /// @param origin a GeoArrow linestring array
-/// @param dest a GeoArrow linestring array
+/// @param dest a GeoArrow linestring array; length 1 or the same length as `origin`
 /// @returns a double vector of Frechet distance values
 /// @export
 /// @family distance
@@ -291,32 +162,23 @@ fn dist_vincenty_impl(bldr: &mut Float64Builder, origin: &PointArray, dest: &Poi
 #[extendr]
 fn ga_dist_frechet_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<Robj> {
     let origin_chunks = as_linestring_chunks(origin)?;
-    let dest_chunks = as_linestring_chunks(dest)?;
     let n = origin_chunks.iter().map(|c| c.len()).sum();
-    check_pair_len(
-        n,
-        dest_chunks.iter().map(|c| c.len()).sum(),
-        "origin",
-        "dest",
-    )?;
+    let dests = as_recycled_linestrings(dest, n, "dest")?;
     let mut bldr = Float64Builder::with_capacity(n);
+    let mut dests = dests.iter().cycle();
 
-    for (orig, dst) in origin_chunks.iter().zip(dest_chunks.iter()) {
-        dist_frechet_impl(&mut bldr, orig, dst);
+    for chunk in &origin_chunks {
+        for item in chunk.iter() {
+            match (item, dests.next().and_then(|d| d.as_ref())) {
+                (Some(Ok(x)), Some(y)) => {
+                    bldr.append_value(Euclidean.frechet_distance(&x.to_line_string(), y))
+                }
+                _ => bldr.append_null(),
+            }
+        }
     }
 
     bldr.finish().into_arrow_robj()
-}
-
-fn dist_frechet_impl(bldr: &mut Float64Builder, origin: &LineStringArray, dest: &LineStringArray) {
-    for (xi, yi) in origin.iter().zip(dest.iter()) {
-        if let (Some(Ok(x)), Some(Ok(y))) = (xi, yi) {
-            let dist = Euclidean.frechet_distance(&x.to_line_string(), &y.to_line_string());
-            bldr.append_value(dist);
-        } else {
-            bldr.append_null();
-        }
-    }
 }
 
 extendr_module! {

@@ -9,7 +9,7 @@ ga_dist_vincenty_pairwise(origin, dest)
 \arguments{
 \item{origin}{a GeoArrow point array of origin points}
 
-\item{dest}{a GeoArrow point array of destination points}
+\item{dest}{a GeoArrow point array; length 1 or the same length as \code{origin}}
 }
 \value{
 a double vector of distance values in meters

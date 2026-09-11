@@ -1,4 +1,4 @@
-use arrow::array::{Array, Int32Builder};
+use arrow::array::{Array, Float64Builder, Int32Builder};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::algorithm::coords_iter::CoordsIter;
@@ -174,10 +174,69 @@ fn ga_lines(geometry: Robj) -> anyhow::Result<Robj> {
         .map_err(|e| anyhow::anyhow!("{e}"))
 }
 
+/// Shared body for the two ordinate readers, which differ only in the axis taken.
+fn ordinate_impl(geometry: Robj, y_axis: bool) -> anyhow::Result<Robj> {
+    let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
+    let n = chunks.iter().map(|c| c.len()).sum();
+    let mut bldr = Float64Builder::with_capacity(n);
+
+    for chunk in &chunks {
+        let geoms = as_geo_geometries(chunk.as_ref()).map_err(|e| anyhow::anyhow!("{e}"))?;
+        for geom in geoms {
+            match geom {
+                Some(Geometry::Point(p)) if y_axis => bldr.append_value(p.y()),
+                Some(Geometry::Point(p)) => bldr.append_value(p.x()),
+                _ => bldr.append_null(),
+            }
+        }
+    }
+
+    bldr.finish()
+        .into_arrow_robj()
+        .map_err(|e| anyhow::anyhow!("{e}"))
+}
+
+/// Read the x or y of a point
+///
+/// Returns one coordinate per row. Any geometry that is not a single point, and
+/// any null or empty point, gives `NA`.
+///
+/// @details
+/// Both coordinate encodings work, so a point array stored as a struct of two
+/// double columns and one stored as interleaved values read the same.
+///
+/// Use [ga_coords()] for the vertices of a line or polygon, which returns a
+/// multipoint per row rather than a single number.
+///
+/// @param geometry a GeoArrow point array
+/// @returns a double array of the same length as `geometry`
+/// @export
+/// @rdname ga_x
+/// @family iteration
+/// @examplesIf requireNamespace("geoarrow", quietly = TRUE)
+/// pts <- ga_xy(c(-111.76, -112.07), c(34.87, 33.45))
+///
+/// as.vector(ga_x(pts))
+/// as.vector(ga_y(pts))
+#[extendr]
+fn ga_x(geometry: Robj) -> anyhow::Result<Robj> {
+    ordinate_impl(geometry, false)
+}
+
+/// @export
+/// @rdname ga_x
+/// @family iteration
+#[extendr]
+fn ga_y(geometry: Robj) -> anyhow::Result<Robj> {
+    ordinate_impl(geometry, true)
+}
+
 extendr_module! {
     mod iteration;
     fn ga_coords;
     fn ga_exterior_coords;
     fn ga_n_coords;
     fn ga_lines;
+    fn ga_x;
+    fn ga_y;
 }

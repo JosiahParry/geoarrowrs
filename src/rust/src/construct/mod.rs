@@ -1,12 +1,13 @@
 use arrow::array::Array;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::Point;
-use geoarrow::array::PointBuilder;
-use geoarrow::datatypes::{Crs, Dimension, Metadata, PointType};
+use geo::{LineString, Point};
+use geo_traits::to_geo::ToGeoPoint;
+use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, LineStringBuilder, PointBuilder};
+use geoarrow::datatypes::{Crs, Dimension, LineStringType, Metadata, PointType};
 use std::sync::Arc;
 
-use crate::try_float_array;
+use crate::{as_point_chunks, as_recycled_points, try_float_array};
 
 /// Build a point array from x and y coordinates
 ///
@@ -80,7 +81,60 @@ fn ga_xy(
         .map_err(|e| anyhow::anyhow!("{e}"))
 }
 
+/// Build a line between pairs of points
+///
+/// Returns a two point linestring joining each `start` to the matching `end`.
+/// `end` is recycled, so one destination pairs with every origin.
+///
+/// @details
+/// A null or empty point on either side gives a null element, so the result is
+/// always the same length as `start`. The length of the line is
+/// [ga_length_euclidean()], which equals [ga_dist_euclidean_pairwise()] on the
+/// same pair.
+///
+/// @param start a GeoArrow point array
+/// @param end a GeoArrow point array; length 1 or the same length as `start`
+/// @returns a GeoArrow linestring array of the same length as `start`
+/// @export
+/// @family construct
+/// @examplesIf requireNamespace("geoarrow", quietly = TRUE)
+/// start <- ga_xy(c(0, 0), c(0, 3))
+/// end <- ga_xy(c(4, 4), c(0, 3))
+///
+/// as.vector(ga_length_euclidean(ga_make_line(start, end)))
+#[extendr]
+fn ga_make_line(start: Robj, end: Robj) -> extendr_api::Result<Robj> {
+    let starts = as_point_chunks(start)?;
+    let n = starts.iter().map(|c| c.len()).sum();
+    let ends = as_recycled_points(end, n, "end")?;
+
+    let metadata = starts[0].data_type().metadata().clone();
+    let mut bldr = LineStringBuilder::new(LineStringType::new(Dimension::XY, metadata));
+    let mut ends = ends.iter().cycle();
+
+    for chunk in &starts {
+        for item in chunk.iter() {
+            let line = match (item, ends.next().and_then(|e| e.as_ref())) {
+                (Some(Ok(s)), Some(e)) => {
+                    let s = s.to_point();
+                    if s.x().is_finite() && s.y().is_finite() {
+                        Some(LineString::new(vec![s.into(), (*e).into()]))
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            };
+            bldr.push_line_string(line.as_ref())
+                .map_err(|e| Error::Other(e.to_string()))?;
+        }
+    }
+
+    bldr.finish().into_arrow_robj()
+}
+
 extendr_module! {
     mod construct;
     fn ga_xy;
+    fn ga_make_line;
 }

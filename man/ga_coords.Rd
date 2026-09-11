@@ -41,6 +41,7 @@ as.vector(ga_n_coords(g))
 \seealso{
 Other iteration:
 \code{\link[=ga_lines]{ga_lines()}},
-\code{\link[=ga_n_coords]{ga_n_coords()}}
+\code{\link[=ga_n_coords]{ga_n_coords()}},
+\code{\link[=ga_x]{ga_x()}}
 }
 \concept{iteration}

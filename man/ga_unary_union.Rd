@@ -42,5 +42,9 @@ as.vector(ga_unsigned_area(ga_unary_union(x)))
 \seealso{
 Other boolean:
 \code{\link[=ga_boolean_intersection]{ga_boolean_intersection()}}
+
+Other aggregate:
+\code{\link[=ga_collect_agg]{ga_collect_agg()}}
 }
+\concept{aggregate}
 \concept{boolean}

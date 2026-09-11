@@ -37,8 +37,8 @@ larger values build faster and query slower. \code{sort} picks the packing
 order, either \code{"hilbert"} or \code{"str"}.
 }
 
-\subsection{Method \code{query}}{
-Find the rows whose bounding box overlaps each geometry
+\subsection{Method \code{search}}{
+Which rows have a bounding box overlapping each geometry
 
 Returns one list of candidate row numbers per element of \code{geometry},
 so the result lines up row for row with the query array. This is the
@@ -64,49 +64,28 @@ a list array of 1 based row numbers, the same length as
 }
 }
 
-\subsection{Method \code{search}}{
-Find the rows whose bounding box overlaps a query box
-
-Returns the row numbers whose bounding box intersects the given box,
-in increasing order.
-
-\subsection{Arguments}{
-\describe{
-\item{\verb{xmin,ymin,xmax,ymax}}{the query box}
-}}
-\subsection{details}{
-This is a bounding box test, not an exact one. Two geometries whose
-boxes overlap need not themselves intersect, so treat the result as a
-set of candidates and confirm with \code{\link[=ga_intersects]{ga_intersects()}} when exactness
-matters.
-
-}
-\subsection{returns}{
-an integer array of 1 based row numbers
-}
-}
-
 \subsection{Method \code{neighbors}}{
-Find the rows nearest a point
-
-Returns row numbers ordered by how close their bounding box is to the
-point.
+Which rows are nearest each geometry, closest first
 
 \subsection{Arguments}{
 \describe{
-\item{\verb{x,y}}{the query point}
-\item{\code{max_results}}{the most rows to return, or \code{NULL} for no limit}
+\item{\code{geometry}}{a GeoArrow array to look up}
+\item{\code{k}}{the most rows to return per query, or \code{NULL} for no limit}
 \item{\code{max_distance}}{the furthest to search, or \code{NULL} for no limit}
 }}
 \subsection{details}{
-Distance is measured to the bounding box rather than to the geometry
-itself, so this too gives candidates. \code{max_results} caps how many come
-back and \code{max_distance} caps how far the search goes; either can be
-\code{NULL}.
+Distance is measured from the centre of each query geometry to the
+bounding box of the indexed one, so this gives candidates to confirm
+with \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}} when exactness matters. \code{k} caps how
+many come back per row and \code{max_distance} how far the search goes.
+
+Taking an array rather than one point at a time is what makes a nearest
+neighbour join one call.
 
 }
 \subsection{returns}{
-an integer array of 1 based row numbers
+a list array of 1 based row numbers, the same length as
+\code{geometry}
 }
 }
 
@@ -139,14 +118,11 @@ nc <- as.data.frame(read_shapefile(
 ))
 idx <- RTree$new(nc$geometry)
 
-idx$size()
+# candidate rows whose box meets each county, confirmed exactly
+head(as.vector(idx$search(nc$geometry)), 3)
 
-# candidate rows whose bounding box meets the query box
-hits <- as.vector(idx$search(-79, 35, -78, 36))
-length(hits)
-
-# the three rows nearest a point
-as.vector(idx$neighbors(-79, 35, max_results = 3))
+# the three counties nearest each centroid
+head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
 \dontshow{\}) # examplesIf}
 }
 \references{

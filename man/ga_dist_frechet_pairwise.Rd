@@ -9,7 +9,7 @@ ga_dist_frechet_pairwise(origin, dest)
 \arguments{
 \item{origin}{a GeoArrow linestring array}
 
-\item{dest}{a GeoArrow linestring array}
+\item{dest}{a GeoArrow linestring array; length 1 or the same length as \code{origin}}
 }
 \value{
 a double vector of Frechet distance values

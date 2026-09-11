@@ -60,6 +60,8 @@ geoarrow_udf_catalogue <- function() {
     "ga_coords",
     "ga_exterior_coords",
     "ga_n_coords",
+    "ga_x",
+    "ga_y",
     "ga_lines",
     "ga_self_intersections"
   )
@@ -96,7 +98,8 @@ geoarrow_udf_catalogue <- function() {
     "ga_dist_hausdorff_pairwise",
     "ga_dist_haversine_pairwise",
     "ga_dist_rhumb_pairwise",
-    "ga_dist_vincenty_pairwise"
+    "ga_dist_vincenty_pairwise",
+    "ga_make_line"
   )
 
   catalogue <- c(

@@ -43,4 +43,8 @@ sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_xy(c(0, 1, 2), 0)))
 ga_xy(c(0, NA), c(0, 1))$null_count
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other construct:
+\code{\link[=ga_make_line]{ga_make_line()}}
+}
 \concept{construct}

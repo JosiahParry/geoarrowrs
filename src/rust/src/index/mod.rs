@@ -19,24 +19,6 @@ pub struct RTree {
     n: usize,
 }
 
-/// Turn the 0 based tree positions into the 1 based row indices R expects.
-fn to_r_indices(positions: &[u32], found: Vec<u32>) -> anyhow::Result<Robj> {
-    let mut bldr = UInt32Builder::with_capacity(found.len());
-    let mut rows: Vec<u32> = found
-        .into_iter()
-        .filter_map(|i| positions.get(i as usize).copied())
-        .map(|i| i + 1)
-        .collect();
-    rows.sort_unstable();
-    for row in rows {
-        bldr.append_value(row);
-    }
-    bldr.finish()
-        .into_data()
-        .into_arrow_robj()
-        .map_err(|e| anyhow::anyhow!("{e}"))
-}
-
 /// A spatial index over a geometry array
 ///
 /// Indexes the bounding box of each geometry so that queries can skip the rows
@@ -67,14 +49,11 @@ fn to_r_indices(positions: &[u32], found: Vec<u32>) -> anyhow::Result<Robj> {
 /// ))
 /// idx <- RTree$new(nc$geometry)
 ///
-/// idx$size()
+/// # candidate rows whose box meets each county, confirmed exactly
+/// head(as.vector(idx$search(nc$geometry)), 3)
 ///
-/// # candidate rows whose bounding box meets the query box
-/// hits <- as.vector(idx$search(-79, 35, -78, 36))
-/// length(hits)
-///
-/// # the three rows nearest a point
-/// as.vector(idx$neighbors(-79, 35, max_results = 3))
+/// # the three counties nearest each centroid
+/// head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
 #[extendr]
 impl RTree {
     /// Build the index. `node_size` sets how many entries share a tree node;
@@ -123,7 +102,7 @@ impl RTree {
         Ok(Self { tree, positions, n })
     }
 
-    /// Find the rows whose bounding box overlaps each geometry
+    /// Which rows have a bounding box overlapping each geometry
     ///
     /// Returns one list of candidate row numbers per element of `geometry`,
     /// so the result lines up row for row with the query array. This is the
@@ -141,7 +120,7 @@ impl RTree {
     /// @param geometry a GeoArrow array to look up
     /// @returns a list array of 1 based row numbers, the same length as
     ///   `geometry`
-    fn query(&self, geometry: Robj) -> anyhow::Result<Robj> {
+    fn search(&self, geometry: Robj) -> anyhow::Result<Robj> {
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
         let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
 
@@ -173,64 +152,55 @@ impl RTree {
             .map_err(|e| anyhow::anyhow!("{e}"))
     }
 
-    /// Find the rows whose bounding box overlaps a query box
-    ///
-    /// Returns the row numbers whose bounding box intersects the given box,
-    /// in increasing order.
+    /// Which rows are nearest each geometry, closest first
     ///
     /// @details
-    /// This is a bounding box test, not an exact one. Two geometries whose
-    /// boxes overlap need not themselves intersect, so treat the result as a
-    /// set of candidates and confirm with [ga_intersects()] when exactness
-    /// matters.
+    /// Distance is measured from the centre of each query geometry to the
+    /// bounding box of the indexed one, so this gives candidates to confirm
+    /// with [ga_dist_euclidean_pairwise()] when exactness matters. `k` caps how
+    /// many come back per row and `max_distance` how far the search goes.
     ///
-    /// @param xmin,ymin,xmax,ymax the query box
-    /// @returns an integer array of 1 based row numbers
-    fn search(&self, xmin: f64, ymin: f64, xmax: f64, ymax: f64) -> anyhow::Result<Robj> {
-        to_r_indices(&self.positions, self.tree.search(xmin, ymin, xmax, ymax))
-    }
-
-    /// Find the rows nearest a point
+    /// Taking an array rather than one point at a time is what makes a nearest
+    /// neighbour join one call.
     ///
-    /// Returns row numbers ordered by how close their bounding box is to the
-    /// point.
-    ///
-    /// @details
-    /// Distance is measured to the bounding box rather than to the geometry
-    /// itself, so this too gives candidates. `max_results` caps how many come
-    /// back and `max_distance` caps how far the search goes; either can be
-    /// `NULL`.
-    ///
-    /// @param x,y the query point
-    /// @param max_results the most rows to return, or `NULL` for no limit
+    /// @param geometry a GeoArrow array to look up
+    /// @param k the most rows to return per query, or `NULL` for no limit
     /// @param max_distance the furthest to search, or `NULL` for no limit
-    /// @returns an integer array of 1 based row numbers
+    /// @returns a list array of 1 based row numbers, the same length as
+    ///   `geometry`
     fn neighbors(
         &self,
-        x: f64,
-        y: f64,
-        #[extendr(default = "NULL")] max_results: Nullable<i32>,
-        #[extendr(default = "NULL")] max_distance: Nullable<f64>,
+        geometry: Robj,
+        #[extendr(default = "NULL")] k: Option<i32>,
+        #[extendr(default = "NULL")] max_distance: Option<f64>,
     ) -> anyhow::Result<Robj> {
-        let max_results = match max_results {
-            Nullable::NotNull(k) if k < 1 => {
-                anyhow::bail!("`max_results` must be at least 1");
-            }
-            Nullable::NotNull(k) => Some(k as usize),
-            Nullable::Null => None,
-        };
-        let max_distance = match max_distance {
-            Nullable::NotNull(d) => Some(d),
-            Nullable::Null => None,
+        let k = match k {
+            Some(k) if k < 1 => anyhow::bail!("`k` must be at least 1"),
+            Some(k) => Some(k as usize),
+            None => None,
         };
 
-        let found = self.tree.neighbors(x, y, max_results, max_distance);
-        let mut bldr = UInt32Builder::with_capacity(found.len());
-        for i in found {
-            if let Some(row) = self.positions.get(i as usize) {
-                bldr.append_value(row + 1);
+        let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let rects = as_rects(&chunks).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let mut bldr = ListBuilder::new(UInt32Builder::new());
+
+        for rect in rects {
+            match rect {
+                Some(rect) => {
+                    let centre = rect.center();
+                    let found = self.tree.neighbors(centre.x, centre.y, k, max_distance);
+                    // neighbors returns nearest first, so keep that order
+                    for i in found {
+                        if let Some(row) = self.positions.get(i as usize) {
+                            bldr.values().append_value(row + 1);
+                        }
+                    }
+                    bldr.append(true);
+                }
+                None => bldr.append(false),
             }
         }
+
         bldr.finish()
             .into_data()
             .into_arrow_robj()

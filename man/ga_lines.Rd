@@ -35,6 +35,7 @@ lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_lines(g))))
 \seealso{
 Other iteration:
 \code{\link[=ga_coords]{ga_coords()}},
-\code{\link[=ga_n_coords]{ga_n_coords()}}
+\code{\link[=ga_n_coords]{ga_n_coords()}},
+\code{\link[=ga_x]{ga_x()}}
 }
 \concept{iteration}

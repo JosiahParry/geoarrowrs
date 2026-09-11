@@ -10,6 +10,7 @@ use geoarrow::array::{
 use geoarrow_array::GeoArrowArray;
 
 pub(crate) mod affine;
+pub(crate) mod aggregate;
 pub(crate) mod area;
 pub(crate) mod bearing;
 pub(crate) mod boolean;
@@ -173,6 +174,102 @@ pub(crate) fn as_geo_geometries(
         .map_err(|e| Error::Other(e.to_string()))
 }
 
+/// Read a point argument as one point per row, recycled against `n`.
+pub(crate) fn as_recycled_points(
+    robj: Robj,
+    n: usize,
+    label: &'static str,
+) -> extendr_api::Result<Vec<Option<geo::Point<f64>>>> {
+    use geo_traits::to_geo::ToGeoPoint;
+    use geoarrow_array::GeoArrowArrayAccessor;
+    let chunks = as_point_chunks(robj)?;
+    let mut out = Vec::new();
+    for chunk in &chunks {
+        for item in chunk.iter() {
+            out.push(match item {
+                Some(Ok(p)) => Some(p.to_point()),
+                _ => None,
+            });
+        }
+    }
+    check_recycle_len(out.len(), n, label)?;
+    Ok(out)
+}
+
+/// Walk two point arrays in lockstep, recycling `dest`, and apply one metric per row.
+///
+/// Distance and bearing differ only in the metric, so both go through here.
+pub(crate) fn point_metric(
+    origin: Robj,
+    dest: Robj,
+    metric: fn(&geo::Point<f64>, &geo::Point<f64>) -> Option<f64>,
+) -> extendr_api::Result<Robj> {
+    use arrow_extendr::IntoArrowRobj;
+    use geo_traits::to_geo::ToGeoPoint;
+    use geoarrow_array::GeoArrowArrayAccessor;
+
+    let origins = as_point_chunks(origin)?;
+    let n = origins.iter().map(|c| c.len()).sum();
+    let dests = as_recycled_points(dest, n, "dest")?;
+    let mut bldr = Float64Builder::with_capacity(n);
+    let mut dests = dests.iter().cycle();
+
+    for chunk in &origins {
+        for item in chunk.iter() {
+            match (item, dests.next().and_then(|d| d.as_ref())) {
+                (Some(Ok(o)), Some(d)) => match metric(&o.to_point(), d) {
+                    Some(v) => bldr.append_value(v),
+                    None => bldr.append_null(),
+                },
+                _ => bldr.append_null(),
+            }
+        }
+    }
+
+    bldr.finish().into_arrow_robj()
+}
+
+/// Walk two geometry arrays in lockstep, recycling `dest`, and apply one metric per row.
+pub(crate) fn geometry_metric(
+    origin: Robj,
+    dest: Robj,
+    metric: fn(&geo::Geometry<f64>, &geo::Geometry<f64>) -> f64,
+) -> extendr_api::Result<Robj> {
+    use arrow_extendr::IntoArrowRobj;
+
+    let origins = as_geometry_chunks(origin)?;
+    let n = origins.iter().map(|c| c.len()).sum();
+    let dests = as_recycled_geometries(dest, n, "dest")?;
+    let mut bldr = Float64Builder::with_capacity(n);
+    let mut dests = dests.iter().cycle();
+
+    for chunk in &origins {
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            match (geom, dests.next().and_then(|d| d.as_ref())) {
+                (Some(x), Some(y)) => bldr.append_value(metric(&x, y)),
+                _ => bldr.append_null(),
+            }
+        }
+    }
+
+    bldr.finish().into_arrow_robj()
+}
+
+/// Read a geometry argument as one geometry per row, recycled against `n`.
+pub(crate) fn as_recycled_geometries(
+    robj: Robj,
+    n: usize,
+    label: &'static str,
+) -> extendr_api::Result<Vec<Option<geo::Geometry<f64>>>> {
+    let chunks = as_geometry_chunks(robj)?;
+    let mut out = Vec::new();
+    for chunk in &chunks {
+        out.extend(as_geo_geometries(chunk.as_ref())?);
+    }
+    check_recycle_len(out.len(), n, label)?;
+    Ok(out)
+}
+
 /// Check that two geometry arrays walked in lockstep have the same length, since zipping them would otherwise truncate to the shorter one.
 pub(crate) fn check_pair_len(
     a: usize,
@@ -207,6 +304,7 @@ pub(crate) fn check_recycle_len(
 extendr_module! {
     mod geoarrowrs;
     use affine;
+    use aggregate;
     use area;
     use distance;
     use iteration;

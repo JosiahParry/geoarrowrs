@@ -170,17 +170,23 @@ test_that("ga_from_wkb reads a bare binary column", {
   expect_equal(res$length, 2L)
 })
 
-test_that("ga_from_wkb unblocks the type specific functions", {
+test_that("ga_from_wkb unblocks the point only functions", {
   skip_deps()
   sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
   bin <- wkb_array(sfc)
 
-  expect_error(ga_dist_euclidean_pairwise(bin, bin), "Extension type name")
+  # the spherical metrics take points, so WKB has to be cast first
+  expect_error(ga_dist_haversine_pairwise(bin, bin), "Extension type name")
   pts <- ga_from_wkb(bin)
-  expect_equal(
-    as.vector(ga_dist_euclidean_pairwise(pts, pts)),
-    c(0, 0)
-  )
+  expect_equal(as.vector(ga_dist_haversine_pairwise(pts, pts)), c(0, 0))
+})
+
+test_that("euclidean distance reads a bare WKB column without casting", {
+  skip_deps()
+  sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
+  bin <- wkb_array(sfc)
+
+  expect_equal(as.vector(ga_dist_euclidean_pairwise(bin, ga_xy(0, 0))), c(0, 5))
 })
 
 test_that("ga_from_wkb records a crs", {

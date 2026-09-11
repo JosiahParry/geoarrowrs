@@ -155,6 +155,7 @@ fn ga_boolean_xor(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// @returns a GeoArrow multipolygon array of length 1
 /// @export
 /// @family boolean
+/// @family aggregate
 /// @references [unary_union](https://docs.rs/geo/latest/geo/algorithm/bool_ops/fn.unary_union.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// x <- geoarrow::as_geoarrow_array(sf::st_sfc(

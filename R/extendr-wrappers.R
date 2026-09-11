@@ -171,6 +171,36 @@ ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, g
 #' geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
 ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate, geometry, x_offset, y_offset)
 
+#' Collect a whole array into one geometry
+#'
+#' Gathers every geometry in the array into a single geometry collection,
+#' returning an array of length 1. This is the aggregate a `summarise()` wants,
+#' not a row by row operation.
+#'
+#' @details
+#' Nothing is dissolved and nothing is reordered, so overlapping parts stay
+#' overlapping and the collection holds one member per non null input row. Use
+#' [ga_unary_union()] to merge overlapping polygons into one outline instead.
+#'
+#' Being an aggregate, this is one of the few functions here that does not
+#' preserve length, and it is not registered as an Arrow kernel: a kernel sees
+#' one batch at a time and would collect each batch separately.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow geometry collection array of length 1
+#' @export
+#' @family aggregate
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' pts <- ga_centroid(nc$geometry)
+#'
+#' # every centroid as one geometry, then the shape they span
+#' collected <- ga_collect_agg(pts)
+#' as.vector(ga_unsigned_area(ga_convex_hull(collected)))
+ga_collect_agg <- function(geometry) .Call(wrap__ga_collect_agg, geometry)
+
 #' Signed and unsigned planar area
 #'
 #' `ga_signed_area()` returns positive values for counter-clockwise winding and
@@ -265,11 +295,18 @@ ga_perimeter_geodesic <- function(x) .Call(wrap__ga_perimeter_geodesic, x)
 
 #' Compute pairwise distances between points
 #'
-#' Calculate the distance between each pair of points in `origin` and `dest`.
-#' These functions differ in the metric space used for the calculation.
+#' Calculate the distance between each pair of geometries in `origin` and
+#' `dest`. These functions differ in the metric space used for the calculation.
 #'
-#' @param origin a GeoArrow point array of origin points
-#' @param dest a GeoArrow point array of destination points
+#' @details
+#' `ga_dist_euclidean_pairwise()` measures between geometries of any type, so
+#' the distance from a point to the nearest edge of a polygon is one call. The
+#' spherical and ellipsoidal metrics take points only, because `geo` defines
+#' them between points alone.
+#'
+#' @param origin a GeoArrow geometry array for `ga_dist_euclidean_pairwise()`,
+#'   a point array for the others
+#' @param dest a GeoArrow array matching `origin`; length 1 or the same length
 #' @returns a double vector of distance values
 #' @export
 #' @rdname dist_pairwise
@@ -311,7 +348,7 @@ ga_dist_rhumb_pairwise <- function(origin, dest) .Call(wrap__ga_dist_rhumb_pairw
 #' by taking the maximum of all minimum distances between points on the two shapes.
 #'
 #' @param origin a GeoArrow geometry array
-#' @param dest a GeoArrow geometry array
+#' @param dest a GeoArrow geometry array; length 1 or the same length as `origin`
 #' @returns a double vector of Hausdorff distance values
 #' @export
 #' @family distance
@@ -331,7 +368,7 @@ ga_dist_hausdorff_pairwise <- function(origin, dest) .Call(wrap__ga_dist_hausdor
 #' converge.
 #'
 #' @param origin a GeoArrow point array of origin points
-#' @param dest a GeoArrow point array of destination points
+#' @param dest a GeoArrow point array; length 1 or the same length as `origin`
 #' @returns a double vector of distance values in meters
 #' @export
 #' @family distance
@@ -351,7 +388,7 @@ ga_dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__ga_dist_vincenty
 #' Uses the Euclidean metric.
 #'
 #' @param origin a GeoArrow linestring array
-#' @param dest a GeoArrow linestring array
+#' @param dest a GeoArrow linestring array; length 1 or the same length as `origin`
 #' @returns a double vector of Frechet distance values
 #' @export
 #' @family distance
@@ -441,6 +478,35 @@ ga_n_coords <- function(geometry) .Call(wrap__ga_n_coords, geometry)
 #' lengths(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_lines(g))))
 ga_lines <- function(geometry) .Call(wrap__ga_lines, geometry)
 
+#' Read the x or y of a point
+#'
+#' Returns one coordinate per row. Any geometry that is not a single point, and
+#' any null or empty point, gives `NA`.
+#'
+#' @details
+#' Both coordinate encodings work, so a point array stored as a struct of two
+#' double columns and one stored as interleaved values read the same.
+#'
+#' Use [ga_coords()] for the vertices of a line or polygon, which returns a
+#' multipoint per row rather than a single number.
+#'
+#' @param geometry a GeoArrow point array
+#' @returns a double array of the same length as `geometry`
+#' @export
+#' @rdname ga_x
+#' @family iteration
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
+#' pts <- ga_xy(c(-111.76, -112.07), c(34.87, 33.45))
+#'
+#' as.vector(ga_x(pts))
+#' as.vector(ga_y(pts))
+ga_x <- function(geometry) .Call(wrap__ga_x, geometry)
+
+#' @export
+#' @rdname ga_x
+#' @family iteration
+ga_y <- function(geometry) .Call(wrap__ga_y, geometry)
+
 #' Compute the length of linestrings
 #'
 #' These functions calculate the total length of each linestring using
@@ -506,7 +572,7 @@ ga_length_vincenty <- function(x) .Call(wrap__ga_length_vincenty, x)
 #' These functions differ in the metric space used for the calculation.
 #'
 #' @param origin a GeoArrow point array of origin points
-#' @param dest a GeoArrow point array of destination points
+#' @param dest a GeoArrow point array; length 1 or the same length as `origin`
 #' @returns a double vector of bearing values in degrees
 #' @export
 #' @rdname bearing
@@ -1318,6 +1384,7 @@ ga_boolean_xor <- function(x, y) .Call(wrap__ga_boolean_xor, x, y)
 #' @returns a GeoArrow multipolygon array of length 1
 #' @export
 #' @family boolean
+#' @family aggregate
 #' @references [unary_union](https://docs.rs/geo/latest/geo/algorithm/bool_ops/fn.unary_union.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' x <- geoarrow::as_geoarrow_array(sf::st_sfc(
@@ -1793,6 +1860,29 @@ ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_sco
 #' # NA in either coordinate gives a null point
 #' ga_xy(c(0, NA), c(0, 1))$null_count
 ga_xy <- function(x, y, crs = NULL) .Call(wrap__ga_xy, x, y, crs)
+
+#' Build a line between pairs of points
+#'
+#' Returns a two point linestring joining each `start` to the matching `end`.
+#' `end` is recycled, so one destination pairs with every origin.
+#'
+#' @details
+#' A null or empty point on either side gives a null element, so the result is
+#' always the same length as `start`. The length of the line is
+#' [ga_length_euclidean()], which equals [ga_dist_euclidean_pairwise()] on the
+#' same pair.
+#'
+#' @param start a GeoArrow point array
+#' @param end a GeoArrow point array; length 1 or the same length as `start`
+#' @returns a GeoArrow linestring array of the same length as `start`
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
+#' start <- ga_xy(c(0, 0), c(0, 3))
+#' end <- ga_xy(c(4, 4), c(0, 3))
+#'
+#' as.vector(ga_length_euclidean(ga_make_line(start, end)))
+ga_make_line <- function(start, end) .Call(wrap__ga_make_line, start, end)
 
 #' Convert coordinates from radians to degrees
 #'
@@ -2420,14 +2510,11 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #' ))
 #' idx <- RTree$new(nc$geometry)
 #'
-#' idx$size()
+#' # candidate rows whose box meets each county, confirmed exactly
+#' head(as.vector(idx$search(nc$geometry)), 3)
 #'
-#' # candidate rows whose bounding box meets the query box
-#' hits <- as.vector(idx$search(-79, 35, -78, 36))
-#' length(hits)
-#'
-#' # the three rows nearest a point
-#' as.vector(idx$neighbors(-79, 35, max_results = 3))
+#' # the three counties nearest each centroid
+#' head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
 #' @section Methods:
 #'\subsection{Method `new`}{
 #'Build the index. `node_size` sets how many entries share a tree node;
@@ -2435,8 +2522,8 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #'order, either `"hilbert"` or `"str"`.
 #'}
 #'
-#'\subsection{Method `query`}{
-#'Find the rows whose bounding box overlaps each geometry
+#'\subsection{Method `search`}{
+#'Which rows have a bounding box overlapping each geometry
 #'
 #'Returns one list of candidate row numbers per element of `geometry`,
 #'so the result lines up row for row with the query array. This is the
@@ -2462,49 +2549,28 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #'}
 #'}
 #'
-#'\subsection{Method `search`}{
-#'Find the rows whose bounding box overlaps a query box
-#'
-#'Returns the row numbers whose bounding box intersects the given box,
-#'in increasing order.
-#'
-#' \subsection{Arguments}{
-#'\describe{
-#'\item{`xmin,ymin,xmax,ymax`}{the query box}
-#'}}
-#' \subsection{details}{
-#'This is a bounding box test, not an exact one. Two geometries whose
-#'boxes overlap need not themselves intersect, so treat the result as a
-#'set of candidates and confirm with [ga_intersects()] when exactness
-#'matters.
-#'
-#'}
-#' \subsection{returns}{
-#'an integer array of 1 based row numbers
-#'}
-#'}
-#'
 #'\subsection{Method `neighbors`}{
-#'Find the rows nearest a point
-#'
-#'Returns row numbers ordered by how close their bounding box is to the
-#'point.
+#'Which rows are nearest each geometry, closest first
 #'
 #' \subsection{Arguments}{
 #'\describe{
-#'\item{`x,y`}{the query point}
-#'\item{`max_results`}{the most rows to return, or `NULL` for no limit}
+#'\item{`geometry`}{a GeoArrow array to look up}
+#'\item{`k`}{the most rows to return per query, or `NULL` for no limit}
 #'\item{`max_distance`}{the furthest to search, or `NULL` for no limit}
 #'}}
 #' \subsection{details}{
-#'Distance is measured to the bounding box rather than to the geometry
-#'itself, so this too gives candidates. `max_results` caps how many come
-#'back and `max_distance` caps how far the search goes; either can be
-#'`NULL`.
+#'Distance is measured from the centre of each query geometry to the
+#'bounding box of the indexed one, so this gives candidates to confirm
+#'with [ga_dist_euclidean_pairwise()] when exactness matters. `k` caps how
+#'many come back per row and `max_distance` how far the search goes.
+#'
+#'Taking an array rather than one point at a time is what makes a nearest
+#'neighbour join one call.
 #'
 #'}
 #' \subsection{returns}{
-#'an integer array of 1 based row numbers
+#'a list array of 1 based row numbers, the same length as
+#'`geometry`
 #'}
 #'}
 #'
@@ -2533,11 +2599,9 @@ RTree <- new.env(parent = emptyenv())
 
 RTree$new <- function(geometry, node_size = 16, sort = "hilbert") .Call(wrap__RTree__new, geometry, node_size, sort)
 
-RTree$query <- function(geometry) .Call(wrap__RTree__query, self, geometry)
+RTree$search <- function(geometry) .Call(wrap__RTree__search, self, geometry)
 
-RTree$search <- function(xmin, ymin, xmax, ymax) .Call(wrap__RTree__search, self, xmin, ymin, xmax, ymax)
-
-RTree$neighbors <- function(x, y, max_results = NULL, max_distance = NULL) .Call(wrap__RTree__neighbors, self, x, y, max_results, max_distance)
+RTree$neighbors <- function(geometry, k = NULL, max_distance = NULL) .Call(wrap__RTree__neighbors, self, geometry, k, max_distance)
 
 RTree$size <- function() .Call(wrap__RTree__size, self)
 

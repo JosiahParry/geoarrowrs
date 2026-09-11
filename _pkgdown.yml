@@ -66,6 +66,10 @@ reference:
     contents:
       - has_concept("cluster")
 
+  - title: Aggregate
+    contents:
+      - has_concept("aggregate")
+
   - title: Combine
     contents:
       - has_concept("boolean")

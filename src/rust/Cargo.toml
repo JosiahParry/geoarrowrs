@@ -47,3 +47,6 @@ codegen-units = 1
 [patch.crates-io]
 extendr-api = { git = "https://github.com/extendr/extendr" }
 extendr-ffi = { git = "https://github.com/extendr/extendr" }
+# development override while arrow_extendr and geoarrowrs move together; drop
+# this and bump the version above once the changes are released
+arrow_extendr = { path = "/Users/josi/github/arrow-extendr" }

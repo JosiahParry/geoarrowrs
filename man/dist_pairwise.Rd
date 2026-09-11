@@ -16,16 +16,23 @@ ga_dist_geodesic_pairwise(origin, dest)
 ga_dist_rhumb_pairwise(origin, dest)
 }
 \arguments{
-\item{origin}{a GeoArrow point array of origin points}
+\item{origin}{a GeoArrow geometry array for \code{ga_dist_euclidean_pairwise()},
+a point array for the others}
 
-\item{dest}{a GeoArrow point array of destination points}
+\item{dest}{a GeoArrow array matching \code{origin}; length 1 or the same length}
 }
 \value{
 a double vector of distance values
 }
 \description{
-Calculate the distance between each pair of points in \code{origin} and \code{dest}.
-These functions differ in the metric space used for the calculation.
+Calculate the distance between each pair of geometries in \code{origin} and
+\code{dest}. These functions differ in the metric space used for the calculation.
+}
+\details{
+\code{ga_dist_euclidean_pairwise()} measures between geometries of any type, so
+the distance from a point to the nearest edge of a polygon is one call. The
+spherical and ellipsoidal metrics take points only, because \code{geo} defines
+them between points alone.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

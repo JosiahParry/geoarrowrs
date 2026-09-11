@@ -9,7 +9,7 @@ ga_dist_hausdorff_pairwise(origin, dest)
 \arguments{
 \item{origin}{a GeoArrow geometry array}
 
-\item{dest}{a GeoArrow geometry array}
+\item{dest}{a GeoArrow geometry array; length 1 or the same length as \code{origin}}
 }
 \value{
 a double vector of Hausdorff distance values
