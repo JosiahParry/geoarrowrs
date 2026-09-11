@@ -39,7 +39,7 @@ ga_join(
 
 ## Value
 
-a data frame with the columns of `x` followed by the non geometry
+an Arrow table with the columns of `x` followed by the non geometry
 columns of `y`
 
 ## Details
@@ -68,9 +68,11 @@ Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
-[`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+[`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+[`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 
 ## Examples
 
@@ -88,14 +90,16 @@ sites <- data.frame(
 
 # which county each site falls in
 ga_join(sites, counties, ga_sparse_within)
-#>   site             geometry        NAME
-#> 1    a <POINT (-78.6 35.8)>        Wake
-#> 2    b <POINT (-80.8 35.2)> Mecklenburg
+#> Table
+#> 2 rows x 3 columns
+#> $site <string>
+#> $geometry: geoarrow.point <crs <unspecified>>
+#> $NAME <string>
 
 # every pair of neighbouring counties
 head(ga_join(counties, counties, ga_sparse_touches)[c("NAME_x", "NAME_y")], 3)
-#>   NAME_x    NAME_y
-#> 1   Ashe Alleghany
-#> 2   Ashe    Wilkes
-#> 3   Ashe   Watauga
+#> Table
+#> 3 rows x 2 columns
+#> $NAME_x <string>
+#> $NAME_y <string>
 ```

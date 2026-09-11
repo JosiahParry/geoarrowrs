@@ -18,7 +18,7 @@ ga_dist_vincenty_pairwise(origin, dest)
 
 - dest:
 
-  a GeoArrow point array of destination points
+  a GeoArrow point array; length 1 or the same length as `origin`
 
 ## Value
 
@@ -31,6 +31,7 @@ a double vector of distance values in meters
 ## See also
 
 Other distance:
+[`ga_cross_distance()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cross_distance.md),
 [`ga_dist_euclidean_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md),
 [`ga_dist_frechet_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_frechet_pairwise.md),
 [`ga_dist_hausdorff_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_hausdorff_pairwise.md)

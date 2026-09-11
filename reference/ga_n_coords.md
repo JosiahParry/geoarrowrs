@@ -33,7 +33,8 @@ geometry gives `NA`.
 
 Other iteration:
 [`ga_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coords.md),
-[`ga_lines()`](https://josiahparry.github.io/geoarrowrs/reference/ga_lines.md)
+[`ga_lines()`](https://josiahparry.github.io/geoarrowrs/reference/ga_lines.md),
+[`ga_x()`](https://josiahparry.github.io/geoarrowrs/reference/ga_x.md)
 
 ## Examples
 

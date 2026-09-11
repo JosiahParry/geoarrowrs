@@ -11,6 +11,8 @@
 
 ## Construct
 
+- [`ga_make_line()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_line.md)
+  : Build a line between pairs of points
 - [`ga_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_xy.md)
   : Build a point array from x and y coordinates
 
@@ -34,10 +36,18 @@
   [`ga_dist_geodesic_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md)
   [`ga_dist_rhumb_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md)
   : Compute pairwise distances between points
+
+- [`ga_cross_distance()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cross_distance.md)
+  :
+
+  Distance from every row of `x` to every row of `y`
+
 - [`ga_dist_frechet_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_frechet_pairwise.md)
   : Pairwise Frechet distance
+
 - [`ga_dist_hausdorff_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_hausdorff_pairwise.md)
   : Pairwise Hausdorff distance
+
 - [`ga_dist_vincenty_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_vincenty_pairwise.md)
   : Pairwise Vincenty distance
 
@@ -64,10 +74,30 @@
 
 - [`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md)
   : A k-d tree over a point array
+
 - [`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md)
   : A spatial index over a geometry array
+
 - [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md)
   : Compute the bounding box of geometries
+
+- [`ga_knn_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_knn_join.md)
+  : Join two data frames on nearest neighbours
+
+- [`ga_set_thread_pool()`](https://josiahparry.github.io/geoarrowrs/reference/ga_set_thread_pool.md)
+  :
+
+  Set the thread cap, from `options(geoarrowrs.thread_pool = )`
+
+- [`ga_sparse_dwithin()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.md)
+  :
+
+  Find which rows of `y` lie within a distance of each row of `x`
+
+- [`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md)
+  :
+
+  Find the rows of `y` nearest each row of `x`
 
 ## Relate
 
@@ -78,6 +108,9 @@
   [`ga_boundary_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md)
   : Determine the topological dimension of geometries
 
+- [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md)
+  : Keep the rows of a data frame that relate to another spatially
+
 - [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md)
   : Test whether geometries are empty
 
@@ -86,6 +119,9 @@
 
 - [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md)
   : DE-9IM relationship between geometries
+
+- [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
+  : Expand a sparse predicate into the row pairs a join needs
 
 - [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
   [`ga_sparse_contains()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
@@ -165,6 +201,13 @@
 - [`ga_outlier_scores()`](https://josiahparry.github.io/geoarrowrs/reference/ga_outlier_scores.md)
   : Score how much each point looks like an outlier
 
+## Aggregate
+
+- [`ga_collect_agg()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collect_agg.md)
+  : Collect an array into one geometry, or one per group
+- [`ga_unary_union()`](https://josiahparry.github.io/geoarrowrs/reference/ga_unary_union.md)
+  : Dissolve an entire array of polygons into one
+
 ## Combine
 
 - [`ga_boolean_intersection()`](https://josiahparry.github.io/geoarrowrs/reference/boolean_ops.md)
@@ -235,6 +278,9 @@
   : Split geometries into their line segments
 - [`ga_n_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_n_coords.md)
   : Count the coordinates in each geometry
+- [`ga_x()`](https://josiahparry.github.io/geoarrowrs/reference/ga_x.md)
+  [`ga_y()`](https://josiahparry.github.io/geoarrowrs/reference/ga_x.md)
+  : Read the x or y of a point
 - [`ga_is_valid()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
   [`ga_validation_error()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
   : Test whether geometries are well formed

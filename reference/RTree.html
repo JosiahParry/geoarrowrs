@@ -18,6 +18,11 @@ that cannot match."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/duckspatial.html">Benchmark: duckdbspatial</a></li>
+    <li><a class="dropdown-item" href="../articles/spatialbench.html">SpatialBench</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -81,8 +86,8 @@ order, either <code>"hilbert"</code> or <code>"str"</code>.</p>
 </div>
 
 <div class="section">
-<h3 id="method-query">Method <code>query</code><a class="anchor" aria-label="anchor" href="#method-query"></a></h3>
-<p>Find the rows whose bounding box overlaps each geometry</p>
+<h3 id="method-search">Method <code>search</code><a class="anchor" aria-label="anchor" href="#method-search"></a></h3>
+<p>Which rows have a bounding box overlapping each geometry</p>
 <p>Returns one list of candidate row numbers per element of <code>geometry</code>,
 so the result lines up row for row with the query array. This is the
 shape a spatial join needs.</p>
@@ -112,45 +117,16 @@ null or empty query geometry gives a null rather than an empty list.</p>
 </div>
 
 <div class="section">
-<h3 id="method-search">Method <code>search</code><a class="anchor" aria-label="anchor" href="#method-search"></a></h3>
-<p>Find the rows whose bounding box overlaps a query box</p>
-<p>Returns the row numbers whose bounding box intersects the given box,
-in increasing order.</p>
+<h3 id="method-neighbors">Method <code>neighbors</code><a class="anchor" aria-label="anchor" href="#method-neighbors"></a></h3>
+<p>Which rows are nearest each geometry, closest first</p>
 <div class="section">
 <h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 
-<dl><dt><code>xmin,ymin,xmax,ymax</code></dt>
-<dd><p>the query box</p></dd>
+<dl><dt><code>geometry</code></dt>
+<dd><p>a GeoArrow array to look up</p></dd>
 
-
-</dl></div>
-<div class="section">
-<h4 id="details-2">details<a class="anchor" aria-label="anchor" href="#details-2"></a></h4>
-<p>This is a bounding box test, not an exact one. Two geometries whose
-boxes overlap need not themselves intersect, so treat the result as a
-set of candidates and confirm with <code><a href="topology.html">ga_intersects()</a></code> when exactness
-matters.</p>
-</div>
-<div class="section">
-<h4 id="returns-1">returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
-<p>an integer array of 1 based row numbers</p>
-</div>
-
-</div>
-
-<div class="section">
-<h3 id="method-neighbors">Method <code>neighbors</code><a class="anchor" aria-label="anchor" href="#method-neighbors"></a></h3>
-<p>Find the rows nearest a point</p>
-<p>Returns row numbers ordered by how close their bounding box is to the
-point.</p>
-<div class="section">
-<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
-
-<dl><dt><code>x,y</code></dt>
-<dd><p>the query point</p></dd>
-
-<dt><code>max_results</code></dt>
-<dd><p>the most rows to return, or <code>NULL</code> for no limit</p></dd>
+<dt><code>k</code></dt>
+<dd><p>the most rows to return per query, or <code>NULL</code> for no limit</p></dd>
 
 <dt><code>max_distance</code></dt>
 <dd><p>the furthest to search, or <code>NULL</code> for no limit</p></dd>
@@ -158,15 +134,18 @@ point.</p>
 
 </dl></div>
 <div class="section">
-<h4 id="details-3">details<a class="anchor" aria-label="anchor" href="#details-3"></a></h4>
-<p>Distance is measured to the bounding box rather than to the geometry
-itself, so this too gives candidates. <code>max_results</code> caps how many come
-back and <code>max_distance</code> caps how far the search goes; either can be
-<code>NULL</code>.</p>
+<h4 id="details-2">details<a class="anchor" aria-label="anchor" href="#details-2"></a></h4>
+<p>Distance is measured from the centre of each query geometry to the
+bounding box of the indexed one, so this gives candidates to confirm
+with <code><a href="dist_pairwise.html">ga_dist_euclidean_pairwise()</a></code> when exactness matters. <code>k</code> caps how
+many come back per row and <code>max_distance</code> how far the search goes.</p>
+<p>Taking an array rather than one point at a time is what makes a nearest
+neighbour join one call.</p>
 </div>
 <div class="section">
-<h4 id="returns-2">returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
-<p>an integer array of 1 based row numbers</p>
+<h4 id="returns-1">returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p>a list array of 1 based row numbers, the same length as
+<code>geometry</code></p>
 </div>
 
 </div>
@@ -175,7 +154,7 @@ back and <code>max_distance</code> caps how far the search goes; either can be
 <h3 id="method-size">Method <code>size</code><a class="anchor" aria-label="anchor" href="#method-size"></a></h3>
 <p>The number of rows the index was built over</p>
 <div class="section">
-<h4 id="returns-3">returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-2">returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>the length of the array the index was built from</p>
 </div>
 
@@ -185,12 +164,12 @@ back and <code>max_distance</code> caps how far the search goes; either can be
 <h3 id="method-n-indexed">Method <code>n_indexed</code><a class="anchor" aria-label="anchor" href="#method-n-indexed"></a></h3>
 <p>The number of rows actually held in the tree</p>
 <div class="section">
-<h4 id="details-4">details<a class="anchor" aria-label="anchor" href="#details-4"></a></h4>
+<h4 id="details-3">details<a class="anchor" aria-label="anchor" href="#details-3"></a></h4>
 <p>Lower than <code>size()</code> when the array held null or empty geometries, which
 have no bounding box to index.</p>
 </div>
 <div class="section">
-<h4 id="returns-4">returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<h4 id="returns-3">returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>the number of indexed rows</p>
 </div>
 
@@ -205,7 +184,11 @@ have no bounding box to index.</p>
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other index:
 <code><a href="KDTree.html">KDTree</a></code>,
-<code><a href="ga_envelope.html">ga_envelope()</a></code></p></div>
+<code><a href="ga_envelope.html">ga_envelope()</a></code>,
+<code><a href="ga_knn_join.html">ga_knn_join()</a></code>,
+<code><a href="ga_set_thread_pool.html">ga_set_thread_pool()</a></code>,
+<code><a href="ga_sparse_dwithin.html">ga_sparse_dwithin()</a></code>,
+<code><a href="ga_sparse_knn.html">ga_sparse_knn()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -215,17 +198,31 @@ have no bounding box to index.</p>
 <span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="va">RTree</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">nc</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">idx</span><span class="op">$</span><span class="fu">size</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 100</span>
+<span class="r-in"><span><span class="co"># candidate rows whose box meets each county, confirmed exactly</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">idx</span><span class="op">$</span><span class="fu">search</span><span class="op">(</span><span class="va">nc</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;list_of&lt;double&gt;[3]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1  2 18 19 22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1  2  3 18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  2  3 10 18 23 25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># candidate rows whose bounding box meets the query box</span></span></span>
-<span class="r-in"><span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">idx</span><span class="op">$</span><span class="fu">search</span><span class="op">(</span><span class="op">-</span><span class="fl">79</span>, <span class="fl">35</span>, <span class="op">-</span><span class="fl">78</span>, <span class="fl">36</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">hits</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># the three rows nearest a point</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">idx</span><span class="op">$</span><span class="fu">neighbors</span><span class="op">(</span><span class="op">-</span><span class="fl">79</span>, <span class="fl">35</span>, max_results <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 82 86 94</span>
+<span class="r-in"><span><span class="co"># the three counties nearest each centroid</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">idx</span><span class="op">$</span><span class="fu">neighbors</span><span class="op">(</span><span class="fu"><a href="ga_centroid.html">ga_centroid</a></span><span class="op">(</span><span class="va">nc</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span>, k <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;list_of&lt;double&gt;[3]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1 18 19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  2 18  1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  3 23 18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

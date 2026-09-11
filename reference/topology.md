@@ -71,10 +71,12 @@ A null geometry on either side gives `NA`.
 Other topology:
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
-[`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+[`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
+[`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 
 ## Examples
 

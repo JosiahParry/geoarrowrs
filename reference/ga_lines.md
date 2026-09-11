@@ -34,7 +34,8 @@ null geometry.
 
 Other iteration:
 [`ga_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coords.md),
-[`ga_n_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_n_coords.md)
+[`ga_n_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_n_coords.md),
+[`ga_x()`](https://josiahparry.github.io/geoarrowrs/reference/ga_x.md)
 
 ## Examples
 

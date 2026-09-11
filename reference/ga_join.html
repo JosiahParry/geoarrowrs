@@ -20,6 +20,11 @@ geometry of y is dropped."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/duckspatial.html">Benchmark: duckdbspatial</a></li>
+    <li><a class="dropdown-item" href="../articles/spatialbench.html">SpatialBench</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -83,7 +88,7 @@ geometry of <code>y</code> is dropped.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a data frame with the columns of <code>x</code> followed by the non geometry
+    <p>an Arrow table with the columns of <code>x</code> followed by the non geometry
 columns of <code>y</code></p>
     </div>
     <div class="section level2">
@@ -104,9 +109,11 @@ frames need exactly one GeoArrow geometry column.</p>
 <code><a href="topology.html">ga_contains()</a></code>,
 <code><a href="ga_coordinate_position.html">ga_coordinate_position()</a></code>,
 <code><a href="ga_dimension.html">ga_dimension()</a></code>,
+<code><a href="ga_filter.html">ga_filter()</a></code>,
 <code><a href="ga_is_empty.html">ga_is_empty()</a></code>,
 <code><a href="ga_relate.html">ga_relate()</a></code>,
-<code><a href="sparse.html">ga_sparse_intersects()</a></code></p></div>
+<code><a href="sparse.html">ga_sparse_intersects()</a></code>,
+<code><a href="ga_sparse_pairs.html">ga_sparse_pairs()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -124,16 +131,18 @@ frames need exactly one GeoArrow geometry column.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># which county each site falls in</span></span></span>
 <span class="r-in"><span><span class="fu">ga_join</span><span class="op">(</span><span class="va">sites</span>, <span class="va">counties</span>, <span class="va">ga_sparse_within</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   site             geometry        NAME</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    a &lt;POINT (-78.6 35.8)&gt;        Wake</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    b &lt;POINT (-80.8 35.2)&gt; Mecklenburg</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Table</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 rows x 3 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $site &lt;string&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $geometry: geoarrow.point &lt;crs &lt;unspecified&gt;&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $NAME &lt;string&gt;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># every pair of neighbouring counties</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">ga_join</span><span class="op">(</span><span class="va">counties</span>, <span class="va">counties</span>, <span class="va">ga_sparse_touches</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NAME_x"</span>, <span class="st">"NAME_y"</span><span class="op">)</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   NAME_x    NAME_y</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   Ashe Alleghany</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   Ashe    Wilkes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   Ashe   Watauga</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Table</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 rows x 2 columns</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $NAME_x &lt;string&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $NAME_y &lt;string&gt;</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

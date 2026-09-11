@@ -25,7 +25,7 @@ ga_bearing_rhumb(origin, dest)
 
 - dest:
 
-  a GeoArrow point array of destination points
+  a GeoArrow point array; length 1 or the same length as `origin`
 
 ## Value
 

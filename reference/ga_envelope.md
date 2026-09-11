@@ -33,7 +33,11 @@ only in that pass through; the boxes themselves are the same.
 
 Other index:
 [`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md),
-[`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md)
+[`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md),
+[`ga_knn_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_knn_join.md),
+[`ga_set_thread_pool()`](https://josiahparry.github.io/geoarrowrs/reference/ga_set_thread_pool.md),
+[`ga_sparse_dwithin()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.md),
+[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md)
 
 ## Examples
 

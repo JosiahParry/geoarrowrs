@@ -40,6 +40,9 @@ are not polygonal, and null rows, are skipped.
 Other boolean:
 [`ga_boolean_intersection()`](https://josiahparry.github.io/geoarrowrs/reference/boolean_ops.md)
 
+Other aggregate:
+[`ga_collect_agg()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collect_agg.md)
+
 ## Examples
 
 ``` r

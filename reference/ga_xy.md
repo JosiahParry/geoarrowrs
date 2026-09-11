@@ -39,6 +39,11 @@ interpreted, so nothing here reprojects. Anything a reader would produce
 works, whether an authority code such as `"EPSG:4326"`, WKT, or
 PROJJSON. Leaving it `NULL` produces an array with no CRS.
 
+## See also
+
+Other construct:
+[`ga_make_line()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_line.md)
+
 ## Examples
 
 ``` r

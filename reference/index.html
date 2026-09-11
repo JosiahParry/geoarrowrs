@@ -16,6 +16,11 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/duckspatial.html">Benchmark: duckdbspatial</a></li>
+    <li><a class="dropdown-item" href="../articles/spatialbench.html">SpatialBench</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -79,6 +84,13 @@
 
       <dl><dt>
 
+          <code><a href="ga_make_line.html">ga_make_line()</a></code>
+
+        </dt>
+        <dd>Build a line between pairs of points</dd>
+
+        <dt>
+
           <code><a href="ga_xy.html">ga_xy()</a></code>
 
         </dt>
@@ -129,6 +141,13 @@
 
         </dt>
         <dd>Compute pairwise distances between points</dd>
+
+        <dt>
+
+          <code><a href="ga_cross_distance.html">ga_cross_distance()</a></code>
+
+        </dt>
+        <dd>Distance from every row of <code>x</code> to every row of <code>y</code></dd>
 
         <dt>
 
@@ -210,6 +229,34 @@
 
         </dt>
         <dd>Compute the bounding box of geometries</dd>
+
+        <dt>
+
+          <code><a href="ga_knn_join.html">ga_knn_join()</a></code>
+
+        </dt>
+        <dd>Join two data frames on nearest neighbours</dd>
+
+        <dt>
+
+          <code><a href="ga_set_thread_pool.html">ga_set_thread_pool()</a></code>
+
+        </dt>
+        <dd>Set the thread cap, from <code>options(geoarrowrs.thread_pool = )</code></dd>
+
+        <dt>
+
+          <code><a href="ga_sparse_dwithin.html">ga_sparse_dwithin()</a></code>
+
+        </dt>
+        <dd>Find which rows of <code>y</code> lie within a distance of each row of <code>x</code></dd>
+
+        <dt>
+
+          <code><a href="ga_sparse_knn.html">ga_sparse_knn()</a></code>
+
+        </dt>
+        <dd>Find the rows of <code>y</code> nearest each row of <code>x</code></dd>
       </dl></div><div class="section level2">
       <h2 id="relate">Relate<a class="anchor" aria-label="anchor" href="#relate"></a></h2>
 
@@ -236,6 +283,13 @@
 
         <dt>
 
+          <code><a href="ga_filter.html">ga_filter()</a></code>
+
+        </dt>
+        <dd>Keep the rows of a data frame that relate to another spatially</dd>
+
+        <dt>
+
           <code><a href="ga_is_empty.html">ga_is_empty()</a></code>
 
         </dt>
@@ -254,6 +308,13 @@
 
         </dt>
         <dd>DE-9IM relationship between geometries</dd>
+
+        <dt>
+
+          <code><a href="ga_sparse_pairs.html">ga_sparse_pairs()</a></code>
+
+        </dt>
+        <dd>Expand a sparse predicate into the row pairs a join needs</dd>
 
         <dt>
 
@@ -430,6 +491,29 @@
 
         </dt>
         <dd>Score how much each point looks like an outlier</dd>
+      </dl></div><div class="section level2">
+      <h2 id="aggregate">Aggregate<a class="anchor" aria-label="anchor" href="#aggregate"></a></h2>
+
+
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="ga_collect_agg.html">ga_collect_agg()</a></code>
+
+        </dt>
+        <dd>Collect an array into one geometry, or one per group</dd>
+
+        <dt>
+
+          <code><a href="ga_unary_union.html">ga_unary_union()</a></code>
+
+        </dt>
+        <dd>Dissolve an entire array of polygons into one</dd>
       </dl></div><div class="section level2">
       <h2 id="combine">Combine<a class="anchor" aria-label="anchor" href="#combine"></a></h2>
 
@@ -643,6 +727,13 @@
 
         </dt>
         <dd>Count the coordinates in each geometry</dd>
+
+        <dt>
+
+          <code><a href="ga_x.html">ga_x()</a></code> <code><a href="ga_x.html">ga_y()</a></code>
+
+        </dt>
+        <dd>Read the x or y of a point</dd>
 
         <dt>
 

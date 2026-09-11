@@ -38,9 +38,9 @@ Build the index. `node_size` sets how many entries share a tree node;
 larger values build faster and query slower. `sort` picks the packing
 order, either `"hilbert"` or `"str"`.
 
-### Method `query`
+### Method `search`
 
-Find the rows whose bounding box overlaps each geometry
+Which rows have a bounding box overlapping each geometry
 
 Returns one list of candidate row numbers per element of `geometry`, so
 the result lines up row for row with the query array. This is the shape
@@ -70,47 +70,19 @@ than an empty list.
 
 a list array of 1 based row numbers, the same length as `geometry`
 
-### Method `search`
-
-Find the rows whose bounding box overlaps a query box
-
-Returns the row numbers whose bounding box intersects the given box, in
-increasing order.
-
-#### Arguments
-
-- `xmin,ymin,xmax,ymax`:
-
-  the query box
-
-#### details
-
-This is a bounding box test, not an exact one. Two geometries whose
-boxes overlap need not themselves intersect, so treat the result as a
-set of candidates and confirm with
-[`ga_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
-when exactness matters.
-
-#### returns
-
-an integer array of 1 based row numbers
-
 ### Method `neighbors`
 
-Find the rows nearest a point
-
-Returns row numbers ordered by how close their bounding box is to the
-point.
+Which rows are nearest each geometry, closest first
 
 #### Arguments
 
-- `x,y`:
+- `geometry`:
 
-  the query point
+  a GeoArrow array to look up
 
-- `max_results`:
+- `k`:
 
-  the most rows to return, or `NULL` for no limit
+  the most rows to return per query, or `NULL` for no limit
 
 - `max_distance`:
 
@@ -118,14 +90,19 @@ point.
 
 #### details
 
-Distance is measured to the bounding box rather than to the geometry
-itself, so this too gives candidates. `max_results` caps how many come
-back and `max_distance` caps how far the search goes; either can be
-`NULL`.
+Distance is measured from the centre of each query geometry to the
+bounding box of the indexed one, so this gives candidates to confirm
+with
+[`ga_dist_euclidean_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md)
+when exactness matters. `k` caps how many come back per row and
+`max_distance` how far the search goes.
+
+Taking an array rather than one point at a time is what makes a nearest
+neighbour join one call.
 
 #### returns
 
-an integer array of 1 based row numbers
+a list array of 1 based row numbers, the same length as `geometry`
 
 ### Method `size`
 
@@ -156,7 +133,11 @@ the number of indexed rows
 
 Other index:
 [`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md),
-[`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md)
+[`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md),
+[`ga_knn_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_knn_join.md),
+[`ga_set_thread_pool()`](https://josiahparry.github.io/geoarrowrs/reference/ga_set_thread_pool.md),
+[`ga_sparse_dwithin()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.md),
+[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md)
 
 ## Examples
 
@@ -166,15 +147,29 @@ nc <- as.data.frame(read_shapefile(
 ))
 idx <- RTree$new(nc$geometry)
 
-idx$size()
-#> [1] 100
+# candidate rows whose box meets each county, confirmed exactly
+head(as.vector(idx$search(nc$geometry)), 3)
+#> <list_of<double>[3]>
+#> [[1]]
+#> [1]  1  2 18 19 22
+#> 
+#> [[2]]
+#> [1]  1  2  3 18
+#> 
+#> [[3]]
+#> [1]  2  3 10 18 23 25
+#> 
 
-# candidate rows whose bounding box meets the query box
-hits <- as.vector(idx$search(-79, 35, -78, 36))
-length(hits)
-#> [1] 15
-
-# the three rows nearest a point
-as.vector(idx$neighbors(-79, 35, max_results = 3))
-#> [1] 82 86 94
+# the three counties nearest each centroid
+head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
+#> <list_of<double>[3]>
+#> [[1]]
+#> [1]  1 18 19
+#> 
+#> [[2]]
+#> [1]  2 18  1
+#> 
+#> [[3]]
+#> [1]  3 23 18
+#> 
 ```

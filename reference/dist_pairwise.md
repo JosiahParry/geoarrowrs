@@ -1,6 +1,6 @@
 # Compute pairwise distances between points
 
-Calculate the distance between each pair of points in `origin` and
+Calculate the distance between each pair of geometries in `origin` and
 `dest`. These functions differ in the metric space used for the
 calculation.
 
@@ -20,15 +20,23 @@ ga_dist_rhumb_pairwise(origin, dest)
 
 - origin:
 
-  a GeoArrow point array of origin points
+  a GeoArrow geometry array for `ga_dist_euclidean_pairwise()`, a point
+  array for the others
 
 - dest:
 
-  a GeoArrow point array of destination points
+  a GeoArrow array matching `origin`; length 1 or the same length
 
 ## Value
 
 a double vector of distance values
+
+## Details
+
+`ga_dist_euclidean_pairwise()` measures between geometries of any type,
+so the distance from a point to the nearest edge of a polygon is one
+call. The spherical and ellipsoidal metrics take points only, because
+`geo` defines them between points alone.
 
 ## References
 
@@ -41,6 +49,7 @@ a double vector of distance values
 ## See also
 
 Other distance:
+[`ga_cross_distance()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cross_distance.md),
 [`ga_dist_frechet_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_frechet_pairwise.md),
 [`ga_dist_hausdorff_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_hausdorff_pairwise.md),
 [`ga_dist_vincenty_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dist_vincenty_pairwise.md)

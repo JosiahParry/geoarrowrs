@@ -2,6 +2,9 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/404.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/CLAUDE.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/LICENSE-text.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/articles/duckspatial.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/articles/index.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/articles/spatialbench.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/authors.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/index.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/news/index.html</loc></url>
@@ -22,10 +25,12 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_centroid.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_chaikin_smoothing.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_closest_point.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_collect_agg.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_concave_hull.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_convex_hull.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_coords.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_cross_distance.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_dbscan.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_densify.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.html</loc></url>
@@ -36,6 +41,7 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_explode.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_extremes.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_filter.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_from_wkb.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_interior_point.html</loc></url>
@@ -45,10 +51,12 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_join.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_kmeans.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_knn_join.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_line_intersection.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_line_locate_point.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_line_segmentize.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_lines.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_make_line.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_minimum_rotated_rect.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_n_coords.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_orient.html</loc></url>
@@ -60,11 +68,15 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_self_intersections.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_set_thread_pool.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_simplify.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_idx.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_vw.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_skew.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_skew_xy.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_to_degrees.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_to_radians.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_translate.html</loc></url>
@@ -74,6 +86,7 @@
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_voronoi_cells.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_voronoi_edges.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_winding_order.html</loc></url>
+<url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_x.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/ga_xy.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/index.html</loc></url>
 <url><loc>https://josiahparry.github.io/geoarrowrs/reference/interpolate_between.html</loc></url>
