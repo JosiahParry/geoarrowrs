@@ -11,10 +11,13 @@ The attached environment, invisibly.
 }
 \description{
 Attaches the geoarrowrs versions of the sf functions sf does not make
-generic, such as \code{\link[sf:st_distance]{st_distance()}} and \code{\link[sf:st_within]{st_within()}}, under sf's own names and
+generic, such as \code{st_distance()} and \code{st_within()}, under sf's own names and
 argument names. Remove them again with \code{detach("geoarrowrs:sf")}.
 }
 \details{
+Not needed alongside sdf, which makes these generic and so reaches this
+package by dispatch.
+
 They take and return the GeoArrow representation rather than \code{sfc}, so
 nothing is converted into an sf object on the way through.
 

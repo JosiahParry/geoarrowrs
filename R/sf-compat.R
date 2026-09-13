@@ -69,9 +69,8 @@ sparse_predicate <- function(x, y, sparse, fn) {
 
 # sf generics, dispatched on the GeoArrow representation -----------------------
 
-#' @exportS3Method sf::st_area
 #' @noRd
-st_area.geoarrow_vctr <- function(x, ...) {
+st_area_sf <- function(x, ...) {
   ga_unsigned_area(as_ga(x))
 }
 
@@ -99,37 +98,58 @@ st_minimum_rotated_rectangle.geoarrow_vctr <- function(x, ...) {
   ga_out(ga_minimum_rotated_rect(as_ga(x)))
 }
 
-#' @exportS3Method sf::st_is_valid
 #' @noRd
-st_is_valid.geoarrow_vctr <- function(x, ...) {
+st_is_valid_sf <- function(x, ...) {
   ga_is_valid(as_ga(x))
 }
 
-#' @exportS3Method sf::st_buffer
+#' sf and PostGIS name the same argument differently
+#'
+#' sf calls it `dist`, PostGIS and sdf call it `distance`. One method serves
+#' both generics, so it answers to either and to the second position.
+#'
 #' @noRd
+#' @exportS3Method sf::st_buffer
 st_buffer.geoarrow_vctr <- function(
   x,
-  dist,
+  distance,
+  ...,
+  dist = distance,
   nQuadSegs = 30,
   endCapStyle = "ROUND",
   joinStyle = "ROUND",
   mitreLimit = 1,
-  singleSide = FALSE,
-  ...
+  singleSide = FALSE
 ) {
+  if (missing(distance)) {
+    distance <- dist
+  }
+
   ga_out(ga_buffer(
     as_ga(x),
-    dist,
+    distance,
     line_cap = tolower(endCapStyle),
     line_join = tolower(joinStyle),
     miter_limit = mitreLimit
   ))
 }
 
-#' @exportS3Method sf::st_simplify
+#' sf calls it `dTolerance`, PostGIS and sdf call it `tolerance`
+#'
 #' @noRd
-st_simplify.geoarrow_vctr <- function(x, preserveTopology, dTolerance = 0) {
-  ga_out(ga_simplify(as_ga(x), dTolerance))
+#' @exportS3Method sf::st_simplify
+st_simplify.geoarrow_vctr <- function(
+  x,
+  tolerance,
+  ...,
+  preserveTopology = FALSE,
+  dTolerance = 0
+) {
+  if (missing(tolerance)) {
+    tolerance <- dTolerance
+  }
+
+  ga_out(ga_simplify(as_ga(x), tolerance))
 }
 
 #' @exportS3Method sf::st_segmentize
@@ -195,9 +215,8 @@ st_sym_difference.geoarrow_vctr <- function(x, y, ...) {
   ga_out(ga_boolean_xor(as_ga(x), as_ga(y)))
 }
 
-#' @exportS3Method sf::st_intersects
 #' @noRd
-st_intersects.geoarrow_vctr <- function(x, y, sparse = TRUE, ...) {
+st_intersects_sf <- function(x, y, sparse = TRUE, ...) {
   if (missing(y)) {
     y <- x
   }
@@ -214,12 +233,17 @@ st_intersects.geoarrow_vctr <- function(x, y, sparse = TRUE, ...) {
 #' @exportS3Method sf::st_concave_hull
 st_concave_hull.geoarrow_vctr <- function(
   x,
-  ratio,
+  concavity,
   ...,
+  ratio = concavity,
   allow_holes = FALSE,
   length_threshold = 0
 ) {
-  ga_out(ga_concave_hull(as_ga(x), ratio, length_threshold))
+  if (missing(concavity)) {
+    concavity <- ratio
+  }
+
+  ga_out(ga_concave_hull(as_ga(x), concavity, length_threshold))
 }
 
 #' @exportS3Method sf::st_coordinates
@@ -453,8 +477,11 @@ sf_masked <- c(
 #' Put the sf lookalikes on the search path
 #'
 #' Attaches the geoarrowrs versions of the sf functions sf does not make
-#' generic, such as [st_distance()] and [st_within()], under sf's own names and
+#' generic, such as `st_distance()` and `st_within()`, under sf's own names and
 #' argument names. Remove them again with `detach("geoarrowrs:sf")`.
+#'
+#' Not needed alongside sdf, which makes these generic and so reaches this
+#' package by dispatch.
 #'
 #' @details
 #' They take and return the GeoArrow representation rather than `sfc`, so
