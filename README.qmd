@@ -4,11 +4,12 @@ format: gfm
 author: Josiah Parry
 ---
 
-Fast and efficient geospatial operations on GeoArrow arrays.
+Fast and efficient **in memory** geospatial operations on GeoArrow arrays.
 
 Bindings to the [geoarrow-rs](https://geoarrow.org/geoarrow-rs/), pure-Rust implementation of [GeoArrow](https://geoarrow.org/) with fast "geospatial algorithms implemented by the [GeoRust community](https://georust.org/)."[^1] 
 
 Rust 🦀 bindings created using [extendr](https://extendr.rs).
+
 
 The `{geoarrowrs}` (pronounced "gee-oh-air-oh-arr-ess") package provides the following:
 
@@ -58,3 +59,16 @@ Note that {geoarrowrs} is desigend to work with {geoarrow} and {nanoarrow} R pac
 
 
 [^1]: geoarrow-rs website <https://geoarrow.org/geoarrow-rs/>
+
+## What do you mean "in memory?"
+
+Most of the work that we do with R, and frankly most programming languages, takes place _in memory_. That means that amount of "stuff" (R objects, data, etc) is limited based on the amount of RAM that your computer has. Packages like `{sf}` and `{geos}` create and store data in memory while working on it.
+
+[Apache Arrow](https://arrow.apache.org/) is an efficient in-memory representation and GeoArrow is a spatial extension to that.
+
+Tools like [Apache Sedona](https://sedona.apache.org/) and the R package `{sedonadb}` as well as DuckDB support working outside of the confines of the memory of your machine by spilling to disk. There are [limitations to this](https://sedona.apache.org/sedonadb/latest/memory-management/#configuring-memory-limits), however. 
+
+
+## Lineage
+
+This package is a long time coming and I'm really excited that it can brought to fruition today.

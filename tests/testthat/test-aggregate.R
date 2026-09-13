@@ -113,3 +113,71 @@ test_that("sizes has to cover the array", {
   expect_error(ga_collect_agg(pts, sizes = c(100.5)), "whole")
   expect_error(ga_collect_agg(pts, sizes = c(-1, 101)), "not negative")
 })
+
+test_that("by groups an unsorted key without an arrange() first", {
+  pts <- ga_centroid(nc$geometry)
+  key <- rep(c("north", "south"), length.out = pts$length)
+
+  grouped <- ga_collect_agg(pts, by = key)
+  expect_identical(grouped$length, 2L)
+})
+
+test_that("by orders groups by first appearance, matching vec_unique(by)", {
+  pts <- geoarrow::as_geoarrow_vctr(ga_centroid(nc$geometry))
+  key <- rep(c("south", "north"), length.out = length(pts))
+
+  labels <- vctrs::vec_unique(key)
+  want <- vapply(
+    labels,
+    function(l) {
+      as.vector(ga_unsigned_area(ga_convex_hull(
+        ga_collect_agg(pts[key == l])
+      )))
+    },
+    numeric(1)
+  )
+  got <- as.vector(ga_unsigned_area(ga_convex_hull(
+    ga_collect_agg(pts, by = key)
+  )))
+
+  expect_equal(got, unname(want))
+})
+
+test_that("NA in by groups those rows together like any other label", {
+  pts <- ga_centroid(nc$geometry)
+  key <- rep(c("north", "south"), length.out = pts$length)
+  key[c(3, 7)] <- NA
+
+  grouped <- ga_collect_agg(pts, by = key)
+  expect_identical(grouped$length, length(vctrs::vec_unique(key)))
+})
+
+test_that("by accepts an Arrow array, matching the plain character vector", {
+  pts <- ga_centroid(nc$geometry)
+  key <- rep(c("north", "south"), length.out = pts$length)
+
+  from_vector <- ga_collect_agg(pts, by = key)
+  from_arrow <- ga_collect_agg(pts, by = nanoarrow::as_nanoarrow_array(key))
+
+  expect_identical(from_arrow$length, from_vector$length)
+  expect_equal(
+    as.vector(ga_unsigned_area(ga_convex_hull(from_arrow))),
+    as.vector(ga_unsigned_area(ga_convex_hull(from_vector)))
+  )
+})
+
+test_that("sizes and by cannot both be given", {
+  pts <- ga_centroid(nc$geometry)
+  key <- rep("a", pts$length)
+
+  expect_error(
+    ga_collect_agg(pts, sizes = pts$length, by = key),
+    "at most one"
+  )
+})
+
+test_that("by has to have one label per row", {
+  pts <- ga_centroid(nc$geometry)
+
+  expect_error(ga_collect_agg(pts, by = c("a", "b")), "one label per row")
+})

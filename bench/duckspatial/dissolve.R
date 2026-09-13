@@ -8,15 +8,10 @@ for (n in SIZES) {
     n,
     "geoarrowrs",
     {
-      tbl <- as_arrow_table(st_drop_geometry(pts))
-      tbl$geometry <- as_arrow_array(wk::as_wkb(st_geometry(pts)))$cast(
-        arrow::binary()
-      )
-      groups <- tbl |> count(category) |> arrange(category) |> compute()
-      rows <- tbl |> arrange(category) |> compute()
+      tbl <- as_arrow_table(as_ga_frame(pts))
       out <- ga_collect_agg(
-        as_nanoarrow_array(rows$geometry),
-        sizes = as.vector(groups$n)
+        as_nanoarrow_array(tbl$geometry),
+        by = as_nanoarrow_array(tbl$category)
       )
     },
     out$length

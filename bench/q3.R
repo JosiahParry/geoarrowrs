@@ -8,13 +8,24 @@ source("bench/setup.R")
 
 t0 <- Sys.time()
 
-t <- scan_cols("trip", c(
-  "t_tripkey", "t_pickuptime", "t_dropofftime", "t_distance", "t_fare"
-))
-t <- with_column(t, "distance_to_box", ga_dist_euclidean_pairwise(
-  geometry("trip", "t_pickuploc"),
-  literal(BOX_Q3_WKT)
-))
+t <- scan_cols(
+  "trip",
+  c(
+    "t_tripkey",
+    "t_pickuptime",
+    "t_dropofftime",
+    "t_distance",
+    "t_fare"
+  )
+)
+t <- with_column(
+  t,
+  "distance_to_box",
+  ga_dist_euclidean_pairwise(
+    geometry("trip", "t_pickuploc"),
+    literal(BOX_Q3_WKT)
+  )
+)
 
 out <- t |>
   filter(distance_to_box <= 0.045) |>

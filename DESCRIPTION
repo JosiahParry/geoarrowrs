@@ -25,6 +25,7 @@ Suggests:
     dplyr,
     geoarrow,
     nanoarrow,
+    sdf,
     sf,
     wk,
     testthat (>= 3.0.0),

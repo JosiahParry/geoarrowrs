@@ -14,7 +14,7 @@ This version of the benchmark compares the peformance of:
 - [{sedonadb}](https://github.com/apache/sedona-db/tree/main/r/sedonadb)
 - geoarrowrs
 
-### The earth is a sphere note a plane
+### The earth is a sphere not a plane
 
 One of the issues the duckdbspatial benchmark—is that is calculates **incorrect** distances.
 `{sf}` delegates to `{s2}` to have very accurate spherical distance calculations—this comes at the cost of speed.

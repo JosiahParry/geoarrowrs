@@ -29,7 +29,11 @@ out <- dataset("trip") |>
     )
   ) |>
   select(
-    t_tripkey, pickup_lon, pickup_lat, t_pickuptime, distance_to_center
+    t_tripkey,
+    pickup_lon,
+    pickup_lat,
+    t_pickuptime,
+    distance_to_center
   ) |>
   arrange(distance_to_center, t_tripkey) |>
   head(100) |>

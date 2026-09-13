@@ -18,7 +18,8 @@ those by hand.
 - `just lint` must pass before committing. Run `just fmt` first.
 - `just test` runs testthat. Every new function needs tests.
 - Commits are conventional (`feat:`, `fix:`, `chore:`). prek enforces this.
-- Always update `NEWS.md`.
+- Always update `NEWS.md`. Each entry is one sentence: what changed, nothing
+  else. No benchmark numbers, no rationale, no mechanism explanation.
 
 ## Documentation
 

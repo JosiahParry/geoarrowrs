@@ -4,12 +4,15 @@
 \alias{ga_collect_agg}
 \title{Collect an array into one geometry, or one per group}
 \usage{
-ga_collect_agg(geometry, sizes = NULL)
+ga_collect_agg(geometry, sizes = NULL, by = NULL)
 }
 \arguments{
 \item{geometry}{a GeoArrow geometry array}
 
 \item{sizes}{the rows in each group, in order, or \code{NULL} for one group}
+
+\item{by}{a character vector or Arrow array with one label per row of
+\code{geometry}, or \code{NULL} to use \code{sizes} instead}
 }
 \value{
 a GeoArrow geometry collection array, of length 1 or of one element
@@ -17,9 +20,9 @@ per group
 }
 \description{
 Gathers the geometries into a single geometry collection, returning an array
-of length 1, or one collection per group when \code{sizes} says how the rows are
-grouped. This is the aggregate a \code{summarise()} wants, not a row by row
-operation.
+of length 1, or one collection per group when \code{sizes} or \code{by} says how the
+rows are grouped. This is the aggregate a \code{summarise()} wants, not a row by
+row operation.
 }
 \details{
 Nothing is dissolved and nothing is reordered, so overlapping parts stay
@@ -31,8 +34,14 @@ overlapping and the collection holds one member per non null input row. Use
 have to already be sorted by the grouping, since the runs are taken as they
 come: group \code{i} of the result is the \code{i}th run of \code{sizes} rows. Nothing is
 returned about the groups themselves, so keep the keys from the same
-\code{summarise()} to say what each row is. \code{NULL} collects everything as one
-group.
+\code{summarise()} to say what each row is.
+
+\code{by} groups the rows itself, from an unsorted key of one label per row, so
+no \code{arrange()} is needed first. The result has one collection per distinct
+label, in the order each label first appears in \code{by}; get the matching keys
+back with \code{vctrs::vec_unique(by)}. \code{NA} in \code{by} groups those rows together
+like any other label. Give at most one of \code{sizes} or \code{by}; \code{NULL} for both
+collects everything as one group.
 
 Being an aggregate, this is one of the few functions here that does not
 preserve length, and it is not registered as an Arrow kernel: a kernel sees
@@ -52,6 +61,11 @@ as.vector(ga_unsigned_area(ga_convex_hull(collected)))
 # the same, in groups of twenty rows
 grouped <- ga_collect_agg(pts, sizes = rep(20, 5))
 as.vector(ga_unsigned_area(ga_convex_hull(grouped)))
+
+# grouped by an unsorted key, no arrange() needed first
+key <- rep(c("north", "south"), length.out = pts$length)
+by_key <- ga_collect_agg(pts, by = key)
+vctrs::vec_unique(key)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
