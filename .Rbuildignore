@@ -16,3 +16,5 @@ air.toml
 ^README\.qmd$
 ^\.github$
 ^vignettes/articles$
+^SF-COVERAGE\.md$
+^DUCKDB-COVERAGE\.md$

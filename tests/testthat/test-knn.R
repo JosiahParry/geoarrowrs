@@ -11,22 +11,26 @@ nc_geometry <- function() {
 }
 
 sq <- function(xmin, ymin, side = 1) {
-  sf::st_polygon(list(matrix(
-    c(
-      xmin,
-      ymin,
-      xmin + side,
-      ymin,
-      xmin + side,
-      ymin + side,
-      xmin,
-      ymin + side,
-      xmin,
-      ymin
-    ),
-    ncol = 2,
-    byrow = TRUE
-  )))
+  sf::st_polygon(
+    list(
+      matrix(
+        c(
+          xmin,
+          ymin,
+          xmin + side,
+          ymin,
+          xmin + side,
+          ymin + side,
+          xmin,
+          ymin + side,
+          xmin,
+          ymin
+        ),
+        ncol = 2,
+        byrow = TRUE
+      )
+    )
+  )
 }
 
 boxes <- function() {

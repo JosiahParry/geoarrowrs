@@ -26,5 +26,8 @@ test:
 document:
     R -q -e "rextendr::document()"
 
+vendor:
+    R -q -e "rextendr::vendor_crates(overwrite = TRUE, clean = TRUE)"
+
 install:
     R -q -e "devtools::install()"
