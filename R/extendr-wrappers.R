@@ -2191,6 +2191,54 @@ ga_self_intersections <- function(geometry) .Call(wrap__ga_self_intersections, g
 #' geoarrow::as_geoarrow_vctr(
 #'   ga_interpolate_point(line, 2, "euclidean", "distance", "end")
 #' )
+#' Determine the type of each geometry
+#'
+#' Returns the simple features type name of each geometry, such as `"POINT"`
+#' or `"MULTIPOLYGON"`. `ga_geometry_type()` uses the same names as
+#' `sf::st_geometry_type()`.
+#'
+#' @details
+#' `ga_geometry_type()` returns `NA` for a null geometry. It does the same for
+#' an empty point, which has no coordinates to read a geometry from.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a string array of the same length as `geometry`
+#' @export
+#' @family geometry type
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_point(c(0, 0)),
+#'   sf::st_linestring(rbind(c(0, 0), c(1, 1)))
+#' ))
+#'
+#' as.vector(ga_geometry_type(g))
+ga_geometry_type <- function(geometry) .Call(wrap__ga_geometry_type, geometry)
+
+#' Test whether geometries are of a given type
+#'
+#' `TRUE` when the geometry's type is one of `types`. Type names are those
+#' `ga_geometry_type()` returns.
+#'
+#' @details
+#' `ga_is()` returns `NA` for a null geometry. It errors on an unknown type
+#' name rather than returning `FALSE`, so it never silently passes a
+#' misspelling.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @param types a character vector of simple features type names, such as `"POLYGON"`
+#' @returns a boolean array of the same length as `geometry`
+#' @export
+#' @family geometry type
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_point(c(0, 0)),
+#'   sf::st_linestring(rbind(c(0, 0), c(1, 1)))
+#' ))
+#'
+#' as.vector(ga_is(g, "POINT"))
+#' as.vector(ga_is(g, c("POINT", "LINESTRING")))
+ga_is <- function(geometry, types) .Call(wrap__ga_is, geometry, types)
+
 ga_interpolate_point <- function(line, value, metric, measure, from) .Call(wrap__ga_interpolate_point, line, value, metric, measure, from)
 
 #' Interpolate a point between two points
