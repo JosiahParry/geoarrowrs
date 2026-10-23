@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* `sf::st_reverse()`, `sf::st_collection_extract()`, and `sf::st_is()` work on a `geoarrow_vctr`, and `mask_sf()` attaches `st_geometry_type()`.
 * `ga_translate()` accepts any geometry type, including multipoints, geometry collections, and WKB.
 * `sf::st_bbox()` works on a `geoarrow_vctr`, returning one box over every row.
 * Added `ga_collection_extract()`, which gathers the points, lines, or polygons of each geometry into one multi geometry per row, or a null where there are none.

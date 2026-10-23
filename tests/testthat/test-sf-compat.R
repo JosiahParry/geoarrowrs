@@ -85,6 +85,58 @@ test_that("st_bbox covers points and lines, not only polygons", {
   expect_equal(box_of(sf::st_bbox(g)), as.numeric(sf::st_bbox(sfc)))
 })
 
+test_that("st_reverse and st_is dispatch to geoarrowrs and match sf", {
+  sfc <- sf::st_as_sfc(geom[1:3])
+
+  expect_s3_class(sf::st_reverse(geom[1:3]), "geoarrow_vctr")
+  expect_equal(
+    sf::st_as_text(sf::st_as_sfc(sf::st_reverse(geom[1:3]))),
+    sf::st_as_text(sf::st_reverse(sfc))
+  )
+  expect_equal(
+    as.vector(sf::st_is(geom[1:3], "MULTIPOLYGON")),
+    sf::st_is(sfc, "MULTIPOLYGON")
+  )
+})
+
+test_that("st_collection_extract keeps one row per input and defaults to polygons", {
+  sq <- rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 0))
+  sfc <- sf::st_sfc(
+    sf::st_geometrycollection(list(
+      sf::st_point(c(0, 0)),
+      sf::st_polygon(list(sq))
+    )),
+    sf::st_point(c(5, 5))
+  )
+  g <- geoarrow::as_geoarrow_vctr(geoarrow::as_geoarrow_array(sfc))
+  res <- sf::st_collection_extract(g)
+
+  expect_s3_class(res, "geoarrow_vctr")
+  expect_length(res, 2L)
+  expect_equal(as.vector(ga_geometry_type(res)), c("MULTIPOLYGON", NA))
+})
+
+test_that("the masked st_geometry_type matches sf", {
+  mask_sf()
+  on.exit(detach("geoarrowrs:sf"), add = TRUE)
+
+  sfc <- sf::st_sfc(
+    sf::st_point(c(0, 0)),
+    sf::st_linestring(rbind(c(0, 0), c(1, 1)))
+  )
+  g <- geoarrow::as_geoarrow_vctr(geoarrow::as_geoarrow_array(sfc))
+
+  expect_equal(
+    as.vector(st_geometry_type(g)),
+    as.character(sf::st_geometry_type(sfc))
+  )
+  expect_equal(
+    st_geometry_type(g, by_geometry = FALSE),
+    as.character(sf::st_geometry_type(sfc, by_geometry = FALSE))
+  )
+  expect_equal(st_geometry_type(geom, by_geometry = FALSE), "MULTIPOLYGON")
+})
+
 test_that("mask_sf() attaches the non-generics and detaches cleanly", {
   mask_sf()
   expect_true("geoarrowrs:sf" %in% search())

@@ -271,6 +271,28 @@ st_triangulate_constrained.geoarrow_vctr <- function(x) {
   ga_out(ga_triangulate_delaunay(as_ga(x), constrained = TRUE))
 }
 
+#' @exportS3Method sf::st_reverse
+#' @noRd
+st_reverse.geoarrow_vctr <- function(x) {
+  ga_out(ga_reverse(as_ga(x)))
+}
+
+#' @exportS3Method sf::st_collection_extract
+#' @noRd
+st_collection_extract.geoarrow_vctr <- function(
+  x,
+  type = c("POLYGON", "POINT", "LINESTRING"),
+  warn = FALSE
+) {
+  ga_out(ga_collection_extract(as_ga(x), rlang::arg_match(type)))
+}
+
+#' @exportS3Method sf::st_is
+#' @noRd
+st_is.geoarrow_vctr <- function(x, type) {
+  ga_is(as_ga(x), type)
+}
+
 # sf non-generics, installed by mask_sf() --------------------------------------
 
 #' @noRd
@@ -314,6 +336,17 @@ st_dimension <- function(x, ...) {
 #' @noRd
 st_is_empty <- function(x) {
   ga_is_empty(as_ga(x))
+}
+
+#' @noRd
+st_geometry_type <- function(x, by_geometry = TRUE) {
+  types <- ga_geometry_type(as_ga(x))
+  if (isTRUE(by_geometry)) {
+    return(types)
+  }
+  # sf names the whole set by its one type, or GEOMETRY when the rows differ
+  found <- unique(stats::na.omit(as.vector(types)))
+  if (length(found) == 1) found else "GEOMETRY"
 }
 
 #' @noRd
@@ -467,6 +500,7 @@ sf_masked <- c(
   "st_disjoint",
   "st_distance",
   "st_equals",
+  "st_geometry_type",
   "st_is_empty",
   "st_is_simple",
   "st_is_within_distance",
