@@ -1,4 +1,5 @@
 mod explode;
+mod extract;
 
 use std::sync::Arc;
 
@@ -421,6 +422,7 @@ fn ga_as_multipolygon(x: Robj) -> extendr_api::Result<Robj> {
 extendr_module! {
     mod cast;
     use explode;
+    use extract;
     fn ga_cast_geometry;
     fn ga_downcast_geometry;
     fn ga_from_wkb;

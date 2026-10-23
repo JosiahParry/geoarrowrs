@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_collection_extract()`, which gathers the points, lines, or polygons of each geometry into one multi geometry per row, or a null where there are none.
 * Added `ga_reverse()`, which reverses the coordinate order of every line and ring.
 * Removed `ga_bounding_rect()`, which duplicated `ga_envelope()`.
 * Added `ga_equals_exact()`.

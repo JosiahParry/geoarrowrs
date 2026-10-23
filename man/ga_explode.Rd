@@ -55,6 +55,7 @@ head(lengths(as.vector(parts)))
 Other cast:
 \code{\link[=ga_as_point]{ga_as_point()}},
 \code{\link[=ga_cast_geometry]{ga_cast_geometry()}},
+\code{\link[=ga_collection_extract]{ga_collection_extract()}},
 \code{\link[=ga_downcast_geometry]{ga_downcast_geometry()}},
 \code{\link[=ga_flatten]{ga_flatten()}},
 \code{\link[=ga_from_wkb]{ga_from_wkb()}}

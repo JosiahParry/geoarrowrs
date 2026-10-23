@@ -1913,6 +1913,35 @@ ga_explode <- function(x) .Call(wrap__ga_explode, x)
 #' ga_flatten(ga_explode(nc$geometry))$length
 ga_flatten <- function(x) .Call(wrap__ga_flatten, x)
 
+#' Extract parts of one type from geometry collections
+#'
+#' Gathers the points, lines, or polygons of each geometry into a single
+#' multipoint, multilinestring, or multipolygon. `ga_collection_extract()`
+#' flattens nested collections and multi part members in order.
+#'
+#' @details
+#' Unlike `sf::st_collection_extract()`, `ga_collection_extract()` keeps one
+#' row per input row. It returns a null for a geometry with no parts of
+#' `geometry_type`, such as a linestring when you ask for polygons, and for a
+#' null geometry.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @param geometry_type one of `"POLYGON"`, `"LINESTRING"`, or `"POINT"`
+#' @returns a GeoArrow multipolygon, multilinestring, or multipoint array of
+#'   the same length as `geometry`
+#' @export
+#' @family cast
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' gc <- sf::st_geometrycollection(list(
+#'   sf::st_point(c(5, 5)),
+#'   sf::st_polygon(list(rbind(c(0, 0), c(1, 0), c(1, 1), c(0, 0))))
+#' ))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(gc, sf::st_point(c(0, 0))))
+#'
+#' # the point has no polygons, so its row is null
+#' as.vector(ga_geometry_type(ga_collection_extract(g, "POLYGON")))
+ga_collection_extract <- function(geometry, geometry_type = "POLYGON") .Call(wrap__ga_collection_extract, geometry, geometry_type)
+
 #' Assign points to clusters by density
 #'
 #' Labels every point in the array with a cluster number, or `NA` when the
