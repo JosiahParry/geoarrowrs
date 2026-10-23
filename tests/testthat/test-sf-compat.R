@@ -53,6 +53,38 @@ test_that("st_union is unary with one argument and binary with two", {
   expect_identical(length(sf::st_union(geom[1:3], geom[4:6])), 3L)
 })
 
+box_of <- function(x) {
+  b <- ga_envelope(x)$children
+  c(
+    as.vector(b$xmin),
+    as.vector(b$ymin),
+    as.vector(b$xmax),
+    as.vector(b$ymax)
+  )
+}
+
+test_that("st_bbox returns one box over every row, matching sf", {
+  res <- sf::st_bbox(geom)
+  expected <- sf::st_bbox(sf::st_read(
+    system.file("shape/nc.shp", package = "sf"),
+    quiet = TRUE
+  ))
+
+  expect_s3_class(res, "geoarrow_vctr")
+  expect_length(res, 1L)
+  expect_equal(box_of(res), as.numeric(expected))
+})
+
+test_that("st_bbox covers points and lines, not only polygons", {
+  sfc <- sf::st_sfc(
+    sf::st_point(c(1, 2)),
+    sf::st_linestring(rbind(c(-1, 0), c(3, 5)))
+  )
+  g <- geoarrow::as_geoarrow_vctr(geoarrow::as_geoarrow_array(sfc))
+
+  expect_equal(box_of(sf::st_bbox(g)), as.numeric(sf::st_bbox(sfc)))
+})
+
 test_that("mask_sf() attaches the non-generics and detaches cleanly", {
   mask_sf()
   expect_true("geoarrowrs:sf" %in% search())

@@ -197,6 +197,13 @@ st_union.geoarrow_vctr <- function(x, y, ...) {
   ga_out(ga_boolean_union(as_ga(x), as_ga(y)))
 }
 
+#' @exportS3Method sf::st_bbox
+#' @noRd
+st_bbox.geoarrow_vctr <- function(obj, ...) {
+  # collecting skips the overlay a union runs, and keeps points and lines a union would drop
+  ga_out(ga_envelope(ga_collect_agg(as_ga(obj))))
+}
+
 #' @exportS3Method sf::st_intersection
 #' @noRd
 st_intersection.geoarrow_vctr <- function(x, y, ...) {
