@@ -43,6 +43,11 @@ Every capability is a `ga_` function first, the native path from Arrow arrays
 to Arrow arrays. `st_*` functions and sdf methods are thin wrappers that only
 call the `ga_` function, never a separate implementation.
 
+All computation happens in Rust. Every `ga_` function is an `#[extendr]`
+binding, never an R function that computes. The sf and sdf compat layer
+(`R/sf-compat.R`, `R/sdf-compat.R`) is the only R code that may compute, for
+example to draw random numbers the way sf does so that `set.seed()` matches it.
+
 `R/extendr-wrappers.R` is generated and excluded from air and jarl. Any
 hand-written R goes in a new file under `R/` and is linted normally. Prefer
 rlang standalone checks and `cli::cli_abort()` there rather than surfacing
