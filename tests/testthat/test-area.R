@@ -54,6 +54,43 @@ test_that("geodesic perimeter is a single function", {
   expect_true(all(res > 0))
 })
 
+test_that("euclidean perimeter matches sf", {
+  skip_deps()
+  skip_if_not_installed("lwgeom")
+  sq <- rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))
+  hole <- rbind(c(0.5, 0.5), c(0.5, 1), c(1, 1), c(1, 0.5), c(0.5, 0.5))
+  x <- sf::st_sfc(
+    sf::st_point(c(0, 0)),
+    sf::st_linestring(rbind(c(0, 0), c(3, 4))),
+    sf::st_polygon(list(sq)),
+    sf::st_polygon(list(sq, hole)),
+    sf::st_multipolygon(list(list(sq), list(sq + 3, hole + 3))),
+    sf::st_polygon()
+  )
+
+  expect_equal(
+    as.vector(ga_perimeter_euclidean(geoarrow::as_geoarrow_array(x))),
+    sf::st_perimeter(x)
+  )
+})
+
+test_that("euclidean perimeter matches sf on nc", {
+  skip_if_not_installed("lwgeom")
+  g <- nc()
+  x <- sf::st_set_crs(
+    sf::st_read(
+      system.file("shape/nc.shp", package = "sf"),
+      quiet = TRUE
+    ),
+    NA
+  )
+
+  expect_equal(
+    as.vector(ga_perimeter_euclidean(g)),
+    as.numeric(sf::st_perimeter(x))
+  )
+})
+
 test_that("area is length preserving and null propagating", {
   skip_deps()
   g <- geoarrow::as_geoarrow_array(sf::st_sfc(

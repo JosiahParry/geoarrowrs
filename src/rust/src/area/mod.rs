@@ -1,7 +1,7 @@
 use arrow::array::Float64Builder;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::{Area, ChamberlainDuquetteArea, GeodesicArea};
+use geo::{Area, ChamberlainDuquetteArea, Euclidean, GeodesicArea, Geometry, Length, Polygon};
 use geoarrow_array::GeoArrowArray;
 
 use crate::{as_geo_geometries, as_geometry_chunks};
@@ -217,6 +217,75 @@ fn ga_perimeter_geodesic(x: Robj) -> extendr_api::Result<Robj> {
     bldr.finish().into_arrow_robj()
 }
 
+/// Planar length of a polygon's exterior and interior rings.
+trait PerimeterEuclidean {
+    fn perimeter_euclidean(&self) -> f64;
+}
+
+impl PerimeterEuclidean for Polygon<f64> {
+    fn perimeter_euclidean(&self) -> f64 {
+        Euclidean.length(self.exterior())
+            + self
+                .interiors()
+                .iter()
+                .map(|r| Euclidean.length(r))
+                .sum::<f64>()
+    }
+}
+
+/// Anything without an area has no perimeter.
+impl PerimeterEuclidean for Geometry<f64> {
+    fn perimeter_euclidean(&self) -> f64 {
+        match self {
+            Geometry::Polygon(p) => p.perimeter_euclidean(),
+            Geometry::MultiPolygon(mp) => mp.0.iter().map(|p| p.perimeter_euclidean()).sum(),
+            Geometry::Rect(r) => r.to_polygon().perimeter_euclidean(),
+            Geometry::Triangle(t) => t.to_polygon().perimeter_euclidean(),
+            Geometry::GeometryCollection(gc) => gc.0.iter().map(|g| g.perimeter_euclidean()).sum(),
+            _ => 0.0,
+        }
+    }
+}
+
+/// Planar perimeter of polygons
+///
+/// Sums the length of every ring, including interior rings, in the units of the
+/// coordinate system. `ga_perimeter_euclidean()` returns 0 for points and
+/// lines, which have no area.
+///
+/// @details
+/// Use `ga_perimeter_geodesic()` for geographic coordinates.
+/// `ga_perimeter_euclidean()` returns `NA` for a null geometry.
+///
+/// @param x a GeoArrow geometry array
+/// @returns a double array of the same length as `x`
+/// @export
+/// @family area
+/// @references [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+/// ))
+///
+/// as.vector(ga_perimeter_euclidean(sq))
+#[extendr]
+fn ga_perimeter_euclidean(x: Robj) -> extendr_api::Result<Robj> {
+    let chunks = as_geometry_chunks(x)?;
+    let n = chunks.iter().map(|c| c.len()).sum();
+    let mut bldr = Float64Builder::with_capacity(n);
+
+    for chunk in &chunks {
+        for geom in as_geo_geometries(chunk.as_ref())? {
+            match geom {
+                Some(g) => bldr.append_value(g.perimeter_euclidean()),
+                None => bldr.append_null(),
+            }
+        }
+    }
+
+    bldr.finish().into_arrow_robj()
+}
+
 extendr_module! {
     mod area;
     fn ga_signed_area;
@@ -226,4 +295,5 @@ extendr_module! {
     fn ga_signed_area_geodesic;
     fn ga_unsigned_area_geodesic;
     fn ga_perimeter_geodesic;
+    fn ga_perimeter_euclidean;
 }

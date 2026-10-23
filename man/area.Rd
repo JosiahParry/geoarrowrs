@@ -35,6 +35,7 @@ head(as.vector(ga_unsigned_area(nc$geometry)))
 }
 \seealso{
 Other area:
+\code{\link[=ga_perimeter_euclidean]{ga_perimeter_euclidean()}},
 \code{\link[=ga_signed_area_cd]{ga_signed_area_cd()}},
 \code{\link[=ga_signed_area_geodesic]{ga_signed_area_geodesic()}}
 }

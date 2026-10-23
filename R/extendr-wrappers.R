@@ -322,6 +322,29 @@ ga_unsigned_area_geodesic <- function(x) .Call(wrap__ga_unsigned_area_geodesic, 
 ga_perimeter_geodesic <- function(x) .Call(wrap__ga_perimeter_geodesic, x)
 
 #' Compute pairwise distances between points
+#' Planar perimeter of polygons
+#'
+#' Sums the length of every ring, including interior rings, in the units of the
+#' coordinate system. `ga_perimeter_euclidean()` returns 0 for points and
+#' lines, which have no area.
+#'
+#' @details
+#' Use `ga_perimeter_geodesic()` for geographic coordinates.
+#' `ga_perimeter_euclidean()` returns `NA` for a null geometry.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns a double array of the same length as `x`
+#' @export
+#' @family area
+#' @references [Length](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Length.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
+#' ))
+#'
+#' as.vector(ga_perimeter_euclidean(sq))
+ga_perimeter_euclidean <- function(x) .Call(wrap__ga_perimeter_euclidean, x)
+
 #'
 #' Calculate the distance between each pair of geometries in `origin` and
 #' `dest`. These functions differ in the metric space used for the calculation.
