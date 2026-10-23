@@ -156,7 +156,12 @@ ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, g
 #' Shifts every coordinate of each geometry by `x_offset` and `y_offset`.
 #' `ga_translate()` keeps the input's geometry type.
 #'
-#' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+#' @details
+#' `ga_translate()` accepts any geometry type, including multipoints,
+#' geometry collections, and WKB. It returns a null for a null geometry or a
+#' null offset.
+#'
+#' @param geometry a GeoArrow geometry array
 #' @param x_offset distance to shift along the x axis; length 1 or the same length as `geometry`
 #' @param y_offset distance to shift along the y axis; length 1 or the same length as `geometry`
 #' @returns a GeoArrow array of the same geometry type as the input

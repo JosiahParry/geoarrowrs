@@ -15,9 +15,11 @@ use geoarrow::{
 };
 use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
+use crate::cast::CastGeoArrow;
+use crate::threads::Threads;
 use crate::{
-    as_linestring_chunks, as_multilinestring_chunks, as_multipolygon_chunks, as_point_chunks,
-    as_polygon_chunks, check_recycle_len, try_float_array,
+    as_geo_geometries_par, as_geometry_chunks, as_linestring_chunks, as_multilinestring_chunks,
+    as_multipolygon_chunks, as_point_chunks, as_polygon_chunks, check_recycle_len, try_float_array,
 };
 
 /// Translate geometries along the x and y axes
@@ -25,7 +27,12 @@ use crate::{
 /// Shifts every coordinate of each geometry by `x_offset` and `y_offset`.
 /// `ga_translate()` keeps the input's geometry type.
 ///
-/// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
+/// @details
+/// `ga_translate()` accepts any geometry type, including multipoints,
+/// geometry collections, and WKB. It returns a null for a null geometry or a
+/// null offset.
+///
+/// @param geometry a GeoArrow geometry array
 /// @param x_offset distance to shift along the x axis; length 1 or the same length as `geometry`
 /// @param y_offset distance to shift along the y axis; length 1 or the same length as `geometry`
 /// @returns a GeoArrow array of the same geometry type as the input
@@ -121,7 +128,7 @@ fn ga_translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::
         return bldr.finish().into_arrow_robj();
     }
 
-    if let Ok(chunks) = as_multipolygon_chunks(geometry) {
+    if let Ok(chunks) = as_multipolygon_chunks(geometry.clone()) {
         let n: usize = chunks.iter().map(|c| c.len()).sum();
         check_recycle_len(xs.len(), n, "x_offset")?;
         check_recycle_len(ys.len(), n, "y_offset")?;
@@ -141,9 +148,24 @@ fn ga_translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::
         return bldr.finish().into_arrow_robj();
     }
 
-    Err(Error::Other(
-        "Expected points, (multi)linestrings, or (multi)polygons".to_string(),
-    ))
+    // any other type, such as a multipoint, a collection, or WKB, goes through geo and casts back
+    let chunks = as_geometry_chunks(geometry)?;
+    let to_type = chunks[0].data_type();
+    let geoms = as_geo_geometries_par(Threads::get(), &chunks)?;
+    check_recycle_len(xs.len(), geoms.len(), "x_offset")?;
+    check_recycle_len(ys.len(), geoms.len(), "y_offset")?;
+
+    let moved = geoms
+        .into_iter()
+        .zip(xs.iter().cycle())
+        .zip(ys.iter().cycle())
+        .map(|((g, x), y)| match (g, x, y) {
+            (Some(g), Some(x), Some(y)) => Some(g.translate(x, y)),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+
+    moved.cast_geoarrow(&to_type)?.into_arrow_robj()
 }
 
 extendr_module! {

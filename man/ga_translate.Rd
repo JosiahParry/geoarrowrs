@@ -7,7 +7,7 @@
 ga_translate(geometry, x_offset, y_offset)
 }
 \arguments{
-\item{geometry}{a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array}
+\item{geometry}{a GeoArrow geometry array}
 
 \item{x_offset}{distance to shift along the x axis; length 1 or the same length as \code{geometry}}
 
@@ -19,6 +19,11 @@ a GeoArrow array of the same geometry type as the input
 \description{
 Shifts every coordinate of each geometry by \code{x_offset} and \code{y_offset}.
 \code{ga_translate()} keeps the input's geometry type.
+}
+\details{
+\code{ga_translate()} accepts any geometry type, including multipoints,
+geometry collections, and WKB. It returns a null for a null geometry or a
+null offset.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
