@@ -3,13 +3,20 @@ use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::algorithm::orient::{Direction, Orient};
 use geo::algorithm::winding_order::WindingOrder;
-use geo::{Geometry, MultiPolygon, Polygon, Winding};
+use geo::{
+    Geometry, GeometryCollection, Line, LineString, MultiLineString, MultiPolygon, Polygon, Winding,
+};
 use geo_traits::to_geo::{ToGeoMultiPolygon, ToGeoPolygon};
 use geoarrow::array::{MultiPolygonBuilder, PolygonBuilder};
-use geoarrow::datatypes::{Dimension, MultiPolygonType, PolygonType};
+use geoarrow::datatypes::{Dimension, GeoArrowType, MultiPolygonType, PolygonType};
 use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 
-use crate::{as_geo_geometries, as_geometry_chunks, as_multipolygon_chunks, as_polygon_chunks};
+use crate::cast::{CastGeoArrow, concat_cast};
+use crate::threads::Threads;
+use crate::{
+    as_geo_geometries, as_geo_geometries_par, as_geometry_chunks, as_multipolygon_chunks,
+    as_polygon_chunks,
+};
 
 /// Parse the winding direction accepted by `ga_orient()`.
 fn parse_direction(direction: &str) -> extendr_api::Result<Direction> {
@@ -213,8 +220,94 @@ fn winding_is(geometry: Robj, want: WindingOrder) -> extendr_api::Result<Robj> {
     bldr.finish().into_data().into_arrow_robj()
 }
 
+/// Reverse coordinate order as GEOS does: every line and ring is reversed, the order of parts and points is not.
+trait Reverse {
+    fn reversed(self) -> Self;
+}
+
+impl Reverse for LineString<f64> {
+    fn reversed(mut self) -> Self {
+        self.0.reverse();
+        self
+    }
+}
+
+/// The exterior stays first.
+impl Reverse for Polygon<f64> {
+    fn reversed(self) -> Self {
+        let (exterior, interiors) = self.into_inner();
+        Polygon::new(
+            exterior.reversed(),
+            interiors.into_iter().map(Reverse::reversed).collect(),
+        )
+    }
+}
+
+impl Reverse for Geometry<f64> {
+    fn reversed(self) -> Self {
+        match self {
+            Geometry::Line(l) => Geometry::Line(Line::new(l.end, l.start)),
+            Geometry::LineString(ls) => Geometry::LineString(ls.reversed()),
+            Geometry::Polygon(p) => Geometry::Polygon(p.reversed()),
+            Geometry::MultiLineString(m) => Geometry::MultiLineString(MultiLineString(
+                m.0.into_iter().map(Reverse::reversed).collect(),
+            )),
+            Geometry::MultiPolygon(m) => Geometry::MultiPolygon(MultiPolygon(
+                m.0.into_iter().map(Reverse::reversed).collect(),
+            )),
+            Geometry::GeometryCollection(gc) => Geometry::GeometryCollection(GeometryCollection(
+                gc.0.into_iter().map(Reverse::reversed).collect(),
+            )),
+            other => other,
+        }
+    }
+}
+
+/// Reverse the coordinate order of geometries
+///
+/// Reverses the order of the coordinates in every line and ring, keeping the
+/// geometry type of the input. `ga_reverse()` leaves the order of the parts of
+/// a multi part geometry unchanged.
+///
+/// @details
+/// `ga_reverse()` returns points and multipoints, which have no order to
+/// reverse, as they are. It flips a polygon's winding; use `ga_orient()` to set
+/// a winding direction instead. It keeps a null geometry null.
+///
+/// @param geometry a GeoArrow geometry array
+/// @returns a GeoArrow array of the same geometry type as `geometry`
+/// @export
+/// @family winding
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// g <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(1, 1), c(2, 0)))
+/// ))
+///
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_reverse(g)))
+#[extendr]
+fn ga_reverse(geometry: Robj) -> extendr_api::Result<Robj> {
+    let chunks = as_geometry_chunks(geometry)?;
+    let to_type = chunks[0].data_type();
+
+    // passing points through untouched keeps an empty point empty rather than null
+    if matches!(
+        to_type,
+        GeoArrowType::Point(_) | GeoArrowType::MultiPoint(_)
+    ) {
+        return concat_cast(chunks, &to_type);
+    }
+
+    let geoms = as_geo_geometries_par(Threads::get(), &chunks)?
+        .into_iter()
+        .map(|g| g.map(Reverse::reversed))
+        .collect::<Vec<_>>();
+
+    geoms.cast_geoarrow(&to_type)?.into_arrow_robj()
+}
+
 extendr_module! {
     mod winding;
+    fn ga_reverse;
     fn ga_orient;
     fn ga_winding_order;
     fn ga_is_ccw;

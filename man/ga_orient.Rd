@@ -45,6 +45,7 @@ ga_winding_order(ga_orient(g, "default"))
 \seealso{
 Other winding:
 \code{\link[=ga_is_ccw]{ga_is_ccw()}},
+\code{\link[=ga_reverse]{ga_reverse()}},
 \code{\link[=ga_winding_order]{ga_winding_order()}}
 }
 \concept{winding}

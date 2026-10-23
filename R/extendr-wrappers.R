@@ -2635,6 +2635,29 @@ ga_voronoi_cells <- function(geometry, clip = "padded", tolerance = 0, boundary 
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_voronoi_edges(g)))
 ga_voronoi_edges <- function(geometry, clip = "padded", tolerance = 0, boundary = NULL) .Call(wrap__ga_voronoi_edges, geometry, clip, tolerance, boundary)
 
+#' Reverse the coordinate order of geometries
+#'
+#' Reverses the order of the coordinates in every line and ring, keeping the
+#' geometry type of the input. `ga_reverse()` leaves the order of the parts of
+#' a multi part geometry unchanged.
+#'
+#' @details
+#' `ga_reverse()` returns points and multipoints, which have no order to
+#' reverse, as they are. It flips a polygon's winding; use `ga_orient()` to set
+#' a winding direction instead. It keeps a null geometry null.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow array of the same geometry type as `geometry`
+#' @export
+#' @family winding
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(1, 1), c(2, 0)))
+#' ))
+#'
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_reverse(g)))
+ga_reverse <- function(geometry) .Call(wrap__ga_reverse, geometry)
+
 #' Apply a winding direction to polygon rings
 #'
 #' Rewinds each polygon so its exterior and interior rings follow a

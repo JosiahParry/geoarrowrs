@@ -13,6 +13,7 @@ use geoarrow::datatypes::{
     WkbType, WktType,
 };
 use geoarrow_array::GeoArrowArray;
+use geoarrow_array::builder::GeometryBuilder;
 use geoarrow_cast::cast::cast;
 use geoarrow_cast::downcast::{NativeType, infer_downcast_type};
 use rayon::prelude::*;
@@ -49,7 +50,7 @@ fn target_type(to: &str, from: &GeoArrowType) -> extendr_api::Result<GeoArrowTyp
 }
 
 /// Stitch the cast pieces back into the single array the R side expects.
-fn concat_cast(
+pub(crate) fn concat_cast(
     parts: Vec<Arc<dyn GeoArrowArray>>,
     to_type: &GeoArrowType,
 ) -> extendr_api::Result<Robj> {
@@ -69,6 +70,25 @@ fn concat_cast(
     from_arrow_array(combined.as_ref(), &field)
         .map_err(|e| Error::Other(e.to_string()))?
         .into_arrow_robj()
+}
+
+/// Cast geo geometries to a GeoArrow array of a given type.
+pub(crate) trait CastGeoArrow {
+    fn cast_geoarrow(&self, to_type: &GeoArrowType) -> extendr_api::Result<Arc<dyn GeoArrowArray>>;
+}
+
+/// Goes by way of a mixed array, so one path serves every output type.
+impl CastGeoArrow for [Option<Geometry<f64>>] {
+    fn cast_geoarrow(&self, to_type: &GeoArrowType) -> extendr_api::Result<Arc<dyn GeoArrowArray>> {
+        let mixed = GeometryBuilder::from_nullable_geometries(
+            self,
+            GeometryType::new(to_type.metadata().clone()),
+        )
+        .map_err(|e| Error::Other(e.to_string()))?
+        .finish();
+
+        cast(&mixed, to_type).map_err(|e| Error::Other(e.to_string()))
+    }
 }
 
 fn cast_chunks(

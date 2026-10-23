@@ -40,6 +40,7 @@ as.vector(ga_is_cw(ga_orient(g, "reversed")))
 \seealso{
 Other winding:
 \code{\link[=ga_orient]{ga_orient()}},
+\code{\link[=ga_reverse]{ga_reverse()}},
 \code{\link[=ga_winding_order]{ga_winding_order()}}
 }
 \concept{winding}

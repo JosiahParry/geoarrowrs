@@ -37,6 +37,7 @@ as.vector(ga_winding_order(g))
 \seealso{
 Other winding:
 \code{\link[=ga_is_ccw]{ga_is_ccw()}},
-\code{\link[=ga_orient]{ga_orient()}}
+\code{\link[=ga_orient]{ga_orient()}},
+\code{\link[=ga_reverse]{ga_reverse()}}
 }
 \concept{winding}

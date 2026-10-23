@@ -118,3 +118,92 @@ test_that("winding functions read a concrete array from a reader", {
   expect_length(res, 100L)
   expect_true(all(res %in% c("clockwise", "counterclockwise")))
 })
+
+as_wkt <- function(x) {
+  sf::st_as_text(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x)))
+}
+
+extension_name <- function(x) {
+  nanoarrow::infer_nanoarrow_schema(x)$metadata[["ARROW:extension:name"]]
+}
+
+hole <- matrix(
+  c(0.2, 0.2, 0.2, 0.4, 0.4, 0.4, 0.4, 0.2, 0.2, 0.2),
+  ncol = 2,
+  byrow = TRUE
+)
+
+test_that("reverse matches sf and keeps the type of each concrete array", {
+  inputs <- list(
+    sf::st_sfc(
+      sf::st_linestring(rbind(c(0, 0), c(1, 1), c(2, 0))),
+      sf::st_linestring(rbind(c(5, 5), c(6, 6)))
+    ),
+    sf::st_sfc(sf::st_polygon(list(ccw_ring, hole)), cw_poly()),
+    sf::st_sfc(sf::st_multilinestring(list(
+      rbind(c(0, 0), c(1, 1)),
+      rbind(c(5, 5), c(6, 6))
+    ))),
+    sf::st_sfc(sf::st_multipolygon(list(
+      list(ccw_ring, hole),
+      list(ccw_ring + 10)
+    )))
+  )
+
+  for (x in inputs) {
+    g <- ga(x)
+    res <- ga_reverse(g)
+    expect_identical(extension_name(res), extension_name(g))
+    expect_equal(as_wkt(res), sf::st_as_text(sf::st_reverse(x)))
+  }
+})
+
+test_that("reverse matches sf on a mixed array with a collection", {
+  x <- sf::st_sfc(
+    sf::st_point(c(1, 2)),
+    sf::st_linestring(rbind(c(0, 0), c(1, 1), c(2, 0))),
+    ccw_poly(),
+    sf::st_multipoint(rbind(c(0, 0), c(1, 1), c(2, 2))),
+    sf::st_geometrycollection(list(
+      sf::st_point(c(0, 0)),
+      sf::st_linestring(rbind(c(0, 0), c(1, 1)))
+    ))
+  )
+  g <- ga(x)
+  res <- ga_reverse(g)
+
+  expect_identical(extension_name(res), extension_name(g))
+  expect_equal(as_wkt(res), sf::st_as_text(sf::st_reverse(x)))
+})
+
+test_that("reverse leaves points and multipoints as they are", {
+  pts <- sf::st_sfc(sf::st_point(c(1, 2)), sf::st_point())
+  mpts <- sf::st_sfc(sf::st_multipoint(rbind(c(0, 0), c(1, 1), c(2, 2))))
+
+  expect_equal(as_wkt(ga_reverse(ga(pts))), sf::st_as_text(sf::st_reverse(pts)))
+  expect_equal(
+    as_wkt(ga_reverse(ga(mpts))),
+    sf::st_as_text(sf::st_reverse(mpts))
+  )
+})
+
+test_that("reverse flips polygon winding and undoes itself", {
+  g <- ga(sf::st_sfc(ccw_poly(), cw_poly()))
+
+  expect_equal(
+    conv(ga_winding_order(ga_reverse(g))),
+    c("clockwise", "counterclockwise")
+  )
+  expect_equal(as_wkt(ga_reverse(ga_reverse(g))), as_wkt(g))
+})
+
+test_that("reverse is length preserving and null propagating", {
+  skip_deps()
+  g <- geoarrow::as_geoarrow_array(
+    wk::wkt(c("LINESTRING (0 0, 1 1)", NA, "LINESTRING EMPTY"))
+  )
+  res <- ga_reverse(g)
+
+  expect_equal(res$length, 3L)
+  expect_equal(conv(ga_is_empty(res)), c(FALSE, NA, TRUE))
+})

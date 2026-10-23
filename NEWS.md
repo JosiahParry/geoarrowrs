@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_reverse()`, which reverses the coordinate order of every line and ring.
 * Removed `ga_bounding_rect()`, which duplicated `ga_envelope()`.
 * Added `ga_equals_exact()`.
 * Added `ga_perimeter_euclidean()`.
