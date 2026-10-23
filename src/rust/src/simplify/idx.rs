@@ -22,20 +22,21 @@ fn retained(g: &Geometry<f64>, epsilon: f64, vw: bool) -> Option<Vec<usize>> {
 
 /// Find which coordinates simplification would keep
 ///
-/// Returns the positions of the coordinates that survive simplification,
+/// Returns the positions of the coordinates that simplification would keep,
 /// rather than the simplified geometry itself. One list per input geometry.
 ///
 /// @details
 /// Use these when the coordinates carry data of their own, such as a timestamp
-/// or a sensor reading per vertex. Simplifying the geometry discards that
-/// alignment; the indices let you subset the other columns the same way.
+/// or a sensor reading per vertex. If you simplify the geometry you lose that
+/// alignment; with the indices you can subset the other columns the same way.
 ///
 /// `ga_simplify_idx()` uses Ramer-Douglas-Peucker and `ga_simplify_vw_idx()` uses
-/// Visvalingam-Whyatt, matching [ga_simplify()] and [ga_simplify_vw()]. Indices are
-/// 1 based and always include the first and last coordinate.
+/// Visvalingam-Whyatt, matching [ga_simplify()] and [ga_simplify_vw()]. Each
+/// function returns 1 based indices and always includes the first and last
+/// coordinate.
 ///
-/// Only linestrings can be simplified this way. Any other geometry type, or a
-/// null geometry, comes back null.
+/// Each function works on linestrings only and returns null for any other
+/// geometry type or a null geometry.
 ///
 /// @param geometry a GeoArrow linestring array
 /// @param epsilon the simplification tolerance; length 1 or the same length as

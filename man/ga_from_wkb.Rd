@@ -18,22 +18,24 @@ as \code{x}
 }
 \description{
 Parses a binary column of WKB into the narrowest GeoArrow type that fits
-every geometry in it. A column of points becomes a \code{point} array.
+every geometry in it. \code{ga_from_wkb()} turns a column of points into a
+\code{point} array.
 }
 \details{
 GeoParquet writers, and plenty of plain Parquet ones, store geometry as a
 bare \code{binary} column with no GeoArrow extension metadata on it. Most
 geoarrowrs functions read that directly, but the ones that need a specific
 geometry type, such as \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}}, cannot tell what is
-in it. Converting once up front settles the type for everything
+in it. If you convert once up front, you settle the type for everything
 downstream.
 
-\code{crs} is stored verbatim in the array's metadata and is never interpreted,
-so nothing here reprojects. Leaving it \code{NULL} keeps whatever the input
-carried, which for a bare binary column is no CRS at all.
+\code{ga_from_wkb()} stores \code{crs} verbatim in the array's metadata and never
+interprets it, so it never reprojects. If you leave it \code{NULL},
+\code{ga_from_wkb()} keeps whatever the input carried, which for a bare binary
+column is no CRS at all.
 
-Mixed geometry types are left as a \code{geometry} array, since no narrower
-type fits.
+\code{ga_from_wkb()} leaves mixed geometry types as a \code{geometry} array, since no
+narrower type fits.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && requireNamespace("wk", quietly = TRUE) && requireNamespace("arrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

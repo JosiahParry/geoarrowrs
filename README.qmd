@@ -8,7 +8,7 @@ Fast and efficient **in memory** geospatial operations on GeoArrow arrays.
 
 Bindings to the [geoarrow-rs](https://geoarrow.org/geoarrow-rs/), pure-Rust implementation of [GeoArrow](https://geoarrow.org/) with fast "geospatial algorithms implemented by the [GeoRust community](https://georust.org/)."[^1] 
 
-Rust 🦀 bindings created using [extendr](https://extendr.rs).
+[extendr](https://extendr.rs) creates the Rust 🦀 bindings.
 
 
 The `{geoarrowrs}` (pronounced "gee-oh-air-oh-arr-ess") package provides the following:
@@ -41,7 +41,7 @@ Install the `{geoarrowrs}` from GitHub:
 pak::pak("josiahparry/geoarrowrs")
 ```
 
-Note that this requires Rust to be installed. 
+Note that you need Rust to install it.
 
 :::{.aside}
 Visit [rustup](https://rustup.sh/) to install rust (do it, it's fun! believe me!).
@@ -50,7 +50,7 @@ Visit [rustup](https://rustup.sh/) to install rust (do it, it's fun! believe me!
 
 ## Usage
 
-Note that {geoarrowrs} is desigend to work with {geoarrow} and {nanoarrow} R packages, specifically. 
+Note that {geoarrowrs} works with the {geoarrow} and {nanoarrow} R packages, specifically. Additionally, I took special care to make it work with {arrow} and its Acero / {dplyr} engines.
 
 ```{r}
 
@@ -62,7 +62,7 @@ Note that {geoarrowrs} is desigend to work with {geoarrow} and {nanoarrow} R pac
 
 ## What do you mean "in memory?"
 
-Most of the work that we do with R, and frankly most programming languages, takes place _in memory_. That means that amount of "stuff" (R objects, data, etc) is limited based on the amount of RAM that your computer has. Packages like `{sf}` and `{geos}` create and store data in memory while working on it.
+Most of the work that we do with R, and frankly most programming languages, takes place _in memory_. That means the amount of RAM your computer has limits the amount of "stuff" (R objects, data, etc) you can work with. Packages like `{sf}` and `{geos}` create and store data in memory while working on it.
 
 [Apache Arrow](https://arrow.apache.org/) is an efficient in-memory representation and GeoArrow is a spatial extension to that.
 
@@ -71,4 +71,4 @@ Tools like [Apache Sedona](https://sedona.apache.org/) and the R package `{sedon
 
 ## Lineage
 
-This package is a long time coming and I'm really excited that it can brought to fruition today.
+This package is a long time coming and I'm really excited to bring it to fruition today.

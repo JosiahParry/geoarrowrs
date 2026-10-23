@@ -27,11 +27,11 @@ a GeoArrow point array
 }
 \description{
 Returns the point located at \code{distance} along the path from \code{start} to \code{end}.
-The metric determines how distance is measured.
+\code{ga_point_at_distance_between()} uses \code{metric} to measure distance.
 
 Returns the point located at \code{ratio} of the way from \code{start} to \code{end},
-where 0.0 is the start and 1.0 is the end. The metric determines how
-the interpolation is computed.
+where 0.0 is the start and 1.0 is the end. \code{ga_point_at_ratio_between()}
+uses \code{metric} to compute the interpolation.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

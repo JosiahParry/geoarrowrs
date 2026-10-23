@@ -26,7 +26,7 @@ ga_dest_geodesic(origin, bearing, distance)
 a GeoArrow point array
 }
 \description{
-Returns the point reached by travelling \code{distance} from \code{origin} along
+Returns the point you reach by travelling \code{distance} from \code{origin} along
 \code{bearing}. Each function uses a different metric space: \code{dest_euclidean}
 treats coordinates as planar, \code{dest_haversine} assumes a sphere,
 \code{dest_geodesic} an ellipsoid, and \code{dest_rhumb} follows a line of constant

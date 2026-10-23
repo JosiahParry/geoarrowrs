@@ -16,12 +16,13 @@ ga_y(geometry)
 a double array of the same length as \code{geometry}
 }
 \description{
-Returns one coordinate per row. Any geometry that is not a single point, and
-any null or empty point, gives \code{NA}.
+Returns one coordinate per row. Each function returns \code{NA} for any geometry
+that is not a single point, and for any null or empty point.
 }
 \details{
-Both coordinate encodings work, so a point array stored as a struct of two
-double columns and one stored as interleaved values read the same.
+Both functions accept either coordinate encoding and return the same values
+whether the point array holds a struct of two double columns or interleaved
+values.
 
 Use \code{\link[=ga_coords]{ga_coords()}} for the vertices of a line or polygon, which returns a
 multipoint per row rather than a single number.

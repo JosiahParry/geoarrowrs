@@ -17,7 +17,7 @@ a double vector of area values in square meters
 }
 \description{
 These functions use the Chamberlain-Duquette formula, which is suitable for
-geographic coordinates on a sphere. Results are in square meters.
+geographic coordinates on a sphere. They return area in square meters.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

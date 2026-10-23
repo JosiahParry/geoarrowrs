@@ -16,7 +16,8 @@ Finds which points sit in a box, or near another point.
 \section{Methods}{
 
 \subsection{Method \code{new}}{
-Build the index. A bigger \code{node_size} builds quicker but searches slower.
+Build the index. With a bigger \code{node_size} you build quicker but search
+slower.
 }
 
 \subsection{Method \code{range}}{
@@ -33,7 +34,7 @@ a list array of 1 based row numbers, the same length as
 }
 
 \subsection{Method \code{within}}{
-Which points are within \code{r} of each point, measured flat in coordinate units
+Which points are within \code{r} of each point, in flat coordinate units
 
 \subsection{Arguments}{
 \describe{
@@ -47,15 +48,15 @@ a list array of 1 based row numbers, the same length as
 }
 
 \subsection{Method \code{size}}{
-How many rows went in
+How many rows you put in
 
 \subsection{returns}{
-the length of the array the index was built from
+the length of the array you built the index from
 }
 }
 
 \subsection{Method \code{n_indexed}}{
-How many rows made it into the tree, skipping null and empty points
+How many rows the tree holds, without null and empty points
 
 \subsection{returns}{
 the number of indexed rows
@@ -73,7 +74,7 @@ idx <- KDTree$new(pts)
 # every centroid within half a degree of every other
 head(as.vector(idx$within(pts, 0.5)), 3)
 
-# a single lookup is an array of one
+# for a single lookup, pass an array of one
 as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
 \dontshow{\}) # examplesIf}
 }

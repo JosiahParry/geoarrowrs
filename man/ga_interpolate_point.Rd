@@ -22,8 +22,8 @@ a GeoArrow point array
 }
 \description{
 Returns the point at a given ratio or distance along each linestring,
-measured from either the start or end. The metric determines how distance
-is calculated.
+measuring from either the start or end. \code{ga_interpolate_point()} uses
+\code{metric} to calculate distance.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

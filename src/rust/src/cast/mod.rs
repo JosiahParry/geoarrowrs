@@ -97,7 +97,7 @@ fn cast_chunks(
 /// holds.
 ///
 /// @details
-/// Some casts always succeed:
+/// `ga_cast_geometry()` always succeeds for these casts:
 ///
 /// | from | to |
 /// | --- | --- |
@@ -106,8 +106,9 @@ fn cast_chunks(
 /// | `polygon` | `multipolygon` |
 /// | any type | `geometry`, `wkb`, `wkt` |
 ///
-/// Others are fallible and error when a geometry does not fit the target type,
-/// such as a `multipoint` holding two points cast to `point`:
+/// Others are fallible, and `ga_cast_geometry()` errors when a geometry does
+/// not fit the target type, such as when you cast a `multipoint` holding two
+/// points to `point`:
 ///
 /// | from | to |
 /// | --- | --- |
@@ -116,8 +117,8 @@ fn cast_chunks(
 /// | `multipolygon` | `polygon` |
 /// | `geometry` | any concrete type |
 ///
-/// The dimension is carried over from the input, and casting between different
-/// dimensions is not supported.
+/// `ga_cast_geometry()` carries the dimension over from the input and does not
+/// support casting between different dimensions.
 ///
 /// @param x a GeoArrow geometry array
 /// @param to the target type, one of `"point"`, `"linestring"`, `"polygon"`,
@@ -129,10 +130,10 @@ fn cast_chunks(
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// pts <- ga_xy(c(0, 1), c(0, 1))
 ///
-/// # widening always works
+/// # you can always widen
 /// ga_cast_geometry(pts, "multipoint")
 ///
-/// # so does going out to wkb, which is what plain Parquet stores
+/// # and you can always go out to wkb, which is what plain Parquet stores
 /// ga_cast_geometry(pts, "wkb")
 #[extendr]
 fn ga_cast_geometry(x: Robj, to: &str) -> extendr_api::Result<Robj> {
@@ -199,12 +200,12 @@ fn promote_to_multi(
 /// Cast to the narrowest geometry type
 ///
 /// Inspects the geometries and casts to the most specific type that can hold
-/// every one of them. A `geometry` array holding only points becomes a `point`
-/// array; one holding points and polygons is left alone, since no narrower
-/// type fits.
+/// every one of them. `ga_downcast_geometry()` turns a `geometry` array holding
+/// only points into a `point` array, and leaves one holding points and polygons
+/// alone, since no narrower type fits.
 ///
-/// This is the inverse of casting up to `geometry`, and is useful after
-/// reading a format that does not record a single geometry type.
+/// It is the inverse of casting up to `geometry`, and is useful after you read
+/// a format that does not record a single geometry type.
 ///
 /// @param x a GeoArrow geometry array
 /// @returns a GeoArrow array of the narrowest type that fits, the same length as `x`
@@ -214,7 +215,7 @@ fn promote_to_multi(
 /// pts <- ga_xy(c(0, 1), c(0, 1))
 /// wide <- ga_cast_geometry(pts, "geometry")
 ///
-/// # only points in there, so it narrows back to a point array
+/// # only points in there, so you get a point array back
 /// ga_downcast_geometry(wide)
 #[extendr]
 fn ga_downcast_geometry(x: Robj) -> extendr_api::Result<Robj> {
@@ -226,22 +227,24 @@ fn ga_downcast_geometry(x: Robj) -> extendr_api::Result<Robj> {
 /// Read well known binary as a GeoArrow array
 ///
 /// Parses a binary column of WKB into the narrowest GeoArrow type that fits
-/// every geometry in it. A column of points becomes a `point` array.
+/// every geometry in it. `ga_from_wkb()` turns a column of points into a
+/// `point` array.
 ///
 /// @details
 /// GeoParquet writers, and plenty of plain Parquet ones, store geometry as a
 /// bare `binary` column with no GeoArrow extension metadata on it. Most
 /// geoarrowrs functions read that directly, but the ones that need a specific
 /// geometry type, such as [ga_dist_euclidean_pairwise()], cannot tell what is
-/// in it. Converting once up front settles the type for everything
+/// in it. If you convert once up front, you settle the type for everything
 /// downstream.
 ///
-/// `crs` is stored verbatim in the array's metadata and is never interpreted,
-/// so nothing here reprojects. Leaving it `NULL` keeps whatever the input
-/// carried, which for a bare binary column is no CRS at all.
+/// `ga_from_wkb()` stores `crs` verbatim in the array's metadata and never
+/// interprets it, so it never reprojects. If you leave it `NULL`,
+/// `ga_from_wkb()` keeps whatever the input carried, which for a bare binary
+/// column is no CRS at all.
 ///
-/// Mixed geometry types are left as a `geometry` array, since no narrower
-/// type fits.
+/// `ga_from_wkb()` leaves mixed geometry types as a `geometry` array, since no
+/// narrower type fits.
 ///
 /// @param x a binary array of WKB, or any GeoArrow array
 /// @param crs a coordinate reference system to record, or `NULL` to keep the
@@ -314,14 +317,14 @@ fn downcast_chunks(
 
 /// Cast to one GeoArrow geometry type
 ///
-/// Each of these casts to the single type its name gives. Because the result
+/// Each of these casts to the single type in its name. Because the result
 /// type does not depend on the data, these are the casts Arrow can run inside
 /// a query, which [ga_from_wkb()] cannot.
 ///
 /// @details
 /// Parsing WKB is the expensive part of using a plain Parquet geometry column,
 /// and every function that needs a concrete geometry type pays for it on its
-/// own. Casting once up front means the rest of the query runs on native
+/// own. If you cast once up front, you run the rest of the query on native
 /// GeoArrow instead:
 ///
 /// ```r
@@ -333,8 +336,9 @@ fn downcast_chunks(
 ///   )
 /// ```
 ///
-/// The cast is fallible. A geometry that does not fit the target type, such as
-/// a two point multipoint cast to `point`, is an error rather than a null.
+/// The cast is fallible. These functions error, rather than return a null,
+/// when a geometry does not fit the target type, such as when you cast a two
+/// point multipoint to `point`.
 ///
 /// @param x a binary array of WKB, or any GeoArrow array
 /// @returns a GeoArrow array of the named type, the same length as `x`

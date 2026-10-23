@@ -14,12 +14,12 @@ a GeoArrow multilinestring array of the same length as \code{geometry}
 }
 \description{
 Returns one multilinestring per input geometry, whose parts are that
-geometry's two point segments. The output has the same length as the input.
+geometry's two point segments. \code{ga_lines()} keeps the input's length.
 }
 \details{
-A polygon contributes the segments of every ring, interior rings included.
-A point has no segments and becomes a null element, as does a null
-geometry.
+For a polygon, \code{ga_lines()} returns the segments of every ring, including
+interior rings. It returns a null element for a point, which has no
+segments, and for a null geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

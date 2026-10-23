@@ -14,20 +14,20 @@ a GeoArrow array of the narrowest type that fits, the same length as \code{x}
 }
 \description{
 Inspects the geometries and casts to the most specific type that can hold
-every one of them. A \code{geometry} array holding only points becomes a \code{point}
-array; one holding points and polygons is left alone, since no narrower
-type fits.
+every one of them. \code{ga_downcast_geometry()} turns a \code{geometry} array holding
+only points into a \code{point} array, and leaves one holding points and polygons
+alone, since no narrower type fits.
 }
 \details{
-This is the inverse of casting up to \code{geometry}, and is useful after
-reading a format that does not record a single geometry type.
+It is the inverse of casting up to \code{geometry}, and is useful after you read
+a format that does not record a single geometry type.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 pts <- ga_xy(c(0, 1), c(0, 1))
 wide <- ga_cast_geometry(pts, "geometry")
 
-# only points in there, so it narrows back to a point array
+# only points in there, so you get a point array back
 ga_downcast_geometry(wide)
 \dontshow{\}) # examplesIf}
 }

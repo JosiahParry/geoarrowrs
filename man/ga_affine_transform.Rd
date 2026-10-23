@@ -21,21 +21,21 @@ a GeoArrow array of the same geometry type as \code{geometry}
 }
 \description{
 Transforms every coordinate by the six coefficients of an affine matrix.
-The geometry type of the output matches the input.
+\code{ga_affine_transform()} keeps the input's geometry type.
 }
 \details{
-The coefficients map a coordinate to
+\code{ga_affine_transform()} maps a coordinate to
 \verb{x' = a * x + b * y + xoff} and \verb{y' = d * x + e * y + yoff}, the same
-ordering PostGIS \code{ST_Affine} and Shapely use. The identity transform is
-\verb{a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0}.
+ordering PostGIS \code{ST_Affine} and Shapely use. Pass
+\verb{a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0} for the identity transform.
 
 This is the general form behind \code{\link[=ga_translate]{ga_translate()}}, \code{\link[=ga_scale_xy]{ga_scale_xy()}}, \code{\link[=ga_rotate_around_centroid]{ga_rotate_around_centroid()}},
 and \code{\link[=ga_skew]{ga_skew()}}. Reach for those when they fit, since they are clearer at the
 call site. Use this one to apply a matrix you already have, or to compose
 several steps into a single pass over the coordinates.
 
-All six coefficients are recycled against \code{geometry}, so a different
-transform can be applied to every row.
+\code{ga_affine_transform()} recycles all six coefficients against \code{geometry},
+so you can apply a different transform to every row.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

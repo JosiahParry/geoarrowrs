@@ -26,7 +26,7 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// fp <- system.file("shape/nc.shp", package = "sf")
 /// nc <- as.data.frame(read_shapefile(fp))
 ///
-/// # free to rotate, so it hugs the county tighter than the envelope
+/// # ga_minimum_rotated_rect() can rotate, so it hugs the county tighter
 /// rot <- ga_minimum_rotated_rect(nc$geometry)
 /// head(as.vector(ga_unsigned_area(rot)), 3)
 /// head(as.vector(ga_unsigned_area(ga_envelope(nc$geometry))), 3)
@@ -64,7 +64,7 @@ fn ga_minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
 /// fp <- system.file("shape/nc.shp", package = "sf")
 /// nc <- as.data.frame(read_shapefile(fp))
 ///
-/// # the hull fills in every concavity, so it is never smaller
+/// # ga_convex_hull() fills in every concavity, so it never shrinks a shape
 /// head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
 /// head(as.vector(ga_unsigned_area(nc$geometry)), 3)
 #[extendr]

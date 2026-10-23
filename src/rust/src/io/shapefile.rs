@@ -386,16 +386,17 @@ fn build_geometry(
 
 /// Read an ESRI Shapefile into a record batch stream
 ///
-/// Reads the `.shp` geometries together with the `.dbf` attributes. The CRS is
-/// taken from the sibling `.prj` file when one is present.
+/// Reads the `.shp` geometries together with the `.dbf` attributes. It takes
+/// the CRS from the sibling `.prj` file when one is present.
 ///
 /// @details
-/// Polylines are read as multilinestrings and polygons as multipolygons,
-/// because a shapefile record of either type may contain multiple parts.
+/// `read_shapefile()` reads polylines as multilinestrings and polygons as
+/// multipolygons, because a shapefile record of either type may contain
+/// multiple parts.
 ///
-/// The coordinate dimension is chosen once per file, from the shape type and
-/// from whether the coordinates actually carry measures. A `PolygonZ` file with
-/// no measures is therefore read as XYZ, rather than as XYZM full of nulls.
+/// It chooses the coordinate dimension once per file, from the shape type and
+/// from whether the coordinates actually carry measures. It therefore reads a
+/// `PolygonZ` file with no measures as XYZ, rather than as XYZM full of nulls.
 ///
 /// | shape type | measures present | dimension |
 /// | --- | --- | --- |
@@ -405,13 +406,13 @@ fn build_geometry(
 /// | `PointZ`, `PolylineZ`, `PolygonZ`, `MultipointZ` | no | XYZ |
 /// | `PointZ`, `PolylineZ`, `PolygonZ`, `MultipointZ` | yes | XYZM |
 ///
-/// If only some coordinates carry a measure, M is dropped and a message is
-/// emitted, because an Arrow column cannot mix dimensions.
+/// If only some coordinates carry a measure, `read_shapefile()` drops M and
+/// emits a message, because Arrow cannot mix dimensions in one column.
 ///
-/// `Multipatch` files are not supported.
+/// `read_shapefile()` does not support `Multipatch` files.
 ///
-/// @param path path to a `.shp` file. The sibling `.dbf` and `.prj` files are
-///   resolved from the same base name.
+/// @param path path to a `.shp` file. `read_shapefile()` resolves the sibling
+///   `.dbf` and `.prj` files from the same base name.
 /// @returns a `nanoarrow_array_stream` of a single record batch, holding the
 ///   `.dbf` attribute columns followed by a `geometry` column.
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)

@@ -16,46 +16,47 @@ that cannot match.
 }
 \details{
 The tree is a packed Hilbert R-tree, the same structure FlatGeobuf stores
-on disk. It is built once and is immutable, so it pays off when a set of
-geometries is queried repeatedly.
+on disk. You build it once and it is immutable, so it pays off when you
+query a set of geometries repeatedly.
 
 Every query is a bounding box test, not an exact one. Two geometries whose
 boxes overlap need not themselves intersect, so treat results as candidates
-and confirm with \code{\link[=ga_intersects]{ga_intersects()}} when exactness matters. Narrowing to
-candidates first is the point: the exact test then runs on a handful of
-rows rather than all of them.
+and confirm with \code{\link[=ga_intersects]{ga_intersects()}} when exactness matters. You narrow to
+candidates first so you can run the exact test on a handful of rows rather
+than all of them.
 
-Rows with a null or empty geometry have no bounding box and are left out of
-the tree, so a query never returns them. Row numbers always refer to
-positions in the original array.
+Rows with a null or empty geometry have no bounding box, so \code{new()} leaves
+them out of the tree and a query never returns them. Row numbers always
+refer to positions in the original array.
 }
 \section{Methods}{
 
 \subsection{Method \code{new}}{
-Build the index. \code{node_size} sets how many entries share a tree node;
-larger values build faster and query slower. \code{sort} picks the packing
-order, either \code{"hilbert"} or \code{"str"}.
+Build the index. Use \code{node_size} to set how many entries share a tree
+node; with larger values you build faster and query slower. Use \code{sort}
+to pick the packing order, either \code{"hilbert"} or \code{"str"}.
 }
 
 \subsection{Method \code{search}}{
 Which rows have a bounding box overlapping each geometry
 
 Returns one list of candidate row numbers per element of \code{geometry},
-so the result lines up row for row with the query array. This is the
-shape a spatial join needs.
+row for row with the query array. This is the shape a spatial join
+needs.
 
 \subsection{Arguments}{
 \describe{
 \item{\code{geometry}}{a GeoArrow array to look up}
 }}
 \subsection{details}{
-Anything with a bounding box works: a point array, a polygon array, or
-the box array \code{\link[=ga_envelope]{ga_envelope()}} produces. Boxes are taken as they are and
-everything else is reduced to its envelope first.
+\code{search()} accepts anything with a bounding box: a point array, a
+polygon array, or the box array \code{\link[=ga_envelope]{ga_envelope()}} produces. It takes boxes
+as they are and reduces everything else to its envelope first.
 
 This is a bounding box test, not an exact one, so each list holds
-candidates to confirm with \code{\link[=ga_intersects]{ga_intersects()}} or another predicate. A
-null or empty query geometry gives a null rather than an empty list.
+candidates to confirm with \code{\link[=ga_intersects]{ga_intersects()}} or another predicate.
+\code{search()} returns a null rather than an empty list for a null or empty
+query geometry.
 
 }
 \subsection{returns}{
@@ -74,13 +75,14 @@ Which rows are nearest each geometry, closest first
 \item{\code{max_distance}}{the furthest to search, or \code{NULL} for no limit}
 }}
 \subsection{details}{
-Distance is measured from the centre of each query geometry to the
-bounding box of the indexed one, so this gives candidates to confirm
-with \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}} when exactness matters. \code{k} caps how
-many come back per row and \code{max_distance} how far the search goes.
+\code{neighbors()} measures distance from the centre of each query geometry
+to the bounding box of the indexed one, so it returns candidates to
+confirm with \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}} when exactness matters. Use
+\code{k} to cap how many rows it returns per row and \code{max_distance} to cap
+how far it searches.
 
-Taking an array rather than one point at a time is what makes a nearest
-neighbour join one call.
+Because \code{neighbors()} takes an array rather than one point at a time,
+you can do a nearest neighbour join in one call.
 
 }
 \subsection{returns}{
@@ -90,15 +92,15 @@ a list array of 1 based row numbers, the same length as
 }
 
 \subsection{Method \code{size}}{
-The number of rows the index was built over
+The number of rows you built the index over
 
 \subsection{returns}{
-the length of the array the index was built from
+the length of the array you built the index from
 }
 }
 
 \subsection{Method \code{n_indexed}}{
-The number of rows actually held in the tree
+The number of rows the tree actually holds
 
 \subsection{details}{
 Lower than \code{size()} when the array held null or empty geometries, which
@@ -118,7 +120,7 @@ nc <- as.data.frame(read_shapefile(
 ))
 idx <- RTree$new(nc$geometry)
 
-# candidate rows whose box meets each county, confirmed exactly
+# candidate rows whose box meets each county, still to confirm exactly
 head(as.vector(idx$search(nc$geometry)), 3)
 
 # the three counties nearest each centroid

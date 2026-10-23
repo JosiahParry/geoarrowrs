@@ -23,10 +23,10 @@ using planar distance. \code{ga_closest_point_haversine()} measures on a sphere
 instead, treating coordinates as longitude and latitude in degrees.
 }
 \details{
-When the point lies on the geometry the intersection itself is returned.
-A geometry with no single nearest position, such as a point equidistant
-from both ends of a symmetric line, becomes a null element, as does a null
-geometry or a null point.
+When the point lies on the geometry, each function returns the intersection
+itself. These functions return a null element for a geometry with no single
+nearest position, such as a point equidistant from both ends of a symmetric
+line, and for a null geometry or a null point.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

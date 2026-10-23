@@ -7,19 +7,20 @@
 ga_flatten(x)
 }
 \arguments{
-\item{x}{a list array of GeoArrow arrays, as returned by \code{\link[=ga_explode]{ga_explode()}}}
+\item{x}{a list array of GeoArrow arrays, as \code{\link[=ga_explode]{ga_explode()}} returns}
 }
 \value{
 a GeoArrow array holding every part, flattened
 }
 \description{
 The inverse of \code{\link[=ga_explode]{ga_explode()}}. Concatenates every element's parts into one
-array, so a list of \code{n} elements holding \code{m} parts in total becomes an
+array, turning a list of \code{n} elements holding \code{m} parts in total into an
 array of length \code{m}.
 }
 \details{
-Null elements contribute nothing, so the result is shorter than the input
-whenever an element holds more or fewer than one geometry.
+\code{ga_flatten()} adds nothing for null elements, so it returns a different
+number of rows than the input whenever an element holds more or fewer than
+one geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

@@ -13,10 +13,10 @@ ga_extremes(x)
 an Arrow struct array of four point fields, with one row per geometry
 }
 \description{
-Returns a struct array with four point fields -- \code{x_min}, \code{x_max}, \code{y_min}
-and \code{y_max} -- giving the coordinate that is furthest in each direction. The
-result has one row per input geometry; a null or empty geometry yields a row
-of four nulls.
+Returns a struct array with four point fields, \code{x_min}, \code{x_max}, \code{y_min}
+and \code{y_max}, holding the coordinate that is furthest in each direction.
+\code{ga_extremes()} returns one row per input geometry, and a row of four nulls
+for a null or empty geometry.
 }
 \details{
 Note these are the extreme \emph{coordinates}, not the corners of the bounding

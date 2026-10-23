@@ -19,7 +19,7 @@ a GeoArrow multilinestring array
 }
 \description{
 Divides each linestring into \code{segment_count} segments of equal length,
-returning a multilinestring. Returns \code{NA} if segmentation fails.
+returning a multilinestring. Returns \code{NA} for a linestring it cannot segment.
 \code{ga_line_segmentize_haversine()} uses the Haversine formula for geographic
 coordinates; \code{ga_line_segmentize()} uses planar Euclidean distance.
 }

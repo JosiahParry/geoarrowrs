@@ -19,9 +19,10 @@ an integer array of the same length as \code{geometry}
 Returns 0 for points, 1 for lines and curves, and 2 for surfaces.
 }
 \details{
-An empty geometry has no dimension and gives \code{NA}, which is distinct from a
-point's 0. \code{ga_boundary_dimension()} gives the dimension of the geometry's
-boundary instead, so a polygon is 1 and a point is \code{NA}.
+\code{ga_dimension()} returns \code{NA} for an empty geometry, which has no dimension,
+rather than a point's 0. \code{ga_boundary_dimension()} gives the dimension of
+the geometry's boundary instead, so it returns 1 for a polygon and \code{NA} for
+a point.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -40,8 +41,8 @@ as.vector(ga_dimension(g))
 Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
-\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_equals_exact]{ga_equals_exact()}},
+\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
 \code{\link[=ga_join]{ga_join()}},
 \code{\link[=ga_relate]{ga_relate()}},

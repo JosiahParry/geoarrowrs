@@ -16,7 +16,8 @@ a boolean array of the same length as \code{geometry}
 \code{TRUE} when the geometry holds no coordinates.
 }
 \details{
-An empty geometry is distinct from a null one. A null geometry gives \code{NA}.
+An empty geometry is distinct from a null one. \code{ga_is_empty()} returns \code{NA}
+for a null geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -36,8 +37,8 @@ Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
-\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_equals_exact]{ga_equals_exact()}},
+\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_join]{ga_join()}},
 \code{\link[=ga_relate]{ga_relate()}},
 \code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}},

@@ -90,7 +90,7 @@ fn relate_predicate(
 /// Test a topological relationship
 ///
 /// Each function compares `x` and `y` row by row and returns `TRUE` when the
-/// named DE-9IM relationship holds. `y` is recycled against `x`.
+/// named DE-9IM relationship holds. These functions recycle `y` against `x`.
 ///
 /// @details
 /// `ga_contains()` is `TRUE` when no point of `y` lies outside `x` and at least
@@ -105,9 +105,10 @@ fn relate_predicate(
 /// interior point, `ga_crosses()` when their interiors meet in a lower dimension
 /// than at least one of them, and `ga_overlaps()` when they meet in the same
 /// dimension as both. `ga_equals_topo()` compares point sets rather than
-/// coordinate order, so two geometries wound differently are still equal.
+/// coordinate order, so it still treats two geometries with different windings
+/// as equal.
 ///
-/// A null geometry on either side gives `NA`.
+/// Each function returns `NA` for a null geometry on either side.
 ///
 /// @param x a GeoArrow geometry array
 /// @param y a GeoArrow geometry array; length 1 or the same length as `x`
@@ -213,13 +214,13 @@ fn ga_equals_topo(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// DE-9IM relationship between geometries
 ///
 /// Returns the nine character DE-9IM matrix describing how each pair of
-/// geometries relates, from which every named predicate can be derived.
+/// geometries relates, from which you can derive every named predicate.
 ///
 /// @details
-/// The string reads as the intersections of the interior, boundary and
-/// exterior of `x` with those of `y`, in that order. Each character is the
-/// dimension of that intersection: `F` for empty, `0` for a point, `1` for a
-/// curve, and `2` for a surface. A null geometry on either side gives `NA`.
+/// Read the string as the intersections of the interior, boundary and exterior
+/// of `x` with those of `y`, in that order. Each character is the dimension of
+/// that intersection: `F` for empty, `0` for a point, `1` for a curve, and `2`
+/// for a surface. `ga_relate()` returns `NA` for a null geometry on either side.
 ///
 /// @inheritParams ga_contains
 /// @returns a string array of the same length as `x`
@@ -241,7 +242,6 @@ fn ga_relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
         .into_arrow_robj()
 }
 
-/// Determine the topological dimension of geometries
 /// Exact equality as GEOS defines it: same type, same structure, and every coordinate within `tol` in planar distance.
 trait EqualsExact {
     fn equals_exact(&self, other: &Self, tol: f64) -> bool;
@@ -363,13 +363,15 @@ fn ga_equals_exact(
     bldr.finish().into_data().into_arrow_robj()
 }
 
+/// Determine the topological dimension of geometries
 ///
 /// Returns 0 for points, 1 for lines and curves, and 2 for surfaces.
 ///
 /// @details
-/// An empty geometry has no dimension and gives `NA`, which is distinct from a
-/// point's 0. `ga_boundary_dimension()` gives the dimension of the geometry's
-/// boundary instead, so a polygon is 1 and a point is `NA`.
+/// `ga_dimension()` returns `NA` for an empty geometry, which has no dimension,
+/// rather than a point's 0. `ga_boundary_dimension()` gives the dimension of
+/// the geometry's boundary instead, so it returns 1 for a polygon and `NA` for
+/// a point.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns an integer array of the same length as `geometry`
@@ -429,7 +431,8 @@ fn dimension_impl(geometry: Robj, boundary: bool) -> extendr_api::Result<Robj> {
 /// `TRUE` when the geometry holds no coordinates.
 ///
 /// @details
-/// An empty geometry is distinct from a null one. A null geometry gives `NA`.
+/// An empty geometry is distinct from a null one. `ga_is_empty()` returns `NA`
+/// for a null geometry.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a boolean array of the same length as `geometry`
@@ -467,8 +470,9 @@ fn ga_is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
 ///
 /// @details
 /// This is the three way form of a point in polygon test, distinguishing a
-/// point that lies exactly on an edge from one strictly inside. `point` is
-/// recycled against `geometry`. A null geometry or a null point gives `NA`.
+/// point that lies exactly on an edge from one strictly inside.
+/// `ga_coordinate_position()` recycles `point` against `geometry` and returns
+/// `NA` for a null geometry or a null point.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @param point a GeoArrow point array; length 1 or the same length as `geometry`
@@ -528,9 +532,9 @@ extendr_module! {
     fn ga_overlaps;
     fn ga_equals_topo;
     fn ga_relate;
+    fn ga_equals_exact;
     fn ga_dimension;
     fn ga_boundary_dimension;
     fn ga_is_empty;
     fn ga_coordinate_position;
-    fn ga_equals_exact;
 }

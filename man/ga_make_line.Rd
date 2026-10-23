@@ -16,13 +16,14 @@ a GeoArrow linestring array of the same length as \code{start}
 }
 \description{
 Returns a two point linestring joining each \code{start} to the matching \code{end}.
-\code{end} is recycled, so one destination pairs with every origin.
+\code{ga_make_line()} recycles \code{end}, so you can pair one destination with every
+origin.
 }
 \details{
-A null or empty point on either side gives a null element, so the result is
-always the same length as \code{start}. The length of the line is
-\code{\link[=ga_length_euclidean]{ga_length_euclidean()}}, which equals \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}} on the
-same pair.
+\code{ga_make_line()} returns a null element for a null or empty point on either
+side, so the result is always the same length as \code{start}. The length of the
+line is \code{\link[=ga_length_euclidean]{ga_length_euclidean()}}, which equals \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}}
+on the same pair.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

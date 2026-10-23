@@ -22,7 +22,7 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 /// fp <- system.file("shape/nc.shp", package = "sf")
 /// nc <- as.data.frame(read_shapefile(fp))
 ///
-/// # nc rings wind clockwise, so the signed area is negative
+/// # ga_signed_area() returns negative values for nc, whose rings wind clockwise
 /// head(as.vector(ga_signed_area(nc$geometry)))
 /// head(as.vector(ga_unsigned_area(nc$geometry)))
 #[extendr]
@@ -69,7 +69,7 @@ fn ga_unsigned_area(x: Robj) -> extendr_api::Result<Robj> {
 /// Chamberlain-Duquette spherical area
 ///
 /// These functions use the Chamberlain-Duquette formula, which is suitable for
-/// geographic coordinates on a sphere. Results are in square meters.
+/// geographic coordinates on a sphere. They return area in square meters.
 ///
 /// @param x a GeoArrow geometry array
 /// @returns a double vector of area values in square meters
@@ -128,15 +128,15 @@ fn ga_unsigned_area_cd(x: Robj) -> extendr_api::Result<Robj> {
 /// Geodesic area and perimeter
 ///
 /// These functions use the geodesic formula for computing area and perimeter on
-/// an ellipsoidal model of the earth. Results are in square meters for area and
-/// meters for perimeter.
+/// an ellipsoidal model of the earth. They return area in square meters and
+/// perimeter in meters.
 ///
 /// @details
-/// `geo` assumes Simple Features winding, so an exterior ring must run
-/// counter-clockwise. A clockwise ring names the rest of the earth instead,
-/// and `ga_unsigned_area_geodesic()` returns a value near 5.1e14. Shapefiles
-/// wind clockwise, so orient with [ga_orient()] first or read the sign off
-/// `ga_signed_area_geodesic()`, which is unaffected.
+/// `geo` assumes Simple Features winding, so it expects an exterior ring to run
+/// counter-clockwise. `ga_unsigned_area_geodesic()` reads a clockwise ring as
+/// the rest of the earth instead and returns a value near 5.1e14. For
+/// shapefiles, which wind clockwise, orient with [ga_orient()] first or read
+/// the sign off `ga_signed_area_geodesic()`, which does not have this problem.
 ///
 /// @param x a GeoArrow geometry array
 /// @returns a double vector of area values in square meters, or perimeter values in meters
@@ -151,7 +151,7 @@ fn ga_unsigned_area_cd(x: Robj) -> extendr_api::Result<Robj> {
 /// head(as.vector(ga_signed_area_geodesic(nc$geometry)))
 /// head(as.vector(ga_perimeter_geodesic(nc$geometry)))
 ///
-/// # nc winds clockwise, so orient before taking the unsigned area
+/// # orient nc, which winds clockwise, before taking the unsigned area
 /// ccw <- ga_orient(nc$geometry, "default")
 /// head(as.vector(ga_unsigned_area_geodesic(ccw)))
 #[extendr]

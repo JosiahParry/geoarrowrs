@@ -67,26 +67,28 @@ fn clip_for<'a>(
 /// Voronoi cells from geometry vertices
 ///
 /// Returns one multipolygon per input geometry, whose parts are the Voronoi
-/// cells of that geometry's vertices. The output has the same length as the
-/// input.
+/// cells of that geometry's vertices. `ga_voronoi_cells()` preserves the
+/// input's length.
 ///
 /// @details
-/// Every vertex of a geometry is treated as a site, so a multipoint of `k`
-/// points yields `k` cells. A Voronoi diagram is unbounded, so the cells are
-/// clipped: `"padded"` uses a box with 50 percent padding around the sites,
-/// matching PostGIS `ST_VoronoiPolygons`, and `"envelope"` uses their exact
-/// bounding box. Passing `boundary` clips to an arbitrary polygon instead,
-/// which is the usual way to cut a diagram to a study area.
+/// `ga_voronoi_cells()` treats every vertex of a geometry as a site, so it
+/// returns `k` cells for a multipoint of `k` points. A Voronoi diagram is
+/// unbounded, so `ga_voronoi_cells()` clips the cells: with `"padded"` it uses
+/// a box with 50 percent padding around the sites, matching PostGIS
+/// `ST_VoronoiPolygons`, and with `"envelope"` their exact bounding box. Pass
+/// `boundary` to clip to an arbitrary polygon instead, which is the usual way
+/// to cut a diagram to a study area.
 ///
 /// A geometry with fewer than two distinct vertices, or one whose vertices are
-/// all collinear, has no cells and comes back as an empty multipolygon rather
-/// than a null. Use [ga_voronoi_edges()] for the collinear case, which returns
-/// the perpendicular bisectors. A null geometry stays null.
+/// all collinear, has no cells, and `ga_voronoi_cells()` returns an empty
+/// multipolygon for it rather than a null. Use [ga_voronoi_edges()] for the
+/// collinear case, which returns the perpendicular bisectors.
+/// `ga_voronoi_cells()` keeps a null geometry null.
 ///
 /// @param geometry a GeoArrow geometry array whose vertices are the sites
 /// @param clip how to bound the diagram, either `"padded"` or `"envelope"`.
-///   Ignored when `boundary` is supplied
-/// @param tolerance sites closer together than this are snapped to the same
+///   Has no effect when you supply `boundary`
+/// @param tolerance the distance below which to snap sites to the same
 ///   position; length 1 or the same length as `geometry`
 /// @param boundary an optional GeoArrow polygon array to clip to; length 1 or
 ///   the same length as `geometry`
@@ -150,16 +152,17 @@ fn ga_voronoi_cells(
 /// Voronoi edges from geometry vertices
 ///
 /// Returns one multilinestring per input geometry, whose parts are the
-/// boundaries between that geometry's Voronoi cells. The output has the same
-/// length as the input.
+/// boundaries between that geometry's Voronoi cells. `ga_voronoi_edges()`
+/// preserves the input's length.
 ///
 /// @details
 /// Unlike [ga_voronoi_cells()], this works on collinear sites, where the edges
 /// are the perpendicular bisectors between neighbouring points. Prefer it
 /// when you want the diagram's skeleton rather than closed regions.
 ///
-/// A geometry with fewer than two distinct vertices has no edges and comes
-/// back as an empty multilinestring. A null geometry stays null.
+/// A geometry with fewer than two distinct vertices has no edges, and
+/// `ga_voronoi_edges()` returns an empty multilinestring for it. It keeps a
+/// null geometry null.
 ///
 /// @inheritParams ga_voronoi_cells
 /// @returns a GeoArrow multilinestring array of the same length as `geometry`

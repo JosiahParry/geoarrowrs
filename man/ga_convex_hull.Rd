@@ -20,7 +20,7 @@ Returns the smallest convex polygon that contains each geometry.
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# the hull fills in every concavity, so it is never smaller
+# ga_convex_hull() fills in every concavity, so it never shrinks a shape
 head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
 head(as.vector(ga_unsigned_area(nc$geometry)), 3)
 \dontshow{\}) # examplesIf}

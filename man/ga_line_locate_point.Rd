@@ -19,10 +19,10 @@ Returns how far along each line the closest position to the corresponding
 point lies, as a fraction between 0 and 1.
 }
 \details{
-0 is the start of the line and 1 its end, so the value multiplied by the
-line's length gives a distance. Only lines and linestrings can be located
-along; any other geometry type, a null geometry, a null point, or a
-zero length line becomes \code{NA}.
+0 is the start of the line and 1 its end, so you can multiply the value by
+the line's length to get a distance. \code{ga_line_locate_point()} locates along
+lines and linestrings only, and returns \code{NA} for any other geometry type, a
+null geometry, a null point, or a zero length line.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

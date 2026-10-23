@@ -15,40 +15,41 @@ ga_sparse_dwithin(x, y, distance, metric = "euclidean")
 length 1 or the same length as \code{x}}
 
 \item{metric}{one of \code{"euclidean"}, \code{"haversine"}, \code{"geodesic"}, or
-\code{"rhumb"}. Everything but \code{"euclidean"} measures between points only.}
+\code{"rhumb"}. Use \code{"euclidean"} for geometries other than points.}
 }
 \value{
 a list array of 1 based row numbers into \code{y}, the same length as \code{x}
 }
 \description{
 Returns the row numbers of \code{y} whose geometry is no further than \code{distance}
-from each row of \code{x}. This is the sparse form of a distance band join, and
-the same test as PostGIS \code{ST_DWithin()}.
+from each row of \code{x}. \code{ga_sparse_dwithin()} is the sparse form of a distance
+band join and runs the same test as PostGIS \code{ST_DWithin()}.
 }
 \details{
-Distance is measured between the geometries themselves, so a point counts
-when it is within \code{distance} of the nearest edge of a polygon, not of the box
-around it. This is why it differs from buffering \code{x} and intersecting: a
-buffer approximates its curves with segments, so a point just inside the true
-radius can fall outside the buffer.
+\code{ga_sparse_dwithin()} measures distance between the geometries themselves,
+so it counts a point that lies within \code{distance} of the nearest edge of a
+polygon, not of the box around it. That is why it differs from buffering \code{x}
+and intersecting: \code{\link[=ga_buffer]{ga_buffer()}} approximates curves with segments, so a point
+just inside the true radius can fall outside the buffer.
 
-\code{metric} decides what \code{distance} means. \code{"euclidean"} measures in the units
-the coordinates are in, which on longitude and latitude is degrees, and is
-what Sedona, PostGIS and DuckDB's \code{ST_DWithin()} all measure. It is the
-default because it is the only metric \code{geo} defines between geometries of any
-type. For longitude and latitude the answer you almost certainly want is
-\code{"geodesic"} or \code{"haversine"}, which measure metres, and which \code{geo} defines
-between points alone: a non point geometry with either is an error rather
-than a planar number wearing a spherical name.
+\code{metric} sets what \code{distance} means. With \code{"euclidean"},
+\code{ga_sparse_dwithin()} measures in the units of the coordinates, which on
+longitude and latitude is degrees, as Sedona, PostGIS and DuckDB's
+\code{ST_DWithin()} all do. It is the default because \code{geo} defines no other
+metric between geometries of any type. For longitude and latitude you almost
+certainly want \code{"geodesic"} or \code{"haversine"}, which work in metres but which
+\code{geo} defines between points alone: \code{ga_sparse_dwithin()} raises an error for
+a non point geometry with either, rather than return a planar number wearing
+a spherical name.
 
-The bounding box of each row of \code{x} is grown far enough to reach \code{distance}
-before the tree is searched, so nothing within reach is missed and only the
-rows that could qualify are measured. \code{distance} is recycled, so one value
-covers every row or a different radius can apply to each.
+Before it searches the tree, \code{ga_sparse_dwithin()} grows the bounding box of
+each row of \code{x} far enough to reach \code{distance}, so it misses nothing within
+reach and measures only the rows that could qualify. It recycles \code{distance},
+so you can give one value for every row or a different radius for each.
 
-A row that matches nothing gives a zero length element, not a null. A null or
-empty geometry in \code{x}, or a null \code{distance}, gives a null element, and a null
-geometry in \code{y} is never returned.
+\code{ga_sparse_dwithin()} returns a zero length element for a row that matches
+nothing, not a null. It returns a null element for a null or empty geometry
+in \code{x} or a null \code{distance}, and never returns a null geometry from \code{y}.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

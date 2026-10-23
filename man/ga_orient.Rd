@@ -16,16 +16,17 @@ a GeoArrow array of the same geometry type as \code{geometry}
 }
 \description{
 Rewinds each polygon so its exterior and interior rings follow a
-consistent direction. The geometry type of the output matches the input.
+consistent direction. \code{ga_orient()} keeps the geometry type of the input.
 }
 \details{
-\code{"default"} gives a counter-clockwise exterior ring and clockwise interior
-rings, which is the winding the OGC simple features and GeoJSON
-specifications call for. \code{"reversed"} gives the opposite. \code{"ccw"} and
-\code{"cw"} are accepted as aliases and refer to the exterior ring.
+With \code{"default"}, \code{ga_orient()} winds the exterior ring counter-clockwise
+and the interior rings clockwise, which is the winding the OGC simple
+features and GeoJSON specifications call for. With \code{"reversed"} it does the
+opposite. It accepts \code{"ccw"} and \code{"cw"} as aliases, which refer to the
+exterior ring.
 
-Rewinding does not change which points a polygon covers, only the order
-its coordinates are stored in. A null geometry stays null.
+\code{ga_orient()} does not change which points a polygon covers, only the order
+of its coordinates. It keeps a null geometry null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

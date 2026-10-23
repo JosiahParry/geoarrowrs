@@ -9,40 +9,41 @@ sparse_metrics <- c("euclidean", "haversine", "geodesic", "rhumb")
 #' Find which rows of `y` lie within a distance of each row of `x`
 #'
 #' Returns the row numbers of `y` whose geometry is no further than `distance`
-#' from each row of `x`. This is the sparse form of a distance band join, and
-#' the same test as PostGIS `ST_DWithin()`.
+#' from each row of `x`. `ga_sparse_dwithin()` is the sparse form of a distance
+#' band join and runs the same test as PostGIS `ST_DWithin()`.
 #'
 #' @details
-#' Distance is measured between the geometries themselves, so a point counts
-#' when it is within `distance` of the nearest edge of a polygon, not of the box
-#' around it. This is why it differs from buffering `x` and intersecting: a
-#' buffer approximates its curves with segments, so a point just inside the true
-#' radius can fall outside the buffer.
+#' `ga_sparse_dwithin()` measures distance between the geometries themselves,
+#' so it counts a point that lies within `distance` of the nearest edge of a
+#' polygon, not of the box around it. That is why it differs from buffering `x`
+#' and intersecting: [ga_buffer()] approximates curves with segments, so a point
+#' just inside the true radius can fall outside the buffer.
 #'
-#' `metric` decides what `distance` means. `"euclidean"` measures in the units
-#' the coordinates are in, which on longitude and latitude is degrees, and is
-#' what Sedona, PostGIS and DuckDB's `ST_DWithin()` all measure. It is the
-#' default because it is the only metric `geo` defines between geometries of any
-#' type. For longitude and latitude the answer you almost certainly want is
-#' `"geodesic"` or `"haversine"`, which measure metres, and which `geo` defines
-#' between points alone: a non point geometry with either is an error rather
-#' than a planar number wearing a spherical name.
+#' `metric` sets what `distance` means. With `"euclidean"`,
+#' `ga_sparse_dwithin()` measures in the units of the coordinates, which on
+#' longitude and latitude is degrees, as Sedona, PostGIS and DuckDB's
+#' `ST_DWithin()` all do. It is the default because `geo` defines no other
+#' metric between geometries of any type. For longitude and latitude you almost
+#' certainly want `"geodesic"` or `"haversine"`, which work in metres but which
+#' `geo` defines between points alone: `ga_sparse_dwithin()` raises an error for
+#' a non point geometry with either, rather than return a planar number wearing
+#' a spherical name.
 #'
-#' The bounding box of each row of `x` is grown far enough to reach `distance`
-#' before the tree is searched, so nothing within reach is missed and only the
-#' rows that could qualify are measured. `distance` is recycled, so one value
-#' covers every row or a different radius can apply to each.
+#' Before it searches the tree, `ga_sparse_dwithin()` grows the bounding box of
+#' each row of `x` far enough to reach `distance`, so it misses nothing within
+#' reach and measures only the rows that could qualify. It recycles `distance`,
+#' so you can give one value for every row or a different radius for each.
 #'
-#' A row that matches nothing gives a zero length element, not a null. A null or
-#' empty geometry in `x`, or a null `distance`, gives a null element, and a null
-#' geometry in `y` is never returned.
+#' `ga_sparse_dwithin()` returns a zero length element for a row that matches
+#' nothing, not a null. It returns a null element for a null or empty geometry
+#' in `x` or a null `distance`, and never returns a null geometry from `y`.
 #'
 #' @param x a GeoArrow geometry array
 #' @param y a GeoArrow geometry array
 #' @param distance the furthest a row of `y` may be, in the units of `metric`;
 #'   length 1 or the same length as `x`
 #' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or
-#'   `"rhumb"`. Everything but `"euclidean"` measures between points only.
+#'   `"rhumb"`. Use `"euclidean"` for geometries other than points.
 #' @returns a list array of 1 based row numbers into `y`, the same length as `x`
 #' @export
 #' @family index
@@ -66,26 +67,29 @@ ga_sparse_dwithin <- function(x, y, distance, metric = "euclidean") {
 #' Find the rows of `y` nearest each row of `x`
 #'
 #' Returns the `k` rows of `y` closest to each row of `x`, nearest first, each
-#' paired with the distance between them. This is the sparse form of a nearest
-#' neighbour search, and the shape [ga_knn_join()] needs.
+#' paired with the distance between them. `ga_sparse_knn()` is the sparse form
+#' of a nearest neighbour search, and returns the shape [ga_knn_join()] needs.
 #'
 #' @details
-#' Distance is measured between the geometries themselves, not between their
-#' bounding boxes, so the nearest edge of a polygon counts rather than the corner
-#' of the box around it. `y` is indexed in a packed Hilbert R-tree, which narrows
-#' the search to the rows that can win before any exact distance is computed, and
-#' the answer is the same as comparing every pair.
+#' `ga_sparse_knn()` measures distance between the geometries themselves, not
+#' between their bounding boxes, so it counts the nearest edge of a polygon
+#' rather than the corner of the box around it. It indexes `y` in a packed
+#' Hilbert R-tree to narrow the search to the rows that can win before it
+#' computes any exact distance, and returns the same answer as comparing every
+#' pair.
 #'
-#' `metric` decides how far apart two rows are, and so which rows win.
-#' `"euclidean"` measures in the units the coordinates are in, which on longitude
-#' and latitude is degrees, and ranks neighbours differently from a real distance
-#' once the rows are far apart or near a pole. It is the default because it is
-#' the only metric `geo` defines between geometries of any type. For longitude
-#' and latitude points, `"geodesic"` or `"haversine"` is the answer you want.
+#' `metric` sets how `ga_sparse_knn()` measures how far apart two rows are, and
+#' so which rows win. With `"euclidean"` it measures in the units of the
+#' coordinates, which on longitude and latitude is degrees, and so ranks
+#' neighbours differently from a real distance once the rows are far apart or
+#' near a pole. It is the default because `geo` defines no other metric between
+#' geometries of any type. For longitude and latitude points, you want
+#' `"geodesic"` or `"haversine"`.
 #'
-#' A row matches fewer than `k` rows only when `max_distance` rules the rest out
-#' or `y` is shorter than `k`. A null or empty geometry in `x` gives a null
-#' element, and one in `y` is never returned.
+#' `ga_sparse_knn()` returns fewer than `k` rows for a row of `x` only when
+#' `max_distance` rules the rest out or `y` is shorter than `k`. It returns a
+#' null element for a null or empty geometry in `x`, and never returns one from
+#' `y`.
 #'
 #' @inheritParams ga_sparse_dwithin
 #' @param k how many rows of `y` to return per row of `x`

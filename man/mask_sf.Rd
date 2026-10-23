@@ -15,16 +15,16 @@ generic, such as \code{st_distance()} and \code{st_within()}, under sf's own nam
 argument names. Remove them again with \code{detach("geoarrowrs:sf")}.
 }
 \details{
-Not needed alongside sdf, which makes these generic and so reaches this
-package by dispatch.
+You do not need it alongside sdf, which makes these functions generic and so
+reaches geoarrowrs by dispatch.
 
-They take and return the GeoArrow representation rather than \code{sfc}, so
-nothing is converted into an sf object on the way through.
+They take and return the GeoArrow representation rather than \code{sfc}, so they
+never convert anything into an sf object.
 
-The generics are not attached, because masking one would shadow sf's own
-dispatch. Those are S3 methods registered on \code{nanoarrow_vctr}, which
-\code{geoarrow_vctr} extends, so \code{st_area()} and the rest already reach this
-package through sf's generic whether or not this is called.
+\code{mask_sf()} does not attach the generics, because masking one would shadow
+sf's own dispatch. Those generics have S3 methods on \code{nanoarrow_vctr}, which
+\code{geoarrow_vctr} extends, so \code{st_area()} and the rest already reach
+geoarrowrs through sf's generic whether or not you call \code{mask_sf()}.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

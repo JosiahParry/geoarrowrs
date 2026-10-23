@@ -2,13 +2,13 @@
 title: "Benchmark: duckdbspatial"
 ---
 
-The wonderful [`{duckspatial}`](https://cidree.github.io/duckspatial/) R package—which delegates operations to [DuckDB](https://duckdb.org/) has published bench marks for operations.
+The wonderful [`{duckspatial}`](https://cidree.github.io/duckspatial/) R package, which delegates operations to [DuckDB](https://duckdb.org/), has published benchmarks for its operations.
 
 This article compares `{geoarrowrs}` implementations to `{sf}` and `{duckspatial}` by recreating the benchmark but including geoarrow-rs.
 
 See the original [duckspatial benchmark](https://cidree.github.io/duckspatial/articles/benchmark.html).
 
-This version of the benchmark compares the peformance of: 
+This version of the benchmark compares the performance of:
 
 - duckspatial
 - [{sedonadb}](https://github.com/apache/sedona-db/tree/main/r/sedonadb)
@@ -16,10 +16,10 @@ This version of the benchmark compares the peformance of:
 
 ### The earth is a sphere not a plane
 
-One of the issues the duckdbspatial benchmark—is that is calculates **incorrect** distances.
-`{sf}` delegates to `{s2}` to have very accurate spherical distance calculations—this comes at the cost of speed.
+One issue with the duckspatial benchmark is that it calculates **incorrect** distances.
+`{sf}` delegates to `{s2}` for very accurate spherical distance calculations, and pays for that accuracy in speed.
 
-Using planar distances for calculating the distance from Jakarta to New York calculates the distance _through_ the earth. 
+If you use planar distance from Jakarta to New York, you measure the distance _through_ the earth.
 
 ```{r}
 #| include: false
@@ -70,8 +70,8 @@ wide$n <- format(wide$n, scientific = FALSE, big.mark = ",", trim = TRUE)
 #| fig-alt: "Five log-log panels, one per operation, of elapsed seconds against
 #|   input size. geoarrowrs is the lowest line in every panel. sf is the
 #|   highest. duckspatial sits between them and is flat from 100,000 to one
-#|   million rows, where its fixed startup cost is most of what is measured."
-#| fig-cap: "Elapsed seconds by input size. Both axes are log scaled."
+#|   million rows, where its fixed startup cost dominates the timing."
+#| fig-cap: "Elapsed seconds by input size. Both axes are on a log scale."
 
 # base graphics rather than ggplot2, which 4.0.3 cannot load against the
 # development version of S7

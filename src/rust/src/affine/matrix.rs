@@ -101,21 +101,21 @@ impl Coeffs {
 /// Apply an arbitrary affine transform
 ///
 /// Transforms every coordinate by the six coefficients of an affine matrix.
-/// The geometry type of the output matches the input.
+/// `ga_affine_transform()` keeps the input's geometry type.
 ///
 /// @details
-/// The coefficients map a coordinate to
+/// `ga_affine_transform()` maps a coordinate to
 /// `x' = a * x + b * y + xoff` and `y' = d * x + e * y + yoff`, the same
-/// ordering PostGIS `ST_Affine` and Shapely use. The identity transform is
-/// `a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0`.
+/// ordering PostGIS `ST_Affine` and Shapely use. Pass
+/// `a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0` for the identity transform.
 ///
 /// This is the general form behind [ga_translate()], [ga_scale_xy()], [ga_rotate_around_centroid()],
 /// and [ga_skew()]. Reach for those when they fit, since they are clearer at the
 /// call site. Use this one to apply a matrix you already have, or to compose
 /// several steps into a single pass over the coordinates.
 ///
-/// All six coefficients are recycled against `geometry`, so a different
-/// transform can be applied to every row.
+/// `ga_affine_transform()` recycles all six coefficients against `geometry`,
+/// so you can apply a different transform to every row.
 ///
 /// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or
 ///   multipolygon array

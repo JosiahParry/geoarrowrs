@@ -13,8 +13,8 @@ ga_envelope(x)
 a GeoArrow box array of the same length as \code{x}
 }
 \description{
-Returns the axis aligned bounding box of each geometry, as the box array
-that the spatial index queries take.
+Returns the axis aligned bounding box of each geometry as a box array, the
+type the spatial index queries take.
 }
 \details{
 \code{ga_envelope()} returns a box array as it is instead of recomputing it, so
@@ -32,7 +32,7 @@ nc <- as.data.frame(read_shapefile(
 boxes <- ga_envelope(nc$geometry)
 head(geoarrow::as_geoarrow_vctr(boxes), 3)
 
-# already boxes, so this is a no op
+# already boxes, so ga_envelope() returns them untouched
 identical(
   as.character(geoarrow::as_geoarrow_vctr(ga_envelope(boxes))),
   as.character(geoarrow::as_geoarrow_vctr(boxes))

@@ -46,7 +46,7 @@ a boolean array of the same length as \code{x}
 }
 \description{
 Each function compares \code{x} and \code{y} row by row and returns \code{TRUE} when the
-named DE-9IM relationship holds. \code{y} is recycled against \code{x}.
+named DE-9IM relationship holds. These functions recycle \code{y} against \code{x}.
 }
 \details{
 \code{ga_contains()} is \code{TRUE} when no point of \code{y} lies outside \code{x} and at least
@@ -61,9 +61,10 @@ within the interior.
 interior point, \code{ga_crosses()} when their interiors meet in a lower dimension
 than at least one of them, and \code{ga_overlaps()} when they meet in the same
 dimension as both. \code{ga_equals_topo()} compares point sets rather than
-coordinate order, so two geometries wound differently are still equal.
+coordinate order, so it still treats two geometries with different windings
+as equal.
 
-A null geometry on either side gives \code{NA}.
+Each function returns \code{NA} for a null geometry on either side.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -84,8 +85,8 @@ as.vector(ga_intersects(x, y))
 Other topology:
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
-\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_equals_exact]{ga_equals_exact()}},
+\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
 \code{\link[=ga_join]{ga_join()}},
 \code{\link[=ga_relate]{ga_relate()}},

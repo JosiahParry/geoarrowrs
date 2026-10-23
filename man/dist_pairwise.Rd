@@ -26,13 +26,14 @@ a double vector of distance values
 }
 \description{
 Calculate the distance between each pair of geometries in \code{origin} and
-\code{dest}. These functions differ in the metric space used for the calculation.
+\code{dest}. These functions differ in the metric space they use for the
+calculation.
 }
 \details{
 \code{ga_dist_euclidean_pairwise()} measures between geometries of any type, so
-the distance from a point to the nearest edge of a polygon is one call. The
-spherical and ellipsoidal metrics take points only, because \code{geo} defines
-them between points alone.
+you can get the distance from a point to the nearest edge of a polygon in
+one call. The spherical and ellipsoidal functions take points only, because
+\code{geo} defines those metrics between points alone.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

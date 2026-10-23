@@ -24,7 +24,8 @@ ga_knn_join(
 
 \item{distance}{the name of the distance column, or \code{NULL} to leave it out}
 
-\item{suffix}{the pair of suffixes added to column names found in both frames}
+\item{suffix}{the pair of suffixes to add to the column names both frames
+share}
 
 \item{left}{whether to keep rows of \code{x} that match nothing}
 }
@@ -34,18 +35,19 @@ an Arrow table with the columns of \code{x}, the non geometry columns of
 }
 \description{
 Attaches the columns of the \code{k} rows of \code{y} nearest each row of \code{x}, the way
-\code{\link[=ga_join]{ga_join()}} attaches the ones that relate to it. The distance between each
-pair comes along as a column.
+\code{\link[=ga_join]{ga_join()}} attaches the ones that relate to it. \code{ga_knn_join()} also adds
+the distance between each pair as a column.
 }
 \details{
-Each row of \code{x} is repeated once per neighbour and the neighbours are ordered
-nearest first, so the result is \code{nrow(x) * k} rows unless \code{max_distance}
-rules some out. A row left with no neighbour is kept once with \code{NA} when
-\code{left = TRUE} and dropped otherwise.
+\code{ga_knn_join()} repeats each row of \code{x} once per neighbour and orders the
+neighbours nearest first, so the result has \code{nrow(x) * k} rows unless
+\code{max_distance} rules some out. With \code{left = TRUE} it keeps a row with no
+neighbour once, with \code{NA}; otherwise it drops that row.
 
-Distance is Euclidean and measured between the geometries themselves, so a
-point joins to the polygon whose edge is nearest rather than to the one whose
-bounding box is. Both frames need exactly one GeoArrow geometry column.
+\code{ga_knn_join()} measures Euclidean distance between the geometries
+themselves, so it joins a point to the polygon whose edge is nearest rather
+than to the one whose bounding box is. Both frames need exactly one GeoArrow
+geometry column.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

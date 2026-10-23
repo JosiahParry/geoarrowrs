@@ -11,7 +11,7 @@ use geoarrow::{
 
 /// Destination from origin, bearing, distance
 ///
-/// Returns the point reached by travelling `distance` from `origin` along
+/// Returns the point you reach by travelling `distance` from `origin` along
 /// `bearing`. Each function uses a different metric space: `dest_euclidean`
 /// treats coordinates as planar, `dest_haversine` assumes a sphere,
 /// `dest_geodesic` an ellipsoid, and `dest_rhumb` follows a line of constant

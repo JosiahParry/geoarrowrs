@@ -36,14 +36,14 @@ fn constrained_of(
 /// Triangulate polygons with the earcut algorithm
 ///
 /// Returns one multipolygon per input geometry, whose parts are that
-/// geometry's triangles. The output has the same length as the input, so a
-/// triangulated geometry stays aligned with the row it came from.
+/// geometry's triangles. `ga_triangulate_earcut()` preserves the input's length,
+/// so it keeps each triangulated geometry aligned with the row it came from.
 ///
 /// @details
-/// Earcut is defined for polygons only. A multipolygon is triangulated part by
-/// part and the triangles are merged into a single multipolygon. Any other
-/// geometry type, a null geometry, or a polygon that cannot be triangulated
-/// becomes a null element.
+/// Earcut handles polygons only. `ga_triangulate_earcut()` triangulates a
+/// multipolygon part by part and merges the triangles into a single
+/// multipolygon. It returns a null element for any other geometry type, a null
+/// geometry, or a polygon it cannot triangulate.
 ///
 /// Earcut is fast and respects interior rings, but the triangles it produces
 /// are not Delaunay. Use [ga_triangulate_delaunay()] when triangle quality
@@ -58,7 +58,7 @@ fn constrained_of(
 /// fp <- system.file("shape/nc.shp", package = "sf")
 /// nc <- as.data.frame(read_shapefile(fp))
 ///
-/// # one multipolygon of triangles per county, so length is preserved
+/// # one multipolygon of triangles per county, so you keep the input's length
 /// tri <- ga_triangulate_earcut(nc$geometry)
 /// tri$length
 /// head(as.vector(ga_n_coords(tri)), 3)
@@ -94,23 +94,23 @@ fn ga_triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
 /// Delaunay triangulation
 ///
 /// Returns one multipolygon per input geometry, whose parts are that
-/// geometry's triangles. The output has the same length as the input.
+/// geometry's triangles. `ga_triangulate_delaunay()` preserves the input's
+/// length.
 ///
 /// @details
-/// A constrained triangulation keeps the input's edges and returns only the
-/// triangles that fall inside the geometry. An unconstrained triangulation
-/// triangulates the convex hull of the input's vertices, ignoring its edges,
-/// so it may cross holes and concavities.
+/// With `constrained = TRUE`, `ga_triangulate_delaunay()` keeps the input's
+/// edges and returns only the triangles that fall inside the geometry. With
+/// `constrained = FALSE`, it triangulates the convex hull of the input's
+/// vertices, ignoring the edges, so the triangles may cross holes and
+/// concavities.
 ///
-/// A null geometry, or one that cannot be triangulated, becomes a null
-/// element.
+/// It returns a null element for a null geometry or one it cannot triangulate.
 ///
 /// @param x a GeoArrow geometry array
 /// @param constrained whether to constrain the triangulation to the input's
 ///   edges. `TRUE` by default
-/// @param snap_radius coordinates closer together than this are snapped to the
-///   same position; length 1 or the same length as `x`. `geo` uses 1e-4 by
-///   default
+/// @param snap_radius the distance below which to snap coordinates to the same
+///   position; length 1 or the same length as `x`. `geo` uses 1e-4 by default
 /// @returns a GeoArrow multipolygon array of the same length as `x`
 /// @export
 /// @family triangulate
@@ -119,11 +119,11 @@ fn ga_triangulate_earcut(x: Robj) -> extendr_api::Result<Robj> {
 /// fp <- system.file("shape/nc.shp", package = "sf")
 /// nc <- as.data.frame(read_shapefile(fp))
 ///
-/// # constrained keeps the triangles inside the county boundary
+/// # with constrained = TRUE you get only triangles inside the county boundary
 /// tri <- ga_triangulate_delaunay(nc$geometry)
 /// tri$length
 ///
-/// # unconstrained fills the convex hull instead, so it covers more
+/// # set constrained = FALSE to fill the convex hull instead, which covers more
 /// hull <- ga_triangulate_delaunay(nc$geometry, constrained = FALSE)
 /// head(as.vector(ga_unsigned_area(tri)), 3)
 /// head(as.vector(ga_unsigned_area(hull)), 3)

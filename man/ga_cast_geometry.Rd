@@ -21,7 +21,7 @@ Changes the geometry type of an array without changing the geometries it
 holds.
 }
 \details{
-Some casts always succeed:\tabular{ll}{
+\code{ga_cast_geometry()} always succeeds for these casts:\tabular{ll}{
    from \tab to \cr
    \code{point} \tab \code{multipoint} \cr
    \code{linestring} \tab \code{multilinestring} \cr
@@ -30,8 +30,9 @@ Some casts always succeed:\tabular{ll}{
 }
 
 
-Others are fallible and error when a geometry does not fit the target type,
-such as a \code{multipoint} holding two points cast to \code{point}:\tabular{ll}{
+Others are fallible, and \code{ga_cast_geometry()} errors when a geometry does
+not fit the target type, such as when you cast a \code{multipoint} holding two
+points to \code{point}:\tabular{ll}{
    from \tab to \cr
    \code{multipoint} \tab \code{point} \cr
    \code{multilinestring} \tab \code{linestring} \cr
@@ -40,17 +41,17 @@ such as a \code{multipoint} holding two points cast to \code{point}:\tabular{ll}
 }
 
 
-The dimension is carried over from the input, and casting between different
-dimensions is not supported.
+\code{ga_cast_geometry()} carries the dimension over from the input and does not
+support casting between different dimensions.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 pts <- ga_xy(c(0, 1), c(0, 1))
 
-# widening always works
+# you can always widen
 ga_cast_geometry(pts, "multipoint")
 
-# so does going out to wkb, which is what plain Parquet stores
+# and you can always go out to wkb, which is what plain Parquet stores
 ga_cast_geometry(pts, "wkb")
 \dontshow{\}) # examplesIf}
 }

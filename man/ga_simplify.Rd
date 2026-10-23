@@ -24,7 +24,7 @@ multilinestrings, polygons, and multipolygons.
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# a bigger epsilon drops more vertices
+# ga_simplify() drops more vertices with a bigger epsilon
 head(as.vector(ga_n_coords(nc$geometry)), 3)
 head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.01))), 3)
 head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.1))), 3)

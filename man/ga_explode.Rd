@@ -14,11 +14,11 @@ a list array of the same length as \code{x}, whose elements are GeoArrow arrays
 }
 \description{
 Returns a list the same length as the input, where each element is an array
-of that geometry's constituent parts. A multipolygon of three polygons
-becomes one element holding a polygon array of length three.
+of that geometry's constituent parts. \code{ga_explode()} turns a multipolygon of
+three polygons into one element holding a polygon array of length three.
 }
 \details{
-The output geometry type is the singular form of the input:\tabular{ll}{
+\code{ga_explode()} returns the singular form of the input geometry type:\tabular{ll}{
    input \tab element type \cr
    \code{multipoint}, \code{point} \tab \code{point} \cr
    \code{multilinestring}, \code{linestring} \tab \code{linestring} \cr
@@ -26,18 +26,19 @@ The output geometry type is the singular form of the input:\tabular{ll}{
 }
 
 
-The element type is decided by the array's declared type, not by its
-contents, so an array of multipolygons that all happen to hold one part
-still explodes to polygons. A mixed \code{geometry} array has no single singular
-type and errors; narrow it with \code{\link[=ga_downcast_geometry]{ga_downcast_geometry()}} first.
+\code{ga_explode()} decides the element type from the array's declared type, not
+from its contents, so it still returns polygons for an array of
+multipolygons that all happen to hold one part. \code{ga_explode()} raises an
+error for a mixed \code{geometry} array, which has no single singular type;
+narrow it with \code{\link[=ga_downcast_geometry]{ga_downcast_geometry()}} first.
 
-A singular geometry yields an element of length one, so the operation is
-well defined for any input. A null geometry yields a null element, which is
-distinct from an empty one.
+\code{ga_explode()} returns an element of length one for a singular geometry, so
+it handles any input. For a null geometry, it returns a null element, which
+is distinct from an empty one.
 
-Because the length is preserved, the result lines up with the row it came
-from and can sit alongside the other columns of a table. Use \code{\link[=ga_flatten]{ga_flatten()}} to
-collapse it into a single array with one row per part.
+Because \code{ga_explode()} preserves length, you can keep the result alongside
+the other columns of a table, each element in line with its source row. Use
+\code{\link[=ga_flatten]{ga_flatten()}} to collapse it into a single array with one row per part.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

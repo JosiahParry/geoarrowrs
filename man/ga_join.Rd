@@ -18,7 +18,8 @@ ga_join(
 
 \item{predicate}{a sparse predicate, by default \code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}}}
 
-\item{suffix}{the pair of suffixes added to column names found in both frames}
+\item{suffix}{the pair of suffixes to add to the column names both frames
+share}
 
 \item{left}{whether to keep rows of \code{x} that match nothing}
 }
@@ -28,21 +29,22 @@ columns of \code{y}
 }
 \description{
 Attaches the columns of \code{y} to each row of \code{x} that it relates to, the way
-\code{\link[=merge]{merge()}} attaches them on a shared key. The geometry of \code{x} is kept and the
-geometry of \code{y} is dropped.
+\code{\link[=merge]{merge()}} attaches them on a shared key. \code{ga_join()} keeps the geometry of
+\code{x} and drops the geometry of \code{y}.
 }
 \details{
-A row of \code{x} matching several rows of \code{y} is repeated once per match, so the
-result is usually longer than \code{x}. With \code{left = TRUE} a row matching nothing
-is kept once with \code{NA} in every column from \code{y}; with \code{left = FALSE} it is
-dropped.
+\code{ga_join()} repeats a row of \code{x} once for each row of \code{y} it matches, so the
+result is usually longer than \code{x}. With \code{left = TRUE} it keeps a row that
+matches nothing once, with \code{NA} in every column from \code{y}; with
+\code{left = FALSE} it drops that row.
 
 \code{predicate} is any of the sparse predicates, such as \code{\link[=ga_sparse_within]{ga_sparse_within()}} or
-\code{\link[=ga_sparse_touches]{ga_sparse_touches()}}. It is called once as \code{predicate(x_geometry, y_geometry)}, so points in polygons is \code{ga_sparse_within()} and polygons
-holding points is \code{ga_sparse_contains()}.
+\code{\link[=ga_sparse_touches]{ga_sparse_touches()}}. \code{ga_join()} calls it once as
+\code{predicate(x_geometry, y_geometry)}, so use \code{ga_sparse_within()} for points
+in polygons and \code{ga_sparse_contains()} for polygons holding points.
 
-Columns the two frames share are suffixed rather than overwritten. Both
-frames need exactly one GeoArrow geometry column.
+\code{ga_join()} suffixes the columns the two frames share rather than
+overwriting them. Both frames need exactly one GeoArrow geometry column.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -69,9 +71,9 @@ Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
+\code{\link[=ga_equals_exact]{ga_equals_exact()}},
 \code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
-\code{\link[=ga_equals_exact]{ga_equals_exact()}},
 \code{\link[=ga_relate]{ga_relate()}},
 \code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}},
 \code{\link[=ga_sparse_pairs]{ga_sparse_pairs()}}

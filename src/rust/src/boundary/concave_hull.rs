@@ -17,16 +17,17 @@ use crate::{
 
 /// Compute the concave hull of geometries
 ///
-/// Returns a polygon enclosing each geometry, tightened toward the geometry's
-/// own shape. Smaller `concavity` values produce a tighter, more concave hull;
-/// larger values approach the convex hull.
+/// Returns a polygon enclosing each geometry, and tightens that polygon toward
+/// the geometry's own shape. With smaller `concavity` values, `ga_concave_hull()`
+/// produces a tighter, more concave hull; with larger values, it approaches the
+/// convex hull.
 ///
 /// Accepts multipoints, linestrings, multilinestrings, polygons, and
 /// multipolygons. `geo` does not define a concave hull for a single point.
 ///
 /// @param geometry a GeoArrow multipoint, linestring, multilinestring, polygon, or multipolygon array
 /// @param concavity the concavity coefficient; length 1 or the same length as `geometry`. `geo` uses 2 by default
-/// @param length_threshold edges shorter than this are not considered for further refinement; length 1 or the same length as `geometry`. `geo` uses 0 by default
+/// @param length_threshold the length below which `ga_concave_hull()` stops refining an edge; length 1 or the same length as `geometry`. `geo` uses 0 by default
 /// @returns a GeoArrow polygon array
 /// @export
 /// @family boundary
@@ -35,7 +36,7 @@ use crate::{
 /// fp <- system.file("shape/nc.shp", package = "sf")
 /// nc <- as.data.frame(read_shapefile(fp))
 ///
-/// # lower concavity tightens the hull onto the shape
+/// # with lower concavity, ga_concave_hull() tightens the hull onto the shape
 /// loose <- ga_concave_hull(nc$geometry, concavity = 2, length_threshold = 0)
 /// tight <- ga_concave_hull(nc$geometry, concavity = 0.5, length_threshold = 0)
 ///

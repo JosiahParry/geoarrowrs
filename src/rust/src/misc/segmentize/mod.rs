@@ -14,7 +14,7 @@ use crate::as_linestring_chunks;
 /// Split linestrings into equal segments
 ///
 /// Divides each linestring into `segment_count` segments of equal length,
-/// returning a multilinestring. Returns `NA` if segmentation fails.
+/// returning a multilinestring. Returns `NA` for a linestring it cannot segment.
 /// `ga_line_segmentize_haversine()` uses the Haversine formula for geographic
 /// coordinates; `ga_line_segmentize()` uses planar Euclidean distance.
 ///

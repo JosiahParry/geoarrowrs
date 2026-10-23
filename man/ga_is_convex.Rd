@@ -13,14 +13,15 @@ ga_is_convex(geometry)
 a boolean array of the same length as \code{geometry}
 }
 \description{
-\code{TRUE} when the geometry's ring turns consistently in one direction. A
-polygon is judged on its exterior ring.
+\code{TRUE} when the geometry's ring turns consistently in one direction.
+\code{ga_is_convex()} judges a polygon on its exterior ring.
 }
 \details{
-A linestring must be closed, that is form a ring, to be reported convex; an
-open one is \code{FALSE}. A polygon's exterior ring is always closed, so polygons
-need no special handling. Any other geometry type, or a null geometry,
-becomes \code{NA} rather than \code{FALSE}.
+\code{ga_is_convex()} reports a linestring as convex only when it is closed, that
+is forms a ring, and returns \code{FALSE} for an open one. A polygon's exterior
+ring is always closed, so \code{ga_is_convex()} needs no special case for them.
+\code{ga_is_convex()} returns \code{NA} rather than \code{FALSE} for any other geometry
+type or a null geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

@@ -17,14 +17,14 @@ a GeoArrow multipoint array of the same length as \code{geometry}
 }
 \description{
 Returns one multipoint per input geometry, holding that geometry's
-vertices in order. The output has the same length as the input.
+vertices in order. Each function keeps the input's length.
 }
 \details{
 \code{ga_exterior_coords()} skips the interior rings of a polygon, so it gives the
-outline only. Both preserve the order the coordinates are stored in, so a
-closed ring repeats its first vertex at the end.
+outline only. Both preserve the coordinates' storage order, so they keep a
+closed ring's repeated first vertex at the end.
 
-A null geometry stays null.
+Each function returns null for a null geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

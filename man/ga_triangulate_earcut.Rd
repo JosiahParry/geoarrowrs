@@ -14,14 +14,14 @@ a GeoArrow multipolygon array of the same length as \code{x}
 }
 \description{
 Returns one multipolygon per input geometry, whose parts are that
-geometry's triangles. The output has the same length as the input, so a
-triangulated geometry stays aligned with the row it came from.
+geometry's triangles. \code{ga_triangulate_earcut()} preserves the input's length,
+so it keeps each triangulated geometry aligned with the row it came from.
 }
 \details{
-Earcut is defined for polygons only. A multipolygon is triangulated part by
-part and the triangles are merged into a single multipolygon. Any other
-geometry type, a null geometry, or a polygon that cannot be triangulated
-becomes a null element.
+Earcut handles polygons only. \code{ga_triangulate_earcut()} triangulates a
+multipolygon part by part and merges the triangles into a single
+multipolygon. It returns a null element for any other geometry type, a null
+geometry, or a polygon it cannot triangulate.
 
 Earcut is fast and respects interior rings, but the triangles it produces
 are not Delaunay. Use \code{\link[=ga_triangulate_delaunay]{ga_triangulate_delaunay()}} when triangle quality
@@ -32,7 +32,7 @@ matters.
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# one multipolygon of triangles per county, so length is preserved
+# one multipolygon of triangles per county, so you keep the input's length
 tri <- ga_triangulate_earcut(nc$geometry)
 tri$length
 head(as.vector(ga_n_coords(tri)), 3)

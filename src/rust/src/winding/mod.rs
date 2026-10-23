@@ -47,16 +47,17 @@ fn order_of(g: &Geometry<f64>) -> Option<WindingOrder> {
 /// Apply a winding direction to polygon rings
 ///
 /// Rewinds each polygon so its exterior and interior rings follow a
-/// consistent direction. The geometry type of the output matches the input.
+/// consistent direction. `ga_orient()` keeps the geometry type of the input.
 ///
 /// @details
-/// `"default"` gives a counter-clockwise exterior ring and clockwise interior
-/// rings, which is the winding the OGC simple features and GeoJSON
-/// specifications call for. `"reversed"` gives the opposite. `"ccw"` and
-/// `"cw"` are accepted as aliases and refer to the exterior ring.
+/// With `"default"`, `ga_orient()` winds the exterior ring counter-clockwise
+/// and the interior rings clockwise, which is the winding the OGC simple
+/// features and GeoJSON specifications call for. With `"reversed"` it does the
+/// opposite. It accepts `"ccw"` and `"cw"` as aliases, which refer to the
+/// exterior ring.
 ///
-/// Rewinding does not change which points a polygon covers, only the order
-/// its coordinates are stored in. A null geometry stays null.
+/// `ga_orient()` does not change which points a polygon covers, only the order
+/// of its coordinates. It keeps a null geometry null.
 ///
 /// @param geometry a GeoArrow polygon or multipolygon array
 /// @param direction one of `"default"`, `"reversed"`, `"ccw"`, or `"cw"`
@@ -120,15 +121,15 @@ fn ga_orient(
 
 /// Determine the winding order of a ring
 ///
-/// Returns `"clockwise"` or `"counterclockwise"` for each geometry. A polygon
-/// reports the winding of its exterior ring.
+/// Returns `"clockwise"` or `"counterclockwise"` for each geometry. For a
+/// polygon, `ga_winding_order()` reports the winding of the exterior ring.
 ///
 /// @details
-/// A multipolygon reports a winding only when every part's exterior ring
-/// agrees, and a multilinestring only when every part agrees; a geometry whose
-/// parts disagree is `NA`, since it has no single winding. Any other geometry
-/// type, a null geometry, or a ring with fewer than three distinct points is
-/// also `NA`.
+/// `ga_winding_order()` reports a winding for a multipolygon only when every
+/// part's exterior ring agrees, and for a multilinestring only when every part
+/// agrees; it returns `NA` for a geometry whose parts disagree, since that
+/// geometry has no single winding. It also returns `NA` for any other geometry
+/// type, a null geometry, or a ring with fewer than three distinct points.
 ///
 /// @param geometry a GeoArrow linestring, polygon, or multi part array of either
 /// @returns a string array of the same length as `geometry`
@@ -161,12 +162,13 @@ fn ga_winding_order(geometry: Robj) -> extendr_api::Result<Robj> {
 /// Test the winding order of a ring
 ///
 /// `ga_is_ccw()` is `TRUE` for counter-clockwise geometries and `ga_is_cw()` is
-/// `TRUE` for clockwise ones. A polygon is tested on its exterior ring.
+/// `TRUE` for clockwise ones. Each function tests a polygon on its exterior
+/// ring.
 ///
 /// @details
-/// Any geometry with no winding order, such as a point or a null geometry,
-/// becomes `NA` rather than `FALSE`, so the two functions are not simply
-/// negations of one another.
+/// Each function returns `NA` rather than `FALSE` for any geometry with no
+/// winding order, such as a point or a null geometry, so the two functions are
+/// not simply negations of one another.
 ///
 /// @param geometry a GeoArrow linestring or polygon array
 /// @returns a boolean array of the same length as `geometry`

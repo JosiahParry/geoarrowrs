@@ -17,13 +17,13 @@ Merges every polygon in \code{x} into a single multipolygon, dropping the
 boundaries between any that touch or overlap.
 }
 \details{
-This is the one function in the package that is not length-preserving. It
-is an aggregate over the whole array, so it always returns a length 1
-array, in the way \code{sum()} reduces a vector to a single value.
+Unlike most functions in the package, \code{ga_unary_union()} does not preserve
+length. It aggregates over the whole array, so it always returns a length 1
+array, the way \code{sum()} reduces a vector to a single value.
 
 It is far faster than folding \code{\link[=ga_boolean_union]{ga_boolean_union()}} across the array, since it
-unions all the rings in one pass. Rows that are not polygonal, and null
-rows, are skipped.
+unions all the rings in one pass. It skips rows that are not polygonal, and
+null rows.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

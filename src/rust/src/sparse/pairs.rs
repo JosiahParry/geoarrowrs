@@ -11,14 +11,14 @@ use std::sync::Arc;
 /// database returns a spatial join in.
 ///
 /// @details
-/// Everything but the padding is expressible with Arrow's own `list_flatten()`
-/// and `list_parent_indices()`. What they cannot do is `left = TRUE`, which has
-/// to put back a row for each row of `x` that matched nothing, so the whole
-/// expansion happens here rather than half here and half in R.
+/// You can express everything but the padding with Arrow's own `list_flatten()`
+/// and `list_parent_indices()`. What they cannot do is `left = TRUE`, where
+/// `ga_sparse_pairs()` has to put back a row for each row of `x` that matched
+/// nothing, so it does the whole expansion itself rather than leaving half to R.
 ///
-/// Rows are 1 based, matching what the sparse predicates return. A row of `x`
-/// that matched nothing appears once with a null `y` when `left = TRUE`, and
-/// not at all otherwise.
+/// `ga_sparse_pairs()` numbers rows from 1, matching what the sparse predicates
+/// return. It returns a row of `x` that matched nothing once with a null `y`
+/// when `left = TRUE`, and drops it otherwise.
 ///
 /// @param hits a list array from one of the sparse predicates
 /// @param left whether to keep the rows of `x` that matched nothing
@@ -29,7 +29,7 @@ use std::sync::Arc;
 /// x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
 /// y <- ga_xy(c(0, 1), c(0, 1))
 ///
-/// # the middle row of x matches nothing, so it is only there with left = TRUE
+/// # the middle row of x matches nothing, so you see it only with left = TRUE
 /// ga_sparse_pairs(ga_sparse_intersects(x, y))
 /// ga_sparse_pairs(ga_sparse_intersects(x, y), left = TRUE)
 #[extendr]

@@ -25,8 +25,8 @@ a double vector of bearing values in degrees
 }
 \description{
 Calculate the bearing in degrees from \code{origin} to \code{dest} for each pair of
-points. Bearing is measured clockwise from north (0 degrees) to 360 degrees.
-These functions differ in the metric space used for the calculation.
+points. These functions measure bearing clockwise from north (0 degrees) to
+360 degrees. They differ in the metric space they use for the calculation.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

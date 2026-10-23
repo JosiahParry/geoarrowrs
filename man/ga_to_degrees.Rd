@@ -13,12 +13,12 @@ ga_to_degrees(geometry)
 a GeoArrow array of the same geometry type as the input
 }
 \description{
-Multiplies every x and y coordinate by \code{180 / pi}. The geometry type of the
-output matches the geometry type of the input.
+Multiplies every x and y coordinate by \code{180 / pi}. \code{ga_to_degrees()} keeps
+the geometry type of the input.
 }
 \details{
-Only the x and y coordinates are converted. Z and M values are dropped,
-since the conversion goes through a two dimensional representation.
+\code{ga_to_degrees()} converts only the x and y coordinates. It drops Z and M
+values, since it goes through a two dimensional representation.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

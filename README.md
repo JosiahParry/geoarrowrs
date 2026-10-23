@@ -8,7 +8,7 @@ pure-Rust implementation of [GeoArrow](https://geoarrow.org/) with fast
 “geospatial algorithms implemented by the [GeoRust
 community](https://georust.org/).”[^1]
 
-Rust 🦀 bindings created using [extendr](https://extendr.rs).
+[extendr](https://extendr.rs) creates the Rust 🦀 bindings.
 
 The `{geoarrowrs}` (pronounced “gee-oh-air-oh-arr-ess”) package provides
 the following:
@@ -40,7 +40,7 @@ Install the `{geoarrowrs}` from GitHub:
 pak::pak("josiahparry/geoarrowrs")
 ```
 
-Note that this requires Rust to be installed.
+Note that you need Rust to install it.
 
 <div class="aside">
 
@@ -51,9 +51,9 @@ believe me!).
 
 ## Usage
 
-Note that {geoarrowrs} is desigend to work with {geoarrow} and
-{nanoarrow} R packages, specifically. 
-Additionally, special care was taken to work with {arrow} and it's Acero / {dplyr} engines.
+Note that {geoarrowrs} works with the {geoarrow} and {nanoarrow} R
+packages, specifically. Additionally, I took special care to make it work
+with {arrow} and its Acero / {dplyr} engines.
 
 
 [^1]: geoarrow-rs website <https://geoarrow.org/geoarrow-rs/>

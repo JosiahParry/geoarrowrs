@@ -19,20 +19,21 @@ ga_simplify_vw_idx(geometry, epsilon)
 a list array of integer positions, one list per input geometry
 }
 \description{
-Returns the positions of the coordinates that survive simplification,
+Returns the positions of the coordinates that simplification would keep,
 rather than the simplified geometry itself. One list per input geometry.
 }
 \details{
 Use these when the coordinates carry data of their own, such as a timestamp
-or a sensor reading per vertex. Simplifying the geometry discards that
-alignment; the indices let you subset the other columns the same way.
+or a sensor reading per vertex. If you simplify the geometry you lose that
+alignment; with the indices you can subset the other columns the same way.
 
 \code{ga_simplify_idx()} uses Ramer-Douglas-Peucker and \code{ga_simplify_vw_idx()} uses
-Visvalingam-Whyatt, matching \code{\link[=ga_simplify]{ga_simplify()}} and \code{\link[=ga_simplify_vw]{ga_simplify_vw()}}. Indices are
-1 based and always include the first and last coordinate.
+Visvalingam-Whyatt, matching \code{\link[=ga_simplify]{ga_simplify()}} and \code{\link[=ga_simplify_vw]{ga_simplify_vw()}}. Each
+function returns 1 based indices and always includes the first and last
+coordinate.
 
-Only linestrings can be simplified this way. Any other geometry type, or a
-null geometry, comes back null.
+Each function works on linestrings only and returns null for any other
+geometry type or a null geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

@@ -24,10 +24,11 @@ Scores meaningfully above 1 mean it is in a sparser neighbourhood than they
 are, which is what marks an outlier. There is no universal cutoff, so
 compare scores within a dataset rather than against a fixed threshold.
 
-\code{k_neighbours} sets how many neighbours define the local neighbourhood.
-Small values react to fine structure and large values smooth it away.
-Scoring is over the whole array, not within each row, so it is a single
-value. A row that is not a single point, or is null, comes back null.
+Use \code{k_neighbours} to set how many neighbours define the local
+neighbourhood. With small values \code{ga_outlier_scores()} reacts to fine
+structure, and with large values it smooths that structure away. It scores
+over the whole array, not within each row, so \code{k_neighbours} is a single
+value. It returns null for a row that is not a single point, or is null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

@@ -21,7 +21,7 @@ geometry, as a polygon array.
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# free to rotate, so it hugs the county tighter than the envelope
+# ga_minimum_rotated_rect() can rotate, so it hugs the county tighter
 rot <- ga_minimum_rotated_rect(nc$geometry)
 head(as.vector(ga_unsigned_area(rot)), 3)
 head(as.vector(ga_unsigned_area(ga_envelope(nc$geometry))), 3)

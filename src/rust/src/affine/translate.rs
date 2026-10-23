@@ -22,8 +22,8 @@ use crate::{
 
 /// Translate geometries along the x and y axes
 ///
-/// Shifts every coordinate of each geometry by `x_offset` and `y_offset`. The
-/// geometry type of the output matches the geometry type of the input.
+/// Shifts every coordinate of each geometry by `x_offset` and `y_offset`.
+/// `ga_translate()` keeps the input's geometry type.
 ///
 /// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 /// @param x_offset distance to shift along the x axis; length 1 or the same length as `geometry`
@@ -35,7 +35,7 @@ use crate::{
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// pts <- ga_xy(c(0, 1), c(0, 1))
 ///
-/// # offsets are per row, so each point shifts by its own amount
+/// # ga_translate() shifts each point by its own row's offsets
 /// geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
 #[extendr]
 fn ga_translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::Result<Robj> {

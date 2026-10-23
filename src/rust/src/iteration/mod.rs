@@ -27,14 +27,14 @@ fn lines_of(g: &Geometry<f64>) -> Option<Vec<Line<f64>>> {
 /// Collect a geometry's coordinates as points
 ///
 /// Returns one multipoint per input geometry, holding that geometry's
-/// vertices in order. The output has the same length as the input.
+/// vertices in order. Each function keeps the input's length.
 ///
 /// @details
 /// `ga_exterior_coords()` skips the interior rings of a polygon, so it gives the
-/// outline only. Both preserve the order the coordinates are stored in, so a
-/// closed ring repeats its first vertex at the end.
+/// outline only. Both preserve the coordinates' storage order, so they keep a
+/// closed ring's repeated first vertex at the end.
 ///
-/// A null geometry stays null.
+/// Each function returns null for a null geometry.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a GeoArrow multipoint array of the same length as `geometry`
@@ -93,8 +93,9 @@ fn coords_impl(geometry: Robj, exterior_only: bool) -> anyhow::Result<Robj> {
 /// Returns how many vertices each geometry holds.
 ///
 /// @details
-/// Counts every coordinate that [ga_coords()] would return, so a closed ring
-/// counts its repeated final vertex. A null geometry gives `NA`.
+/// Counts every coordinate that [ga_coords()] would return, so it counts the
+/// repeated final vertex of a closed ring. `ga_n_coords()` returns `NA` for a
+/// null geometry.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns an integer array of the same length as `geometry`
@@ -131,12 +132,12 @@ fn ga_n_coords(geometry: Robj) -> anyhow::Result<Robj> {
 /// Split geometries into their line segments
 ///
 /// Returns one multilinestring per input geometry, whose parts are that
-/// geometry's two point segments. The output has the same length as the input.
+/// geometry's two point segments. `ga_lines()` keeps the input's length.
 ///
 /// @details
-/// A polygon contributes the segments of every ring, interior rings included.
-/// A point has no segments and becomes a null element, as does a null
-/// geometry.
+/// For a polygon, `ga_lines()` returns the segments of every ring, including
+/// interior rings. It returns a null element for a point, which has no
+/// segments, and for a null geometry.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a GeoArrow multilinestring array of the same length as `geometry`
@@ -198,12 +199,13 @@ fn ordinate_impl(geometry: Robj, y_axis: bool) -> anyhow::Result<Robj> {
 
 /// Read the x or y of a point
 ///
-/// Returns one coordinate per row. Any geometry that is not a single point, and
-/// any null or empty point, gives `NA`.
+/// Returns one coordinate per row. Each function returns `NA` for any geometry
+/// that is not a single point, and for any null or empty point.
 ///
 /// @details
-/// Both coordinate encodings work, so a point array stored as a struct of two
-/// double columns and one stored as interleaved values read the same.
+/// Both functions accept either coordinate encoding and return the same values
+/// whether the point array holds a struct of two double columns or interleaved
+/// values.
 ///
 /// Use [ga_coords()] for the vertices of a line or polygon, which returns a
 /// multipoint per row rather than a single number.

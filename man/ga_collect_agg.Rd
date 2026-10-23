@@ -20,32 +20,34 @@ per group
 }
 \description{
 Gathers the geometries into a single geometry collection, returning an array
-of length 1, or one collection per group when \code{sizes} or \code{by} says how the
-rows are grouped. This is the aggregate a \code{summarise()} wants, not a row by
+of length 1, or one collection per group when you group the rows with
+\code{sizes} or \code{by}. This is the aggregate a \code{summarise()} wants, not a row by
 row operation.
 }
 \details{
-Nothing is dissolved and nothing is reordered, so overlapping parts stay
-overlapping and the collection holds one member per non null input row. Use
-\code{\link[=ga_unary_union]{ga_unary_union()}} to merge overlapping polygons into one outline instead.
+\code{ga_collect_agg()} neither dissolves nor reorders, so it keeps overlapping
+parts overlapping and adds one member to the collection per non null input
+row. Use \code{\link[=ga_unary_union]{ga_unary_union()}} to merge overlapping polygons into one outline
+instead.
 
-\code{sizes} is the number of rows in each group, in order, which is what a
-\code{group_by()} and \code{summarise(n = n())} over the same ordering gives. The rows
-have to already be sorted by the grouping, since the runs are taken as they
-come: group \code{i} of the result is the \code{i}th run of \code{sizes} rows. Nothing is
-returned about the groups themselves, so keep the keys from the same
-\code{summarise()} to say what each row is.
+\code{ga_collect_agg()} reads \code{sizes} as the number of rows in each group, in
+order, which you get from a \code{group_by()} and \code{summarise(n = n())} over the
+same ordering. You have to sort the rows by the grouping first, since
+\code{ga_collect_agg()} takes the runs in row order: it returns the \code{i}th run of
+\code{sizes} rows as group \code{i}. It returns nothing about the groups themselves,
+so keep the keys from the same \code{summarise()} to say what each row is.
 
-\code{by} groups the rows itself, from an unsorted key of one label per row, so
-no \code{arrange()} is needed first. The result has one collection per distinct
-label, in the order each label first appears in \code{by}; get the matching keys
-back with \code{vctrs::vec_unique(by)}. \code{NA} in \code{by} groups those rows together
-like any other label. Give at most one of \code{sizes} or \code{by}; \code{NULL} for both
+With \code{by}, \code{ga_collect_agg()} groups the rows itself, from an unsorted key
+of one label per row, so you need no \code{arrange()} first. It returns one
+collection per distinct label, in the order each label first appears in
+\code{by}; get the matching keys back with \code{vctrs::vec_unique(by)}.
+\code{ga_collect_agg()} groups rows with \code{NA} in \code{by} together like any other
+label. Give at most one of \code{sizes} or \code{by}; with \code{NULL} for both, it
 collects everything as one group.
 
 Being an aggregate, this is one of the few functions here that does not
-preserve length, and it is not registered as an Arrow kernel: a kernel sees
-one batch at a time and would collect each batch separately.
+preserve length, and it has no Arrow kernel: a kernel sees one batch at a
+time and would collect each batch separately.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -62,7 +64,7 @@ as.vector(ga_unsigned_area(ga_convex_hull(collected)))
 grouped <- ga_collect_agg(pts, sizes = rep(20, 5))
 as.vector(ga_unsigned_area(ga_convex_hull(grouped)))
 
-# grouped by an unsorted key, no arrange() needed first
+# group by an unsorted key, without an arrange() first
 key <- rep(c("north", "south"), length.out = pts$length)
 by_key <- ga_collect_agg(pts, by = key)
 vctrs::vec_unique(key)

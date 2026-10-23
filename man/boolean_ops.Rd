@@ -26,15 +26,15 @@ a GeoArrow multipolygon array of the same length as \code{x}
 }
 \description{
 Each function pairs \code{x} with \code{y} row by row and returns the polygonal
-result. \code{y} is recycled against \code{x}.
+result. Each function recycles \code{y} against \code{x}.
 }
 \details{
 \code{ga_boolean_intersection()} keeps the area in both, \code{ga_boolean_union()} the area
 in either, \code{ga_boolean_difference()} the area in \code{x} but not \code{y}, and
 \code{ga_boolean_xor()} the area in exactly one of them.
 
-These are defined for polygons and multipolygons only. A row whose geometry
-is any other type, or is null, comes back null. The result is always a
+These functions operate on polygons and multipolygons only. They return null
+for a row whose geometry is any other type, or is null. They always return a
 multipolygon, since a set operation can split one polygon into several or
 erase it entirely.
 }
@@ -47,7 +47,7 @@ y <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
 ))
 
-# two 2x2 squares offset by 1, so the overlap is a 1x1 square
+# ga_boolean_intersection() returns the 1x1 overlap of two offset 2x2 squares
 as.vector(ga_unsigned_area(ga_boolean_intersection(x, y)))
 \dontshow{\}) # examplesIf}
 }

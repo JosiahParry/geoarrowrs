@@ -45,19 +45,20 @@ fn segments_of(g: &Geometry<f64>) -> Option<Vec<Line<f64>>> {
 /// Intersect pairs of two point lines
 ///
 /// Returns where each pair of lines meets: a point when they cross, and a line
-/// when they overlap along a shared stretch. `y` is recycled against `x`.
+/// when they overlap along a shared stretch. `ga_line_intersection()` recycles
+/// `y` against `x`.
 ///
 /// @details
-/// The answer is a point when the lines cross and a segment when they overlap.
-/// Both come back as a multipoint so the column has one type: a crossing gives
-/// one point, an overlap gives the two endpoints of the shared stretch. So
-/// `ga_n_coords()` tells the two apart, and an overlap can be rebuilt from its
-/// endpoints.
+/// `ga_line_intersection()` finds a point when the lines cross and a segment
+/// when they overlap. It returns both as a multipoint to give the column one
+/// type: one point for a crossing, and the two endpoints of the shared stretch
+/// for an overlap. So `ga_n_coords()` tells the two apart, and you can rebuild
+/// an overlap from its endpoints.
 ///
-/// Both arguments must hold single segments, that is a `LINE` or a two point
-/// `LINESTRING`. Longer linestrings, other geometry types, and null rows come
-/// back null, as do pairs that simply do not meet. Use
-/// [ga_self_intersections()] for a geometry with many segments.
+/// `ga_line_intersection()` needs single segments in both arguments, that is a
+/// `LINE` or a two point `LINESTRING`. It returns null for longer linestrings,
+/// other geometry types, and null rows, and for pairs that simply do not meet.
+/// Use [ga_self_intersections()] for a geometry with many segments.
 ///
 /// @param x a GeoArrow array of two point linestrings
 /// @param y a GeoArrow array of two point linestrings; length 1 or the same
@@ -125,15 +126,15 @@ fn ga_line_intersection(x: Robj, y: Robj) -> anyhow::Result<Robj> {
 ///
 /// @details
 /// Uses the Bentley-Ottmann sweep line, which finds all crossings in roughly
-/// `n log n` rather than by testing every pair. This is how to locate the
-/// problem that [ga_is_valid()] reports: a self intersecting polygon comes back
-/// with the offending points.
+/// `n log n` rather than by testing every pair. Use `ga_self_intersections()`
+/// to locate the problem that [ga_is_valid()] reports: it returns the
+/// offending points of a self intersecting polygon.
 ///
-/// Segments that merely share an endpoint, as consecutive segments of a
-/// linestring always do, are not counted. A geometry with no crossings gives
-/// an empty multipoint rather than a null, so an empty result is
-/// distinguishable from an unsupported geometry. Points and null rows come
-/// back null.
+/// `ga_self_intersections()` does not count segments that merely share an
+/// endpoint, as consecutive segments of a linestring always do. It returns an
+/// empty multipoint rather than a null for a geometry with no crossings, so you
+/// can distinguish an empty result from an unsupported geometry. It returns
+/// null for points and null rows.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a GeoArrow multipoint array of the same length as `geometry`

@@ -12,36 +12,36 @@ ga_triangulate_delaunay(x, constrained = TRUE, snap_radius = 1e-04)
 \item{constrained}{whether to constrain the triangulation to the input's
 edges. \code{TRUE} by default}
 
-\item{snap_radius}{coordinates closer together than this are snapped to the
-same position; length 1 or the same length as \code{x}. \code{geo} uses 1e-4 by
-default}
+\item{snap_radius}{the distance below which to snap coordinates to the same
+position; length 1 or the same length as \code{x}. \code{geo} uses 1e-4 by default}
 }
 \value{
 a GeoArrow multipolygon array of the same length as \code{x}
 }
 \description{
 Returns one multipolygon per input geometry, whose parts are that
-geometry's triangles. The output has the same length as the input.
+geometry's triangles. \code{ga_triangulate_delaunay()} preserves the input's
+length.
 }
 \details{
-A constrained triangulation keeps the input's edges and returns only the
-triangles that fall inside the geometry. An unconstrained triangulation
-triangulates the convex hull of the input's vertices, ignoring its edges,
-so it may cross holes and concavities.
+With \code{constrained = TRUE}, \code{ga_triangulate_delaunay()} keeps the input's
+edges and returns only the triangles that fall inside the geometry. With
+\code{constrained = FALSE}, it triangulates the convex hull of the input's
+vertices, ignoring the edges, so the triangles may cross holes and
+concavities.
 
-A null geometry, or one that cannot be triangulated, becomes a null
-element.
+It returns a null element for a null geometry or one it cannot triangulate.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# constrained keeps the triangles inside the county boundary
+# with constrained = TRUE you get only triangles inside the county boundary
 tri <- ga_triangulate_delaunay(nc$geometry)
 tri$length
 
-# unconstrained fills the convex hull instead, so it covers more
+# set constrained = FALSE to fill the convex hull instead, which covers more
 hull <- ga_triangulate_delaunay(nc$geometry, constrained = FALSE)
 head(as.vector(ga_unsigned_area(tri)), 3)
 head(as.vector(ga_unsigned_area(hull)), 3)

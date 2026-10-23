@@ -13,8 +13,9 @@ ga_set_thread_pool(n)
 \code{n}, invisibly
 }
 \description{
-Called on load and whenever the option changes. \code{0} returns the parallel
-paths to rayon's own default, which is one thread per core.
+geoarrowrs calls \code{ga_set_thread_pool()} on load and whenever you change the
+option. With \code{0}, it returns the parallel paths to rayon's own default, which
+is one thread per core.
 }
 \examples{
 # hold the parallel paths to two threads

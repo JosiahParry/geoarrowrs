@@ -19,7 +19,7 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 ///
 /// Densifies linestrings, multilinestrings, polygons, and multipolygons by
 /// inserting additional points along each segment until no segment exceeds
-/// `max_segment_length`. The metric determines how segment length is measured.
+/// `max_segment_length`. `ga_densify()` measures segment length with `metric`.
 ///
 /// @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
 /// @param max_segment_length the maximum segment length; either length 1 or the same length as `geometry`
@@ -33,7 +33,7 @@ use geoarrow_array::{GeoArrowArray, GeoArrowArrayAccessor};
 ///   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
 /// ))
 ///
-/// # a 10 unit segment capped at 2 units needs four new vertices
+/// # ga_densify() adds four new vertices to cap a 10 unit segment at 2 units
 /// as.vector(ga_n_coords(line))
 /// as.vector(ga_n_coords(ga_densify(line, 2, "euclidean")))
 #[extendr]

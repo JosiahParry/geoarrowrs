@@ -23,8 +23,7 @@ use crate::{
 /// Skew geometries uniformly about their centroid
 ///
 /// Shears each geometry by `degrees` along both the x and y dimensions, about
-/// the geometry's own centroid. The geometry type of the output matches the
-/// geometry type of the input.
+/// the geometry's own centroid. `ga_skew()` keeps the input's geometry type.
 ///
 /// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 /// @param degrees the shear angle; length 1 or the same length as `geometry`
@@ -37,7 +36,7 @@ use crate::{
 ///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 /// ))
 ///
-/// # a shear leaves the area unchanged
+/// # ga_skew() leaves the area unchanged
 /// geoarrow::as_geoarrow_vctr(ga_skew(sq, 30))
 /// as.vector(ga_unsigned_area(ga_skew(sq, 30)))
 #[extendr]
@@ -146,8 +145,8 @@ fn ga_skew(geometry: Robj, degrees: Robj) -> extendr_api::Result<Robj> {
 /// Skew geometries in x and y
 ///
 /// Shears each geometry by `degrees_x` along the x dimension and `degrees_y`
-/// along the y dimension, about the geometry's own centroid. The geometry type
-/// of the output matches the geometry type of the input.
+/// along the y dimension, about the geometry's own centroid. `ga_skew_xy()`
+/// keeps the input's geometry type.
 ///
 /// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 /// @param degrees_x shear angle along the x dimension; length 1 or the same length as `geometry`

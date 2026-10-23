@@ -7,24 +7,25 @@
 read_shapefile(path)
 }
 \arguments{
-\item{path}{path to a \code{.shp} file. The sibling \code{.dbf} and \code{.prj} files are
-resolved from the same base name.}
+\item{path}{path to a \code{.shp} file. \code{read_shapefile()} resolves the sibling
+\code{.dbf} and \code{.prj} files from the same base name.}
 }
 \value{
 a \code{nanoarrow_array_stream} of a single record batch, holding the
 \code{.dbf} attribute columns followed by a \code{geometry} column.
 }
 \description{
-Reads the \code{.shp} geometries together with the \code{.dbf} attributes. The CRS is
-taken from the sibling \code{.prj} file when one is present.
+Reads the \code{.shp} geometries together with the \code{.dbf} attributes. It takes
+the CRS from the sibling \code{.prj} file when one is present.
 }
 \details{
-Polylines are read as multilinestrings and polygons as multipolygons,
-because a shapefile record of either type may contain multiple parts.
+\code{read_shapefile()} reads polylines as multilinestrings and polygons as
+multipolygons, because a shapefile record of either type may contain
+multiple parts.
 
-The coordinate dimension is chosen once per file, from the shape type and
-from whether the coordinates actually carry measures. A \code{PolygonZ} file with
-no measures is therefore read as XYZ, rather than as XYZM full of nulls.\tabular{lll}{
+It chooses the coordinate dimension once per file, from the shape type and
+from whether the coordinates actually carry measures. It therefore reads a
+\code{PolygonZ} file with no measures as XYZ, rather than as XYZM full of nulls.\tabular{lll}{
    shape type \tab measures present \tab dimension \cr
    \code{Point}, \code{Polyline}, \code{Polygon}, \code{Multipoint} \tab not applicable \tab XY \cr
    \code{PointM}, \code{PolylineM}, \code{PolygonM}, \code{MultipointM} \tab no \tab XY \cr
@@ -34,10 +35,10 @@ no measures is therefore read as XYZ, rather than as XYZM full of nulls.\tabular
 }
 
 
-If only some coordinates carry a measure, M is dropped and a message is
-emitted, because an Arrow column cannot mix dimensions.
+If only some coordinates carry a measure, \code{read_shapefile()} drops M and
+emits a message, because Arrow cannot mix dimensions in one column.
 
-\code{Multipatch} files are not supported.
+\code{read_shapefile()} does not support \code{Multipatch} files.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

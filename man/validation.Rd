@@ -20,20 +20,20 @@ a string array of the same length as \code{geometry}
 \description{
 \code{TRUE} when a geometry satisfies the OGC simple features rules.
 
-Returns the first validation problem found, or \code{NA} when the geometry is
+Returns the first validation problem it finds, or \code{NA} when the geometry is
 valid.
 }
 \details{
 Several algorithms give wrong answers on invalid input rather than failing,
-so this is worth checking before trusting a result. Common problems are a
-polygon whose rings self intersect, a ring with too few points, and a
-coordinate that is \code{NaN} or infinite.
+so check validity before trusting a result. Common problems are a polygon
+whose rings self intersect, a ring with too few points, and a coordinate
+that is \code{NaN} or infinite.
 
-A null geometry gives \code{NA}. Use \code{\link[=ga_validation_error]{ga_validation_error()}} to see why a geometry
-failed.
+\code{ga_is_valid()} returns \code{NA} for a null geometry. Use \code{\link[=ga_validation_error]{ga_validation_error()}}
+to see why a geometry is invalid.
 
-A geometry can break more than one rule; only the first is reported, since
-fixing it often resolves the rest.
+A geometry can break more than one rule; \code{ga_validation_error()} reports only
+the first, since you often resolve the rest by fixing it.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

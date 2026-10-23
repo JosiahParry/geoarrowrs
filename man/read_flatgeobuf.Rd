@@ -10,7 +10,7 @@ read_flatgeobuf(path, bbox = NULL)
 \item{path}{path to a \code{.fgb} file.}
 
 \item{bbox}{optionally a length 4 numeric vector of \code{c(xmin, ymin, xmax, ymax)}
-used to filter features spatially. \code{NULL} reads every feature.}
+used to filter features spatially. Pass \code{NULL} to read every feature.}
 }
 \value{
 a \code{nanoarrow_array_stream} of record batches, holding the property
@@ -18,14 +18,15 @@ columns followed by a \code{geometry} column.
 }
 \description{
 Reads the geometries together with the feature properties. Unlike the
-shapefile and GeoJSON readers this one streams, so the whole file is never
-held in memory at once.
+shapefile and GeoJSON readers this one streams, so it never holds the whole
+file in memory at once.
 }
 \details{
-Passing \code{bbox} uses the file's packed Hilbert R-tree index to skip features
-that fall outside it, so a spatial subset does not read the whole file.
-Features come back in the order the file stores them, which for an indexed
-file is that R-tree order rather than the order they were written in.
+When you pass \code{bbox}, \code{read_flatgeobuf()} uses the file's packed Hilbert
+R-tree index to skip features that fall outside it, so it does not read the
+whole file for a spatial subset. It returns features in the order the file
+stores them, which for an indexed file is that R-tree order rather than
+their original order.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

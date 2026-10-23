@@ -7,64 +7,67 @@
 register_geoarrow_udfs(crs = NULL, functions = NULL, prefix = "")
 }
 \arguments{
-\item{crs}{the coordinate reference system the kernels dispatch on. \code{NULL},
-the default, registers for data with no CRS. Also accepts a CRS string, or
-any object carrying one: an Arrow \code{Table}, \code{RecordBatch}, \code{Dataset},
-\code{Schema}, \code{Array}, or a GeoArrow array or vector. Give a list to cover
-several at once}
+\item{crs}{the coordinate reference system the kernels dispatch on. Pass
+\code{NULL}, the default, for data with no CRS, a CRS string, or any object
+carrying one: an Arrow \code{Table}, \code{RecordBatch}, \code{Dataset}, \code{Schema},
+\code{Array}, or a GeoArrow array or vector. Pass a list to cover several at
+once}
 
-\item{functions}{names of geoarrowrs functions to register. \code{NULL}, the
-default, registers everything that can be}
+\item{functions}{names of geoarrowrs functions to register, or \code{NULL}, the
+default, for every function \code{register_geoarrow_udfs()} supports}
 
-\item{prefix}{prepended to each registered name, to avoid masking an
-existing Arrow binding}
+\item{prefix}{a string to prepend to each registered name, to avoid masking
+an existing Arrow binding}
 }
 \value{
 the registered names, invisibly
 }
 \description{
 Makes geoarrowrs functions callable inside \code{dplyr} verbs on an Arrow
-\code{Table}, \code{RecordBatch}, or \code{Dataset}, so the geometry never has to be pulled
+\code{Table}, \code{RecordBatch}, or \code{Dataset}, so you never have to pull the geometry
 into R.
 }
 \details{
-Arrow's query engine only knows the kernels registered with it, so calling a
-geoarrowrs function on a \code{Table} normally warns that the expression is not
-supported and falls back to pulling the data into R. This registers each
-function as an Arrow scalar kernel instead, which lets it run inside the
-engine and, on a \code{Dataset}, stream batch by batch without ever holding the
-whole column in memory.
+Arrow's query engine only knows the kernels you register with it, so when
+you call a geoarrowrs function on a \code{Table}, Arrow warns that it does not
+support the expression and pulls the data into R instead.
+\code{register_geoarrow_udfs()} registers each function as an Arrow scalar kernel,
+so the engine runs it and, on a \code{Dataset}, streams it batch by batch without
+ever holding the whole column in memory.
 
-Registration is per CRS, not per table. Every GeoArrow geometry type gets
-its own kernel, so one call covers points, linestrings, polygons, and their
-multi variants at once. A function that cannot handle a type, such as
-\code{\link[=ga_length_euclidean]{ga_length_euclidean()}} against polygons, simply has no kernel for it.
+\code{register_geoarrow_udfs()} registers per CRS, not per table. It registers a
+kernel for every GeoArrow geometry type, so one call covers points,
+linestrings, polygons, and their multi variants at once. It registers no
+kernel for a type a function cannot handle, such as \code{\link[=ga_length_euclidean]{ga_length_euclidean()}}
+on polygons.
 
-Arguments that are not geometry are registered too. Numeric arguments such
-as the \code{epsilon} of \code{\link[=ga_simplify]{ga_simplify()}} take a \code{double} column or a literal and
-are recycled row by row. Option arguments such as the \code{metric} of
-\code{\link[=ga_densify]{ga_densify()}} take a literal string. Since Arrow has no optional arguments,
-every argument of a registered function must be given.
+It registers the arguments that are not geometry too. Numeric arguments such
+as the \code{epsilon} of \code{\link[=ga_simplify]{ga_simplify()}} take a \code{double} column or a literal,
+which the kernel recycles row by row. Option arguments such as the \code{metric}
+of \code{\link[=ga_densify]{ga_densify()}} take a literal string. Arrow has no optional arguments, so
+you must pass every argument of a registered function.
 
-\code{\link[=ga_unary_union]{ga_unary_union()}}, \code{\link[=ga_explode]{ga_explode()}}, and \code{\link[=ga_flatten]{ga_flatten()}} are not registered,
+It does not register \code{\link[=ga_unary_union]{ga_unary_union()}}, \code{\link[=ga_explode]{ga_explode()}}, or \code{\link[=ga_flatten]{ga_flatten()}},
 because they change the length of the array and a scalar kernel may not.
 
-A bare \code{binary} column of WKB, which is what plain Parquet writes, is
-registered for too. The kernel parses it, and a geometry result comes back
-as WKB, since a kernel's output type cannot depend on what the column turns
-out to hold. To work on native GeoArrow instead, cast once with
-\code{\link[=ga_as_point]{ga_as_point()}} or one of its siblings and follow it with \code{compute()}.
-Without the \code{compute()} Arrow inlines the cast into each expression that
-reads it, so it runs once per use rather than once per column.
+It also registers kernels for a bare \code{binary} column of WKB, which is what
+plain Parquet writes. The kernel parses the WKB and returns a geometry result
+as WKB, since a kernel's output type cannot depend on what the column holds.
+To work on native GeoArrow instead, cast once with \code{\link[=ga_as_point]{ga_as_point()}} or one of
+its siblings and follow it with \code{compute()}. Without the \code{compute()}, Arrow
+inlines the cast into each expression that reads it and runs it once per use
+rather than once per column.
 
-A GeoArrow type carries its CRS, and Arrow compares that when it looks for a
-kernel, so \code{crs} has to match the data. Pass every CRS you need in one call:
-registering a name again replaces the kernels it had.
+A GeoArrow type carries its CRS, and Arrow compares it when it looks for a
+kernel, so you have to pass a \code{crs} that matches the data. Pass every CRS you
+need in one call: when you register a name again, \code{register_geoarrow_udfs()}
+replaces the kernels it had.
 
-Loading geoarrowrs calls this once for you with \code{crs = NULL}, so data with
-no CRS works without any setup. Data that carries one still needs a call
-naming it. Set \code{options(geoarrowrs.register_udfs = FALSE)} before loading to
-skip that, which also stops the package pulling in arrow at load time.
+geoarrowrs calls \code{register_geoarrow_udfs()} once with \code{crs = NULL} when it
+loads, so you can use data with no CRS without any setup. For data with a
+CRS, you still need to call it with that CRS. Set
+\code{options(geoarrowrs.register_udfs = FALSE)} before loading to skip the call,
+which also keeps geoarrowrs from loading arrow when it loads.
 }
 \examples{
 \dontshow{if (requireNamespace("arrow", quietly = TRUE) && requireNamespace("dplyr", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && isTRUE(arrow::arrow_info()$capabilities[["acero"]])) withAutoprint(\{ # examplesIf}

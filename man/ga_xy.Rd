@@ -18,28 +18,28 @@ the same length as \code{x}}
 a GeoArrow point array
 }
 \description{
-Pairs two numeric vectors into a GeoArrow point array. The shorter of the
-two is recycled when it is length 1.
+Pairs two numeric vectors into a GeoArrow point array. \code{ga_xy()} recycles
+the shorter of the two when it is length 1.
 }
 \details{
-A row where either coordinate is \code{NA} gives a null point rather than a
-point at an arbitrary location, so the result always has the same length as
-the longer input.
+\code{ga_xy()} returns a null point for a row where either coordinate is \code{NA},
+rather than a point at an arbitrary location, so the result always has the
+same length as the longer input.
 
-\code{crs} is stored verbatim in the array's GeoArrow metadata and is never
-interpreted, so nothing here reprojects. Anything a reader would produce
-works, whether an authority code such as \code{"EPSG:4326"}, WKT, or PROJJSON.
-Leaving it \code{NULL} produces an array with no CRS.
+\code{ga_xy()} stores \code{crs} verbatim in the array's GeoArrow metadata and never
+interprets it, so it never reprojects. It accepts anything a reader would
+produce, whether an authority code such as \code{"EPSG:4326"}, WKT, or PROJJSON.
+If you leave it \code{NULL}, \code{ga_xy()} produces an array with no CRS.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 pts <- ga_xy(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
 
-# a length 1 coordinate is recycled
+# ga_xy() recycles a length 1 coordinate
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_xy(c(0, 1, 2), 0)))
 
-# NA in either coordinate gives a null point
+# ga_xy() returns a null point for NA in either coordinate
 ga_xy(c(0, NA), c(0, 1))$null_count
 \dontshow{\}) # examplesIf}
 }

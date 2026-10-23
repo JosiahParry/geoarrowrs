@@ -24,20 +24,20 @@ Measures the full cross product rather than walking the two arrays in
 lockstep, giving one list of \code{length(y)} distances per row of \code{x}.
 }
 \details{
-This is the shape \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}} cannot express, and it
-costs \code{length(x) * length(y)} distances to hold: ten thousand rows against
-ten thousand is a hundred million doubles, or eight hundred megabytes. Where
-the distances are only wanted to pick a nearest row or a threshold,
-\code{\link[=ga_sparse_knn]{ga_sparse_knn()}} and \code{\link[=ga_sparse_dwithin]{ga_sparse_dwithin()}} answer that against an R-tree
-without ever forming the product.
+\code{ga_cross_distance()} returns the shape \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidean_pairwise()}}
+cannot express, at the cost of holding \code{length(x) * length(y)} distances:
+ten thousand rows against ten thousand is a hundred million doubles, or
+eight hundred megabytes. Where you only want the distances to pick a
+nearest row or a threshold, \code{\link[=ga_sparse_knn]{ga_sparse_knn()}} and \code{\link[=ga_sparse_dwithin]{ga_sparse_dwithin()}}
+answer that against an R-tree without ever forming the product.
 
-\code{"euclidean"} measures between geometries of any type. The spherical and
-ellipsoidal metrics take points only, because \code{geo} defines them between
-points alone. \code{"vincenty"} gives a null where the algorithm fails to
-converge.
+With \code{"euclidean"}, \code{ga_cross_distance()} measures between geometries of
+any type. It takes points only for the spherical and ellipsoidal metrics,
+because \code{geo} defines them between points alone. With \code{"vincenty"}, it
+returns a null where the algorithm fails to converge.
 
-A null row of \code{x} gives a null element. A null row of \code{y} gives a null in
-that position of every element.
+\code{ga_cross_distance()} returns a null element for a null row of \code{x}. For a
+null row of \code{y}, it returns a null in that position of every element.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

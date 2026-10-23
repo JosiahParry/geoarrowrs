@@ -35,11 +35,11 @@ fn finish_list(
 /// Split multi-part geometries into their parts
 ///
 /// Returns a list the same length as the input, where each element is an array
-/// of that geometry's constituent parts. A multipolygon of three polygons
-/// becomes one element holding a polygon array of length three.
+/// of that geometry's constituent parts. `ga_explode()` turns a multipolygon of
+/// three polygons into one element holding a polygon array of length three.
 ///
 /// @details
-/// The output geometry type is the singular form of the input:
+/// `ga_explode()` returns the singular form of the input geometry type:
 ///
 /// | input | element type |
 /// | --- | --- |
@@ -47,18 +47,19 @@ fn finish_list(
 /// | `multilinestring`, `linestring` | `linestring` |
 /// | `multipolygon`, `polygon` | `polygon` |
 ///
-/// The element type is decided by the array's declared type, not by its
-/// contents, so an array of multipolygons that all happen to hold one part
-/// still explodes to polygons. A mixed `geometry` array has no single singular
-/// type and errors; narrow it with [ga_downcast_geometry()] first.
+/// `ga_explode()` decides the element type from the array's declared type, not
+/// from its contents, so it still returns polygons for an array of
+/// multipolygons that all happen to hold one part. `ga_explode()` raises an
+/// error for a mixed `geometry` array, which has no single singular type;
+/// narrow it with [ga_downcast_geometry()] first.
 ///
-/// A singular geometry yields an element of length one, so the operation is
-/// well defined for any input. A null geometry yields a null element, which is
-/// distinct from an empty one.
+/// `ga_explode()` returns an element of length one for a singular geometry, so
+/// it handles any input. For a null geometry, it returns a null element, which
+/// is distinct from an empty one.
 ///
-/// Because the length is preserved, the result lines up with the row it came
-/// from and can sit alongside the other columns of a table. Use [ga_flatten()] to
-/// collapse it into a single array with one row per part.
+/// Because `ga_explode()` preserves length, you can keep the result alongside
+/// the other columns of a table, each element in line with its source row. Use
+/// [ga_flatten()] to collapse it into a single array with one row per part.
 ///
 /// @param x a GeoArrow geometry array
 /// @returns a list array of the same length as `x`, whose elements are GeoArrow arrays
@@ -198,13 +199,14 @@ fn ga_explode(x: Robj) -> extendr_api::Result<Robj> {
 /// Collapse a list of geometries into a single array
 ///
 /// The inverse of [ga_explode()]. Concatenates every element's parts into one
-/// array, so a list of `n` elements holding `m` parts in total becomes an
+/// array, turning a list of `n` elements holding `m` parts in total into an
 /// array of length `m`.
 ///
-/// Null elements contribute nothing, so the result is shorter than the input
-/// whenever an element holds more or fewer than one geometry.
+/// `ga_flatten()` adds nothing for null elements, so it returns a different
+/// number of rows than the input whenever an element holds more or fewer than
+/// one geometry.
 ///
-/// @param x a list array of GeoArrow arrays, as returned by [ga_explode()]
+/// @param x a list array of GeoArrow arrays, as [ga_explode()] returns
 /// @returns a GeoArrow array holding every part, flattened
 /// @export
 /// @family cast

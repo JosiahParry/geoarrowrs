@@ -16,7 +16,7 @@ a GeoArrow array of the same geometry type as the input
 }
 \description{
 Rotates each geometry counter-clockwise by \code{degrees} about its own centroid.
-The geometry type of the output matches the geometry type of the input.
+\code{ga_rotate_around_centroid()} keeps the input's geometry type.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

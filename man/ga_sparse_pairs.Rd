@@ -20,21 +20,21 @@ one row per pair, which is the shape \code{\link[=ga_join]{ga_join()}} takes and
 database returns a spatial join in.
 }
 \details{
-Everything but the padding is expressible with Arrow's own \code{list_flatten()}
-and \code{list_parent_indices()}. What they cannot do is \code{left = TRUE}, which has
-to put back a row for each row of \code{x} that matched nothing, so the whole
-expansion happens here rather than half here and half in R.
+You can express everything but the padding with Arrow's own \code{list_flatten()}
+and \code{list_parent_indices()}. What they cannot do is \code{left = TRUE}, where
+\code{ga_sparse_pairs()} has to put back a row for each row of \code{x} that matched
+nothing, so it does the whole expansion itself rather than leaving half to R.
 
-Rows are 1 based, matching what the sparse predicates return. A row of \code{x}
-that matched nothing appears once with a null \code{y} when \code{left = TRUE}, and
-not at all otherwise.
+\code{ga_sparse_pairs()} numbers rows from 1, matching what the sparse predicates
+return. It returns a row of \code{x} that matched nothing once with a null \code{y}
+when \code{left = TRUE}, and drops it otherwise.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
 y <- ga_xy(c(0, 1), c(0, 1))
 
-# the middle row of x matches nothing, so it is only there with left = TRUE
+# the middle row of x matches nothing, so you see it only with left = TRUE
 ga_sparse_pairs(ga_sparse_intersects(x, y))
 ga_sparse_pairs(ga_sparse_intersects(x, y), left = TRUE)
 \dontshow{\}) # examplesIf}

@@ -11,18 +11,18 @@ use crate::{as_point_chunks, as_recycled_points, try_float_array};
 
 /// Build a point array from x and y coordinates
 ///
-/// Pairs two numeric vectors into a GeoArrow point array. The shorter of the
-/// two is recycled when it is length 1.
+/// Pairs two numeric vectors into a GeoArrow point array. `ga_xy()` recycles
+/// the shorter of the two when it is length 1.
 ///
 /// @details
-/// A row where either coordinate is `NA` gives a null point rather than a
-/// point at an arbitrary location, so the result always has the same length as
-/// the longer input.
+/// `ga_xy()` returns a null point for a row where either coordinate is `NA`,
+/// rather than a point at an arbitrary location, so the result always has the
+/// same length as the longer input.
 ///
-/// `crs` is stored verbatim in the array's GeoArrow metadata and is never
-/// interpreted, so nothing here reprojects. Anything a reader would produce
-/// works, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
-/// Leaving it `NULL` produces an array with no CRS.
+/// `ga_xy()` stores `crs` verbatim in the array's GeoArrow metadata and never
+/// interprets it, so it never reprojects. It accepts anything a reader would
+/// produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
+/// If you leave it `NULL`, `ga_xy()` produces an array with no CRS.
 ///
 /// @param x a numeric vector or float64 array of x coordinates
 /// @param y a numeric vector or float64 array of y coordinates; length 1 or
@@ -35,10 +35,10 @@ use crate::{as_point_chunks, as_recycled_points, try_float_array};
 /// pts <- ga_xy(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
 ///
-/// # a length 1 coordinate is recycled
+/// # ga_xy() recycles a length 1 coordinate
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_xy(c(0, 1, 2), 0)))
 ///
-/// # NA in either coordinate gives a null point
+/// # ga_xy() returns a null point for NA in either coordinate
 /// ga_xy(c(0, NA), c(0, 1))$null_count
 #[extendr]
 fn ga_xy(
@@ -84,13 +84,14 @@ fn ga_xy(
 /// Build a line between pairs of points
 ///
 /// Returns a two point linestring joining each `start` to the matching `end`.
-/// `end` is recycled, so one destination pairs with every origin.
+/// `ga_make_line()` recycles `end`, so you can pair one destination with every
+/// origin.
 ///
 /// @details
-/// A null or empty point on either side gives a null element, so the result is
-/// always the same length as `start`. The length of the line is
-/// [ga_length_euclidean()], which equals [ga_dist_euclidean_pairwise()] on the
-/// same pair.
+/// `ga_make_line()` returns a null element for a null or empty point on either
+/// side, so the result is always the same length as `start`. The length of the
+/// line is [ga_length_euclidean()], which equals [ga_dist_euclidean_pairwise()]
+/// on the same pair.
 ///
 /// @param start a GeoArrow point array
 /// @param end a GeoArrow point array; length 1 or the same length as `start`

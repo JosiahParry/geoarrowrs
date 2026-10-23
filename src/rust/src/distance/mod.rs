@@ -35,13 +35,14 @@ fn as_recycled_linestrings(
 /// Compute pairwise distances between points
 ///
 /// Calculate the distance between each pair of geometries in `origin` and
-/// `dest`. These functions differ in the metric space used for the calculation.
+/// `dest`. These functions differ in the metric space they use for the
+/// calculation.
 ///
 /// @details
 /// `ga_dist_euclidean_pairwise()` measures between geometries of any type, so
-/// the distance from a point to the nearest edge of a polygon is one call. The
-/// spherical and ellipsoidal metrics take points only, because `geo` defines
-/// them between points alone.
+/// you can get the distance from a point to the nearest edge of a polygon in
+/// one call. The spherical and ellipsoidal functions take points only, because
+/// `geo` defines those metrics between points alone.
 ///
 /// @param origin a GeoArrow geometry array for `ga_dist_euclidean_pairwise()`,
 ///   a point array for the others

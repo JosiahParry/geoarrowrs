@@ -19,7 +19,7 @@ a GeoArrow array of the same geometry type as the input
 \description{
 Densifies linestrings, multilinestrings, polygons, and multipolygons by
 inserting additional points along each segment until no segment exceeds
-\code{max_segment_length}. The metric determines how segment length is measured.
+\code{max_segment_length}. \code{ga_densify()} measures segment length with \code{metric}.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -27,7 +27,7 @@ line <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
 ))
 
-# a 10 unit segment capped at 2 units needs four new vertices
+# ga_densify() adds four new vertices to cap a 10 unit segment at 2 units
 as.vector(ga_n_coords(line))
 as.vector(ga_n_coords(ga_densify(line, 2, "euclidean")))
 \dontshow{\}) # examplesIf}

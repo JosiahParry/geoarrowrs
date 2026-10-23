@@ -72,20 +72,20 @@ where
 /// lockstep, giving one list of `length(y)` distances per row of `x`.
 ///
 /// @details
-/// This is the shape [ga_dist_euclidean_pairwise()] cannot express, and it
-/// costs `length(x) * length(y)` distances to hold: ten thousand rows against
-/// ten thousand is a hundred million doubles, or eight hundred megabytes. Where
-/// the distances are only wanted to pick a nearest row or a threshold,
-/// [ga_sparse_knn()] and [ga_sparse_dwithin()] answer that against an R-tree
-/// without ever forming the product.
+/// `ga_cross_distance()` returns the shape [ga_dist_euclidean_pairwise()]
+/// cannot express, at the cost of holding `length(x) * length(y)` distances:
+/// ten thousand rows against ten thousand is a hundred million doubles, or
+/// eight hundred megabytes. Where you only want the distances to pick a
+/// nearest row or a threshold, [ga_sparse_knn()] and [ga_sparse_dwithin()]
+/// answer that against an R-tree without ever forming the product.
 ///
-/// `"euclidean"` measures between geometries of any type. The spherical and
-/// ellipsoidal metrics take points only, because `geo` defines them between
-/// points alone. `"vincenty"` gives a null where the algorithm fails to
-/// converge.
+/// With `"euclidean"`, `ga_cross_distance()` measures between geometries of
+/// any type. It takes points only for the spherical and ellipsoidal metrics,
+/// because `geo` defines them between points alone. With `"vincenty"`, it
+/// returns a null where the algorithm fails to converge.
 ///
-/// A null row of `x` gives a null element. A null row of `y` gives a null in
-/// that position of every element.
+/// `ga_cross_distance()` returns a null element for a null row of `x`. For a
+/// null row of `y`, it returns a null in that position of every element.
 ///
 /// @param x a GeoArrow geometry array for `metric = "euclidean"`, a point array
 ///   for the others

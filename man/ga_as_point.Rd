@@ -28,14 +28,14 @@ ga_as_multipolygon(x)
 a GeoArrow array of the named type, the same length as \code{x}
 }
 \description{
-Each of these casts to the single type its name gives. Because the result
+Each of these casts to the single type in its name. Because the result
 type does not depend on the data, these are the casts Arrow can run inside
 a query, which \code{\link[=ga_from_wkb]{ga_from_wkb()}} cannot.
 }
 \details{
 Parsing WKB is the expensive part of using a plain Parquet geometry column,
 and every function that needs a concrete geometry type pays for it on its
-own. Casting once up front means the rest of the query runs on native
+own. If you cast once up front, you run the rest of the query on native
 GeoArrow instead:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{trip |>
@@ -46,8 +46,9 @@ GeoArrow instead:
   )
 }\if{html}{\out{</div>}}
 
-The cast is fallible. A geometry that does not fit the target type, such as
-a two point multipoint cast to \code{point}, is an error rather than a null.
+The cast is fallible. These functions error, rather than return a null,
+when a geometry does not fit the target type, such as when you cast a two
+point multipoint to \code{point}.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE) && requireNamespace("wk", quietly = TRUE) && requireNamespace("arrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

@@ -10,9 +10,9 @@ ga_voronoi_edges(geometry, clip = "padded", tolerance = 0, boundary = NULL)
 \item{geometry}{a GeoArrow geometry array whose vertices are the sites}
 
 \item{clip}{how to bound the diagram, either \code{"padded"} or \code{"envelope"}.
-Ignored when \code{boundary} is supplied}
+Has no effect when you supply \code{boundary}}
 
-\item{tolerance}{sites closer together than this are snapped to the same
+\item{tolerance}{the distance below which to snap sites to the same
 position; length 1 or the same length as \code{geometry}}
 
 \item{boundary}{an optional GeoArrow polygon array to clip to; length 1 or
@@ -23,16 +23,17 @@ a GeoArrow multilinestring array of the same length as \code{geometry}
 }
 \description{
 Returns one multilinestring per input geometry, whose parts are the
-boundaries between that geometry's Voronoi cells. The output has the same
-length as the input.
+boundaries between that geometry's Voronoi cells. \code{ga_voronoi_edges()}
+preserves the input's length.
 }
 \details{
 Unlike \code{\link[=ga_voronoi_cells]{ga_voronoi_cells()}}, this works on collinear sites, where the edges
 are the perpendicular bisectors between neighbouring points. Prefer it
 when you want the diagram's skeleton rather than closed regions.
 
-A geometry with fewer than two distinct vertices has no edges and comes
-back as an empty multilinestring. A null geometry stays null.
+A geometry with fewer than two distinct vertices has no edges, and
+\code{ga_voronoi_edges()} returns an empty multilinestring for it. It keeps a
+null geometry null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

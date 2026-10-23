@@ -131,12 +131,12 @@ macro_rules! convert_angle {
 
 /// Convert coordinates from radians to degrees
 ///
-/// Multiplies every x and y coordinate by `180 / pi`. The geometry type of the
-/// output matches the geometry type of the input.
+/// Multiplies every x and y coordinate by `180 / pi`. `ga_to_degrees()` keeps
+/// the geometry type of the input.
 ///
 /// @details
-/// Only the x and y coordinates are converted. Z and M values are dropped,
-/// since the conversion goes through a two dimensional representation.
+/// `ga_to_degrees()` converts only the x and y coordinates. It drops Z and M
+/// values, since it goes through a two dimensional representation.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a GeoArrow array of the same geometry type as the input
@@ -154,12 +154,12 @@ fn ga_to_degrees(geometry: Robj) -> extendr_api::Result<Robj> {
 
 /// Convert coordinates from degrees to radians
 ///
-/// Multiplies every x and y coordinate by `pi / 180`. The geometry type of the
-/// output matches the geometry type of the input.
+/// Multiplies every x and y coordinate by `pi / 180`. `ga_to_radians()` keeps
+/// the geometry type of the input.
 ///
 /// @details
-/// Only the x and y coordinates are converted. Z and M values are dropped,
-/// since the conversion goes through a two dimensional representation.
+/// `ga_to_radians()` converts only the x and y coordinates. It drops Z and M
+/// values, since it goes through a two dimensional representation.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a GeoArrow array of the same geometry type as the input

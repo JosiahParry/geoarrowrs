@@ -13,13 +13,13 @@ ga_interior_point(geometry)
 a GeoArrow point array of the same length as \code{geometry}
 }
 \description{
-Returns a point guaranteed to lie on the geometry, unlike \code{\link[=ga_centroid]{ga_centroid()}},
-which can fall outside a concave shape.
+Returns a point that always lies on the geometry, unlike \code{\link[=ga_centroid]{ga_centroid()}},
+which can return a point outside a concave shape.
 }
 \details{
-For a polygon this is a point on the interior, chosen from the horizontal
-line closest to the centroid. An empty or null geometry becomes a null
-element.
+For a polygon, \code{ga_interior_point()} picks a point on the interior from the
+horizontal line closest to the centroid. It returns a null element for an
+empty or null geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

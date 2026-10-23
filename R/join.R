@@ -95,26 +95,27 @@ suffix_names <- function(x_names, y_names, suffix) {
 #' Join two data frames on a spatial relationship
 #'
 #' Attaches the columns of `y` to each row of `x` that it relates to, the way
-#' [merge()] attaches them on a shared key. The geometry of `x` is kept and the
-#' geometry of `y` is dropped.
+#' [merge()] attaches them on a shared key. `ga_join()` keeps the geometry of
+#' `x` and drops the geometry of `y`.
 #'
 #' @details
-#' A row of `x` matching several rows of `y` is repeated once per match, so the
-#' result is usually longer than `x`. With `left = TRUE` a row matching nothing
-#' is kept once with `NA` in every column from `y`; with `left = FALSE` it is
-#' dropped.
+#' `ga_join()` repeats a row of `x` once for each row of `y` it matches, so the
+#' result is usually longer than `x`. With `left = TRUE` it keeps a row that
+#' matches nothing once, with `NA` in every column from `y`; with
+#' `left = FALSE` it drops that row.
 #'
 #' `predicate` is any of the sparse predicates, such as [ga_sparse_within()] or
-#' [ga_sparse_touches()]. It is called once as `predicate(x_geometry,
-#' y_geometry)`, so points in polygons is `ga_sparse_within()` and polygons
-#' holding points is `ga_sparse_contains()`.
+#' [ga_sparse_touches()]. `ga_join()` calls it once as
+#' `predicate(x_geometry, y_geometry)`, so use `ga_sparse_within()` for points
+#' in polygons and `ga_sparse_contains()` for polygons holding points.
 #'
-#' Columns the two frames share are suffixed rather than overwritten. Both
-#' frames need exactly one GeoArrow geometry column.
+#' `ga_join()` suffixes the columns the two frames share rather than
+#' overwriting them. Both frames need exactly one GeoArrow geometry column.
 #'
 #' @param x,y data frames, each with one GeoArrow geometry column
 #' @param predicate a sparse predicate, by default [ga_sparse_intersects()]
-#' @param suffix the pair of suffixes added to column names found in both frames
+#' @param suffix the pair of suffixes to add to the column names both frames
+#'   share
 #' @param left whether to keep rows of `x` that match nothing
 #' @returns an Arrow table with the columns of `x` followed by the non geometry
 #'   columns of `y`
@@ -178,18 +179,19 @@ ga_join <- function(
 #' Join two data frames on nearest neighbours
 #'
 #' Attaches the columns of the `k` rows of `y` nearest each row of `x`, the way
-#' [ga_join()] attaches the ones that relate to it. The distance between each
-#' pair comes along as a column.
+#' [ga_join()] attaches the ones that relate to it. `ga_knn_join()` also adds
+#' the distance between each pair as a column.
 #'
 #' @details
-#' Each row of `x` is repeated once per neighbour and the neighbours are ordered
-#' nearest first, so the result is `nrow(x) * k` rows unless `max_distance`
-#' rules some out. A row left with no neighbour is kept once with `NA` when
-#' `left = TRUE` and dropped otherwise.
+#' `ga_knn_join()` repeats each row of `x` once per neighbour and orders the
+#' neighbours nearest first, so the result has `nrow(x) * k` rows unless
+#' `max_distance` rules some out. With `left = TRUE` it keeps a row with no
+#' neighbour once, with `NA`; otherwise it drops that row.
 #'
-#' Distance is Euclidean and measured between the geometries themselves, so a
-#' point joins to the polygon whose edge is nearest rather than to the one whose
-#' bounding box is. Both frames need exactly one GeoArrow geometry column.
+#' `ga_knn_join()` measures Euclidean distance between the geometries
+#' themselves, so it joins a point to the polygon whose edge is nearest rather
+#' than to the one whose bounding box is. Both frames need exactly one GeoArrow
+#' geometry column.
 #'
 #' @inheritParams ga_join
 #' @param k how many neighbours to attach to each row of `x`
@@ -278,15 +280,15 @@ ga_knn_join <- function(
 
 #' Keep the rows of a data frame that relate to another spatially
 #'
-#' Filters `x` down to the rows whose geometry relates to any row of `y`. The
-#' columns of `y` are not attached, which is the difference from [ga_join()].
+#' Filters `x` down to the rows whose geometry relates to any row of `y`.
+#' Unlike [ga_join()], it does not attach the columns of `y`.
 #'
 #' @details
-#' A row of `x` is kept when the predicate finds it at least one match in `y`,
-#' so `ga_filter(sites, counties, ga_sparse_within)` keeps the sites that fall
-#' in any county. This is `ST_Filter()`, and the same answer as
-#' `ga_join(x, y, predicate, left = FALSE)` with the columns of `y` dropped and
-#' the rows of `x` not repeated.
+#' `ga_filter()` keeps a row of `x` when the predicate finds at least one match
+#' for it in `y`, so `ga_filter(sites, counties, ga_sparse_within)` keeps the
+#' sites that fall in any county. `ga_filter()` matches `ST_Filter()`, and
+#' returns the same rows as `ga_join(x, y, predicate, left = FALSE)` would,
+#' without the columns of `y` and without repeating rows of `x`.
 #'
 #' @inheritParams ga_join
 #' @returns an Arrow table holding the rows of `x` that matched
@@ -303,7 +305,7 @@ ga_knn_join <- function(
 #'   )
 #' )
 #'
-#' # the third site is in the Atlantic, so it goes
+#' # the third site is in the Atlantic, so ga_filter() drops it
 #' ga_filter(sites, nc, ga_sparse_within)
 ga_filter <- function(x, y, predicate = ga_sparse_intersects, ...) {
   rlang::check_dots_empty()

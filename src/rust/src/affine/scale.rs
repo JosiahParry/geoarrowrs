@@ -23,8 +23,8 @@ use crate::{
 /// Scale geometries in x and y
 ///
 /// Scales each geometry by `x_factor` along the x axis and `y_factor` along the
-/// y axis, about the geometry's own centroid. The geometry type of the output
-/// matches the geometry type of the input.
+/// y axis, about the geometry's own centroid. `ga_scale_xy()` keeps the input's
+/// geometry type.
 ///
 /// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 /// @param x_factor scaling factor along the x axis; length 1 or the same length as `geometry`
@@ -38,7 +38,7 @@ use crate::{
 ///   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 /// ))
 ///
-/// # twice as wide, same height, so the area doubles
+/// # twice as wide, same height, so ga_scale_xy() doubles the area
 /// geoarrow::as_geoarrow_vctr(ga_scale_xy(sq, 2, 1))
 /// as.vector(ga_unsigned_area(ga_scale_xy(sq, 2, 1)))
 #[extendr]

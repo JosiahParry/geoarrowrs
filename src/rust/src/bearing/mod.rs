@@ -6,8 +6,8 @@ use crate::point_metric;
 /// Compute the bearing between pairs of points
 ///
 /// Calculate the bearing in degrees from `origin` to `dest` for each pair of
-/// points. Bearing is measured clockwise from north (0 degrees) to 360 degrees.
-/// These functions differ in the metric space used for the calculation.
+/// points. These functions measure bearing clockwise from north (0 degrees) to
+/// 360 degrees. They differ in the metric space they use for the calculation.
 ///
 /// @param origin a GeoArrow point array of origin points
 /// @param dest a GeoArrow point array; length 1 or the same length as `origin`

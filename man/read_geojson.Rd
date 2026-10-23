@@ -15,14 +15,14 @@ property columns followed by a \code{geometry} column.
 }
 \description{
 Reads the geometries together with the feature properties. Properties are
-untyped in GeoJSON, so each column's arrow type is inferred by scanning
-every feature.
+untyped in GeoJSON, so \code{read_geojson()} infers each column's arrow type by
+scanning every feature.
 }
 \details{
-The geometry column is narrowed to the most specific type that holds every
-feature, promoting a singular type to its multi form where the two are
-mixed. A feature with a \code{null} geometry becomes a null element and does not
-affect the choice:\tabular{ll}{
+\code{read_geojson()} narrows the geometry column to the most specific type that
+holds every feature, promoting a singular type to its multi form when it
+finds both. It turns a feature with a \code{null} geometry into a null element
+and ignores it when choosing the type:\tabular{ll}{
    geometry types in the file \tab column type \cr
    all points \tab \code{geoarrow.point} \cr
    points and multipoints \tab \code{geoarrow.multipoint} \cr
@@ -33,11 +33,11 @@ affect the choice:\tabular{ll}{
 
 
 Narrowing matters in practice: \code{geoarrow.geometry} is a dense union that
-geoarrow's R bindings cannot yet convert, so a genuinely mixed collection
-reads back as its raw storage rather than as geometries.
+geoarrow's R bindings cannot yet convert, so they return a genuinely mixed
+collection as its raw storage rather than as geometries.
 
-Property columns appear in the order the keys are first seen. A key missing
-from a given feature is null for that row. Types are widened across
+\code{read_geojson()} adds property columns in the order it first sees their
+keys. It writes a null where a feature lacks a key. It widens types across
 features:\tabular{ll}{
    values seen for a key \tab column type \cr
    booleans \tab \code{Boolean} \cr
@@ -48,11 +48,12 @@ features:\tabular{ll}{
 }
 
 
-Nested arrays and objects have no arrow analogue and are kept as their raw
-JSON text.
+\code{read_geojson()} keeps nested arrays and objects, which have no arrow
+analogue, as their raw JSON text.
 
-Per RFC 7946 the coordinate reference system is always \code{OGC:CRS84}, so that
-is set on the geometry column without reading anything from the file.
+Per RFC 7946 the coordinate reference system is always \code{OGC:CRS84}, so
+\code{read_geojson()} sets that on the geometry column without reading anything
+from the file.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

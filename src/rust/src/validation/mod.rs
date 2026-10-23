@@ -12,12 +12,12 @@ use crate::{as_geo_geometries, as_geometry_chunks};
 ///
 /// @details
 /// Several algorithms give wrong answers on invalid input rather than failing,
-/// so this is worth checking before trusting a result. Common problems are a
-/// polygon whose rings self intersect, a ring with too few points, and a
-/// coordinate that is `NaN` or infinite.
+/// so check validity before trusting a result. Common problems are a polygon
+/// whose rings self intersect, a ring with too few points, and a coordinate
+/// that is `NaN` or infinite.
 ///
-/// A null geometry gives `NA`. Use [ga_validation_error()] to see why a geometry
-/// failed.
+/// `ga_is_valid()` returns `NA` for a null geometry. Use [ga_validation_error()]
+/// to see why a geometry is invalid.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a boolean array of the same length as `geometry`
@@ -58,12 +58,12 @@ fn ga_is_valid(geometry: Robj) -> anyhow::Result<Robj> {
 
 /// Explain why a geometry is invalid
 ///
-/// Returns the first validation problem found, or `NA` when the geometry is
+/// Returns the first validation problem it finds, or `NA` when the geometry is
 /// valid.
 ///
 /// @details
-/// A geometry can break more than one rule; only the first is reported, since
-/// fixing it often resolves the rest.
+/// A geometry can break more than one rule; `ga_validation_error()` reports only
+/// the first, since you often resolve the rest by fixing it.
 ///
 /// @returns a string array of the same length as `geometry`
 /// @export

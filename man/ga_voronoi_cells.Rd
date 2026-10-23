@@ -10,9 +10,9 @@ ga_voronoi_cells(geometry, clip = "padded", tolerance = 0, boundary = NULL)
 \item{geometry}{a GeoArrow geometry array whose vertices are the sites}
 
 \item{clip}{how to bound the diagram, either \code{"padded"} or \code{"envelope"}.
-Ignored when \code{boundary} is supplied}
+Has no effect when you supply \code{boundary}}
 
-\item{tolerance}{sites closer together than this are snapped to the same
+\item{tolerance}{the distance below which to snap sites to the same
 position; length 1 or the same length as \code{geometry}}
 
 \item{boundary}{an optional GeoArrow polygon array to clip to; length 1 or
@@ -23,21 +23,23 @@ a GeoArrow multipolygon array of the same length as \code{geometry}
 }
 \description{
 Returns one multipolygon per input geometry, whose parts are the Voronoi
-cells of that geometry's vertices. The output has the same length as the
-input.
+cells of that geometry's vertices. \code{ga_voronoi_cells()} preserves the
+input's length.
 }
 \details{
-Every vertex of a geometry is treated as a site, so a multipoint of \code{k}
-points yields \code{k} cells. A Voronoi diagram is unbounded, so the cells are
-clipped: \code{"padded"} uses a box with 50 percent padding around the sites,
-matching PostGIS \code{ST_VoronoiPolygons}, and \code{"envelope"} uses their exact
-bounding box. Passing \code{boundary} clips to an arbitrary polygon instead,
-which is the usual way to cut a diagram to a study area.
+\code{ga_voronoi_cells()} treats every vertex of a geometry as a site, so it
+returns \code{k} cells for a multipoint of \code{k} points. A Voronoi diagram is
+unbounded, so \code{ga_voronoi_cells()} clips the cells: with \code{"padded"} it uses
+a box with 50 percent padding around the sites, matching PostGIS
+\code{ST_VoronoiPolygons}, and with \code{"envelope"} their exact bounding box. Pass
+\code{boundary} to clip to an arbitrary polygon instead, which is the usual way
+to cut a diagram to a study area.
 
 A geometry with fewer than two distinct vertices, or one whose vertices are
-all collinear, has no cells and comes back as an empty multipolygon rather
-than a null. Use \code{\link[=ga_voronoi_edges]{ga_voronoi_edges()}} for the collinear case, which returns
-the perpendicular bisectors. A null geometry stays null.
+all collinear, has no cells, and \code{ga_voronoi_cells()} returns an empty
+multipolygon for it rather than a null. Use \code{\link[=ga_voronoi_edges]{ga_voronoi_edges()}} for the
+collinear case, which returns the perpendicular bisectors.
+\code{ga_voronoi_cells()} keeps a null geometry null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

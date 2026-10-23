@@ -20,9 +20,9 @@ files <- c(
 )
 ```
 
-The twelve queries of
-[SpatialBench](https://github.com/apache/sedona-spatialbench), run by
-`bench/run-all.R` and read back here from `bench/last-run/`.
+`bench/run-all.R` runs the twelve queries of
+[SpatialBench](https://github.com/apache/sedona-spatialbench), and this page
+reads the results back from `bench/last-run/`.
 
 ```{r}
 knitr::kable(t(machine), col.names = "")

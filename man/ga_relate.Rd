@@ -16,13 +16,13 @@ a string array of the same length as \code{x}
 }
 \description{
 Returns the nine character DE-9IM matrix describing how each pair of
-geometries relates, from which every named predicate can be derived.
+geometries relates, from which you can derive every named predicate.
 }
 \details{
-The string reads as the intersections of the interior, boundary and
-exterior of \code{x} with those of \code{y}, in that order. Each character is the
-dimension of that intersection: \code{F} for empty, \code{0} for a point, \code{1} for a
-curve, and \code{2} for a surface. A null geometry on either side gives \code{NA}.
+Read the string as the intersections of the interior, boundary and exterior
+of \code{x} with those of \code{y}, in that order. Each character is the dimension of
+that intersection: \code{F} for empty, \code{0} for a point, \code{1} for a curve, and \code{2}
+for a surface. \code{ga_relate()} returns \code{NA} for a null geometry on either side.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

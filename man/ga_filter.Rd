@@ -15,15 +15,15 @@ ga_filter(x, y, predicate = ga_sparse_intersects, ...)
 an Arrow table holding the rows of \code{x} that matched
 }
 \description{
-Filters \code{x} down to the rows whose geometry relates to any row of \code{y}. The
-columns of \code{y} are not attached, which is the difference from \code{\link[=ga_join]{ga_join()}}.
+Filters \code{x} down to the rows whose geometry relates to any row of \code{y}.
+Unlike \code{\link[=ga_join]{ga_join()}}, it does not attach the columns of \code{y}.
 }
 \details{
-A row of \code{x} is kept when the predicate finds it at least one match in \code{y},
-so \code{ga_filter(sites, counties, ga_sparse_within)} keeps the sites that fall
-in any county. This is \code{ST_Filter()}, and the same answer as
-\code{ga_join(x, y, predicate, left = FALSE)} with the columns of \code{y} dropped and
-the rows of \code{x} not repeated.
+\code{ga_filter()} keeps a row of \code{x} when the predicate finds at least one match
+for it in \code{y}, so \code{ga_filter(sites, counties, ga_sparse_within)} keeps the
+sites that fall in any county. \code{ga_filter()} matches \code{ST_Filter()}, and
+returns the same rows as \code{ga_join(x, y, predicate, left = FALSE)} would,
+without the columns of \code{y} and without repeating rows of \code{x}.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -37,7 +37,7 @@ sites <- data.frame(
   )
 )
 
-# the third site is in the Atlantic, so it goes
+# the third site is in the Atlantic, so ga_filter() drops it
 ga_filter(sites, nc, ga_sparse_within)
 \dontshow{\}) # examplesIf}
 }

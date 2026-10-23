@@ -8,21 +8,21 @@ NULL
 #' Apply an arbitrary affine transform
 #'
 #' Transforms every coordinate by the six coefficients of an affine matrix.
-#' The geometry type of the output matches the input.
+#' `ga_affine_transform()` keeps the input's geometry type.
 #'
 #' @details
-#' The coefficients map a coordinate to
+#' `ga_affine_transform()` maps a coordinate to
 #' `x' = a * x + b * y + xoff` and `y' = d * x + e * y + yoff`, the same
-#' ordering PostGIS `ST_Affine` and Shapely use. The identity transform is
-#' `a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0`.
+#' ordering PostGIS `ST_Affine` and Shapely use. Pass
+#' `a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0` for the identity transform.
 #'
 #' This is the general form behind [ga_translate()], [ga_scale_xy()], [ga_rotate_around_centroid()],
 #' and [ga_skew()]. Reach for those when they fit, since they are clearer at the
 #' call site. Use this one to apply a matrix you already have, or to compose
 #' several steps into a single pass over the coordinates.
 #'
-#' All six coefficients are recycled against `geometry`, so a different
-#' transform can be applied to every row.
+#' `ga_affine_transform()` recycles all six coefficients against `geometry`,
+#' so you can apply a different transform to every row.
 #'
 #' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or
 #'   multipolygon array
@@ -47,7 +47,7 @@ ga_affine_transform <- function(geometry, a, b, xoff, d, e, yoff) .Call(wrap__ga
 #' Rotate geometries around their centroid
 #'
 #' Rotates each geometry counter-clockwise by `degrees` about its own centroid.
-#' The geometry type of the output matches the geometry type of the input.
+#' `ga_rotate_around_centroid()` keeps the input's geometry type.
 #'
 #' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 #' @param degrees angle of rotation; length 1 or the same length as `geometry`
@@ -67,8 +67,8 @@ ga_rotate_around_centroid <- function(geometry, degrees) .Call(wrap__ga_rotate_a
 #' Rotate around the bounding box center
 #'
 #' Rotates each geometry counter-clockwise by `degrees` about the center of its
-#' own axis-aligned bounding rectangle. The geometry type of the output matches
-#' the geometry type of the input.
+#' own axis-aligned bounding rectangle. `ga_rotate_around_center()` keeps the
+#' input's geometry type.
 #'
 #' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 #' @param degrees angle of rotation; length 1 or the same length as `geometry`
@@ -77,7 +77,7 @@ ga_rotate_around_centroid <- function(geometry, degrees) .Call(wrap__ga_rotate_a
 #' @family affine
 #' @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' # the same triangle, turned about its bounding box center instead
+#' # turn the same triangle about its bounding box center instead
 #' tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
 #'   sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
 #' ))
@@ -88,8 +88,8 @@ ga_rotate_around_center <- function(geometry, degrees) .Call(wrap__ga_rotate_aro
 #' Scale geometries in x and y
 #'
 #' Scales each geometry by `x_factor` along the x axis and `y_factor` along the
-#' y axis, about the geometry's own centroid. The geometry type of the output
-#' matches the geometry type of the input.
+#' y axis, about the geometry's own centroid. `ga_scale_xy()` keeps the input's
+#' geometry type.
 #'
 #' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 #' @param x_factor scaling factor along the x axis; length 1 or the same length as `geometry`
@@ -103,7 +103,7 @@ ga_rotate_around_center <- function(geometry, degrees) .Call(wrap__ga_rotate_aro
 #'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 #' ))
 #'
-#' # twice as wide, same height, so the area doubles
+#' # twice as wide, same height, so ga_scale_xy() doubles the area
 #' geoarrow::as_geoarrow_vctr(ga_scale_xy(sq, 2, 1))
 #' as.vector(ga_unsigned_area(ga_scale_xy(sq, 2, 1)))
 ga_scale_xy <- function(geometry, x_factor, y_factor) .Call(wrap__ga_scale_xy, geometry, x_factor, y_factor)
@@ -111,8 +111,7 @@ ga_scale_xy <- function(geometry, x_factor, y_factor) .Call(wrap__ga_scale_xy, g
 #' Skew geometries uniformly about their centroid
 #'
 #' Shears each geometry by `degrees` along both the x and y dimensions, about
-#' the geometry's own centroid. The geometry type of the output matches the
-#' geometry type of the input.
+#' the geometry's own centroid. `ga_skew()` keeps the input's geometry type.
 #'
 #' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 #' @param degrees the shear angle; length 1 or the same length as `geometry`
@@ -125,7 +124,7 @@ ga_scale_xy <- function(geometry, x_factor, y_factor) .Call(wrap__ga_scale_xy, g
 #'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 #' ))
 #'
-#' # a shear leaves the area unchanged
+#' # ga_skew() leaves the area unchanged
 #' geoarrow::as_geoarrow_vctr(ga_skew(sq, 30))
 #' as.vector(ga_unsigned_area(ga_skew(sq, 30)))
 ga_skew <- function(geometry, degrees) .Call(wrap__ga_skew, geometry, degrees)
@@ -133,8 +132,8 @@ ga_skew <- function(geometry, degrees) .Call(wrap__ga_skew, geometry, degrees)
 #' Skew geometries in x and y
 #'
 #' Shears each geometry by `degrees_x` along the x dimension and `degrees_y`
-#' along the y dimension, about the geometry's own centroid. The geometry type
-#' of the output matches the geometry type of the input.
+#' along the y dimension, about the geometry's own centroid. `ga_skew_xy()`
+#' keeps the input's geometry type.
 #'
 #' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 #' @param degrees_x shear angle along the x dimension; length 1 or the same length as `geometry`
@@ -154,8 +153,8 @@ ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, g
 
 #' Translate geometries along the x and y axes
 #'
-#' Shifts every coordinate of each geometry by `x_offset` and `y_offset`. The
-#' geometry type of the output matches the geometry type of the input.
+#' Shifts every coordinate of each geometry by `x_offset` and `y_offset`.
+#' `ga_translate()` keeps the input's geometry type.
 #'
 #' @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 #' @param x_offset distance to shift along the x axis; length 1 or the same length as `geometry`
@@ -167,39 +166,41 @@ ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, g
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' pts <- ga_xy(c(0, 1), c(0, 1))
 #'
-#' # offsets are per row, so each point shifts by its own amount
+#' # ga_translate() shifts each point by its own row's offsets
 #' geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
 ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate, geometry, x_offset, y_offset)
 
 #' Collect an array into one geometry, or one per group
 #'
 #' Gathers the geometries into a single geometry collection, returning an array
-#' of length 1, or one collection per group when `sizes` or `by` says how the
-#' rows are grouped. This is the aggregate a `summarise()` wants, not a row by
+#' of length 1, or one collection per group when you group the rows with
+#' `sizes` or `by`. This is the aggregate a `summarise()` wants, not a row by
 #' row operation.
 #'
 #' @details
-#' Nothing is dissolved and nothing is reordered, so overlapping parts stay
-#' overlapping and the collection holds one member per non null input row. Use
-#' [ga_unary_union()] to merge overlapping polygons into one outline instead.
+#' `ga_collect_agg()` neither dissolves nor reorders, so it keeps overlapping
+#' parts overlapping and adds one member to the collection per non null input
+#' row. Use [ga_unary_union()] to merge overlapping polygons into one outline
+#' instead.
 #'
-#' `sizes` is the number of rows in each group, in order, which is what a
-#' `group_by()` and `summarise(n = n())` over the same ordering gives. The rows
-#' have to already be sorted by the grouping, since the runs are taken as they
-#' come: group `i` of the result is the `i`th run of `sizes` rows. Nothing is
-#' returned about the groups themselves, so keep the keys from the same
-#' `summarise()` to say what each row is.
+#' `ga_collect_agg()` reads `sizes` as the number of rows in each group, in
+#' order, which you get from a `group_by()` and `summarise(n = n())` over the
+#' same ordering. You have to sort the rows by the grouping first, since
+#' `ga_collect_agg()` takes the runs in row order: it returns the `i`th run of
+#' `sizes` rows as group `i`. It returns nothing about the groups themselves,
+#' so keep the keys from the same `summarise()` to say what each row is.
 #'
-#' `by` groups the rows itself, from an unsorted key of one label per row, so
-#' no `arrange()` is needed first. The result has one collection per distinct
-#' label, in the order each label first appears in `by`; get the matching keys
-#' back with `vctrs::vec_unique(by)`. `NA` in `by` groups those rows together
-#' like any other label. Give at most one of `sizes` or `by`; `NULL` for both
+#' With `by`, `ga_collect_agg()` groups the rows itself, from an unsorted key
+#' of one label per row, so you need no `arrange()` first. It returns one
+#' collection per distinct label, in the order each label first appears in
+#' `by`; get the matching keys back with `vctrs::vec_unique(by)`.
+#' `ga_collect_agg()` groups rows with `NA` in `by` together like any other
+#' label. Give at most one of `sizes` or `by`; with `NULL` for both, it
 #' collects everything as one group.
 #'
 #' Being an aggregate, this is one of the few functions here that does not
-#' preserve length, and it is not registered as an Arrow kernel: a kernel sees
-#' one batch at a time and would collect each batch separately.
+#' preserve length, and it has no Arrow kernel: a kernel sees one batch at a
+#' time and would collect each batch separately.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @param sizes the rows in each group, in order, or `NULL` for one group
@@ -223,7 +224,7 @@ ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate,
 #' grouped <- ga_collect_agg(pts, sizes = rep(20, 5))
 #' as.vector(ga_unsigned_area(ga_convex_hull(grouped)))
 #'
-#' # grouped by an unsorted key, no arrange() needed first
+#' # group by an unsorted key, without an arrange() first
 #' key <- rep(c("north", "south"), length.out = pts$length)
 #' by_key <- ga_collect_agg(pts, by = key)
 #' vctrs::vec_unique(key)
@@ -245,7 +246,7 @@ ga_collect_agg <- function(geometry, sizes = NULL, by = NULL) .Call(wrap__ga_col
 #' fp <- system.file("shape/nc.shp", package = "sf")
 #' nc <- as.data.frame(read_shapefile(fp))
 #'
-#' # nc rings wind clockwise, so the signed area is negative
+#' # ga_signed_area() returns negative values for nc, whose rings wind clockwise
 #' head(as.vector(ga_signed_area(nc$geometry)))
 #' head(as.vector(ga_unsigned_area(nc$geometry)))
 ga_signed_area <- function(x) .Call(wrap__ga_signed_area, x)
@@ -258,7 +259,7 @@ ga_unsigned_area <- function(x) .Call(wrap__ga_unsigned_area, x)
 #' Chamberlain-Duquette spherical area
 #'
 #' These functions use the Chamberlain-Duquette formula, which is suitable for
-#' geographic coordinates on a sphere. Results are in square meters.
+#' geographic coordinates on a sphere. They return area in square meters.
 #'
 #' @param x a GeoArrow geometry array
 #' @returns a double vector of area values in square meters
@@ -283,15 +284,15 @@ ga_unsigned_area_cd <- function(x) .Call(wrap__ga_unsigned_area_cd, x)
 #' Geodesic area and perimeter
 #'
 #' These functions use the geodesic formula for computing area and perimeter on
-#' an ellipsoidal model of the earth. Results are in square meters for area and
-#' meters for perimeter.
+#' an ellipsoidal model of the earth. They return area in square meters and
+#' perimeter in meters.
 #'
 #' @details
-#' `geo` assumes Simple Features winding, so an exterior ring must run
-#' counter-clockwise. A clockwise ring names the rest of the earth instead,
-#' and `ga_unsigned_area_geodesic()` returns a value near 5.1e14. Shapefiles
-#' wind clockwise, so orient with [ga_orient()] first or read the sign off
-#' `ga_signed_area_geodesic()`, which is unaffected.
+#' `geo` assumes Simple Features winding, so it expects an exterior ring to run
+#' counter-clockwise. `ga_unsigned_area_geodesic()` reads a clockwise ring as
+#' the rest of the earth instead and returns a value near 5.1e14. For
+#' shapefiles, which wind clockwise, orient with [ga_orient()] first or read
+#' the sign off `ga_signed_area_geodesic()`, which does not have this problem.
 #'
 #' @param x a GeoArrow geometry array
 #' @returns a double vector of area values in square meters, or perimeter values in meters
@@ -306,7 +307,7 @@ ga_unsigned_area_cd <- function(x) .Call(wrap__ga_unsigned_area_cd, x)
 #' head(as.vector(ga_signed_area_geodesic(nc$geometry)))
 #' head(as.vector(ga_perimeter_geodesic(nc$geometry)))
 #'
-#' # nc winds clockwise, so orient before taking the unsigned area
+#' # orient nc, which winds clockwise, before taking the unsigned area
 #' ccw <- ga_orient(nc$geometry, "default")
 #' head(as.vector(ga_unsigned_area_geodesic(ccw)))
 ga_signed_area_geodesic <- function(x) .Call(wrap__ga_signed_area_geodesic, x)
@@ -321,7 +322,6 @@ ga_unsigned_area_geodesic <- function(x) .Call(wrap__ga_unsigned_area_geodesic, 
 #' @family area
 ga_perimeter_geodesic <- function(x) .Call(wrap__ga_perimeter_geodesic, x)
 
-#' Compute pairwise distances between points
 #' Planar perimeter of polygons
 #'
 #' Sums the length of every ring, including interior rings, in the units of the
@@ -345,15 +345,17 @@ ga_perimeter_geodesic <- function(x) .Call(wrap__ga_perimeter_geodesic, x)
 #' as.vector(ga_perimeter_euclidean(sq))
 ga_perimeter_euclidean <- function(x) .Call(wrap__ga_perimeter_euclidean, x)
 
+#' Compute pairwise distances between points
 #'
 #' Calculate the distance between each pair of geometries in `origin` and
-#' `dest`. These functions differ in the metric space used for the calculation.
+#' `dest`. These functions differ in the metric space they use for the
+#' calculation.
 #'
 #' @details
 #' `ga_dist_euclidean_pairwise()` measures between geometries of any type, so
-#' the distance from a point to the nearest edge of a polygon is one call. The
-#' spherical and ellipsoidal metrics take points only, because `geo` defines
-#' them between points alone.
+#' you can get the distance from a point to the nearest edge of a polygon in
+#' one call. The spherical and ellipsoidal functions take points only, because
+#' `geo` defines those metrics between points alone.
 #'
 #' @param origin a GeoArrow geometry array for `ga_dist_euclidean_pairwise()`,
 #'   a point array for the others
@@ -462,20 +464,20 @@ ga_dist_frechet_pairwise <- function(origin, dest) .Call(wrap__ga_dist_frechet_p
 #' lockstep, giving one list of `length(y)` distances per row of `x`.
 #'
 #' @details
-#' This is the shape [ga_dist_euclidean_pairwise()] cannot express, and it
-#' costs `length(x) * length(y)` distances to hold: ten thousand rows against
-#' ten thousand is a hundred million doubles, or eight hundred megabytes. Where
-#' the distances are only wanted to pick a nearest row or a threshold,
-#' [ga_sparse_knn()] and [ga_sparse_dwithin()] answer that against an R-tree
-#' without ever forming the product.
+#' `ga_cross_distance()` returns the shape [ga_dist_euclidean_pairwise()]
+#' cannot express, at the cost of holding `length(x) * length(y)` distances:
+#' ten thousand rows against ten thousand is a hundred million doubles, or
+#' eight hundred megabytes. Where you only want the distances to pick a
+#' nearest row or a threshold, [ga_sparse_knn()] and [ga_sparse_dwithin()]
+#' answer that against an R-tree without ever forming the product.
 #'
-#' `"euclidean"` measures between geometries of any type. The spherical and
-#' ellipsoidal metrics take points only, because `geo` defines them between
-#' points alone. `"vincenty"` gives a null where the algorithm fails to
-#' converge.
+#' With `"euclidean"`, `ga_cross_distance()` measures between geometries of
+#' any type. It takes points only for the spherical and ellipsoidal metrics,
+#' because `geo` defines them between points alone. With `"vincenty"`, it
+#' returns a null where the algorithm fails to converge.
 #'
-#' A null row of `x` gives a null element. A null row of `y` gives a null in
-#' that position of every element.
+#' `ga_cross_distance()` returns a null element for a null row of `x`. For a
+#' null row of `y`, it returns a null in that position of every element.
 #'
 #' @param x a GeoArrow geometry array for `metric = "euclidean"`, a point array
 #'   for the others
@@ -497,14 +499,14 @@ ga_cross_distance <- function(x, y, metric = "euclidean") .Call(wrap__ga_cross_d
 #' Collect a geometry's coordinates as points
 #'
 #' Returns one multipoint per input geometry, holding that geometry's
-#' vertices in order. The output has the same length as the input.
+#' vertices in order. Each function keeps the input's length.
 #'
 #' @details
 #' `ga_exterior_coords()` skips the interior rings of a polygon, so it gives the
-#' outline only. Both preserve the order the coordinates are stored in, so a
-#' closed ring repeats its first vertex at the end.
+#' outline only. Both preserve the coordinates' storage order, so they keep a
+#' closed ring's repeated first vertex at the end.
 #'
-#' A null geometry stays null.
+#' Each function returns null for a null geometry.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns a GeoArrow multipoint array of the same length as `geometry`
@@ -530,8 +532,9 @@ ga_exterior_coords <- function(geometry) .Call(wrap__ga_exterior_coords, geometr
 #' Returns how many vertices each geometry holds.
 #'
 #' @details
-#' Counts every coordinate that [ga_coords()] would return, so a closed ring
-#' counts its repeated final vertex. A null geometry gives `NA`.
+#' Counts every coordinate that [ga_coords()] would return, so it counts the
+#' repeated final vertex of a closed ring. `ga_n_coords()` returns `NA` for a
+#' null geometry.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns an integer array of the same length as `geometry`
@@ -548,12 +551,12 @@ ga_n_coords <- function(geometry) .Call(wrap__ga_n_coords, geometry)
 #' Split geometries into their line segments
 #'
 #' Returns one multilinestring per input geometry, whose parts are that
-#' geometry's two point segments. The output has the same length as the input.
+#' geometry's two point segments. `ga_lines()` keeps the input's length.
 #'
 #' @details
-#' A polygon contributes the segments of every ring, interior rings included.
-#' A point has no segments and becomes a null element, as does a null
-#' geometry.
+#' For a polygon, `ga_lines()` returns the segments of every ring, including
+#' interior rings. It returns a null element for a point, which has no
+#' segments, and for a null geometry.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns a GeoArrow multilinestring array of the same length as `geometry`
@@ -569,12 +572,13 @@ ga_lines <- function(geometry) .Call(wrap__ga_lines, geometry)
 
 #' Read the x or y of a point
 #'
-#' Returns one coordinate per row. Any geometry that is not a single point, and
-#' any null or empty point, gives `NA`.
+#' Returns one coordinate per row. Each function returns `NA` for any geometry
+#' that is not a single point, and for any null or empty point.
 #'
 #' @details
-#' Both coordinate encodings work, so a point array stored as a struct of two
-#' double columns and one stored as interleaved values read the same.
+#' Both functions accept either coordinate encoding and return the same values
+#' whether the point array holds a struct of two double columns or interleaved
+#' values.
 #'
 #' Use [ga_coords()] for the vertices of a line or polygon, which returns a
 #' multipoint per row rather than a single number.
@@ -644,7 +648,8 @@ ga_length_rhumb <- function(x) .Call(wrap__ga_length_rhumb, x)
 #'
 #' Calculates the geodesic length of each linestring or multilinestring using
 #' the Vincenty formula on an ellipsoidal model of the earth. Returns `NA`
-#' if the algorithm fails to converge. Results are in meters.
+#' if the algorithm fails to converge. `ga_length_vincenty()` returns lengths
+#' in meters.
 #'
 #' @param x a GeoArrow linestring or multilinestring array
 #' @returns a double vector of length values in meters
@@ -657,8 +662,8 @@ ga_length_vincenty <- function(x) .Call(wrap__ga_length_vincenty, x)
 #' Compute the bearing between pairs of points
 #'
 #' Calculate the bearing in degrees from `origin` to `dest` for each pair of
-#' points. Bearing is measured clockwise from north (0 degrees) to 360 degrees.
-#' These functions differ in the metric space used for the calculation.
+#' points. These functions measure bearing clockwise from north (0 degrees) to
+#' 360 degrees. They differ in the metric space they use for the calculation.
 #'
 #' @param origin a GeoArrow point array of origin points
 #' @param dest a GeoArrow point array; length 1 or the same length as `origin`
@@ -699,7 +704,7 @@ ga_bearing_rhumb <- function(origin, dest) .Call(wrap__ga_bearing_rhumb, origin,
 
 #' Destination from origin, bearing, distance
 #'
-#' Returns the point reached by travelling `distance` from `origin` along
+#' Returns the point you reach by travelling `distance` from `origin` along
 #' `bearing`. Each function uses a different metric space: `dest_euclidean`
 #' treats coordinates as planar, `dest_haversine` assumes a sphere,
 #' `dest_geodesic` an ellipsoid, and `dest_rhumb` follows a line of constant
@@ -741,10 +746,10 @@ ga_dest_geodesic <- function(origin, bearing, distance) .Call(wrap__ga_dest_geod
 #' instead, treating coordinates as longitude and latitude in degrees.
 #'
 #' @details
-#' When the point lies on the geometry the intersection itself is returned.
-#' A geometry with no single nearest position, such as a point equidistant
-#' from both ends of a symmetric line, becomes a null element, as does a null
-#' geometry or a null point.
+#' When the point lies on the geometry, each function returns the intersection
+#' itself. These functions return a null element for a geometry with no single
+#' nearest position, such as a point equidistant from both ends of a symmetric
+#' line, and for a null geometry or a null point.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @param point a GeoArrow point array; length 1 or the same length as `geometry`
@@ -770,13 +775,13 @@ ga_closest_point_haversine <- function(geometry, point) .Call(wrap__ga_closest_p
 
 #' Compute a representative point inside a geometry
 #'
-#' Returns a point guaranteed to lie on the geometry, unlike [ga_centroid()],
-#' which can fall outside a concave shape.
+#' Returns a point that always lies on the geometry, unlike [ga_centroid()],
+#' which can return a point outside a concave shape.
 #'
 #' @details
-#' For a polygon this is a point on the interior, chosen from the horizontal
-#' line closest to the centroid. An empty or null geometry becomes a null
-#' element.
+#' For a polygon, `ga_interior_point()` picks a point on the interior from the
+#' horizontal line closest to the centroid. It returns a null element for an
+#' empty or null geometry.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns a GeoArrow point array of the same length as `geometry`
@@ -793,14 +798,15 @@ ga_interior_point <- function(geometry) .Call(wrap__ga_interior_point, geometry)
 
 #' Test whether a ring is convex
 #'
-#' `TRUE` when the geometry's ring turns consistently in one direction. A
-#' polygon is judged on its exterior ring.
+#' `TRUE` when the geometry's ring turns consistently in one direction.
+#' `ga_is_convex()` judges a polygon on its exterior ring.
 #'
 #' @details
-#' A linestring must be closed, that is form a ring, to be reported convex; an
-#' open one is `FALSE`. A polygon's exterior ring is always closed, so polygons
-#' need no special handling. Any other geometry type, or a null geometry,
-#' becomes `NA` rather than `FALSE`.
+#' `ga_is_convex()` reports a linestring as convex only when it is closed, that
+#' is forms a ring, and returns `FALSE` for an open one. A polygon's exterior
+#' ring is always closed, so `ga_is_convex()` needs no special case for them.
+#' `ga_is_convex()` returns `NA` rather than `FALSE` for any other geometry
+#' type or a null geometry.
 #'
 #' @param geometry a GeoArrow linestring or polygon array
 #' @returns a boolean array of the same length as `geometry`
@@ -822,10 +828,10 @@ ga_is_convex <- function(geometry) .Call(wrap__ga_is_convex, geometry)
 #' point lies, as a fraction between 0 and 1.
 #'
 #' @details
-#' 0 is the start of the line and 1 its end, so the value multiplied by the
-#' line's length gives a distance. Only lines and linestrings can be located
-#' along; any other geometry type, a null geometry, a null point, or a
-#' zero length line becomes `NA`.
+#' 0 is the start of the line and 1 its end, so you can multiply the value by
+#' the line's length to get a distance. `ga_line_locate_point()` locates along
+#' lines and linestrings only, and returns `NA` for any other geometry type, a
+#' null geometry, a null point, or a zero length line.
 #'
 #' @param geometry a GeoArrow linestring array
 #' @param point a GeoArrow point array; length 1 or the same length as `geometry`
@@ -858,7 +864,7 @@ ga_line_locate_point <- function(geometry, point) .Call(wrap__ga_line_locate_poi
 #' fp <- system.file("shape/nc.shp", package = "sf")
 #' nc <- as.data.frame(read_shapefile(fp))
 #'
-#' # a bigger epsilon drops more vertices
+#' # ga_simplify() drops more vertices with a bigger epsilon
 #' head(as.vector(ga_n_coords(nc$geometry)), 3)
 #' head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.01))), 3)
 #' head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.1))), 3)
@@ -903,20 +909,21 @@ ga_simplify_vw_preserve <- function(geometry, epsilon) .Call(wrap__ga_simplify_v
 
 #' Find which coordinates simplification would keep
 #'
-#' Returns the positions of the coordinates that survive simplification,
+#' Returns the positions of the coordinates that simplification would keep,
 #' rather than the simplified geometry itself. One list per input geometry.
 #'
 #' @details
 #' Use these when the coordinates carry data of their own, such as a timestamp
-#' or a sensor reading per vertex. Simplifying the geometry discards that
-#' alignment; the indices let you subset the other columns the same way.
+#' or a sensor reading per vertex. If you simplify the geometry you lose that
+#' alignment; with the indices you can subset the other columns the same way.
 #'
 #' `ga_simplify_idx()` uses Ramer-Douglas-Peucker and `ga_simplify_vw_idx()` uses
-#' Visvalingam-Whyatt, matching [ga_simplify()] and [ga_simplify_vw()]. Indices are
-#' 1 based and always include the first and last coordinate.
+#' Visvalingam-Whyatt, matching [ga_simplify()] and [ga_simplify_vw()]. Each
+#' function returns 1 based indices and always includes the first and last
+#' coordinate.
 #'
-#' Only linestrings can be simplified this way. Any other geometry type, or a
-#' null geometry, comes back null.
+#' Each function works on linestrings only and returns null for any other
+#' geometry type or a null geometry.
 #'
 #' @param geometry a GeoArrow linestring array
 #' @param epsilon the simplification tolerance; length 1 or the same length as
@@ -947,18 +954,18 @@ ga_simplify_vw_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_vw_idx
 #' shape [ga_join()] needs.
 #'
 #' @details
-#' The comparison is not the full cross product. `y` is indexed in a packed
-#' Hilbert R-tree and only the rows whose bounding box overlaps are relate
-#' tested, so the cost scales with the number of candidates rather than with
-#' `length(x) * length(y)`.
+#' These functions do not compare the full cross product. Each function indexes
+#' `y` in a packed Hilbert R-tree and runs the relate test only on the rows
+#' whose bounding boxes overlap, so the cost scales with the number of
+#' candidates rather than with `length(x) * length(y)`.
 #'
-#' A row of `x` that matches nothing gives a zero length element, not a null. A
-#' null or empty geometry in `x` gives a null element, and one in `y` is never
-#' returned.
+#' Each function returns a zero length element, not a null, for a row of `x`
+#' that matches nothing. It returns a null element for a null or empty geometry
+#' in `x`, and never returns one in `y`.
 #'
-#' [ga_disjoint()] has no sparse form. Disjointness is the one relationship a
-#' bounding box cannot narrow, so the answer is almost every row of `y` and the
-#' result is denser than the input.
+#' [ga_disjoint()] has no sparse form. Disjointness is the one relationship you
+#' cannot narrow with a bounding box, so the answer is almost every row of `y`
+#' and the result is denser than the input.
 #'
 #' @param x a GeoArrow geometry array
 #' @param y a GeoArrow geometry array
@@ -1040,14 +1047,14 @@ ga_sparse_knn_impl <- function(x, y, k, max_distance, metric) .Call(wrap__ga_spa
 #' database returns a spatial join in.
 #'
 #' @details
-#' Everything but the padding is expressible with Arrow's own `list_flatten()`
-#' and `list_parent_indices()`. What they cannot do is `left = TRUE`, which has
-#' to put back a row for each row of `x` that matched nothing, so the whole
-#' expansion happens here rather than half here and half in R.
+#' You can express everything but the padding with Arrow's own `list_flatten()`
+#' and `list_parent_indices()`. What they cannot do is `left = TRUE`, where
+#' `ga_sparse_pairs()` has to put back a row for each row of `x` that matched
+#' nothing, so it does the whole expansion itself rather than leaving half to R.
 #'
-#' Rows are 1 based, matching what the sparse predicates return. A row of `x`
-#' that matched nothing appears once with a null `y` when `left = TRUE`, and
-#' not at all otherwise.
+#' `ga_sparse_pairs()` numbers rows from 1, matching what the sparse predicates
+#' return. It returns a row of `x` that matched nothing once with a null `y`
+#' when `left = TRUE`, and drops it otherwise.
 #'
 #' @param hits a list array from one of the sparse predicates
 #' @param left whether to keep the rows of `x` that matched nothing
@@ -1058,15 +1065,16 @@ ga_sparse_knn_impl <- function(x, y, k, max_distance, metric) .Call(wrap__ga_spa
 #' x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
 #' y <- ga_xy(c(0, 1), c(0, 1))
 #'
-#' # the middle row of x matches nothing, so it is only there with left = TRUE
+#' # the middle row of x matches nothing, so you see it only with left = TRUE
 #' ga_sparse_pairs(ga_sparse_intersects(x, y))
 #' ga_sparse_pairs(ga_sparse_intersects(x, y), left = TRUE)
 ga_sparse_pairs <- function(hits, left = FALSE) .Call(wrap__ga_sparse_pairs, hits, left)
 
 #' Set the thread cap, from `options(geoarrowrs.thread_pool = )`
 #'
-#' Called on load and whenever the option changes. `0` returns the parallel
-#' paths to rayon's own default, which is one thread per core.
+#' geoarrowrs calls `ga_set_thread_pool()` on load and whenever you change the
+#' option. With `0`, it returns the parallel paths to rayon's own default, which
+#' is one thread per core.
 #'
 #' @param n the most threads to use, or `0` for rayon's default
 #' @returns `n`, invisibly
@@ -1083,7 +1091,7 @@ ga_set_thread_pool <- function(n) .Call(wrap__ga_set_thread_pool, n)
 #' Test a topological relationship
 #'
 #' Each function compares `x` and `y` row by row and returns `TRUE` when the
-#' named DE-9IM relationship holds. `y` is recycled against `x`.
+#' named DE-9IM relationship holds. These functions recycle `y` against `x`.
 #'
 #' @details
 #' `ga_contains()` is `TRUE` when no point of `y` lies outside `x` and at least
@@ -1098,9 +1106,10 @@ ga_set_thread_pool <- function(n) .Call(wrap__ga_set_thread_pool, n)
 #' interior point, `ga_crosses()` when their interiors meet in a lower dimension
 #' than at least one of them, and `ga_overlaps()` when they meet in the same
 #' dimension as both. `ga_equals_topo()` compares point sets rather than
-#' coordinate order, so two geometries wound differently are still equal.
+#' coordinate order, so it still treats two geometries with different windings
+#' as equal.
 #'
-#' A null geometry on either side gives `NA`.
+#' Each function returns `NA` for a null geometry on either side.
 #'
 #' @param x a GeoArrow geometry array
 #' @param y a GeoArrow geometry array; length 1 or the same length as `x`
@@ -1173,13 +1182,13 @@ ga_equals_topo <- function(x, y) .Call(wrap__ga_equals_topo, x, y)
 #' DE-9IM relationship between geometries
 #'
 #' Returns the nine character DE-9IM matrix describing how each pair of
-#' geometries relates, from which every named predicate can be derived.
+#' geometries relates, from which you can derive every named predicate.
 #'
 #' @details
-#' The string reads as the intersections of the interior, boundary and
-#' exterior of `x` with those of `y`, in that order. Each character is the
-#' dimension of that intersection: `F` for empty, `0` for a point, `1` for a
-#' curve, and `2` for a surface. A null geometry on either side gives `NA`.
+#' Read the string as the intersections of the interior, boundary and exterior
+#' of `x` with those of `y`, in that order. Each character is the dimension of
+#' that intersection: `F` for empty, `0` for a point, `1` for a curve, and `2`
+#' for a surface. `ga_relate()` returns `NA` for a null geometry on either side.
 #'
 #' @inheritParams ga_contains
 #' @returns a string array of the same length as `x`
@@ -1196,15 +1205,6 @@ ga_equals_topo <- function(x, y) .Call(wrap__ga_equals_topo, x, y)
 #' as.vector(ga_relate(x, y))
 ga_relate <- function(x, y) .Call(wrap__ga_relate, x, y)
 
-#' Determine the topological dimension of geometries
-#'
-#' Returns 0 for points, 1 for lines and curves, and 2 for surfaces.
-#'
-#' @details
-#' An empty geometry has no dimension and gives `NA`, which is distinct from a
-#' point's 0. `ga_boundary_dimension()` gives the dimension of the geometry's
-#' boundary instead, so a polygon is 1 and a point is `NA`.
-#'
 #' Test whether geometries are identical within a tolerance
 #'
 #' `TRUE` when `x` and `y` have the same type and structure and every
@@ -1236,6 +1236,16 @@ ga_relate <- function(x, y) .Call(wrap__ga_relate, x, y)
 #' as.vector(ga_equals_exact(x, y, 0.1))
 ga_equals_exact <- function(x, y, tolerance = 0) .Call(wrap__ga_equals_exact, x, y, tolerance)
 
+#' Determine the topological dimension of geometries
+#'
+#' Returns 0 for points, 1 for lines and curves, and 2 for surfaces.
+#'
+#' @details
+#' `ga_dimension()` returns `NA` for an empty geometry, which has no dimension,
+#' rather than a point's 0. `ga_boundary_dimension()` gives the dimension of
+#' the geometry's boundary instead, so it returns 1 for a polygon and `NA` for
+#' a point.
+#'
 #' @param geometry a GeoArrow geometry array
 #' @returns an integer array of the same length as `geometry`
 #' @export
@@ -1261,7 +1271,8 @@ ga_boundary_dimension <- function(geometry) .Call(wrap__ga_boundary_dimension, g
 #' `TRUE` when the geometry holds no coordinates.
 #'
 #' @details
-#' An empty geometry is distinct from a null one. A null geometry gives `NA`.
+#' An empty geometry is distinct from a null one. `ga_is_empty()` returns `NA`
+#' for a null geometry.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns a boolean array of the same length as `geometry`
@@ -1283,8 +1294,9 @@ ga_is_empty <- function(geometry) .Call(wrap__ga_is_empty, geometry)
 #'
 #' @details
 #' This is the three way form of a point in polygon test, distinguishing a
-#' point that lies exactly on an edge from one strictly inside. `point` is
-#' recycled against `geometry`. A null geometry or a null point gives `NA`.
+#' point that lies exactly on an edge from one strictly inside.
+#' `ga_coordinate_position()` recycles `point` against `geometry` and returns
+#' `NA` for a null geometry or a null point.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @param point a GeoArrow point array; length 1 or the same length as `geometry`
@@ -1305,14 +1317,14 @@ ga_coordinate_position <- function(geometry, point) .Call(wrap__ga_coordinate_po
 #' Triangulate polygons with the earcut algorithm
 #'
 #' Returns one multipolygon per input geometry, whose parts are that
-#' geometry's triangles. The output has the same length as the input, so a
-#' triangulated geometry stays aligned with the row it came from.
+#' geometry's triangles. `ga_triangulate_earcut()` preserves the input's length,
+#' so it keeps each triangulated geometry aligned with the row it came from.
 #'
 #' @details
-#' Earcut is defined for polygons only. A multipolygon is triangulated part by
-#' part and the triangles are merged into a single multipolygon. Any other
-#' geometry type, a null geometry, or a polygon that cannot be triangulated
-#' becomes a null element.
+#' Earcut handles polygons only. `ga_triangulate_earcut()` triangulates a
+#' multipolygon part by part and merges the triangles into a single
+#' multipolygon. It returns a null element for any other geometry type, a null
+#' geometry, or a polygon it cannot triangulate.
 #'
 #' Earcut is fast and respects interior rings, but the triangles it produces
 #' are not Delaunay. Use [ga_triangulate_delaunay()] when triangle quality
@@ -1327,7 +1339,7 @@ ga_coordinate_position <- function(geometry, point) .Call(wrap__ga_coordinate_po
 #' fp <- system.file("shape/nc.shp", package = "sf")
 #' nc <- as.data.frame(read_shapefile(fp))
 #'
-#' # one multipolygon of triangles per county, so length is preserved
+#' # one multipolygon of triangles per county, so you keep the input's length
 #' tri <- ga_triangulate_earcut(nc$geometry)
 #' tri$length
 #' head(as.vector(ga_n_coords(tri)), 3)
@@ -1336,23 +1348,23 @@ ga_triangulate_earcut <- function(x) .Call(wrap__ga_triangulate_earcut, x)
 #' Delaunay triangulation
 #'
 #' Returns one multipolygon per input geometry, whose parts are that
-#' geometry's triangles. The output has the same length as the input.
+#' geometry's triangles. `ga_triangulate_delaunay()` preserves the input's
+#' length.
 #'
 #' @details
-#' A constrained triangulation keeps the input's edges and returns only the
-#' triangles that fall inside the geometry. An unconstrained triangulation
-#' triangulates the convex hull of the input's vertices, ignoring its edges,
-#' so it may cross holes and concavities.
+#' With `constrained = TRUE`, `ga_triangulate_delaunay()` keeps the input's
+#' edges and returns only the triangles that fall inside the geometry. With
+#' `constrained = FALSE`, it triangulates the convex hull of the input's
+#' vertices, ignoring the edges, so the triangles may cross holes and
+#' concavities.
 #'
-#' A null geometry, or one that cannot be triangulated, becomes a null
-#' element.
+#' It returns a null element for a null geometry or one it cannot triangulate.
 #'
 #' @param x a GeoArrow geometry array
 #' @param constrained whether to constrain the triangulation to the input's
 #'   edges. `TRUE` by default
-#' @param snap_radius coordinates closer together than this are snapped to the
-#'   same position; length 1 or the same length as `x`. `geo` uses 1e-4 by
-#'   default
+#' @param snap_radius the distance below which to snap coordinates to the same
+#'   position; length 1 or the same length as `x`. `geo` uses 1e-4 by default
 #' @returns a GeoArrow multipolygon array of the same length as `x`
 #' @export
 #' @family triangulate
@@ -1361,11 +1373,11 @@ ga_triangulate_earcut <- function(x) .Call(wrap__ga_triangulate_earcut, x)
 #' fp <- system.file("shape/nc.shp", package = "sf")
 #' nc <- as.data.frame(read_shapefile(fp))
 #'
-#' # constrained keeps the triangles inside the county boundary
+#' # with constrained = TRUE you get only triangles inside the county boundary
 #' tri <- ga_triangulate_delaunay(nc$geometry)
 #' tri$length
 #'
-#' # unconstrained fills the convex hull instead, so it covers more
+#' # set constrained = FALSE to fill the convex hull instead, which covers more
 #' hull <- ga_triangulate_delaunay(nc$geometry, constrained = FALSE)
 #' head(as.vector(ga_unsigned_area(tri)), 3)
 #' head(as.vector(ga_unsigned_area(hull)), 3)
@@ -1374,8 +1386,8 @@ ga_triangulate_delaunay <- function(x, constrained = TRUE, snap_radius = 1e-4) .
 #' Buffer geometries by a given distance
 #'
 #' Expands each geometry outward by `distance` to produce a multipolygon.
-#' Line cap and join styles control the shape of the buffer at endpoints and
-#' corners.
+#' `ga_buffer()` uses the line cap and join styles to shape the buffer at
+#' endpoints and corners.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @param distance a numeric vector of buffer distances; length 1 or the same length as `geometry`
@@ -1392,10 +1404,11 @@ ga_triangulate_delaunay <- function(x, constrained = TRUE, snap_radius = 1e-4) .
 #'   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 #' ))
 #'
-#' # the 2x2 square grows by 8 along its sides plus a unit circle at the corners
+#' # ga_buffer() grows the 2x2 square by 8 along its sides plus a unit circle
+#' # at the corners
 #' as.vector(ga_unsigned_area(ga_buffer(sq, 1)))
 #'
-#' # a smaller angular step rounds the corners more finely
+#' # with a smaller angular step, ga_buffer() rounds the corners more finely
 #' as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.01)))
 #'
 #' # square corners instead
@@ -1435,7 +1448,7 @@ ga_centroid <- function(x) .Call(wrap__ga_centroid, x)
 #'   sf::st_linestring(rbind(c(0, 0), c(1, 2), c(2, 0), c(3, 2)))
 #' ))
 #'
-#' # each iteration cuts every corner, so the vertex count grows
+#' # each iteration cuts every corner, raising the vertex count
 #' as.vector(ga_n_coords(zigzag))
 #' as.vector(ga_n_coords(ga_chaikin_smoothing(zigzag, 2)))
 #'
@@ -1453,7 +1466,7 @@ ga_chaikin_smoothing <- function(geometry, n_iterations) .Call(wrap__ga_chaikin_
 #' @family misc
 #' @references [RemoveRepeatedPoints](https://docs.rs/geo/latest/geo/algorithm/remove_repeated_points/trait.RemoveRepeatedPoints.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' # the middle vertex is recorded twice
+#' # record the middle vertex twice
 #' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
 #'   sf::st_linestring(rbind(c(0, 0), c(1, 1), c(1, 1), c(2, 2)))
 #' ))
@@ -1465,7 +1478,7 @@ ga_remove_repeated_points <- function(geometry) .Call(wrap__ga_remove_repeated_p
 #' Split linestrings into equal segments
 #'
 #' Divides each linestring into `segment_count` segments of equal length,
-#' returning a multilinestring. Returns `NA` if segmentation fails.
+#' returning a multilinestring. Returns `NA` for a linestring it cannot segment.
 #' `ga_line_segmentize_haversine()` uses the Haversine formula for geographic
 #' coordinates; `ga_line_segmentize()` uses planar Euclidean distance.
 #'
@@ -1494,15 +1507,15 @@ ga_line_segmentize_haversine <- function(geometry, segment_count) .Call(wrap__ga
 #' Combine two polygon arrays with a set operation
 #'
 #' Each function pairs `x` with `y` row by row and returns the polygonal
-#' result. `y` is recycled against `x`.
+#' result. Each function recycles `y` against `x`.
 #'
 #' @details
 #' `ga_boolean_intersection()` keeps the area in both, `ga_boolean_union()` the area
 #' in either, `ga_boolean_difference()` the area in `x` but not `y`, and
 #' `ga_boolean_xor()` the area in exactly one of them.
 #'
-#' These are defined for polygons and multipolygons only. A row whose geometry
-#' is any other type, or is null, comes back null. The result is always a
+#' These functions operate on polygons and multipolygons only. They return null
+#' for a row whose geometry is any other type, or is null. They always return a
 #' multipolygon, since a set operation can split one polygon into several or
 #' erase it entirely.
 #'
@@ -1522,7 +1535,7 @@ ga_line_segmentize_haversine <- function(geometry, segment_count) .Call(wrap__ga
 #'   sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
 #' ))
 #'
-#' # two 2x2 squares offset by 1, so the overlap is a 1x1 square
+#' # ga_boolean_intersection() returns the 1x1 overlap of two offset 2x2 squares
 #' as.vector(ga_unsigned_area(ga_boolean_intersection(x, y)))
 ga_boolean_intersection <- function(x, y) .Call(wrap__ga_boolean_intersection, x, y)
 
@@ -1547,13 +1560,13 @@ ga_boolean_xor <- function(x, y) .Call(wrap__ga_boolean_xor, x, y)
 #' boundaries between any that touch or overlap.
 #'
 #' @details
-#' This is the one function in the package that is not length-preserving. It
-#' is an aggregate over the whole array, so it always returns a length 1
-#' array, in the way `sum()` reduces a vector to a single value.
+#' Unlike most functions in the package, `ga_unary_union()` does not preserve
+#' length. It aggregates over the whole array, so it always returns a length 1
+#' array, the way `sum()` reduces a vector to a single value.
 #'
 #' It is far faster than folding [ga_boolean_union()] across the array, since it
-#' unions all the rings in one pass. Rows that are not polygonal, and null
-#' rows, are skipped.
+#' unions all the rings in one pass. It skips rows that are not polygonal, and
+#' null rows.
 #'
 #' @param x a GeoArrow polygon or multipolygon array
 #' @returns a GeoArrow multipolygon array of length 1
@@ -1585,7 +1598,7 @@ ga_unary_union <- function(x) .Call(wrap__ga_unary_union, x)
 #' fp <- system.file("shape/nc.shp", package = "sf")
 #' nc <- as.data.frame(read_shapefile(fp))
 #'
-#' # free to rotate, so it hugs the county tighter than the envelope
+#' # ga_minimum_rotated_rect() can rotate, so it hugs the county tighter
 #' rot <- ga_minimum_rotated_rect(nc$geometry)
 #' head(as.vector(ga_unsigned_area(rot)), 3)
 #' head(as.vector(ga_unsigned_area(ga_envelope(nc$geometry))), 3)
@@ -1604,23 +1617,24 @@ ga_minimum_rotated_rect <- function(x) .Call(wrap__ga_minimum_rotated_rect, x)
 #' fp <- system.file("shape/nc.shp", package = "sf")
 #' nc <- as.data.frame(read_shapefile(fp))
 #'
-#' # the hull fills in every concavity, so it is never smaller
+#' # ga_convex_hull() fills in every concavity, so it never shrinks a shape
 #' head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
 #' head(as.vector(ga_unsigned_area(nc$geometry)), 3)
 ga_convex_hull <- function(x) .Call(wrap__ga_convex_hull, x)
 
 #' Compute the concave hull of geometries
 #'
-#' Returns a polygon enclosing each geometry, tightened toward the geometry's
-#' own shape. Smaller `concavity` values produce a tighter, more concave hull;
-#' larger values approach the convex hull.
+#' Returns a polygon enclosing each geometry, and tightens that polygon toward
+#' the geometry's own shape. With smaller `concavity` values, `ga_concave_hull()`
+#' produces a tighter, more concave hull; with larger values, it approaches the
+#' convex hull.
 #'
 #' Accepts multipoints, linestrings, multilinestrings, polygons, and
 #' multipolygons. `geo` does not define a concave hull for a single point.
 #'
 #' @param geometry a GeoArrow multipoint, linestring, multilinestring, polygon, or multipolygon array
 #' @param concavity the concavity coefficient; length 1 or the same length as `geometry`. `geo` uses 2 by default
-#' @param length_threshold edges shorter than this are not considered for further refinement; length 1 or the same length as `geometry`. `geo` uses 0 by default
+#' @param length_threshold the length below which `ga_concave_hull()` stops refining an edge; length 1 or the same length as `geometry`. `geo` uses 0 by default
 #' @returns a GeoArrow polygon array
 #' @export
 #' @family boundary
@@ -1629,7 +1643,7 @@ ga_convex_hull <- function(x) .Call(wrap__ga_convex_hull, x)
 #' fp <- system.file("shape/nc.shp", package = "sf")
 #' nc <- as.data.frame(read_shapefile(fp))
 #'
-#' # lower concavity tightens the hull onto the shape
+#' # with lower concavity, ga_concave_hull() tightens the hull onto the shape
 #' loose <- ga_concave_hull(nc$geometry, concavity = 2, length_threshold = 0)
 #' tight <- ga_concave_hull(nc$geometry, concavity = 0.5, length_threshold = 0)
 #'
@@ -1639,10 +1653,10 @@ ga_concave_hull <- function(geometry, concavity, length_threshold) .Call(wrap__g
 
 #' Compute the extreme coordinates of geometries
 #'
-#' Returns a struct array with four point fields -- `x_min`, `x_max`, `y_min`
-#' and `y_max` -- giving the coordinate that is furthest in each direction. The
-#' result has one row per input geometry; a null or empty geometry yields a row
-#' of four nulls.
+#' Returns a struct array with four point fields, `x_min`, `x_max`, `y_min`
+#' and `y_max`, holding the coordinate that is furthest in each direction.
+#' `ga_extremes()` returns one row per input geometry, and a row of four nulls
+#' for a null or empty geometry.
 #'
 #' Note these are the extreme *coordinates*, not the corners of the bounding
 #' box: `ga_extremes()` gives the `x_min` point the y value of whichever vertex
@@ -1667,7 +1681,7 @@ ga_extremes <- function(x) .Call(wrap__ga_extremes, x)
 #' holds.
 #'
 #' @details
-#' Some casts always succeed:
+#' `ga_cast_geometry()` always succeeds for these casts:
 #'
 #' | from | to |
 #' | --- | --- |
@@ -1676,8 +1690,9 @@ ga_extremes <- function(x) .Call(wrap__ga_extremes, x)
 #' | `polygon` | `multipolygon` |
 #' | any type | `geometry`, `wkb`, `wkt` |
 #'
-#' Others are fallible and error when a geometry does not fit the target type,
-#' such as a `multipoint` holding two points cast to `point`:
+#' Others are fallible, and `ga_cast_geometry()` errors when a geometry does
+#' not fit the target type, such as when you cast a `multipoint` holding two
+#' points to `point`:
 #'
 #' | from | to |
 #' | --- | --- |
@@ -1686,8 +1701,8 @@ ga_extremes <- function(x) .Call(wrap__ga_extremes, x)
 #' | `multipolygon` | `polygon` |
 #' | `geometry` | any concrete type |
 #'
-#' The dimension is carried over from the input, and casting between different
-#' dimensions is not supported.
+#' `ga_cast_geometry()` carries the dimension over from the input and does not
+#' support casting between different dimensions.
 #'
 #' @param x a GeoArrow geometry array
 #' @param to the target type, one of `"point"`, `"linestring"`, `"polygon"`,
@@ -1699,22 +1714,22 @@ ga_extremes <- function(x) .Call(wrap__ga_extremes, x)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' pts <- ga_xy(c(0, 1), c(0, 1))
 #'
-#' # widening always works
+#' # you can always widen
 #' ga_cast_geometry(pts, "multipoint")
 #'
-#' # so does going out to wkb, which is what plain Parquet stores
+#' # and you can always go out to wkb, which is what plain Parquet stores
 #' ga_cast_geometry(pts, "wkb")
 ga_cast_geometry <- function(x, to) .Call(wrap__ga_cast_geometry, x, to)
 
 #' Cast to the narrowest geometry type
 #'
 #' Inspects the geometries and casts to the most specific type that can hold
-#' every one of them. A `geometry` array holding only points becomes a `point`
-#' array; one holding points and polygons is left alone, since no narrower
-#' type fits.
+#' every one of them. `ga_downcast_geometry()` turns a `geometry` array holding
+#' only points into a `point` array, and leaves one holding points and polygons
+#' alone, since no narrower type fits.
 #'
-#' This is the inverse of casting up to `geometry`, and is useful after
-#' reading a format that does not record a single geometry type.
+#' It is the inverse of casting up to `geometry`, and is useful after you read
+#' a format that does not record a single geometry type.
 #'
 #' @param x a GeoArrow geometry array
 #' @returns a GeoArrow array of the narrowest type that fits, the same length as `x`
@@ -1724,29 +1739,31 @@ ga_cast_geometry <- function(x, to) .Call(wrap__ga_cast_geometry, x, to)
 #' pts <- ga_xy(c(0, 1), c(0, 1))
 #' wide <- ga_cast_geometry(pts, "geometry")
 #'
-#' # only points in there, so it narrows back to a point array
+#' # only points in there, so you get a point array back
 #' ga_downcast_geometry(wide)
 ga_downcast_geometry <- function(x) .Call(wrap__ga_downcast_geometry, x)
 
 #' Read well known binary as a GeoArrow array
 #'
 #' Parses a binary column of WKB into the narrowest GeoArrow type that fits
-#' every geometry in it. A column of points becomes a `point` array.
+#' every geometry in it. `ga_from_wkb()` turns a column of points into a
+#' `point` array.
 #'
 #' @details
 #' GeoParquet writers, and plenty of plain Parquet ones, store geometry as a
 #' bare `binary` column with no GeoArrow extension metadata on it. Most
 #' geoarrowrs functions read that directly, but the ones that need a specific
 #' geometry type, such as [ga_dist_euclidean_pairwise()], cannot tell what is
-#' in it. Converting once up front settles the type for everything
+#' in it. If you convert once up front, you settle the type for everything
 #' downstream.
 #'
-#' `crs` is stored verbatim in the array's metadata and is never interpreted,
-#' so nothing here reprojects. Leaving it `NULL` keeps whatever the input
-#' carried, which for a bare binary column is no CRS at all.
+#' `ga_from_wkb()` stores `crs` verbatim in the array's metadata and never
+#' interprets it, so it never reprojects. If you leave it `NULL`,
+#' `ga_from_wkb()` keeps whatever the input carried, which for a bare binary
+#' column is no CRS at all.
 #'
-#' Mixed geometry types are left as a `geometry` array, since no narrower
-#' type fits.
+#' `ga_from_wkb()` leaves mixed geometry types as a `geometry` array, since no
+#' narrower type fits.
 #'
 #' @param x a binary array of WKB, or any GeoArrow array
 #' @param crs a coordinate reference system to record, or `NULL` to keep the
@@ -1767,14 +1784,14 @@ ga_from_wkb <- function(x, crs = NULL) .Call(wrap__ga_from_wkb, x, crs)
 
 #' Cast to one GeoArrow geometry type
 #'
-#' Each of these casts to the single type its name gives. Because the result
+#' Each of these casts to the single type in its name. Because the result
 #' type does not depend on the data, these are the casts Arrow can run inside
 #' a query, which [ga_from_wkb()] cannot.
 #'
 #' @details
 #' Parsing WKB is the expensive part of using a plain Parquet geometry column,
 #' and every function that needs a concrete geometry type pays for it on its
-#' own. Casting once up front means the rest of the query runs on native
+#' own. If you cast once up front, you run the rest of the query on native
 #' GeoArrow instead:
 #'
 #' ```r
@@ -1786,8 +1803,9 @@ ga_from_wkb <- function(x, crs = NULL) .Call(wrap__ga_from_wkb, x, crs)
 #'   )
 #' ```
 #'
-#' The cast is fallible. A geometry that does not fit the target type, such as
-#' a two point multipoint cast to `point`, is an error rather than a null.
+#' The cast is fallible. These functions error, rather than return a null,
+#' when a geometry does not fit the target type, such as when you cast a two
+#' point multipoint to `point`.
 #'
 #' @param x a binary array of WKB, or any GeoArrow array
 #' @returns a GeoArrow array of the named type, the same length as `x`
@@ -1832,11 +1850,11 @@ ga_as_multipolygon <- function(x) .Call(wrap__ga_as_multipolygon, x)
 #' Split multi-part geometries into their parts
 #'
 #' Returns a list the same length as the input, where each element is an array
-#' of that geometry's constituent parts. A multipolygon of three polygons
-#' becomes one element holding a polygon array of length three.
+#' of that geometry's constituent parts. `ga_explode()` turns a multipolygon of
+#' three polygons into one element holding a polygon array of length three.
 #'
 #' @details
-#' The output geometry type is the singular form of the input:
+#' `ga_explode()` returns the singular form of the input geometry type:
 #'
 #' | input | element type |
 #' | --- | --- |
@@ -1844,18 +1862,19 @@ ga_as_multipolygon <- function(x) .Call(wrap__ga_as_multipolygon, x)
 #' | `multilinestring`, `linestring` | `linestring` |
 #' | `multipolygon`, `polygon` | `polygon` |
 #'
-#' The element type is decided by the array's declared type, not by its
-#' contents, so an array of multipolygons that all happen to hold one part
-#' still explodes to polygons. A mixed `geometry` array has no single singular
-#' type and errors; narrow it with [ga_downcast_geometry()] first.
+#' `ga_explode()` decides the element type from the array's declared type, not
+#' from its contents, so it still returns polygons for an array of
+#' multipolygons that all happen to hold one part. `ga_explode()` raises an
+#' error for a mixed `geometry` array, which has no single singular type;
+#' narrow it with [ga_downcast_geometry()] first.
 #'
-#' A singular geometry yields an element of length one, so the operation is
-#' well defined for any input. A null geometry yields a null element, which is
-#' distinct from an empty one.
+#' `ga_explode()` returns an element of length one for a singular geometry, so
+#' it handles any input. For a null geometry, it returns a null element, which
+#' is distinct from an empty one.
 #'
-#' Because the length is preserved, the result lines up with the row it came
-#' from and can sit alongside the other columns of a table. Use [ga_flatten()] to
-#' collapse it into a single array with one row per part.
+#' Because `ga_explode()` preserves length, you can keep the result alongside
+#' the other columns of a table, each element in line with its source row. Use
+#' [ga_flatten()] to collapse it into a single array with one row per part.
 #'
 #' @param x a GeoArrow geometry array
 #' @returns a list array of the same length as `x`, whose elements are GeoArrow arrays
@@ -1874,13 +1893,14 @@ ga_explode <- function(x) .Call(wrap__ga_explode, x)
 #' Collapse a list of geometries into a single array
 #'
 #' The inverse of [ga_explode()]. Concatenates every element's parts into one
-#' array, so a list of `n` elements holding `m` parts in total becomes an
+#' array, turning a list of `n` elements holding `m` parts in total into an
 #' array of length `m`.
 #'
-#' Null elements contribute nothing, so the result is shorter than the input
-#' whenever an element holds more or fewer than one geometry.
+#' `ga_flatten()` adds nothing for null elements, so it returns a different
+#' number of rows than the input whenever an element holds more or fewer than
+#' one geometry.
 #'
-#' @param x a list array of GeoArrow arrays, as returned by [ga_explode()]
+#' @param x a list array of GeoArrow arrays, as [ga_explode()] returns
 #' @returns a GeoArrow array holding every part, flattened
 #' @export
 #' @family cast
@@ -1896,18 +1916,19 @@ ga_flatten <- function(x) .Call(wrap__ga_flatten, x)
 #' Assign points to clusters by density
 #'
 #' Labels every point in the array with a cluster number, or `NA` when the
-#' point is noise. One label per row, in the order the points were given.
+#' point is noise. One label per row, in the order you gave the points.
 #'
 #' @details
 #' DBSCAN grows a cluster from any point with at least `min_points` neighbours
-#' within `eps`. Points reachable from that core join the cluster, and points
-#' that never become reachable are noise. Unlike k-means it finds clusters of
-#' any shape and does not need the count up front.
+#' within `eps`. It adds points reachable from that core to the cluster and
+#' labels points that never become reachable as noise. Unlike k-means it finds
+#' clusters of any shape and does not need the count up front.
 #'
-#' Clustering is over the whole array, not within each row, so `eps` and
-#' `min_points` are single values rather than one per row. Cluster numbers
-#' start at 1 and mean nothing beyond grouping. A row that is not a single
-#' point, or is null, takes no part in the clustering and comes back null.
+#' `ga_dbscan()` clusters over the whole array, not within each row, so `eps`
+#' and `min_points` are single values rather than one per row. It numbers
+#' clusters from 1, and the numbers mean nothing beyond grouping. It leaves a
+#' row that is not a single point, or is null, out of the clustering and
+#' returns null for it.
 #'
 #' @param geometry a GeoArrow point array
 #' @param eps how close two points must be to be neighbours
@@ -1928,17 +1949,18 @@ ga_dbscan <- function(geometry, eps, min_points) .Call(wrap__ga_dbscan, geometry
 #' Assign points to a fixed number of clusters
 #'
 #' Splits the points in the array into `k` clusters by nearest centre. One
-#' label per row, in the order the points were given.
+#' label per row, in the order you gave the points.
 #'
 #' @details
-#' k-means always produces exactly `k` clusters and no noise, so every point
-#' gets a label. It favours round, similarly sized clusters; use [ga_dbscan()]
+#' k-means always produces exactly `k` clusters and no noise, so it labels
+#' every point. It favours round, similarly sized clusters; use [ga_dbscan()]
 #' when the shapes are irregular or the count is unknown.
 #'
-#' Clustering is over the whole array, not within each row, so `k` is a single
-#' value rather than one per row. The algorithm starts from a random seed, so
-#' results vary between runs unless `seed` is given. A row that is not a single
-#' point, or is null, takes no part in the clustering and comes back null.
+#' `ga_kmeans()` clusters over the whole array, not within each row, so `k` is
+#' a single value rather than one per row. The algorithm starts from a random
+#' seed, so `ga_kmeans()` can return different results on each run unless you
+#' give `seed`. It leaves a row that is not a single point, or is null, out of
+#' the clustering and returns null for it.
 #'
 #' @param geometry a GeoArrow point array
 #' @param k how many clusters to produce
@@ -1967,10 +1989,11 @@ ga_kmeans <- function(geometry, k, seed = NULL) .Call(wrap__ga_kmeans, geometry,
 #' are, which is what marks an outlier. There is no universal cutoff, so
 #' compare scores within a dataset rather than against a fixed threshold.
 #'
-#' `k_neighbours` sets how many neighbours define the local neighbourhood.
-#' Small values react to fine structure and large values smooth it away.
-#' Scoring is over the whole array, not within each row, so it is a single
-#' value. A row that is not a single point, or is null, comes back null.
+#' Use `k_neighbours` to set how many neighbours define the local
+#' neighbourhood. With small values `ga_outlier_scores()` reacts to fine
+#' structure, and with large values it smooths that structure away. It scores
+#' over the whole array, not within each row, so `k_neighbours` is a single
+#' value. It returns null for a row that is not a single point, or is null.
 #'
 #' @param geometry a GeoArrow point array
 #' @param k_neighbours how many neighbours define a neighbourhood
@@ -1989,18 +2012,18 @@ ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_sco
 
 #' Build a point array from x and y coordinates
 #'
-#' Pairs two numeric vectors into a GeoArrow point array. The shorter of the
-#' two is recycled when it is length 1.
+#' Pairs two numeric vectors into a GeoArrow point array. `ga_xy()` recycles
+#' the shorter of the two when it is length 1.
 #'
 #' @details
-#' A row where either coordinate is `NA` gives a null point rather than a
-#' point at an arbitrary location, so the result always has the same length as
-#' the longer input.
+#' `ga_xy()` returns a null point for a row where either coordinate is `NA`,
+#' rather than a point at an arbitrary location, so the result always has the
+#' same length as the longer input.
 #'
-#' `crs` is stored verbatim in the array's GeoArrow metadata and is never
-#' interpreted, so nothing here reprojects. Anything a reader would produce
-#' works, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
-#' Leaving it `NULL` produces an array with no CRS.
+#' `ga_xy()` stores `crs` verbatim in the array's GeoArrow metadata and never
+#' interprets it, so it never reprojects. It accepts anything a reader would
+#' produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
+#' If you leave it `NULL`, `ga_xy()` produces an array with no CRS.
 #'
 #' @param x a numeric vector or float64 array of x coordinates
 #' @param y a numeric vector or float64 array of y coordinates; length 1 or
@@ -2013,23 +2036,24 @@ ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_sco
 #' pts <- ga_xy(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
 #'
-#' # a length 1 coordinate is recycled
+#' # ga_xy() recycles a length 1 coordinate
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_xy(c(0, 1, 2), 0)))
 #'
-#' # NA in either coordinate gives a null point
+#' # ga_xy() returns a null point for NA in either coordinate
 #' ga_xy(c(0, NA), c(0, 1))$null_count
 ga_xy <- function(x, y, crs = NULL) .Call(wrap__ga_xy, x, y, crs)
 
 #' Build a line between pairs of points
 #'
 #' Returns a two point linestring joining each `start` to the matching `end`.
-#' `end` is recycled, so one destination pairs with every origin.
+#' `ga_make_line()` recycles `end`, so you can pair one destination with every
+#' origin.
 #'
 #' @details
-#' A null or empty point on either side gives a null element, so the result is
-#' always the same length as `start`. The length of the line is
-#' [ga_length_euclidean()], which equals [ga_dist_euclidean_pairwise()] on the
-#' same pair.
+#' `ga_make_line()` returns a null element for a null or empty point on either
+#' side, so the result is always the same length as `start`. The length of the
+#' line is [ga_length_euclidean()], which equals [ga_dist_euclidean_pairwise()]
+#' on the same pair.
 #'
 #' @param start a GeoArrow point array
 #' @param end a GeoArrow point array; length 1 or the same length as `start`
@@ -2045,12 +2069,12 @@ ga_make_line <- function(start, end) .Call(wrap__ga_make_line, start, end)
 
 #' Convert coordinates from radians to degrees
 #'
-#' Multiplies every x and y coordinate by `180 / pi`. The geometry type of the
-#' output matches the geometry type of the input.
+#' Multiplies every x and y coordinate by `180 / pi`. `ga_to_degrees()` keeps
+#' the geometry type of the input.
 #'
 #' @details
-#' Only the x and y coordinates are converted. Z and M values are dropped,
-#' since the conversion goes through a two dimensional representation.
+#' `ga_to_degrees()` converts only the x and y coordinates. It drops Z and M
+#' values, since it goes through a two dimensional representation.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns a GeoArrow array of the same geometry type as the input
@@ -2065,12 +2089,12 @@ ga_to_degrees <- function(geometry) .Call(wrap__ga_to_degrees, geometry)
 
 #' Convert coordinates from degrees to radians
 #'
-#' Multiplies every x and y coordinate by `pi / 180`. The geometry type of the
-#' output matches the geometry type of the input.
+#' Multiplies every x and y coordinate by `pi / 180`. `ga_to_radians()` keeps
+#' the geometry type of the input.
 #'
 #' @details
-#' Only the x and y coordinates are converted. Z and M values are dropped,
-#' since the conversion goes through a two dimensional representation.
+#' `ga_to_radians()` converts only the x and y coordinates. It drops Z and M
+#' values, since it goes through a two dimensional representation.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns a GeoArrow array of the same geometry type as the input
@@ -2087,7 +2111,7 @@ ga_to_radians <- function(geometry) .Call(wrap__ga_to_radians, geometry)
 #'
 #' Densifies linestrings, multilinestrings, polygons, and multipolygons by
 #' inserting additional points along each segment until no segment exceeds
-#' `max_segment_length`. The metric determines how segment length is measured.
+#' `max_segment_length`. `ga_densify()` measures segment length with `metric`.
 #'
 #' @param geometry a GeoArrow linestring, multilinestring, polygon, or multipolygon array
 #' @param max_segment_length the maximum segment length; either length 1 or the same length as `geometry`
@@ -2101,15 +2125,15 @@ ga_to_radians <- function(geometry) .Call(wrap__ga_to_radians, geometry)
 #'   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
 #' ))
 #'
-#' # a 10 unit segment capped at 2 units needs four new vertices
+#' # ga_densify() adds four new vertices to cap a 10 unit segment at 2 units
 #' as.vector(ga_n_coords(line))
 #' as.vector(ga_n_coords(ga_densify(line, 2, "euclidean")))
 ga_densify <- function(geometry, max_segment_length, metric) .Call(wrap__ga_densify, geometry, max_segment_length, metric)
 
 #' Compute the bounding box of geometries
 #'
-#' Returns the axis aligned bounding box of each geometry, as the box array
-#' that the spatial index queries take.
+#' Returns the axis aligned bounding box of each geometry as a box array, the
+#' type the spatial index queries take.
 #'
 #' @details
 #' `ga_envelope()` returns a box array as it is instead of recomputing it, so
@@ -2122,6 +2146,7 @@ ga_densify <- function(geometry, max_segment_length, metric) .Call(wrap__ga_dens
 #' @param x a GeoArrow geometry array
 #' @returns a GeoArrow box array of the same length as `x`
 #' @export
+#' @family boundary
 #' @family index
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' nc <- as.data.frame(read_shapefile(
@@ -2130,105 +2155,13 @@ ga_densify <- function(geometry, max_segment_length, metric) .Call(wrap__ga_dens
 #' boxes <- ga_envelope(nc$geometry)
 #' head(geoarrow::as_geoarrow_vctr(boxes), 3)
 #'
-#' # already boxes, so this is a no op
+#' # already boxes, so ga_envelope() returns them untouched
 #' identical(
 #'   as.character(geoarrow::as_geoarrow_vctr(ga_envelope(boxes))),
 #'   as.character(geoarrow::as_geoarrow_vctr(boxes))
 #' )
 ga_envelope <- function(x) .Call(wrap__ga_envelope, x)
 
-#' Intersect pairs of two point lines
-#'
-#' Returns where each pair of lines meets: a point when they cross, and a line
-#' when they overlap along a shared stretch. `y` is recycled against `x`.
-#'
-#' @details
-#' The answer is a point when the lines cross and a segment when they overlap.
-#' Both come back as a multipoint so the column has one type: a crossing gives
-#' one point, an overlap gives the two endpoints of the shared stretch. So
-#' `ga_n_coords()` tells the two apart, and an overlap can be rebuilt from its
-#' endpoints.
-#'
-#' Both arguments must hold single segments, that is a `LINE` or a two point
-#' `LINESTRING`. Longer linestrings, other geometry types, and null rows come
-#' back null, as do pairs that simply do not meet. Use
-#' [ga_self_intersections()] for a geometry with many segments.
-#'
-#' @param x a GeoArrow array of two point linestrings
-#' @param y a GeoArrow array of two point linestrings; length 1 or the same
-#'   length as `x`
-#' @returns a GeoArrow multipoint array of the same length as `x`
-#' @export
-#' @family intersection
-#' @references [line_intersection](https://docs.rs/geo/latest/geo/algorithm/line_intersection/fn.line_intersection.html)
-#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' a <- sf::st_linestring(cbind(c(0, 2), c(0, 2)))
-#' b <- sf::st_linestring(cbind(c(0, 2), c(2, 0)))
-#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(a))
-#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(b))
-#'
-#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_line_intersection(x, y)))
-ga_line_intersection <- function(x, y) .Call(wrap__ga_line_intersection, x, y)
-
-#' Find where a geometry crosses itself
-#'
-#' Returns the points at which a geometry's own segments intersect, one
-#' multipoint per input geometry.
-#'
-#' @family boundary
-#' @details
-#' Uses the Bentley-Ottmann sweep line, which finds all crossings in roughly
-#' `n log n` rather than by testing every pair. This is how to locate the
-#' problem that [ga_is_valid()] reports: a self intersecting polygon comes back
-#' with the offending points.
-#'
-#' Segments that merely share an endpoint, as consecutive segments of a
-#' linestring always do, are not counted. A geometry with no crossings gives
-#' an empty multipoint rather than a null, so an empty result is
-#' distinguishable from an unsupported geometry. Points and null rows come
-#' back null.
-#'
-#' @param geometry a GeoArrow geometry array
-#' @returns a GeoArrow multipoint array of the same length as `geometry`
-#' @export
-#' @family intersection
-#' @references [Intersections](https://docs.rs/geo/latest/geo/sweep/struct.Intersections.html)
-#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' ring <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
-#' bowtie <- sf::st_polygon(list(ring))
-#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
-#'
-#' as.vector(ga_is_valid(g))
-#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_self_intersections(g)))
-ga_self_intersections <- function(geometry) .Call(wrap__ga_self_intersections, geometry)
-
-#' Interpolate a point along a linestring
-#'
-#' Returns the point at a given ratio or distance along each linestring,
-#' measured from either the start or end. The metric determines how distance
-#' is calculated.
-#'
-#' @param line a GeoArrow linestring array
-#' @param value a numeric vector of ratio or distance values; length 1 or the same length as `line`
-#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
-#' @param measure one of `"ratio"` or `"distance"`
-#' @param from one of `"start"` or `"end"`
-#' @returns a GeoArrow point array
-#' @export
-#' @family interpolate
-#' @references [InterpolateLine](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html)
-#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
-#'   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
-#' ))
-#'
-#' # halfway from the start, then two units in from the end
-#' geoarrow::as_geoarrow_vctr(
-#'   ga_interpolate_point(line, 0.5, "euclidean", "ratio", "start")
-#' )
-#' geoarrow::as_geoarrow_vctr(
-#'   ga_interpolate_point(line, 2, "euclidean", "distance", "end")
-#' )
 #' Determine the type of each geometry
 #'
 #' Returns the simple features type name of each geometry, such as `"POINT"`
@@ -2277,12 +2210,104 @@ ga_geometry_type <- function(geometry) .Call(wrap__ga_geometry_type, geometry)
 #' as.vector(ga_is(g, c("POINT", "LINESTRING")))
 ga_is <- function(geometry, types) .Call(wrap__ga_is, geometry, types)
 
+#' Intersect pairs of two point lines
+#'
+#' Returns where each pair of lines meets: a point when they cross, and a line
+#' when they overlap along a shared stretch. `ga_line_intersection()` recycles
+#' `y` against `x`.
+#'
+#' @details
+#' `ga_line_intersection()` finds a point when the lines cross and a segment
+#' when they overlap. It returns both as a multipoint to give the column one
+#' type: one point for a crossing, and the two endpoints of the shared stretch
+#' for an overlap. So `ga_n_coords()` tells the two apart, and you can rebuild
+#' an overlap from its endpoints.
+#'
+#' `ga_line_intersection()` needs single segments in both arguments, that is a
+#' `LINE` or a two point `LINESTRING`. It returns null for longer linestrings,
+#' other geometry types, and null rows, and for pairs that simply do not meet.
+#' Use [ga_self_intersections()] for a geometry with many segments.
+#'
+#' @param x a GeoArrow array of two point linestrings
+#' @param y a GeoArrow array of two point linestrings; length 1 or the same
+#'   length as `x`
+#' @returns a GeoArrow multipoint array of the same length as `x`
+#' @export
+#' @family intersection
+#' @references [line_intersection](https://docs.rs/geo/latest/geo/algorithm/line_intersection/fn.line_intersection.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' a <- sf::st_linestring(cbind(c(0, 2), c(0, 2)))
+#' b <- sf::st_linestring(cbind(c(0, 2), c(2, 0)))
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(a))
+#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(b))
+#'
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_line_intersection(x, y)))
+ga_line_intersection <- function(x, y) .Call(wrap__ga_line_intersection, x, y)
+
+#' Find where a geometry crosses itself
+#'
+#' Returns the points at which a geometry's own segments intersect, one
+#' multipoint per input geometry.
+#'
+#' @details
+#' Uses the Bentley-Ottmann sweep line, which finds all crossings in roughly
+#' `n log n` rather than by testing every pair. Use `ga_self_intersections()`
+#' to locate the problem that [ga_is_valid()] reports: it returns the
+#' offending points of a self intersecting polygon.
+#'
+#' `ga_self_intersections()` does not count segments that merely share an
+#' endpoint, as consecutive segments of a linestring always do. It returns an
+#' empty multipoint rather than a null for a geometry with no crossings, so you
+#' can distinguish an empty result from an unsupported geometry. It returns
+#' null for points and null rows.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns a GeoArrow multipoint array of the same length as `geometry`
+#' @export
+#' @family intersection
+#' @references [Intersections](https://docs.rs/geo/latest/geo/sweep/struct.Intersections.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' ring <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
+#' bowtie <- sf::st_polygon(list(ring))
+#' g <- geoarrow::as_geoarrow_array(sf::st_sfc(bowtie))
+#'
+#' as.vector(ga_is_valid(g))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_self_intersections(g)))
+ga_self_intersections <- function(geometry) .Call(wrap__ga_self_intersections, geometry)
+
+#' Interpolate a point along a linestring
+#'
+#' Returns the point at a given ratio or distance along each linestring,
+#' measuring from either the start or end. `ga_interpolate_point()` uses
+#' `metric` to calculate distance.
+#'
+#' @param line a GeoArrow linestring array
+#' @param value a numeric vector of ratio or distance values; length 1 or the same length as `line`
+#' @param metric one of `"euclidean"`, `"haversine"`, `"geodesic"`, or `"rhumb"`
+#' @param measure one of `"ratio"` or `"distance"`
+#' @param from one of `"start"` or `"end"`
+#' @returns a GeoArrow point array
+#' @export
+#' @family interpolate
+#' @references [InterpolateLine](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolateLine.html)
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' line <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(10, 0)))
+#' ))
+#'
+#' # halfway from the start, then two units in from the end
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_interpolate_point(line, 0.5, "euclidean", "ratio", "start")
+#' )
+#' geoarrow::as_geoarrow_vctr(
+#'   ga_interpolate_point(line, 2, "euclidean", "distance", "end")
+#' )
 ga_interpolate_point <- function(line, value, metric, measure, from) .Call(wrap__ga_interpolate_point, line, value, metric, measure, from)
 
 #' Interpolate a point between two points
 #'
 #' Returns the point located at `distance` along the path from `start` to `end`.
-#' The metric determines how distance is measured.
+#' `ga_point_at_distance_between()` uses `metric` to measure distance.
 #'
 #' @param start a GeoArrow point array of start points
 #' @param end a GeoArrow point array of end points
@@ -2309,8 +2334,8 @@ ga_point_at_distance_between <- function(start, end, distance, metric) .Call(wra
 #' Interpolate a point at a given ratio between two points
 #'
 #' Returns the point located at `ratio` of the way from `start` to `end`,
-#' where 0.0 is the start and 1.0 is the end. The metric determines how
-#' the interpolation is computed.
+#' where 0.0 is the start and 1.0 is the end. `ga_point_at_ratio_between()`
+#' uses `metric` to compute the interpolation.
 #'
 #' @param start a GeoArrow point array of start points
 #' @param end a GeoArrow point array of end points
@@ -2349,18 +2374,19 @@ ga_points_along_line <- function(start, end, max_distance, include_ends, metric)
 #' Read a FlatGeobuf file into a record batch stream
 #'
 #' Reads the geometries together with the feature properties. Unlike the
-#' shapefile and GeoJSON readers this one streams, so the whole file is never
-#' held in memory at once.
+#' shapefile and GeoJSON readers this one streams, so it never holds the whole
+#' file in memory at once.
 #'
 #' @details
-#' Passing `bbox` uses the file's packed Hilbert R-tree index to skip features
-#' that fall outside it, so a spatial subset does not read the whole file.
-#' Features come back in the order the file stores them, which for an indexed
-#' file is that R-tree order rather than the order they were written in.
+#' When you pass `bbox`, `read_flatgeobuf()` uses the file's packed Hilbert
+#' R-tree index to skip features that fall outside it, so it does not read the
+#' whole file for a spatial subset. It returns features in the order the file
+#' stores them, which for an indexed file is that R-tree order rather than
+#' their original order.
 #'
 #' @param path path to a `.fgb` file.
 #' @param bbox optionally a length 4 numeric vector of `c(xmin, ymin, xmax, ymax)`
-#'   used to filter features spatially. `NULL` reads every feature.
+#'   used to filter features spatially. Pass `NULL` to read every feature.
 #' @returns a `nanoarrow_array_stream` of record batches, holding the property
 #'   columns followed by a `geometry` column.
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
@@ -2389,14 +2415,14 @@ read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path
 #' Read a GeoJSON FeatureCollection
 #'
 #' Reads the geometries together with the feature properties. Properties are
-#' untyped in GeoJSON, so each column's arrow type is inferred by scanning
-#' every feature.
+#' untyped in GeoJSON, so `read_geojson()` infers each column's arrow type by
+#' scanning every feature.
 #'
 #' @details
-#' The geometry column is narrowed to the most specific type that holds every
-#' feature, promoting a singular type to its multi form where the two are
-#' mixed. A feature with a `null` geometry becomes a null element and does not
-#' affect the choice:
+#' `read_geojson()` narrows the geometry column to the most specific type that
+#' holds every feature, promoting a singular type to its multi form when it
+#' finds both. It turns a feature with a `null` geometry into a null element
+#' and ignores it when choosing the type:
 #'
 #' | geometry types in the file | column type |
 #' | --- | --- |
@@ -2407,11 +2433,11 @@ read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path
 #' | more than one family, or any collection | `geoarrow.geometry` |
 #'
 #' Narrowing matters in practice: `geoarrow.geometry` is a dense union that
-#' geoarrow's R bindings cannot yet convert, so a genuinely mixed collection
-#' reads back as its raw storage rather than as geometries.
+#' geoarrow's R bindings cannot yet convert, so they return a genuinely mixed
+#' collection as its raw storage rather than as geometries.
 #'
-#' Property columns appear in the order the keys are first seen. A key missing
-#' from a given feature is null for that row. Types are widened across
+#' `read_geojson()` adds property columns in the order it first sees their
+#' keys. It writes a null where a feature lacks a key. It widens types across
 #' features:
 #'
 #' | values seen for a key | column type |
@@ -2422,11 +2448,12 @@ read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path
 #' | strings, or any mix that cannot unify | `Utf8` |
 #' | only `null` | `Utf8`, all null |
 #'
-#' Nested arrays and objects have no arrow analogue and are kept as their raw
-#' JSON text.
+#' `read_geojson()` keeps nested arrays and objects, which have no arrow
+#' analogue, as their raw JSON text.
 #'
-#' Per RFC 7946 the coordinate reference system is always `OGC:CRS84`, so that
-#' is set on the geometry column without reading anything from the file.
+#' Per RFC 7946 the coordinate reference system is always `OGC:CRS84`, so
+#' `read_geojson()` sets that on the geometry column without reading anything
+#' from the file.
 #'
 #' @param path path to a `.geojson` file holding a `FeatureCollection`.
 #' @returns a `nanoarrow_array_stream` of a single record batch, holding the
@@ -2453,16 +2480,17 @@ read_geojson <- function(path) .Call(wrap__read_geojson, path)
 
 #' Read an ESRI Shapefile into a record batch stream
 #'
-#' Reads the `.shp` geometries together with the `.dbf` attributes. The CRS is
-#' taken from the sibling `.prj` file when one is present.
+#' Reads the `.shp` geometries together with the `.dbf` attributes. It takes
+#' the CRS from the sibling `.prj` file when one is present.
 #'
 #' @details
-#' Polylines are read as multilinestrings and polygons as multipolygons,
-#' because a shapefile record of either type may contain multiple parts.
+#' `read_shapefile()` reads polylines as multilinestrings and polygons as
+#' multipolygons, because a shapefile record of either type may contain
+#' multiple parts.
 #'
-#' The coordinate dimension is chosen once per file, from the shape type and
-#' from whether the coordinates actually carry measures. A `PolygonZ` file with
-#' no measures is therefore read as XYZ, rather than as XYZM full of nulls.
+#' It chooses the coordinate dimension once per file, from the shape type and
+#' from whether the coordinates actually carry measures. It therefore reads a
+#' `PolygonZ` file with no measures as XYZ, rather than as XYZM full of nulls.
 #'
 #' | shape type | measures present | dimension |
 #' | --- | --- | --- |
@@ -2472,13 +2500,13 @@ read_geojson <- function(path) .Call(wrap__read_geojson, path)
 #' | `PointZ`, `PolylineZ`, `PolygonZ`, `MultipointZ` | no | XYZ |
 #' | `PointZ`, `PolylineZ`, `PolygonZ`, `MultipointZ` | yes | XYZM |
 #'
-#' If only some coordinates carry a measure, M is dropped and a message is
-#' emitted, because an Arrow column cannot mix dimensions.
+#' If only some coordinates carry a measure, `read_shapefile()` drops M and
+#' emits a message, because Arrow cannot mix dimensions in one column.
 #'
-#' `Multipatch` files are not supported.
+#' `read_shapefile()` does not support `Multipatch` files.
 #'
-#' @param path path to a `.shp` file. The sibling `.dbf` and `.prj` files are
-#'   resolved from the same base name.
+#' @param path path to a `.shp` file. `read_shapefile()` resolves the sibling
+#'   `.dbf` and `.prj` files from the same base name.
 #' @returns a `nanoarrow_array_stream` of a single record batch, holding the
 #'   `.dbf` attribute columns followed by a `geometry` column.
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
@@ -2501,12 +2529,12 @@ read_shapefile <- function(path) .Call(wrap__read_shapefile, path)
 #'
 #' @details
 #' Several algorithms give wrong answers on invalid input rather than failing,
-#' so this is worth checking before trusting a result. Common problems are a
-#' polygon whose rings self intersect, a ring with too few points, and a
-#' coordinate that is `NaN` or infinite.
+#' so check validity before trusting a result. Common problems are a polygon
+#' whose rings self intersect, a ring with too few points, and a coordinate
+#' that is `NaN` or infinite.
 #'
-#' A null geometry gives `NA`. Use [ga_validation_error()] to see why a geometry
-#' failed.
+#' `ga_is_valid()` returns `NA` for a null geometry. Use [ga_validation_error()]
+#' to see why a geometry is invalid.
 #'
 #' @param geometry a GeoArrow geometry array
 #' @returns a boolean array of the same length as `geometry`
@@ -2527,12 +2555,12 @@ ga_is_valid <- function(geometry) .Call(wrap__ga_is_valid, geometry)
 
 #' Explain why a geometry is invalid
 #'
-#' Returns the first validation problem found, or `NA` when the geometry is
+#' Returns the first validation problem it finds, or `NA` when the geometry is
 #' valid.
 #'
 #' @details
-#' A geometry can break more than one rule; only the first is reported, since
-#' fixing it often resolves the rest.
+#' A geometry can break more than one rule; `ga_validation_error()` reports only
+#' the first, since you often resolve the rest by fixing it.
 #'
 #' @returns a string array of the same length as `geometry`
 #' @export
@@ -2543,26 +2571,28 @@ ga_validation_error <- function(geometry) .Call(wrap__ga_validation_error, geome
 #' Voronoi cells from geometry vertices
 #'
 #' Returns one multipolygon per input geometry, whose parts are the Voronoi
-#' cells of that geometry's vertices. The output has the same length as the
-#' input.
+#' cells of that geometry's vertices. `ga_voronoi_cells()` preserves the
+#' input's length.
 #'
 #' @details
-#' Every vertex of a geometry is treated as a site, so a multipoint of `k`
-#' points yields `k` cells. A Voronoi diagram is unbounded, so the cells are
-#' clipped: `"padded"` uses a box with 50 percent padding around the sites,
-#' matching PostGIS `ST_VoronoiPolygons`, and `"envelope"` uses their exact
-#' bounding box. Passing `boundary` clips to an arbitrary polygon instead,
-#' which is the usual way to cut a diagram to a study area.
+#' `ga_voronoi_cells()` treats every vertex of a geometry as a site, so it
+#' returns `k` cells for a multipoint of `k` points. A Voronoi diagram is
+#' unbounded, so `ga_voronoi_cells()` clips the cells: with `"padded"` it uses
+#' a box with 50 percent padding around the sites, matching PostGIS
+#' `ST_VoronoiPolygons`, and with `"envelope"` their exact bounding box. Pass
+#' `boundary` to clip to an arbitrary polygon instead, which is the usual way
+#' to cut a diagram to a study area.
 #'
 #' A geometry with fewer than two distinct vertices, or one whose vertices are
-#' all collinear, has no cells and comes back as an empty multipolygon rather
-#' than a null. Use [ga_voronoi_edges()] for the collinear case, which returns
-#' the perpendicular bisectors. A null geometry stays null.
+#' all collinear, has no cells, and `ga_voronoi_cells()` returns an empty
+#' multipolygon for it rather than a null. Use [ga_voronoi_edges()] for the
+#' collinear case, which returns the perpendicular bisectors.
+#' `ga_voronoi_cells()` keeps a null geometry null.
 #'
 #' @param geometry a GeoArrow geometry array whose vertices are the sites
 #' @param clip how to bound the diagram, either `"padded"` or `"envelope"`.
-#'   Ignored when `boundary` is supplied
-#' @param tolerance sites closer together than this are snapped to the same
+#'   Has no effect when you supply `boundary`
+#' @param tolerance the distance below which to snap sites to the same
 #'   position; length 1 or the same length as `geometry`
 #' @param boundary an optional GeoArrow polygon array to clip to; length 1 or
 #'   the same length as `geometry`
@@ -2581,16 +2611,17 @@ ga_voronoi_cells <- function(geometry, clip = "padded", tolerance = 0, boundary 
 #' Voronoi edges from geometry vertices
 #'
 #' Returns one multilinestring per input geometry, whose parts are the
-#' boundaries between that geometry's Voronoi cells. The output has the same
-#' length as the input.
+#' boundaries between that geometry's Voronoi cells. `ga_voronoi_edges()`
+#' preserves the input's length.
 #'
 #' @details
 #' Unlike [ga_voronoi_cells()], this works on collinear sites, where the edges
 #' are the perpendicular bisectors between neighbouring points. Prefer it
 #' when you want the diagram's skeleton rather than closed regions.
 #'
-#' A geometry with fewer than two distinct vertices has no edges and comes
-#' back as an empty multilinestring. A null geometry stays null.
+#' A geometry with fewer than two distinct vertices has no edges, and
+#' `ga_voronoi_edges()` returns an empty multilinestring for it. It keeps a
+#' null geometry null.
 #'
 #' @inheritParams ga_voronoi_cells
 #' @returns a GeoArrow multilinestring array of the same length as `geometry`
@@ -2607,16 +2638,17 @@ ga_voronoi_edges <- function(geometry, clip = "padded", tolerance = 0, boundary 
 #' Apply a winding direction to polygon rings
 #'
 #' Rewinds each polygon so its exterior and interior rings follow a
-#' consistent direction. The geometry type of the output matches the input.
+#' consistent direction. `ga_orient()` keeps the geometry type of the input.
 #'
 #' @details
-#' `"default"` gives a counter-clockwise exterior ring and clockwise interior
-#' rings, which is the winding the OGC simple features and GeoJSON
-#' specifications call for. `"reversed"` gives the opposite. `"ccw"` and
-#' `"cw"` are accepted as aliases and refer to the exterior ring.
+#' With `"default"`, `ga_orient()` winds the exterior ring counter-clockwise
+#' and the interior rings clockwise, which is the winding the OGC simple
+#' features and GeoJSON specifications call for. With `"reversed"` it does the
+#' opposite. It accepts `"ccw"` and `"cw"` as aliases, which refer to the
+#' exterior ring.
 #'
-#' Rewinding does not change which points a polygon covers, only the order
-#' its coordinates are stored in. A null geometry stays null.
+#' `ga_orient()` does not change which points a polygon covers, only the order
+#' of its coordinates. It keeps a null geometry null.
 #'
 #' @param geometry a GeoArrow polygon or multipolygon array
 #' @param direction one of `"default"`, `"reversed"`, `"ccw"`, or `"cw"`
@@ -2636,15 +2668,15 @@ ga_orient <- function(geometry, direction = "default") .Call(wrap__ga_orient, ge
 
 #' Determine the winding order of a ring
 #'
-#' Returns `"clockwise"` or `"counterclockwise"` for each geometry. A polygon
-#' reports the winding of its exterior ring.
+#' Returns `"clockwise"` or `"counterclockwise"` for each geometry. For a
+#' polygon, `ga_winding_order()` reports the winding of the exterior ring.
 #'
 #' @details
-#' A multipolygon reports a winding only when every part's exterior ring
-#' agrees, and a multilinestring only when every part agrees; a geometry whose
-#' parts disagree is `NA`, since it has no single winding. Any other geometry
-#' type, a null geometry, or a ring with fewer than three distinct points is
-#' also `NA`.
+#' `ga_winding_order()` reports a winding for a multipolygon only when every
+#' part's exterior ring agrees, and for a multilinestring only when every part
+#' agrees; it returns `NA` for a geometry whose parts disagree, since that
+#' geometry has no single winding. It also returns `NA` for any other geometry
+#' type, a null geometry, or a ring with fewer than three distinct points.
 #'
 #' @param geometry a GeoArrow linestring, polygon, or multi part array of either
 #' @returns a string array of the same length as `geometry`
@@ -2661,12 +2693,13 @@ ga_winding_order <- function(geometry) .Call(wrap__ga_winding_order, geometry)
 #' Test the winding order of a ring
 #'
 #' `ga_is_ccw()` is `TRUE` for counter-clockwise geometries and `ga_is_cw()` is
-#' `TRUE` for clockwise ones. A polygon is tested on its exterior ring.
+#' `TRUE` for clockwise ones. Each function tests a polygon on its exterior
+#' ring.
 #'
 #' @details
-#' Any geometry with no winding order, such as a point or a null geometry,
-#' becomes `NA` rather than `FALSE`, so the two functions are not simply
-#' negations of one another.
+#' Each function returns `NA` rather than `FALSE` for any geometry with no
+#' winding order, such as a point or a null geometry, so the two functions are
+#' not simply negations of one another.
 #'
 #' @param geometry a GeoArrow linestring or polygon array
 #' @returns a boolean array of the same length as `geometry`
@@ -2694,18 +2727,18 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #'
 #' @details
 #' The tree is a packed Hilbert R-tree, the same structure FlatGeobuf stores
-#' on disk. It is built once and is immutable, so it pays off when a set of
-#' geometries is queried repeatedly.
+#' on disk. You build it once and it is immutable, so it pays off when you
+#' query a set of geometries repeatedly.
 #'
 #' Every query is a bounding box test, not an exact one. Two geometries whose
 #' boxes overlap need not themselves intersect, so treat results as candidates
-#' and confirm with [ga_intersects()] when exactness matters. Narrowing to
-#' candidates first is the point: the exact test then runs on a handful of
-#' rows rather than all of them.
+#' and confirm with [ga_intersects()] when exactness matters. You narrow to
+#' candidates first so you can run the exact test on a handful of rows rather
+#' than all of them.
 #'
-#' Rows with a null or empty geometry have no bounding box and are left out of
-#' the tree, so a query never returns them. Row numbers always refer to
-#' positions in the original array.
+#' Rows with a null or empty geometry have no bounding box, so `new()` leaves
+#' them out of the tree and a query never returns them. Row numbers always
+#' refer to positions in the original array.
 #'
 #' @returns an `RTree` object
 #' @export
@@ -2717,37 +2750,38 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #' ))
 #' idx <- RTree$new(nc$geometry)
 #'
-#' # candidate rows whose box meets each county, confirmed exactly
+#' # candidate rows whose box meets each county, still to confirm exactly
 #' head(as.vector(idx$search(nc$geometry)), 3)
 #'
 #' # the three counties nearest each centroid
 #' head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
 #' @section Methods:
 #'\subsection{Method `new`}{
-#'Build the index. `node_size` sets how many entries share a tree node;
-#'larger values build faster and query slower. `sort` picks the packing
-#'order, either `"hilbert"` or `"str"`.
+#'Build the index. Use `node_size` to set how many entries share a tree
+#'node; with larger values you build faster and query slower. Use `sort`
+#'to pick the packing order, either `"hilbert"` or `"str"`.
 #'}
 #'
 #'\subsection{Method `search`}{
 #'Which rows have a bounding box overlapping each geometry
 #'
 #'Returns one list of candidate row numbers per element of `geometry`,
-#'so the result lines up row for row with the query array. This is the
-#'shape a spatial join needs.
+#'row for row with the query array. This is the shape a spatial join
+#'needs.
 #'
 #' \subsection{Arguments}{
 #'\describe{
 #'\item{`geometry`}{a GeoArrow array to look up}
 #'}}
 #' \subsection{details}{
-#'Anything with a bounding box works: a point array, a polygon array, or
-#'the box array [ga_envelope()] produces. Boxes are taken as they are and
-#'everything else is reduced to its envelope first.
+#'`search()` accepts anything with a bounding box: a point array, a
+#'polygon array, or the box array [ga_envelope()] produces. It takes boxes
+#'as they are and reduces everything else to its envelope first.
 #'
 #'This is a bounding box test, not an exact one, so each list holds
-#'candidates to confirm with [ga_intersects()] or another predicate. A
-#'null or empty query geometry gives a null rather than an empty list.
+#'candidates to confirm with [ga_intersects()] or another predicate.
+#'`search()` returns a null rather than an empty list for a null or empty
+#'query geometry.
 #'
 #'}
 #' \subsection{returns}{
@@ -2766,13 +2800,14 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #'\item{`max_distance`}{the furthest to search, or `NULL` for no limit}
 #'}}
 #' \subsection{details}{
-#'Distance is measured from the centre of each query geometry to the
-#'bounding box of the indexed one, so this gives candidates to confirm
-#'with [ga_dist_euclidean_pairwise()] when exactness matters. `k` caps how
-#'many come back per row and `max_distance` how far the search goes.
+#'`neighbors()` measures distance from the centre of each query geometry
+#'to the bounding box of the indexed one, so it returns candidates to
+#'confirm with [ga_dist_euclidean_pairwise()] when exactness matters. Use
+#'`k` to cap how many rows it returns per row and `max_distance` to cap
+#'how far it searches.
 #'
-#'Taking an array rather than one point at a time is what makes a nearest
-#'neighbour join one call.
+#'Because `neighbors()` takes an array rather than one point at a time,
+#'you can do a nearest neighbour join in one call.
 #'
 #'}
 #' \subsection{returns}{
@@ -2782,15 +2817,15 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #'}
 #'
 #'\subsection{Method `size`}{
-#'The number of rows the index was built over
+#'The number of rows you built the index over
 #'
 #' \subsection{returns}{
-#'the length of the array the index was built from
+#'the length of the array you built the index from
 #'}
 #'}
 #'
 #'\subsection{Method `n_indexed`}{
-#'The number of rows actually held in the tree
+#'The number of rows the tree actually holds
 #'
 #' \subsection{details}{
 #'Lower than `size()` when the array held null or empty geometries, which
@@ -2839,11 +2874,12 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 #' # every centroid within half a degree of every other
 #' head(as.vector(idx$within(pts, 0.5)), 3)
 #'
-#' # a single lookup is an array of one
+#' # for a single lookup, pass an array of one
 #' as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
 #' @section Methods:
 #'\subsection{Method `new`}{
-#'Build the index. A bigger `node_size` builds quicker but searches slower.
+#'Build the index. With a bigger `node_size` you build quicker but search
+#'slower.
 #'}
 #'
 #'\subsection{Method `range`}{
@@ -2860,7 +2896,7 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 #'}
 #'
 #'\subsection{Method `within`}{
-#'Which points are within `r` of each point, measured flat in coordinate units
+#'Which points are within `r` of each point, in flat coordinate units
 #'
 #' \subsection{Arguments}{
 #'\describe{
@@ -2874,15 +2910,15 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 #'}
 #'
 #'\subsection{Method `size`}{
-#'How many rows went in
+#'How many rows you put in
 #'
 #' \subsection{returns}{
-#'the length of the array the index was built from
+#'the length of the array you built the index from
 #'}
 #'}
 #'
 #'\subsection{Method `n_indexed`}{
-#'How many rows made it into the tree, skipping null and empty points
+#'How many rows the tree holds, without null and empty points
 #'
 #' \subsection{returns}{
 #'the number of indexed rows

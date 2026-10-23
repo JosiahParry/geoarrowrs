@@ -78,15 +78,15 @@ fn boolean_pairwise(x: Robj, y: Robj, op: Op) -> extendr_api::Result<Robj> {
 /// Combine two polygon arrays with a set operation
 ///
 /// Each function pairs `x` with `y` row by row and returns the polygonal
-/// result. `y` is recycled against `x`.
+/// result. Each function recycles `y` against `x`.
 ///
 /// @details
 /// `ga_boolean_intersection()` keeps the area in both, `ga_boolean_union()` the area
 /// in either, `ga_boolean_difference()` the area in `x` but not `y`, and
 /// `ga_boolean_xor()` the area in exactly one of them.
 ///
-/// These are defined for polygons and multipolygons only. A row whose geometry
-/// is any other type, or is null, comes back null. The result is always a
+/// These functions operate on polygons and multipolygons only. They return null
+/// for a row whose geometry is any other type, or is null. They always return a
 /// multipolygon, since a set operation can split one polygon into several or
 /// erase it entirely.
 ///
@@ -106,7 +106,7 @@ fn boolean_pairwise(x: Robj, y: Robj, op: Op) -> extendr_api::Result<Robj> {
 ///   sf::st_polygon(list(rbind(c(1, 1), c(3, 1), c(3, 3), c(1, 3), c(1, 1))))
 /// ))
 ///
-/// # two 2x2 squares offset by 1, so the overlap is a 1x1 square
+/// # ga_boolean_intersection() returns the 1x1 overlap of two offset 2x2 squares
 /// as.vector(ga_unsigned_area(ga_boolean_intersection(x, y)))
 #[extendr]
 fn ga_boolean_intersection(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
@@ -143,13 +143,13 @@ fn ga_boolean_xor(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 /// boundaries between any that touch or overlap.
 ///
 /// @details
-/// This is the one function in the package that is not length-preserving. It
-/// is an aggregate over the whole array, so it always returns a length 1
-/// array, in the way `sum()` reduces a vector to a single value.
+/// Unlike most functions in the package, `ga_unary_union()` does not preserve
+/// length. It aggregates over the whole array, so it always returns a length 1
+/// array, the way `sum()` reduces a vector to a single value.
 ///
 /// It is far faster than folding [ga_boolean_union()] across the array, since it
-/// unions all the rings in one pass. Rows that are not polygonal, and null
-/// rows, are skipped.
+/// unions all the rings in one pass. It skips rows that are not polygonal, and
+/// null rows.
 ///
 /// @param x a GeoArrow polygon or multipolygon array
 /// @returns a GeoArrow multipolygon array of length 1

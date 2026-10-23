@@ -296,18 +296,18 @@ pub(super) fn rows_to_list_array(found: Vec<Option<Vec<u32>>>) -> extendr_api::R
 /// shape [ga_join()] needs.
 ///
 /// @details
-/// The comparison is not the full cross product. `y` is indexed in a packed
-/// Hilbert R-tree and only the rows whose bounding box overlaps are relate
-/// tested, so the cost scales with the number of candidates rather than with
-/// `length(x) * length(y)`.
+/// These functions do not compare the full cross product. Each function indexes
+/// `y` in a packed Hilbert R-tree and runs the relate test only on the rows
+/// whose bounding boxes overlap, so the cost scales with the number of
+/// candidates rather than with `length(x) * length(y)`.
 ///
-/// A row of `x` that matches nothing gives a zero length element, not a null. A
-/// null or empty geometry in `x` gives a null element, and one in `y` is never
-/// returned.
+/// Each function returns a zero length element, not a null, for a row of `x`
+/// that matches nothing. It returns a null element for a null or empty geometry
+/// in `x`, and never returns one in `y`.
 ///
-/// [ga_disjoint()] has no sparse form. Disjointness is the one relationship a
-/// bounding box cannot narrow, so the answer is almost every row of `y` and the
-/// result is denser than the input.
+/// [ga_disjoint()] has no sparse form. Disjointness is the one relationship you
+/// cannot narrow with a bounding box, so the answer is almost every row of `y`
+/// and the result is denser than the input.
 ///
 /// @param x a GeoArrow geometry array
 /// @param y a GeoArrow geometry array

@@ -17,19 +17,20 @@ a GeoArrow multipoint array of the same length as \code{x}
 }
 \description{
 Returns where each pair of lines meets: a point when they cross, and a line
-when they overlap along a shared stretch. \code{y} is recycled against \code{x}.
+when they overlap along a shared stretch. \code{ga_line_intersection()} recycles
+\code{y} against \code{x}.
 }
 \details{
-The answer is a point when the lines cross and a segment when they overlap.
-Both come back as a multipoint so the column has one type: a crossing gives
-one point, an overlap gives the two endpoints of the shared stretch. So
-\code{ga_n_coords()} tells the two apart, and an overlap can be rebuilt from its
-endpoints.
+\code{ga_line_intersection()} finds a point when the lines cross and a segment
+when they overlap. It returns both as a multipoint to give the column one
+type: one point for a crossing, and the two endpoints of the shared stretch
+for an overlap. So \code{ga_n_coords()} tells the two apart, and you can rebuild
+an overlap from its endpoints.
 
-Both arguments must hold single segments, that is a \code{LINE} or a two point
-\code{LINESTRING}. Longer linestrings, other geometry types, and null rows come
-back null, as do pairs that simply do not meet. Use
-\code{\link[=ga_self_intersections]{ga_self_intersections()}} for a geometry with many segments.
+\code{ga_line_intersection()} needs single segments in both arguments, that is a
+\code{LINE} or a two point \code{LINESTRING}. It returns null for longer linestrings,
+other geometry types, and null rows, and for pairs that simply do not meet.
+Use \code{\link[=ga_self_intersections]{ga_self_intersections()}} for a geometry with many segments.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

@@ -25,7 +25,7 @@ non-negative value.
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# nc rings wind clockwise, so the signed area is negative
+# ga_signed_area() returns negative values for nc, whose rings wind clockwise
 head(as.vector(ga_signed_area(nc$geometry)))
 head(as.vector(ga_unsigned_area(nc$geometry)))
 \dontshow{\}) # examplesIf}

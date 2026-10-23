@@ -17,7 +17,7 @@ ga_sparse_knn(x, y, k = 1, max_distance = NULL, metric = "euclidean")
 \code{NULL} for no limit}
 
 \item{metric}{one of \code{"euclidean"}, \code{"haversine"}, \code{"geodesic"}, or
-\code{"rhumb"}. Everything but \code{"euclidean"} measures between points only.}
+\code{"rhumb"}. Use \code{"euclidean"} for geometries other than points.}
 }
 \value{
 a list array of \code{row} and \code{distance} pairs, the same length as \code{x},
@@ -25,26 +25,29 @@ where \code{row} is a 1 based row number into \code{y}
 }
 \description{
 Returns the \code{k} rows of \code{y} closest to each row of \code{x}, nearest first, each
-paired with the distance between them. This is the sparse form of a nearest
-neighbour search, and the shape \code{\link[=ga_knn_join]{ga_knn_join()}} needs.
+paired with the distance between them. \code{ga_sparse_knn()} is the sparse form
+of a nearest neighbour search, and returns the shape \code{\link[=ga_knn_join]{ga_knn_join()}} needs.
 }
 \details{
-Distance is measured between the geometries themselves, not between their
-bounding boxes, so the nearest edge of a polygon counts rather than the corner
-of the box around it. \code{y} is indexed in a packed Hilbert R-tree, which narrows
-the search to the rows that can win before any exact distance is computed, and
-the answer is the same as comparing every pair.
+\code{ga_sparse_knn()} measures distance between the geometries themselves, not
+between their bounding boxes, so it counts the nearest edge of a polygon
+rather than the corner of the box around it. It indexes \code{y} in a packed
+Hilbert R-tree to narrow the search to the rows that can win before it
+computes any exact distance, and returns the same answer as comparing every
+pair.
 
-\code{metric} decides how far apart two rows are, and so which rows win.
-\code{"euclidean"} measures in the units the coordinates are in, which on longitude
-and latitude is degrees, and ranks neighbours differently from a real distance
-once the rows are far apart or near a pole. It is the default because it is
-the only metric \code{geo} defines between geometries of any type. For longitude
-and latitude points, \code{"geodesic"} or \code{"haversine"} is the answer you want.
+\code{metric} sets how \code{ga_sparse_knn()} measures how far apart two rows are, and
+so which rows win. With \code{"euclidean"} it measures in the units of the
+coordinates, which on longitude and latitude is degrees, and so ranks
+neighbours differently from a real distance once the rows are far apart or
+near a pole. It is the default because \code{geo} defines no other metric between
+geometries of any type. For longitude and latitude points, you want
+\code{"geodesic"} or \code{"haversine"}.
 
-A row matches fewer than \code{k} rows only when \code{max_distance} rules the rest out
-or \code{y} is shorter than \code{k}. A null or empty geometry in \code{x} gives a null
-element, and one in \code{y} is never returned.
+\code{ga_sparse_knn()} returns fewer than \code{k} rows for a row of \code{x} only when
+\code{max_distance} rules the rest out or \code{y} is shorter than \code{k}. It returns a
+null element for a null or empty geometry in \code{x}, and never returns one from
+\code{y}.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

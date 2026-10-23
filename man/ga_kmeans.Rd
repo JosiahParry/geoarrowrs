@@ -18,17 +18,18 @@ an integer array of cluster labels, the same length as \code{geometry}
 }
 \description{
 Splits the points in the array into \code{k} clusters by nearest centre. One
-label per row, in the order the points were given.
+label per row, in the order you gave the points.
 }
 \details{
-k-means always produces exactly \code{k} clusters and no noise, so every point
-gets a label. It favours round, similarly sized clusters; use \code{\link[=ga_dbscan]{ga_dbscan()}}
+k-means always produces exactly \code{k} clusters and no noise, so it labels
+every point. It favours round, similarly sized clusters; use \code{\link[=ga_dbscan]{ga_dbscan()}}
 when the shapes are irregular or the count is unknown.
 
-Clustering is over the whole array, not within each row, so \code{k} is a single
-value rather than one per row. The algorithm starts from a random seed, so
-results vary between runs unless \code{seed} is given. A row that is not a single
-point, or is null, takes no part in the clustering and comes back null.
+\code{ga_kmeans()} clusters over the whole array, not within each row, so \code{k} is
+a single value rather than one per row. The algorithm starts from a random
+seed, so \code{ga_kmeans()} can return different results on each run unless you
+give \code{seed}. It leaves a row that is not a single point, or is null, out of
+the clustering and returns null for it.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

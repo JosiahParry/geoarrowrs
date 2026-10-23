@@ -18,15 +18,15 @@ multipoint per input geometry.
 }
 \details{
 Uses the Bentley-Ottmann sweep line, which finds all crossings in roughly
-\verb{n log n} rather than by testing every pair. This is how to locate the
-problem that \code{\link[=ga_is_valid]{ga_is_valid()}} reports: a self intersecting polygon comes back
-with the offending points.
+\verb{n log n} rather than by testing every pair. Use \code{ga_self_intersections()}
+to locate the problem that \code{\link[=ga_is_valid]{ga_is_valid()}} reports: it returns the
+offending points of a self intersecting polygon.
 
-Segments that merely share an endpoint, as consecutive segments of a
-linestring always do, are not counted. A geometry with no crossings gives
-an empty multipoint rather than a null, so an empty result is
-distinguishable from an unsupported geometry. Points and null rows come
-back null.
+\code{ga_self_intersections()} does not count segments that merely share an
+endpoint, as consecutive segments of a linestring always do. It returns an
+empty multipoint rather than a null for a geometry with no crossings, so you
+can distinguish an empty result from an unsupported geometry. It returns
+null for points and null rows.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

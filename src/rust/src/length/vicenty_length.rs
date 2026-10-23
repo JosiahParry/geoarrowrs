@@ -13,7 +13,8 @@ use crate::{as_linestring_chunks, as_multilinestring_chunks};
 ///
 /// Calculates the geodesic length of each linestring or multilinestring using
 /// the Vincenty formula on an ellipsoidal model of the earth. Returns `NA`
-/// if the algorithm fails to converge. Results are in meters.
+/// if the algorithm fails to converge. `ga_length_vincenty()` returns lengths
+/// in meters.
 ///
 /// @param x a GeoArrow linestring or multilinestring array
 /// @returns a double vector of length values in meters

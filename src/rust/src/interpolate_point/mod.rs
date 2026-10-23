@@ -16,7 +16,7 @@ use crate::{as_point_chunks, check_pair_len, check_recycle_len, try_float_array}
 /// Interpolate a point between two points
 ///
 /// Returns the point located at `distance` along the path from `start` to `end`.
-/// The metric determines how distance is measured.
+/// `ga_point_at_distance_between()` uses `metric` to measure distance.
 ///
 /// @param start a GeoArrow point array of start points
 /// @param end a GeoArrow point array of end points
@@ -94,8 +94,8 @@ fn ga_point_at_distance_between(
 /// Interpolate a point at a given ratio between two points
 ///
 /// Returns the point located at `ratio` of the way from `start` to `end`,
-/// where 0.0 is the start and 1.0 is the end. The metric determines how
-/// the interpolation is computed.
+/// where 0.0 is the start and 1.0 is the end. `ga_point_at_ratio_between()`
+/// uses `metric` to compute the interpolation.
 ///
 /// @param start a GeoArrow point array of start points
 /// @param end a GeoArrow point array of end points

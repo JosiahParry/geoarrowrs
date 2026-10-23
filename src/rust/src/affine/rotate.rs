@@ -23,7 +23,7 @@ use crate::{
 /// Rotate geometries around their centroid
 ///
 /// Rotates each geometry counter-clockwise by `degrees` about its own centroid.
-/// The geometry type of the output matches the geometry type of the input.
+/// `ga_rotate_around_centroid()` keeps the input's geometry type.
 ///
 /// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 /// @param degrees angle of rotation; length 1 or the same length as `geometry`
@@ -146,8 +146,8 @@ fn ga_rotate_around_centroid(geometry: Robj, degrees: Robj) -> extendr_api::Resu
 /// Rotate around the bounding box center
 ///
 /// Rotates each geometry counter-clockwise by `degrees` about the center of its
-/// own axis-aligned bounding rectangle. The geometry type of the output matches
-/// the geometry type of the input.
+/// own axis-aligned bounding rectangle. `ga_rotate_around_center()` keeps the
+/// input's geometry type.
 ///
 /// @param geometry a GeoArrow point, linestring, multilinestring, polygon, or multipolygon array
 /// @param degrees angle of rotation; length 1 or the same length as `geometry`
@@ -156,7 +156,7 @@ fn ga_rotate_around_centroid(geometry: Robj, degrees: Robj) -> extendr_api::Resu
 /// @family affine
 /// @references [Rotate](https://docs.rs/geo/latest/geo/algorithm/rotate/trait.Rotate.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// # the same triangle, turned about its bounding box center instead
+/// # turn the same triangle about its bounding box center instead
 /// tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
 ///   sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
 /// ))

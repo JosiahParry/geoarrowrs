@@ -17,12 +17,13 @@ a boolean array of the same length as \code{geometry}
 }
 \description{
 \code{ga_is_ccw()} is \code{TRUE} for counter-clockwise geometries and \code{ga_is_cw()} is
-\code{TRUE} for clockwise ones. A polygon is tested on its exterior ring.
+\code{TRUE} for clockwise ones. Each function tests a polygon on its exterior
+ring.
 }
 \details{
-Any geometry with no winding order, such as a point or a null geometry,
-becomes \code{NA} rather than \code{FALSE}, so the two functions are not simply
-negations of one another.
+Each function returns \code{NA} rather than \code{FALSE} for any geometry with no
+winding order, such as a point or a null geometry, so the two functions are
+not simply negations of one another.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

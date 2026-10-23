@@ -96,10 +96,10 @@ fn closest_impl(geometry: Robj, point: Robj, haversine: bool) -> extendr_api::Re
 /// instead, treating coordinates as longitude and latitude in degrees.
 ///
 /// @details
-/// When the point lies on the geometry the intersection itself is returned.
-/// A geometry with no single nearest position, such as a point equidistant
-/// from both ends of a symmetric line, becomes a null element, as does a null
-/// geometry or a null point.
+/// When the point lies on the geometry, each function returns the intersection
+/// itself. These functions return a null element for a geometry with no single
+/// nearest position, such as a point equidistant from both ends of a symmetric
+/// line, and for a null geometry or a null point.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @param point a GeoArrow point array; length 1 or the same length as `geometry`
@@ -131,13 +131,13 @@ fn ga_closest_point_haversine(geometry: Robj, point: Robj) -> extendr_api::Resul
 
 /// Compute a representative point inside a geometry
 ///
-/// Returns a point guaranteed to lie on the geometry, unlike [ga_centroid()],
-/// which can fall outside a concave shape.
+/// Returns a point that always lies on the geometry, unlike [ga_centroid()],
+/// which can return a point outside a concave shape.
 ///
 /// @details
-/// For a polygon this is a point on the interior, chosen from the horizontal
-/// line closest to the centroid. An empty or null geometry becomes a null
-/// element.
+/// For a polygon, `ga_interior_point()` picks a point on the interior from the
+/// horizontal line closest to the centroid. It returns a null element for an
+/// empty or null geometry.
 ///
 /// @param geometry a GeoArrow geometry array
 /// @returns a GeoArrow point array of the same length as `geometry`
@@ -169,14 +169,15 @@ fn ga_interior_point(geometry: Robj) -> extendr_api::Result<Robj> {
 
 /// Test whether a ring is convex
 ///
-/// `TRUE` when the geometry's ring turns consistently in one direction. A
-/// polygon is judged on its exterior ring.
+/// `TRUE` when the geometry's ring turns consistently in one direction.
+/// `ga_is_convex()` judges a polygon on its exterior ring.
 ///
 /// @details
-/// A linestring must be closed, that is form a ring, to be reported convex; an
-/// open one is `FALSE`. A polygon's exterior ring is always closed, so polygons
-/// need no special handling. Any other geometry type, or a null geometry,
-/// becomes `NA` rather than `FALSE`.
+/// `ga_is_convex()` reports a linestring as convex only when it is closed, that
+/// is forms a ring, and returns `FALSE` for an open one. A polygon's exterior
+/// ring is always closed, so `ga_is_convex()` needs no special case for them.
+/// `ga_is_convex()` returns `NA` rather than `FALSE` for any other geometry
+/// type or a null geometry.
 ///
 /// @param geometry a GeoArrow linestring or polygon array
 /// @returns a boolean array of the same length as `geometry`
@@ -214,10 +215,10 @@ fn ga_is_convex(geometry: Robj) -> extendr_api::Result<Robj> {
 /// point lies, as a fraction between 0 and 1.
 ///
 /// @details
-/// 0 is the start of the line and 1 its end, so the value multiplied by the
-/// line's length gives a distance. Only lines and linestrings can be located
-/// along; any other geometry type, a null geometry, a null point, or a
-/// zero length line becomes `NA`.
+/// 0 is the start of the line and 1 its end, so you can multiply the value by
+/// the line's length to get a distance. `ga_line_locate_point()` locates along
+/// lines and linestrings only, and returns `NA` for any other geometry type, a
+/// null geometry, a null point, or a zero length line.
 ///
 /// @param geometry a GeoArrow linestring array
 /// @param point a GeoArrow point array; length 1 or the same length as `geometry`

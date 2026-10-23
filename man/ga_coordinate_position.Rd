@@ -19,8 +19,9 @@ Returns \code{"inside"}, \code{"outside"}, or \code{"boundary"} for each pair.
 }
 \details{
 This is the three way form of a point in polygon test, distinguishing a
-point that lies exactly on an edge from one strictly inside. \code{point} is
-recycled against \code{geometry}. A null geometry or a null point gives \code{NA}.
+point that lies exactly on an edge from one strictly inside.
+\code{ga_coordinate_position()} recycles \code{point} against \code{geometry} and returns
+\code{NA} for a null geometry or a null point.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -40,8 +41,8 @@ as.vector(ga_coordinate_position(g, p))
 Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
-\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_equals_exact]{ga_equals_exact()}},
+\code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
 \code{\link[=ga_join]{ga_join()}},
 \code{\link[=ga_relate]{ga_relate()}},

@@ -20,15 +20,15 @@ a double vector of area values in square meters, or perimeter values in meters
 }
 \description{
 These functions use the geodesic formula for computing area and perimeter on
-an ellipsoidal model of the earth. Results are in square meters for area and
-meters for perimeter.
+an ellipsoidal model of the earth. They return area in square meters and
+perimeter in meters.
 }
 \details{
-\code{geo} assumes Simple Features winding, so an exterior ring must run
-counter-clockwise. A clockwise ring names the rest of the earth instead,
-and \code{ga_unsigned_area_geodesic()} returns a value near 5.1e14. Shapefiles
-wind clockwise, so orient with \code{\link[=ga_orient]{ga_orient()}} first or read the sign off
-\code{ga_signed_area_geodesic()}, which is unaffected.
+\code{geo} assumes Simple Features winding, so it expects an exterior ring to run
+counter-clockwise. \code{ga_unsigned_area_geodesic()} reads a clockwise ring as
+the rest of the earth instead and returns a value near 5.1e14. For
+shapefiles, which wind clockwise, orient with \code{\link[=ga_orient]{ga_orient()}} first or read
+the sign off \code{ga_signed_area_geodesic()}, which does not have this problem.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -38,7 +38,7 @@ nc <- as.data.frame(read_shapefile(fp))
 head(as.vector(ga_signed_area_geodesic(nc$geometry)))
 head(as.vector(ga_perimeter_geodesic(nc$geometry)))
 
-# nc winds clockwise, so orient before taking the unsigned area
+# orient nc, which winds clockwise, before taking the unsigned area
 ccw <- ga_orient(nc$geometry, "default")
 head(as.vector(ga_unsigned_area_geodesic(ccw)))
 \dontshow{\}) # examplesIf}

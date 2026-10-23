@@ -36,10 +36,10 @@ fn extremes_of(array: &dyn GeoArrowArray) -> GeoArrowResult<Vec<Option<Outcome<f
 
 /// Compute the extreme coordinates of geometries
 ///
-/// Returns a struct array with four point fields -- `x_min`, `x_max`, `y_min`
-/// and `y_max` -- giving the coordinate that is furthest in each direction. The
-/// result has one row per input geometry; a null or empty geometry yields a row
-/// of four nulls.
+/// Returns a struct array with four point fields, `x_min`, `x_max`, `y_min`
+/// and `y_max`, holding the coordinate that is furthest in each direction.
+/// `ga_extremes()` returns one row per input geometry, and a row of four nulls
+/// for a null or empty geometry.
 ///
 /// Note these are the extreme *coordinates*, not the corners of the bounding
 /// box: `ga_extremes()` gives the `x_min` point the y value of whichever vertex

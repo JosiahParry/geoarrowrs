@@ -16,12 +16,12 @@ a GeoArrow array of the same geometry type as the input
 }
 \description{
 Rotates each geometry counter-clockwise by \code{degrees} about the center of its
-own axis-aligned bounding rectangle. The geometry type of the output matches
-the geometry type of the input.
+own axis-aligned bounding rectangle. \code{ga_rotate_around_center()} keeps the
+input's geometry type.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-# the same triangle, turned about its bounding box center instead
+# turn the same triangle about its bounding box center instead
 tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
 ))

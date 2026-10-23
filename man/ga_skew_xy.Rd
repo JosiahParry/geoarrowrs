@@ -18,8 +18,8 @@ a GeoArrow array of the same geometry type as the input
 }
 \description{
 Shears each geometry by \code{degrees_x} along the x dimension and \code{degrees_y}
-along the y dimension, about the geometry's own centroid. The geometry type
-of the output matches the geometry type of the input.
+along the y dimension, about the geometry's own centroid. \code{ga_skew_xy()}
+keeps the input's geometry type.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

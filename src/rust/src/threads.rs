@@ -27,8 +27,9 @@ impl Threads {
 
 /// Set the thread cap, from `options(geoarrowrs.thread_pool = )`
 ///
-/// Called on load and whenever the option changes. `0` returns the parallel
-/// paths to rayon's own default, which is one thread per core.
+/// geoarrowrs calls `ga_set_thread_pool()` on load and whenever you change the
+/// option. With `0`, it returns the parallel paths to rayon's own default, which
+/// is one thread per core.
 ///
 /// @param n the most threads to use, or `0` for rayon's default
 /// @returns `n`, invisibly

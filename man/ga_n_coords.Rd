@@ -16,8 +16,9 @@ an integer array of the same length as \code{geometry}
 Returns how many vertices each geometry holds.
 }
 \details{
-Counts every coordinate that \code{\link[=ga_coords]{ga_coords()}} would return, so a closed ring
-counts its repeated final vertex. A null geometry gives \code{NA}.
+Counts every coordinate that \code{\link[=ga_coords]{ga_coords()}} would return, so it counts the
+repeated final vertex of a closed ring. \code{ga_n_coords()} returns \code{NA} for a
+null geometry.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

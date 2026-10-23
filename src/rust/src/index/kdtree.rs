@@ -70,11 +70,12 @@ fn add_points(chunks: &[PointArray], node_size: u16) -> anyhow::Result<(GeoKDTre
 /// # every centroid within half a degree of every other
 /// head(as.vector(idx$within(pts, 0.5)), 3)
 ///
-/// # a single lookup is an array of one
+/// # for a single lookup, pass an array of one
 /// as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
 #[extendr]
 impl KDTree {
-    /// Build the index. A bigger `node_size` builds quicker but searches slower.
+    /// Build the index. With a bigger `node_size` you build quicker but search
+    /// slower.
     fn new(geometry: Robj, #[extendr(default = "64")] node_size: i32) -> anyhow::Result<Self> {
         if node_size < 2 {
             anyhow::bail!("`node_size` must be at least 2");
@@ -117,7 +118,7 @@ impl KDTree {
             .map_err(|e| anyhow::anyhow!("{e}"))
     }
 
-    /// Which points are within `r` of each point, measured flat in coordinate units
+    /// Which points are within `r` of each point, in flat coordinate units
     ///
     /// @param geometry a GeoArrow point array to look up
     /// @param r the radius; length 1 or the same length as `geometry`
@@ -156,14 +157,14 @@ impl KDTree {
             .map_err(|e| anyhow::anyhow!("{e}"))
     }
 
-    /// How many rows went in
+    /// How many rows you put in
     ///
-    /// @returns the length of the array the index was built from
+    /// @returns the length of the array you built the index from
     fn size(&self) -> i32 {
         self.n as i32
     }
 
-    /// How many rows made it into the tree, skipping null and empty points
+    /// How many rows the tree holds, without null and empty points
     ///
     /// @returns the number of indexed rows
     fn n_indexed(&self) -> i32 {

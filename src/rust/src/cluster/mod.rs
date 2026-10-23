@@ -50,18 +50,19 @@ fn as_scalar(x: Robj, label: &'static str) -> extendr_api::Result<f64> {
 /// Assign points to clusters by density
 ///
 /// Labels every point in the array with a cluster number, or `NA` when the
-/// point is noise. One label per row, in the order the points were given.
+/// point is noise. One label per row, in the order you gave the points.
 ///
 /// @details
 /// DBSCAN grows a cluster from any point with at least `min_points` neighbours
-/// within `eps`. Points reachable from that core join the cluster, and points
-/// that never become reachable are noise. Unlike k-means it finds clusters of
-/// any shape and does not need the count up front.
+/// within `eps`. It adds points reachable from that core to the cluster and
+/// labels points that never become reachable as noise. Unlike k-means it finds
+/// clusters of any shape and does not need the count up front.
 ///
-/// Clustering is over the whole array, not within each row, so `eps` and
-/// `min_points` are single values rather than one per row. Cluster numbers
-/// start at 1 and mean nothing beyond grouping. A row that is not a single
-/// point, or is null, takes no part in the clustering and comes back null.
+/// `ga_dbscan()` clusters over the whole array, not within each row, so `eps`
+/// and `min_points` are single values rather than one per row. It numbers
+/// clusters from 1, and the numbers mean nothing beyond grouping. It leaves a
+/// row that is not a single point, or is null, out of the clustering and
+/// returns null for it.
 ///
 /// @param geometry a GeoArrow point array
 /// @param eps how close two points must be to be neighbours
@@ -105,17 +106,18 @@ fn ga_dbscan(geometry: Robj, eps: Robj, min_points: Robj) -> anyhow::Result<Robj
 /// Assign points to a fixed number of clusters
 ///
 /// Splits the points in the array into `k` clusters by nearest centre. One
-/// label per row, in the order the points were given.
+/// label per row, in the order you gave the points.
 ///
 /// @details
-/// k-means always produces exactly `k` clusters and no noise, so every point
-/// gets a label. It favours round, similarly sized clusters; use [ga_dbscan()]
+/// k-means always produces exactly `k` clusters and no noise, so it labels
+/// every point. It favours round, similarly sized clusters; use [ga_dbscan()]
 /// when the shapes are irregular or the count is unknown.
 ///
-/// Clustering is over the whole array, not within each row, so `k` is a single
-/// value rather than one per row. The algorithm starts from a random seed, so
-/// results vary between runs unless `seed` is given. A row that is not a single
-/// point, or is null, takes no part in the clustering and comes back null.
+/// `ga_kmeans()` clusters over the whole array, not within each row, so `k` is
+/// a single value rather than one per row. The algorithm starts from a random
+/// seed, so `ga_kmeans()` can return different results on each run unless you
+/// give `seed`. It leaves a row that is not a single point, or is null, out of
+/// the clustering and returns null for it.
 ///
 /// @param geometry a GeoArrow point array
 /// @param k how many clusters to produce
@@ -175,10 +177,11 @@ fn ga_kmeans(
 /// are, which is what marks an outlier. There is no universal cutoff, so
 /// compare scores within a dataset rather than against a fixed threshold.
 ///
-/// `k_neighbours` sets how many neighbours define the local neighbourhood.
-/// Small values react to fine structure and large values smooth it away.
-/// Scoring is over the whole array, not within each row, so it is a single
-/// value. A row that is not a single point, or is null, comes back null.
+/// Use `k_neighbours` to set how many neighbours define the local
+/// neighbourhood. With small values `ga_outlier_scores()` reacts to fine
+/// structure, and with large values it smooths that structure away. It scores
+/// over the whole array, not within each row, so `k_neighbours` is a single
+/// value. It returns null for a row that is not a single point, or is null.
 ///
 /// @param geometry a GeoArrow point array
 /// @param k_neighbours how many neighbours define a neighbourhood

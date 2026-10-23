@@ -18,18 +18,19 @@ an integer array of cluster labels, the same length as \code{geometry}
 }
 \description{
 Labels every point in the array with a cluster number, or \code{NA} when the
-point is noise. One label per row, in the order the points were given.
+point is noise. One label per row, in the order you gave the points.
 }
 \details{
 DBSCAN grows a cluster from any point with at least \code{min_points} neighbours
-within \code{eps}. Points reachable from that core join the cluster, and points
-that never become reachable are noise. Unlike k-means it finds clusters of
-any shape and does not need the count up front.
+within \code{eps}. It adds points reachable from that core to the cluster and
+labels points that never become reachable as noise. Unlike k-means it finds
+clusters of any shape and does not need the count up front.
 
-Clustering is over the whole array, not within each row, so \code{eps} and
-\code{min_points} are single values rather than one per row. Cluster numbers
-start at 1 and mean nothing beyond grouping. A row that is not a single
-point, or is null, takes no part in the clustering and comes back null.
+\code{ga_dbscan()} clusters over the whole array, not within each row, so \code{eps}
+and \code{min_points} are single values rather than one per row. It numbers
+clusters from 1, and the numbers mean nothing beyond grouping. It leaves a
+row that is not a single point, or is null, out of the clustering and
+returns null for it.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

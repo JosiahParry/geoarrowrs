@@ -25,7 +25,7 @@ zigzag <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_linestring(rbind(c(0, 0), c(1, 2), c(2, 0), c(3, 2)))
 ))
 
-# each iteration cuts every corner, so the vertex count grows
+# each iteration cuts every corner, raising the vertex count
 as.vector(ga_n_coords(zigzag))
 as.vector(ga_n_coords(ga_chaikin_smoothing(zigzag, 2)))
 
