@@ -34,7 +34,7 @@ is_geometry.geoarrow_vctr <- function(x) {
 #' @noRd
 st_extent.geoarrow_vctr <- function(x) {
   # the box array is a struct of four columns, so the extent is their range
-  boxes <- ga_bounding_rect(as_ga(x))$children
+  boxes <- ga_envelope(as_ga(x))$children
 
   c(
     xmin = min(as.vector(boxes$xmin), na.rm = TRUE),

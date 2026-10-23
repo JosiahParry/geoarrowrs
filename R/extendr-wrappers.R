@@ -1571,22 +1571,6 @@ ga_boolean_xor <- function(x, y) .Call(wrap__ga_boolean_xor, x, y)
 #' as.vector(ga_unsigned_area(ga_unary_union(x)))
 ga_unary_union <- function(x) .Call(wrap__ga_unary_union, x)
 
-#' Axis-aligned bounding rectangle
-#'
-#' Returns the smallest axis-aligned rectangle that contains each geometry.
-#'
-#' @param x a GeoArrow geometry array
-#' @returns a GeoArrow rect array
-#' @export
-#' @family boundary
-#' @references [BoundingRect](https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html)
-#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' fp <- system.file("shape/nc.shp", package = "sf")
-#' nc <- as.data.frame(read_shapefile(fp))
-#'
-#' head(geoarrow::as_geoarrow_vctr(ga_bounding_rect(nc$geometry)), 3)
-ga_bounding_rect <- function(x) .Call(wrap__ga_bounding_rect, x)
-
 #' Minimum rotated bounding rectangle
 #'
 #' Returns the smallest rectangle of arbitrary rotation that contains each
@@ -1604,7 +1588,7 @@ ga_bounding_rect <- function(x) .Call(wrap__ga_bounding_rect, x)
 #' # free to rotate, so it hugs the county tighter than the envelope
 #' rot <- ga_minimum_rotated_rect(nc$geometry)
 #' head(as.vector(ga_unsigned_area(rot)), 3)
-#' head(as.vector(ga_unsigned_area(ga_bounding_rect(nc$geometry))), 3)
+#' head(as.vector(ga_unsigned_area(ga_envelope(nc$geometry))), 3)
 ga_minimum_rotated_rect <- function(x) .Call(wrap__ga_minimum_rotated_rect, x)
 
 #' Compute the convex hull of geometries
@@ -1661,8 +1645,8 @@ ga_concave_hull <- function(geometry, concavity, length_threshold) .Call(wrap__g
 #' of four nulls.
 #'
 #' Note these are the extreme *coordinates*, not the corners of the bounding
-#' box: the `x_min` point carries the y value of whichever vertex was
-#' leftmost. Use [ga_bounding_rect()] for the envelope.
+#' box: `ga_extremes()` gives the `x_min` point the y value of whichever vertex
+#' was leftmost. Use [ga_envelope()] for the bounding box.
 #'
 #' @param x a GeoArrow geometry array
 #' @returns an Arrow struct array of four point fields, with one row per geometry
@@ -2128,13 +2112,12 @@ ga_densify <- function(geometry, max_segment_length, metric) .Call(wrap__ga_dens
 #' that the spatial index queries take.
 #'
 #' @details
-#' A box array is passed straight through rather than recomputed, so this is
-#' cheap to call on something that already holds boxes and safe to call
-#' defensively before a query.
+#' `ga_envelope()` returns a box array as it is instead of recomputing it, so
+#' you can call it before a query whether or not the input already holds
+#' boxes. It returns `NA` for a null or empty geometry.
 #'
-#' This is the envelope in the OGC sense. It differs from
-#' [ga_bounding_rect()] only in that pass through; the boxes themselves are
-#' the same.
+#' PostGIS calls this `ST_Envelope()`, which returns a polygon rather than a
+#' box.
 #'
 #' @param x a GeoArrow geometry array
 #' @returns a GeoArrow box array of the same length as `x`
@@ -2192,6 +2175,7 @@ ga_line_intersection <- function(x, y) .Call(wrap__ga_line_intersection, x, y)
 #' Returns the points at which a geometry's own segments intersect, one
 #' multipoint per input geometry.
 #'
+#' @family boundary
 #' @details
 #' Uses the Bentley-Ottmann sweep line, which finds all crossings in roughly
 #' `n log n` rather than by testing every pair. This is how to locate the

@@ -30,8 +30,8 @@ head(as.vector(ga_unsigned_area(nc$geometry)), 3)
 }
 \seealso{
 Other boundary:
-\code{\link[=ga_bounding_rect]{ga_bounding_rect()}},
 \code{\link[=ga_concave_hull]{ga_concave_hull()}},
+\code{\link[=ga_envelope]{ga_envelope()}},
 \code{\link[=ga_extremes]{ga_extremes()}},
 \code{\link[=ga_minimum_rotated_rect]{ga_minimum_rotated_rect()}}
 }

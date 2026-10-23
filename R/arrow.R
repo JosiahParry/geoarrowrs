@@ -40,7 +40,7 @@ geoarrow_udf_catalogue <- function() {
     "ga_centroid",
     "ga_interior_point",
     "ga_convex_hull",
-    "ga_bounding_rect",
+    "ga_envelope",
     "ga_minimum_rotated_rect",
     "ga_extremes",
     "ga_is_convex",

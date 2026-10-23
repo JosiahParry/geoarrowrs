@@ -20,8 +20,8 @@ of four nulls.
 }
 \details{
 Note these are the extreme \emph{coordinates}, not the corners of the bounding
-box: the \code{x_min} point carries the y value of whichever vertex was
-leftmost. Use \code{\link[=ga_bounding_rect]{ga_bounding_rect()}} for the envelope.
+box: \code{ga_extremes()} gives the \code{x_min} point the y value of whichever vertex
+was leftmost. Use \code{\link[=ga_envelope]{ga_envelope()}} for the bounding box.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -37,9 +37,9 @@ head(as.data.frame(ga_extremes(nc$geometry)), 3)
 }
 \seealso{
 Other boundary:
-\code{\link[=ga_bounding_rect]{ga_bounding_rect()}},
 \code{\link[=ga_concave_hull]{ga_concave_hull()}},
 \code{\link[=ga_convex_hull]{ga_convex_hull()}},
+\code{\link[=ga_envelope]{ga_envelope()}},
 \code{\link[=ga_minimum_rotated_rect]{ga_minimum_rotated_rect()}}
 }
 \concept{boundary}

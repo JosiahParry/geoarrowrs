@@ -17,13 +17,12 @@ Returns the axis aligned bounding box of each geometry, as the box array
 that the spatial index queries take.
 }
 \details{
-A box array is passed straight through rather than recomputed, so this is
-cheap to call on something that already holds boxes and safe to call
-defensively before a query.
+\code{ga_envelope()} returns a box array as it is instead of recomputing it, so
+you can call it before a query whether or not the input already holds
+boxes. It returns \code{NA} for a null or empty geometry.
 
-This is the envelope in the OGC sense. It differs from
-\code{\link[=ga_bounding_rect]{ga_bounding_rect()}} only in that pass through; the boxes themselves are
-the same.
+PostGIS calls this \code{ST_Envelope()}, which returns a polygon rather than a
+box.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -41,6 +40,12 @@ identical(
 \dontshow{\}) # examplesIf}
 }
 \seealso{
+Other boundary:
+\code{\link[=ga_concave_hull]{ga_concave_hull()}},
+\code{\link[=ga_convex_hull]{ga_convex_hull()}},
+\code{\link[=ga_extremes]{ga_extremes()}},
+\code{\link[=ga_minimum_rotated_rect]{ga_minimum_rotated_rect()}}
+
 Other index:
 \code{\link{KDTree}},
 \code{\link{RTree}},
@@ -49,4 +54,5 @@ Other index:
 \code{\link[=ga_sparse_dwithin]{ga_sparse_dwithin()}},
 \code{\link[=ga_sparse_knn]{ga_sparse_knn()}}
 }
+\concept{boundary}
 \concept{index}

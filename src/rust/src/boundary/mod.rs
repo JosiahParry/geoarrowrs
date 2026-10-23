@@ -3,49 +3,14 @@ mod extremes;
 
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::{BoundingRect, ConvexHull, MinimumRotatedRect, Polygon};
+use geo::{ConvexHull, MinimumRotatedRect, Polygon};
 use geoarrow::{
-    array::{PolygonBuilder, RectBuilder},
-    datatypes::{BoxType, Dimension, PolygonType},
+    array::PolygonBuilder,
+    datatypes::{Dimension, PolygonType},
 };
 use geoarrow_array::GeoArrowArray;
 
 use crate::{as_geo_geometries, as_geometry_chunks};
-
-/// Axis-aligned bounding rectangle
-///
-/// Returns the smallest axis-aligned rectangle that contains each geometry.
-///
-/// @param x a GeoArrow geometry array
-/// @returns a GeoArrow rect array
-/// @export
-/// @family boundary
-/// @references [BoundingRect](https://docs.rs/geo/latest/geo/algorithm/bounding_rect/trait.BoundingRect.html)
-/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// fp <- system.file("shape/nc.shp", package = "sf")
-/// nc <- as.data.frame(read_shapefile(fp))
-///
-/// head(geoarrow::as_geoarrow_vctr(ga_bounding_rect(nc$geometry)), 3)
-#[extendr]
-fn ga_bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
-    let chunks = as_geometry_chunks(x)?;
-    let n = chunks.iter().map(|c| c.len()).sum();
-    let metadata = chunks[0].data_type().metadata().clone();
-    let mut bldr = RectBuilder::new(BoxType::new(geoarrow::datatypes::Dimension::XY, metadata));
-    bldr.reserve(n);
-
-    for chunk in &chunks {
-        for geom in as_geo_geometries(chunk.as_ref())? {
-            if let Some(val) = geom {
-                bldr.push_rect(val.bounding_rect().as_ref());
-            } else {
-                bldr.push_rect(None::<&geo::Rect<f64>>);
-            }
-        }
-    }
-
-    bldr.finish().into_arrow_robj()
-}
 
 /// Minimum rotated bounding rectangle
 ///
@@ -64,7 +29,7 @@ fn ga_bounding_rect(x: Robj) -> extendr_api::Result<Robj> {
 /// # free to rotate, so it hugs the county tighter than the envelope
 /// rot <- ga_minimum_rotated_rect(nc$geometry)
 /// head(as.vector(ga_unsigned_area(rot)), 3)
-/// head(as.vector(ga_unsigned_area(ga_bounding_rect(nc$geometry))), 3)
+/// head(as.vector(ga_unsigned_area(ga_envelope(nc$geometry))), 3)
 #[extendr]
 fn ga_minimum_rotated_rect(x: Robj) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x)?;
@@ -127,7 +92,6 @@ extendr_module! {
     mod boundary;
     use concave_hull;
     use extremes;
-    fn ga_bounding_rect;
     fn ga_minimum_rotated_rect;
     fn ga_convex_hull;
 }

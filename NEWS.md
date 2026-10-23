@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Removed `ga_bounding_rect()`, which duplicated `ga_envelope()`.
 * Added `ga_equals_exact()`.
 * Added `ga_perimeter_euclidean()`.
 * Added `ga_geometry_type()` and `ga_is()`.

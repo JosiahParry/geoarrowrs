@@ -66,7 +66,7 @@ test_that("geometry args accept concrete arrays, not just mixed ones", {
   expect_no_error(ga_centroid(g))
   expect_no_error(ga_signed_area(g))
   expect_no_error(ga_unsigned_area(g))
-  expect_no_error(ga_bounding_rect(g))
+  expect_no_error(ga_envelope(g))
   expect_no_error(ga_convex_hull(g))
   expect_no_error(ga_minimum_rotated_rect(g))
   expect_no_error(ga_extremes(g))

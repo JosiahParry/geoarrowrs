@@ -48,17 +48,17 @@ pub(crate) fn rects_of(
 /// that the spatial index queries take.
 ///
 /// @details
-/// A box array is passed straight through rather than recomputed, so this is
-/// cheap to call on something that already holds boxes and safe to call
-/// defensively before a query.
+/// `ga_envelope()` returns a box array as it is instead of recomputing it, so
+/// you can call it before a query whether or not the input already holds
+/// boxes. It returns `NA` for a null or empty geometry.
 ///
-/// This is the envelope in the OGC sense. It differs from
-/// [ga_bounding_rect()] only in that pass through; the boxes themselves are
-/// the same.
+/// PostGIS calls this `ST_Envelope()`, which returns a polygon rather than a
+/// box.
 ///
 /// @param x a GeoArrow geometry array
 /// @returns a GeoArrow box array of the same length as `x`
 /// @export
+/// @family boundary
 /// @family index
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// nc <- as.data.frame(read_shapefile(

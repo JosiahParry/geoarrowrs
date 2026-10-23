@@ -42,8 +42,8 @@ fn extremes_of(array: &dyn GeoArrowArray) -> GeoArrowResult<Vec<Option<Outcome<f
 /// of four nulls.
 ///
 /// Note these are the extreme *coordinates*, not the corners of the bounding
-/// box: the `x_min` point carries the y value of whichever vertex was
-/// leftmost. Use [ga_bounding_rect()] for the envelope.
+/// box: `ga_extremes()` gives the `x_min` point the y value of whichever vertex
+/// was leftmost. Use [ga_envelope()] for the bounding box.
 ///
 /// @param x a GeoArrow geometry array
 /// @returns an Arrow struct array of four point fields, with one row per geometry

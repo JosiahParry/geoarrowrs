@@ -24,7 +24,7 @@ nc <- as.data.frame(read_shapefile(fp))
 # free to rotate, so it hugs the county tighter than the envelope
 rot <- ga_minimum_rotated_rect(nc$geometry)
 head(as.vector(ga_unsigned_area(rot)), 3)
-head(as.vector(ga_unsigned_area(ga_bounding_rect(nc$geometry))), 3)
+head(as.vector(ga_unsigned_area(ga_envelope(nc$geometry))), 3)
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -32,9 +32,9 @@ head(as.vector(ga_unsigned_area(ga_bounding_rect(nc$geometry))), 3)
 }
 \seealso{
 Other boundary:
-\code{\link[=ga_bounding_rect]{ga_bounding_rect()}},
 \code{\link[=ga_concave_hull]{ga_concave_hull()}},
 \code{\link[=ga_convex_hull]{ga_convex_hull()}},
+\code{\link[=ga_envelope]{ga_envelope()}},
 \code{\link[=ga_extremes]{ga_extremes()}}
 }
 \concept{boundary}
