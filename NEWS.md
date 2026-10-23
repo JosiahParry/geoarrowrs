@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_equals_exact()`.
 * Added `ga_perimeter_euclidean()`.
 * Added `ga_geometry_type()` and `ga_is()`.
 * A `geoarrow_vctr` is now an sdf geometry backend, implementing sdf's generics so `sdf_filter()` and `sdf_join()` run on Arrow.

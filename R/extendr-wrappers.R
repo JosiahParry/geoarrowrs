@@ -1205,6 +1205,37 @@ ga_relate <- function(x, y) .Call(wrap__ga_relate, x, y)
 #' point's 0. `ga_boundary_dimension()` gives the dimension of the geometry's
 #' boundary instead, so a polygon is 1 and a point is `NA`.
 #'
+#' Test whether geometries are identical within a tolerance
+#'
+#' `TRUE` when `x` and `y` have the same type and structure and every
+#' coordinate lies within `tolerance` of its counterpart. `ga_equals_exact()`
+#' recycles `y` and `tolerance` against `x`.
+#'
+#' @details
+#' Unlike `ga_equals_topo()`, `ga_equals_exact()` compares coordinates in
+#' order, so it does not treat a line and its reverse as equal. It measures
+#' planar distance between coordinates and returns `NA` for a null on either
+#' side.
+#'
+#' @param x a GeoArrow geometry array
+#' @param y a GeoArrow geometry array; length 1 or the same length as `x`
+#' @param tolerance the largest planar distance allowed between matching coordinates; length 1 or the same length as `x`
+#' @returns a boolean array of the same length as `x`
+#' @export
+#' @family topology
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(1, 1))),
+#'   sf::st_linestring(rbind(c(1, 1), c(0, 0)))
+#' ))
+#' y <- geoarrow::as_geoarrow_array(sf::st_sfc(
+#'   sf::st_linestring(rbind(c(0, 0), c(1, 1.01)))
+#' ))
+#'
+#' # ga_equals_exact() does not treat the reversed line as equal
+#' as.vector(ga_equals_exact(x, y, 0.1))
+ga_equals_exact <- function(x, y, tolerance = 0) .Call(wrap__ga_equals_exact, x, y, tolerance)
+
 #' @param geometry a GeoArrow geometry array
 #' @returns an integer array of the same length as `geometry`
 #' @export

@@ -83,6 +83,7 @@ Other topology:
 \code{\link[=ga_contains]{ga_contains()}},
 \code{\link[=ga_coordinate_position]{ga_coordinate_position()}},
 \code{\link[=ga_dimension]{ga_dimension()}},
+\code{\link[=ga_equals_exact]{ga_equals_exact()}},
 \code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
 \code{\link[=ga_join]{ga_join()}},

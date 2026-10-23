@@ -5,12 +5,15 @@ use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::algorithm::dimensions::{Dimensions, HasDimensions};
 use geo::algorithm::relate::{IntersectionMatrix, Relate};
 use geo::indexed::PreparedGeometry;
-use geo::{Coord, Geometry};
+use geo::{Coord, Geometry, LineString, Point, Polygon};
 use geoarrow_array::GeoArrowArray;
 use rayon::prelude::*;
 
 use crate::threads::with_pool;
-use crate::{as_geo_geometries, as_geo_geometries_par, as_geometry_chunks, as_recycled_geometries};
+use crate::{
+    as_geo_geometries, as_geo_geometries_par, as_geometry_chunks, as_recycled_geometries,
+    check_recycle_len, try_float_array,
+};
 
 /// Build the nine character DE-9IM string; Debug wraps it in the type name, so read the cells.
 fn de9im(m: &IntersectionMatrix) -> String {
@@ -239,6 +242,127 @@ fn ga_relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 }
 
 /// Determine the topological dimension of geometries
+/// Exact equality as GEOS defines it: same type, same structure, and every coordinate within `tol` in planar distance.
+trait EqualsExact {
+    fn equals_exact(&self, other: &Self, tol: f64) -> bool;
+}
+
+impl EqualsExact for Coord<f64> {
+    fn equals_exact(&self, other: &Self, tol: f64) -> bool {
+        (self.x - other.x).hypot(self.y - other.y) <= tol
+    }
+}
+
+/// Sequences match element by element, in order.
+impl<T: EqualsExact> EqualsExact for [T] {
+    fn equals_exact(&self, other: &Self, tol: f64) -> bool {
+        self.len() == other.len() && self.iter().zip(other).all(|(a, b)| a.equals_exact(b, tol))
+    }
+}
+
+impl EqualsExact for Point<f64> {
+    fn equals_exact(&self, other: &Self, tol: f64) -> bool {
+        self.0.equals_exact(&other.0, tol)
+    }
+}
+
+impl EqualsExact for LineString<f64> {
+    fn equals_exact(&self, other: &Self, tol: f64) -> bool {
+        self.0.as_slice().equals_exact(other.0.as_slice(), tol)
+    }
+}
+
+/// Rings match in order, exterior first.
+impl EqualsExact for Polygon<f64> {
+    fn equals_exact(&self, other: &Self, tol: f64) -> bool {
+        self.exterior().equals_exact(other.exterior(), tol)
+            && self.interiors().equals_exact(other.interiors(), tol)
+    }
+}
+
+/// Geometries of different types are never equal.
+impl EqualsExact for Geometry<f64> {
+    fn equals_exact(&self, other: &Self, tol: f64) -> bool {
+        match (self, other) {
+            (Geometry::Point(p), Geometry::Point(q)) => p.equals_exact(q, tol),
+            (Geometry::LineString(p), Geometry::LineString(q)) => p.equals_exact(q, tol),
+            (Geometry::Polygon(p), Geometry::Polygon(q)) => p.equals_exact(q, tol),
+            (Geometry::Rect(p), Geometry::Rect(q)) => {
+                [p.min(), p.max()][..].equals_exact(&[q.min(), q.max()][..], tol)
+            }
+            (Geometry::MultiPoint(p), Geometry::MultiPoint(q)) => {
+                p.0.as_slice().equals_exact(q.0.as_slice(), tol)
+            }
+            (Geometry::MultiLineString(p), Geometry::MultiLineString(q)) => {
+                p.0.as_slice().equals_exact(q.0.as_slice(), tol)
+            }
+            (Geometry::MultiPolygon(p), Geometry::MultiPolygon(q)) => {
+                p.0.as_slice().equals_exact(q.0.as_slice(), tol)
+            }
+            (Geometry::GeometryCollection(p), Geometry::GeometryCollection(q)) => {
+                p.0.as_slice().equals_exact(q.0.as_slice(), tol)
+            }
+            _ => false,
+        }
+    }
+}
+
+/// Test whether geometries are identical within a tolerance
+///
+/// `TRUE` when `x` and `y` have the same type and structure and every
+/// coordinate lies within `tolerance` of its counterpart. `ga_equals_exact()`
+/// recycles `y` and `tolerance` against `x`.
+///
+/// @details
+/// Unlike `ga_equals_topo()`, `ga_equals_exact()` compares coordinates in
+/// order, so it does not treat a line and its reverse as equal. It measures
+/// planar distance between coordinates and returns `NA` for a null on either
+/// side.
+///
+/// @param x a GeoArrow geometry array
+/// @param y a GeoArrow geometry array; length 1 or the same length as `x`
+/// @param tolerance the largest planar distance allowed between matching coordinates; length 1 or the same length as `x`
+/// @returns a boolean array of the same length as `x`
+/// @export
+/// @family topology
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// x <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(1, 1))),
+///   sf::st_linestring(rbind(c(1, 1), c(0, 0)))
+/// ))
+/// y <- geoarrow::as_geoarrow_array(sf::st_sfc(
+///   sf::st_linestring(rbind(c(0, 0), c(1, 1.01)))
+/// ))
+///
+/// # ga_equals_exact() does not treat the reversed line as equal
+/// as.vector(ga_equals_exact(x, y, 0.1))
+#[extendr]
+fn ga_equals_exact(
+    x: Robj,
+    y: Robj,
+    #[extendr(default = "0")] tolerance: Robj,
+) -> extendr_api::Result<Robj> {
+    let threads = crate::threads::Threads::get();
+    let geoms = as_geo_geometries_par(threads, &as_geometry_chunks(x)?)?;
+    let others = as_recycled_geometries(threads, y, geoms.len(), "y")?;
+    let tol = try_float_array(tolerance, "tolerance")?;
+    check_recycle_len(tol.len(), geoms.len(), "tolerance")?;
+
+    let mut bldr = BooleanBuilder::with_capacity(geoms.len());
+    for ((a, b), t) in geoms
+        .iter()
+        .zip(others.iter().cycle())
+        .zip(tol.iter().cycle())
+    {
+        match (a, b, t) {
+            (Some(a), Some(b), Some(t)) => bldr.append_value(a.equals_exact(b, t)),
+            _ => bldr.append_null(),
+        }
+    }
+
+    bldr.finish().into_data().into_arrow_robj()
+}
+
 ///
 /// Returns 0 for points, 1 for lines and curves, and 2 for surfaces.
 ///
@@ -408,4 +532,5 @@ extendr_module! {
     fn ga_boundary_dimension;
     fn ga_is_empty;
     fn ga_coordinate_position;
+    fn ga_equals_exact;
 }
