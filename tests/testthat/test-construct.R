@@ -97,3 +97,71 @@ test_that("ga_xy handles a zero length input", {
   skip_deps()
   expect_equal(ga_xy(numeric(0), numeric(0))$length, 0L)
 })
+
+sf_envelope <- function(xmin, ymin, xmax, ymax) {
+  boxes <- Map(
+    function(a, b, c, d) {
+      sf::st_as_sfc(sf::st_bbox(c(xmin = a, ymin = b, xmax = c, ymax = d)))[[1]]
+    },
+    xmin,
+    ymin,
+    xmax,
+    ymax
+  )
+  geoarrow::as_geoarrow_array(sf::st_sfc(boxes))
+}
+
+test_that("ga_make_envelope matches sf's bbox polygons", {
+  skip_deps()
+  res <- ga_make_envelope(c(0, 10), c(0, -5), c(1, 12), c(2, 5))
+  expected <- sf_envelope(c(0, 10), c(0, -5), c(1, 12), c(2, 5))
+
+  expect_equal(as.vector(ga_equals_topo(res, expected)), c(TRUE, TRUE))
+  expect_equal(as.vector(ga_unsigned_area(res)), c(2, 20))
+  expect_equal(as.vector(ga_geometry_type(res)), c("POLYGON", "POLYGON"))
+})
+
+test_that("ga_make_envelope sorts swapped bounds", {
+  skip_deps()
+  expect_true(as.vector(ga_equals_topo(
+    ga_make_envelope(1, 2, 0, 0),
+    ga_make_envelope(0, 0, 1, 2)
+  )))
+})
+
+test_that("ga_make_envelope recycles a length 1 bound", {
+  skip_deps()
+  res <- ga_make_envelope(0, 0, c(1, 2, 3), 1)
+  expect_equal(as.vector(ga_unsigned_area(res)), c(1, 2, 3))
+})
+
+test_that("ga_make_envelope accepts integer vectors", {
+  skip_deps()
+  res <- ga_make_envelope(0L, 0L, 2L, 3L)
+  expect_equal(as.vector(ga_unsigned_area(res)), 6)
+})
+
+test_that("ga_make_envelope gives a null polygon when any bound is NA", {
+  skip_deps()
+  res <- ga_make_envelope(c(0, NA), 0, 1, 1)
+
+  expect_equal(res$length, 2L)
+  expect_equal(as.vector(ga_geometry_type(res)), c("POLYGON", NA))
+})
+
+test_that("ga_make_envelope rejects a length that cannot be recycled", {
+  skip_deps()
+  expect_error(ga_make_envelope(c(0, 0), c(0, 0, 0), 1, 1), "xmin")
+})
+
+test_that("ga_make_envelope records the crs it is given", {
+  skip_deps()
+  res <- ga_make_envelope(0, 0, 1, 1, crs = "EPSG:4326")
+  expect_equal(wk::wk_crs(geoarrow::as_geoarrow_vctr(res)), "EPSG:4326")
+  expect_null(wk::wk_crs(geoarrow::as_geoarrow_vctr(ga_make_envelope(
+    0,
+    0,
+    1,
+    1
+  ))))
+})

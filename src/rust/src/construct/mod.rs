@@ -1,10 +1,12 @@
 use arrow::array::Array;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::{LineString, Point};
+use geo::{Coord, LineString, Point, Rect};
 use geo_traits::to_geo::ToGeoPoint;
-use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, LineStringBuilder, PointBuilder};
-use geoarrow::datatypes::{Crs, Dimension, LineStringType, Metadata, PointType};
+use geoarrow::array::{
+    GeoArrowArray, GeoArrowArrayAccessor, LineStringBuilder, PointBuilder, PolygonBuilder,
+};
+use geoarrow::datatypes::{Crs, Dimension, LineStringType, Metadata, PointType, PolygonType};
 use std::sync::Arc;
 
 use crate::{as_point_chunks, as_recycled_points, try_float_array};
@@ -134,8 +136,92 @@ fn ga_make_line(start: Robj, end: Robj) -> extendr_api::Result<Robj> {
     bldr.finish().into_arrow_robj()
 }
 
+/// Build rectangles from their bounds
+///
+/// Returns the axis aligned rectangle spanning `xmin` to `xmax` and `ymin` to
+/// `ymax` on each row, as a polygon array. `ga_make_envelope()` recycles any
+/// bound of length 1.
+///
+/// @details
+/// This matches PostGIS `ST_MakeEnvelope()`. `ga_make_envelope()` sorts each
+/// pair of bounds, so a row with `xmin` above `xmax` gives the same rectangle.
+/// It returns a null polygon for a row where any bound is `NA`, so the result
+/// always has the same length as the longest bound.
+///
+/// `ga_make_envelope()` stores `crs` verbatim in the array's GeoArrow metadata
+/// and never interprets it. If you leave it `NULL`, it produces an array with
+/// no CRS.
+///
+/// @param xmin,ymin,xmax,ymax numeric vectors or float64 arrays of the bounds;
+///   each length 1 or the same length as the longest
+/// @param crs a coordinate reference system to record, or `NULL` for none
+/// @returns a GeoArrow polygon array
+/// @export
+/// @family construct
+/// @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+/// boxes <- ga_make_envelope(c(0, 10), c(0, 10), c(1, 12), c(2, 14))
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(boxes))
+///
+/// as.vector(ga_unsigned_area(boxes))
+#[extendr]
+fn ga_make_envelope(
+    xmin: Robj,
+    ymin: Robj,
+    xmax: Robj,
+    ymax: Robj,
+    #[extendr(default = "NULL")] crs: Option<String>,
+) -> anyhow::Result<Robj> {
+    let x0 = try_float_array(xmin, "xmin").map_err(|e| anyhow::anyhow!("{e}"))?;
+    let y0 = try_float_array(ymin, "ymin").map_err(|e| anyhow::anyhow!("{e}"))?;
+    let x1 = try_float_array(xmax, "xmax").map_err(|e| anyhow::anyhow!("{e}"))?;
+    let y1 = try_float_array(ymax, "ymax").map_err(|e| anyhow::anyhow!("{e}"))?;
+
+    let n = x0.len().max(y0.len()).max(x1.len()).max(y1.len());
+    for (label, len) in [
+        ("xmin", x0.len()),
+        ("ymin", y0.len()),
+        ("xmax", x1.len()),
+        ("ymax", y1.len()),
+    ] {
+        if len != n && len != 1 {
+            return Err(anyhow::anyhow!(
+                "`{label}` must be length 1 or the same length as the longest argument ({n}), got {len}"
+            ));
+        }
+    }
+
+    let metadata = match crs {
+        Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
+        None => Arc::new(Metadata::default()),
+    };
+
+    let mut bldr = PolygonBuilder::new(PolygonType::new(Dimension::XY, metadata));
+    for (((a, b), c), d) in x0
+        .iter()
+        .cycle()
+        .zip(y0.iter().cycle())
+        .zip(x1.iter().cycle())
+        .zip(y1.iter().cycle())
+        .take(n)
+    {
+        let rect = match (a, b, c, d) {
+            (Some(a), Some(b), Some(c), Some(d)) => {
+                Some(Rect::new(Coord { x: a, y: b }, Coord { x: c, y: d }).to_polygon())
+            }
+            _ => None,
+        };
+        bldr.push_polygon(rect.as_ref())
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
+    }
+
+    bldr.finish()
+        .into_arrow_robj()
+        .map_err(|e| anyhow::anyhow!("{e}"))
+}
+
 extendr_module! {
     mod construct;
     fn ga_xy;
     fn ga_make_line;
+    fn ga_make_envelope;
 }

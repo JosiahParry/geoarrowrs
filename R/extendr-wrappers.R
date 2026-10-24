@@ -2101,6 +2101,35 @@ ga_xy <- function(x, y, crs = NULL) .Call(wrap__ga_xy, x, y, crs)
 #' as.vector(ga_length_euclidean(ga_make_line(start, end)))
 ga_make_line <- function(start, end) .Call(wrap__ga_make_line, start, end)
 
+#' Build rectangles from their bounds
+#'
+#' Returns the axis aligned rectangle spanning `xmin` to `xmax` and `ymin` to
+#' `ymax` on each row, as a polygon array. `ga_make_envelope()` recycles any
+#' bound of length 1.
+#'
+#' @details
+#' This matches PostGIS `ST_MakeEnvelope()`. `ga_make_envelope()` sorts each
+#' pair of bounds, so a row with `xmin` above `xmax` gives the same rectangle.
+#' It returns a null polygon for a row where any bound is `NA`, so the result
+#' always has the same length as the longest bound.
+#'
+#' `ga_make_envelope()` stores `crs` verbatim in the array's GeoArrow metadata
+#' and never interprets it. If you leave it `NULL`, it produces an array with
+#' no CRS.
+#'
+#' @param xmin,ymin,xmax,ymax numeric vectors or float64 arrays of the bounds;
+#'   each length 1 or the same length as the longest
+#' @param crs a coordinate reference system to record, or `NULL` for none
+#' @returns a GeoArrow polygon array
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' boxes <- ga_make_envelope(c(0, 10), c(0, 10), c(1, 12), c(2, 14))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(boxes))
+#'
+#' as.vector(ga_unsigned_area(boxes))
+ga_make_envelope <- function(xmin, ymin, xmax, ymax, crs = NULL) .Call(wrap__ga_make_envelope, xmin, ymin, xmax, ymax, crs)
+
 #' Convert coordinates from radians to degrees
 #'
 #' Multiplies every x and y coordinate by `180 / pi`. `ga_to_degrees()` keeps

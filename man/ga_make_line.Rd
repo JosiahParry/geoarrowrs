@@ -35,6 +35,7 @@ as.vector(ga_length_euclidean(ga_make_line(start, end)))
 }
 \seealso{
 Other construct:
+\code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_xy]{ga_xy()}}
 }
 \concept{construct}
