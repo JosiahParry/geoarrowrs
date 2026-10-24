@@ -3,21 +3,20 @@ use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 
 use geo_index::kdtree::{
-    DEFAULT_KDTREE_NODE_SIZE, KDTree as GeoKDTree, KDTreeBuilder, KDTreeIndex,
+    DEFAULT_KDTREE_NODE_SIZE, KDTree as GeoKDTree, KDTreeBuilder, KDTreeIndex, KDTreeRef,
 };
 use geo_traits::to_geo::ToGeoPoint;
 use geoarrow::array::{GeoArrowArray, GeoArrowArrayAccessor, PointArray};
 
+use super::file::IndexFile;
 use crate::envelope::as_rects;
 use crate::{as_geometry_chunks, as_point_chunks, check_recycle_len, try_float_array};
 
 // A k-d tree over the points of a geometry array
 #[extendr]
 pub struct KDTree {
-    tree: GeoKDTree<f64>,
-    /// Rows whose point was null or empty are never added, so map tree positions back.
-    positions: Vec<u32>,
-    n: usize,
+    /// The tree with the original row of each entry, since null and empty points are never added.
+    file: IndexFile,
 }
 
 /// Add every point of a GeoArrow point array to a tree, returning it with the row each point came from.
@@ -57,6 +56,12 @@ fn add_points(chunks: &[PointArray], node_size: u16) -> anyhow::Result<(GeoKDTre
 ///
 /// Finds which points sit in a box, or near another point.
 ///
+/// @details
+/// `write()` saves the index to a file and `KDTree$read()` opens it again, so
+/// you build it once and reuse it across sessions. With `mmap = TRUE`,
+/// `read()` maps the file instead of reading it, so the index opens at once
+/// and each query loads only the parts of the tree it visits.
+///
 /// @returns a `KDTree` object
 /// @export
 /// @family index
@@ -72,6 +77,12 @@ fn add_points(chunks: &[PointArray], node_size: u16) -> anyhow::Result<(GeoKDTre
 ///
 /// # for a single lookup, pass an array of one
 /// as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+///
+/// # save the index and open it again without reading the whole file
+/// path <- tempfile(fileext = ".gaix")
+/// idx$write(path)
+/// saved <- KDTree$read(path, mmap = TRUE)
+/// as.vector(saved$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
 #[extendr]
 impl KDTree {
     /// Build the index. With a bigger `node_size` you build quicker but search
@@ -86,7 +97,46 @@ impl KDTree {
         let node_size = u16::try_from(node_size).unwrap_or(DEFAULT_KDTREE_NODE_SIZE);
         let (tree, positions) = add_points(&chunks, node_size)?;
 
-        Ok(Self { tree, positions, n })
+        Ok(Self {
+            file: IndexFile::new(n, &positions, &tree.into_inner()),
+        })
+    }
+
+    /// Read an index that `write()` saved
+    ///
+    /// @details
+    /// With `mmap = TRUE`, `read()` maps the file instead of reading it into
+    /// memory, so it opens at once whatever the file's size and each query
+    /// loads only the parts of the tree it visits. Do not change or delete
+    /// the file while you use a mapped index, or R may crash.
+    ///
+    /// @param path the file `write()` saved
+    /// @param mmap whether to map the file rather than read it into memory
+    /// @returns a `KDTree` object
+    fn read(path: &str, #[extendr(default = "FALSE")] mmap: bool) -> anyhow::Result<Self> {
+        let file = IndexFile::open(path, mmap)?;
+        {
+            let bytes = file.tree();
+            let tree = KDTreeRef::<f64>::try_new(&bytes)
+                .map_err(|e| anyhow::anyhow!("The file does not hold a k-d tree: {e}"))?;
+            if tree.num_items() as usize != file.positions().len() {
+                anyhow::bail!("The index file is corrupt: its tree and row positions disagree");
+            }
+        }
+        Ok(Self { file })
+    }
+
+    /// Save the index to a file
+    ///
+    /// @details
+    /// `write()` saves the tree with the row each point came from, so
+    /// `KDTree$read()` restores an index that answers every query the same
+    /// way. The tree keeps the layout of the JavaScript kdbush library.
+    ///
+    /// @param path the file to write
+    /// @returns `NULL`
+    fn write(&self, path: &str) -> anyhow::Result<()> {
+        self.file.write(path)
     }
 
     /// Which points fall inside each geometry's box
@@ -98,14 +148,14 @@ impl KDTree {
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
         let rects = as_rects(crate::threads::Threads::get(), &chunks)
             .map_err(|e| anyhow::anyhow!("{e}"))?;
+        let bytes = self.file.tree();
+        let tree = KDTreeRef::<f64>::try_new(&bytes).map_err(|e| anyhow::anyhow!("{e}"))?;
 
         let mut bldr = ListBuilder::new(UInt32Builder::new());
         for rect in rects {
             match rect {
                 Some(rect) => {
-                    let found =
-                        self.tree
-                            .range(rect.min().x, rect.min().y, rect.max().x, rect.max().y);
+                    let found = tree.range(rect.min().x, rect.min().y, rect.max().x, rect.max().y);
                     self.push_rows(&mut bldr, found);
                 }
                 None => bldr.append(false),
@@ -130,6 +180,8 @@ impl KDTree {
         let radii = try_float_array(r, "r").map_err(|e| anyhow::anyhow!("{e}"))?;
         check_recycle_len(radii.len(), n, "r").map_err(|e| anyhow::anyhow!("{e}"))?;
 
+        let bytes = self.file.tree();
+        let tree = KDTreeRef::<f64>::try_new(&bytes).map_err(|e| anyhow::anyhow!("{e}"))?;
         let mut bldr = ListBuilder::new(UInt32Builder::new());
         let mut radii = radii.iter().cycle();
 
@@ -140,7 +192,7 @@ impl KDTree {
                     (Some(Ok(point)), Some(radius)) if radius >= 0.0 => {
                         let point = point.to_point();
                         if point.x().is_finite() && point.y().is_finite() {
-                            let found = self.tree.within(point.x(), point.y(), radius);
+                            let found = tree.within(point.x(), point.y(), radius);
                             self.push_rows(&mut bldr, found);
                         } else {
                             bldr.append(false);
@@ -161,23 +213,24 @@ impl KDTree {
     ///
     /// @returns the length of the array you built the index from
     fn size(&self) -> i32 {
-        self.n as i32
+        self.file.n() as i32
     }
 
     /// How many rows the tree holds, without null and empty points
     ///
     /// @returns the number of indexed rows
     fn n_indexed(&self) -> i32 {
-        self.positions.len() as i32
+        self.file.positions().len() as i32
     }
 }
 
 impl KDTree {
     /// Append one query's hits as a list element, in increasing row order.
     fn push_rows(&self, bldr: &mut ListBuilder<UInt32Builder>, found: Vec<u32>) {
+        let positions = self.file.positions();
         let mut rows = found
             .into_iter()
-            .filter_map(|i| self.positions.get(i as usize).copied())
+            .filter_map(|i| positions.get(i as usize).copied())
             .map(|i| i + 1)
             .collect::<Vec<_>>();
         rows.sort_unstable();

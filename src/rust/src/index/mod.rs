@@ -3,20 +3,20 @@ use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 
 use geo_index::rtree::sort::{HilbertSort, STRSort};
-use geo_index::rtree::{DEFAULT_RTREE_NODE_SIZE, RTree as GeoRTree, RTreeBuilder, RTreeIndex};
+use geo_index::rtree::{DEFAULT_RTREE_NODE_SIZE, RTreeBuilder, RTreeIndex, RTreeRef};
 use geoarrow_array::GeoArrowArray;
+mod file;
 mod kdtree;
 
 use crate::as_geometry_chunks;
 use crate::envelope::as_rects;
+use file::IndexFile;
 
 // Spatial index over a geometry array
 #[extendr]
 pub struct RTree {
-    tree: GeoRTree<f64>,
-    /// Rows whose geometry was null or empty are never added, so map tree positions back.
-    positions: Vec<u32>,
-    n: usize,
+    /// The tree with the original row of each entry, since null and empty rows are never added.
+    file: IndexFile,
 }
 
 /// A spatial index over a geometry array
@@ -39,6 +39,11 @@ pub struct RTree {
 /// them out of the tree and a query never returns them. Row numbers always
 /// refer to positions in the original array.
 ///
+/// `write()` saves the index to a file and `RTree$read()` opens it again, so
+/// you build it once and reuse it across sessions. With `mmap = TRUE`,
+/// `read()` maps the file instead of reading it, so the index opens at once
+/// and each query loads only the parts of the tree it visits.
+///
 /// @returns an `RTree` object
 /// @export
 /// @family index
@@ -54,6 +59,12 @@ pub struct RTree {
 ///
 /// # the three counties nearest each centroid
 /// head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
+///
+/// # save the index and open it again without reading the whole file
+/// path <- tempfile(fileext = ".gaix")
+/// idx$write(path)
+/// saved <- RTree$read(path, mmap = TRUE)
+/// head(as.vector(saved$search(nc$geometry)), 3)
 #[extendr]
 impl RTree {
     /// Build the index. Use `node_size` to set how many entries share a tree
@@ -100,7 +111,46 @@ impl RTree {
             _ => bldr.finish::<HilbertSort>(),
         };
 
-        Ok(Self { tree, positions, n })
+        Ok(Self {
+            file: IndexFile::new(n, &positions, &tree.into_inner()),
+        })
+    }
+
+    /// Read an index that `write()` saved
+    ///
+    /// @details
+    /// With `mmap = TRUE`, `read()` maps the file instead of reading it into
+    /// memory, so it opens at once whatever the file's size and each query
+    /// loads only the parts of the tree it visits. Do not change or delete
+    /// the file while you use a mapped index, or R may crash.
+    ///
+    /// @param path the file `write()` saved
+    /// @param mmap whether to map the file rather than read it into memory
+    /// @returns an `RTree` object
+    fn read(path: &str, #[extendr(default = "FALSE")] mmap: bool) -> anyhow::Result<Self> {
+        let file = IndexFile::open(path, mmap)?;
+        {
+            let bytes = file.tree();
+            let tree = RTreeRef::<f64>::try_new(&bytes)
+                .map_err(|e| anyhow::anyhow!("The file does not hold an R-tree: {e}"))?;
+            if tree.num_items() as usize != file.positions().len() {
+                anyhow::bail!("The index file is corrupt: its tree and row positions disagree");
+            }
+        }
+        Ok(Self { file })
+    }
+
+    /// Save the index to a file
+    ///
+    /// @details
+    /// `write()` saves the tree with the row each entry came from, so
+    /// `RTree$read()` restores an index that answers every query the same
+    /// way. The tree keeps the layout of the JavaScript flatbush library.
+    ///
+    /// @param path the file to write
+    /// @returns `NULL`
+    fn write(&self, path: &str) -> anyhow::Result<()> {
+        self.file.write(path)
     }
 
     /// Which rows have a bounding box overlapping each geometry
@@ -126,17 +176,18 @@ impl RTree {
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
         let rects = as_rects(crate::threads::Threads::get(), &chunks)
             .map_err(|e| anyhow::anyhow!("{e}"))?;
+        let bytes = self.file.tree();
+        let tree = RTreeRef::<f64>::try_new(&bytes).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let positions = self.file.positions();
 
         let mut bldr = ListBuilder::new(UInt32Builder::new());
         for rect in rects {
             match rect {
                 Some(rect) => {
-                    let found =
-                        self.tree
-                            .search(rect.min().x, rect.min().y, rect.max().x, rect.max().y);
+                    let found = tree.search(rect.min().x, rect.min().y, rect.max().x, rect.max().y);
                     let mut rows = found
                         .into_iter()
-                        .filter_map(|i| self.positions.get(i as usize).copied())
+                        .filter_map(|i| positions.get(i as usize).copied())
                         .map(|i| i + 1)
                         .collect::<Vec<_>>();
                     rows.sort_unstable();
@@ -187,16 +238,19 @@ impl RTree {
         let chunks = as_geometry_chunks(geometry).map_err(|e| anyhow::anyhow!("{e}"))?;
         let rects = as_rects(crate::threads::Threads::get(), &chunks)
             .map_err(|e| anyhow::anyhow!("{e}"))?;
+        let bytes = self.file.tree();
+        let tree = RTreeRef::<f64>::try_new(&bytes).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let positions = self.file.positions();
         let mut bldr = ListBuilder::new(UInt32Builder::new());
 
         for rect in rects {
             match rect {
                 Some(rect) => {
                     let centre = rect.center();
-                    let found = self.tree.neighbors(centre.x, centre.y, k, max_distance);
+                    let found = tree.neighbors(centre.x, centre.y, k, max_distance);
                     // neighbors returns nearest first, so keep that order
                     for i in found {
-                        if let Some(row) = self.positions.get(i as usize) {
+                        if let Some(row) = positions.get(i as usize) {
                             bldr.values().append_value(row + 1);
                         }
                     }
@@ -216,7 +270,7 @@ impl RTree {
     ///
     /// @returns the length of the array you built the index from
     fn size(&self) -> i32 {
-        self.n as i32
+        self.file.n() as i32
     }
 
     /// The number of rows the tree actually holds
@@ -227,7 +281,7 @@ impl RTree {
     ///
     /// @returns the number of indexed rows
     fn n_indexed(&self) -> i32 {
-        self.positions.len() as i32
+        self.file.positions().len() as i32
     }
 }
 

@@ -28,6 +28,11 @@ than all of them.
 Rows with a null or empty geometry have no bounding box, so \code{new()} leaves
 them out of the tree and a query never returns them. Row numbers always
 refer to positions in the original array.
+
+\code{write()} saves the index to a file and \code{RTree$read()} opens it again, so
+you build it once and reuse it across sessions. With \code{mmap = TRUE},
+\code{read()} maps the file instead of reading it, so the index opens at once
+and each query loads only the parts of the tree it visits.
 }
 \section{Methods}{
 
@@ -35,6 +40,44 @@ refer to positions in the original array.
 Build the index. Use \code{node_size} to set how many entries share a tree
 node; with larger values you build faster and query slower. Use \code{sort}
 to pick the packing order, either \code{"hilbert"} or \code{"str"}.
+}
+
+\subsection{Method \code{read}}{
+Read an index that \code{write()} saved
+
+\subsection{Arguments}{
+\describe{
+\item{\code{path}}{the file \code{write()} saved}
+\item{\code{mmap}}{whether to map the file rather than read it into memory}
+}}
+\subsection{details}{
+With \code{mmap = TRUE}, \code{read()} maps the file instead of reading it into
+memory, so it opens at once whatever the file's size and each query
+loads only the parts of the tree it visits. Do not change or delete
+the file while you use a mapped index, or R may crash.
+
+}
+\subsection{returns}{
+an \code{RTree} object
+}
+}
+
+\subsection{Method \code{write}}{
+Save the index to a file
+
+\subsection{Arguments}{
+\describe{
+\item{\code{path}}{the file to write}
+}}
+\subsection{details}{
+\code{write()} saves the tree with the row each entry came from, so
+\code{RTree$read()} restores an index that answers every query the same
+way. The tree keeps the layout of the JavaScript flatbush library.
+
+}
+\subsection{returns}{
+\code{NULL}
+}
 }
 
 \subsection{Method \code{search}}{
@@ -125,6 +168,12 @@ head(as.vector(idx$search(nc$geometry)), 3)
 
 # the three counties nearest each centroid
 head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
+
+# save the index and open it again without reading the whole file
+path <- tempfile(fileext = ".gaix")
+idx$write(path)
+saved <- RTree$read(path, mmap = TRUE)
+head(as.vector(saved$search(nc$geometry)), 3)
 \dontshow{\}) # examplesIf}
 }
 \references{

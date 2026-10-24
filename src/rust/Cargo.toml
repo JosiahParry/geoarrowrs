@@ -36,6 +36,10 @@ geoarrow-geojson = "0.8.0"
 shapefile = { version = "0.9.0", features = ["geo-traits", "geo-types"] }
 geoarrow-cast = "0.8.0"
 geo-index = "0.3.4"
+# read an index's row positions in place, as geo-index reads its tree
+bytemuck = "1.25"
+# open a saved index without reading it all into memory
+memmap2 = "0.9"
 
 [profile.release]
 lto = true

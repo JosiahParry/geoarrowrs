@@ -535,7 +535,7 @@ dependencies = [
 [[package]]
 name = "extendr-api"
 version = "0.9.0"
-source = "git+https://github.com/extendr/extendr#74afddcbbe5a441ec187ce1d4010ba95e466ed2a"
+source = "git+https://github.com/extendr/extendr#60c58531e9549223a191298ee3b9eb38792998e8"
 dependencies = [
  "either",
  "extendr-ffi",
@@ -553,7 +553,7 @@ source = "git+https://github.com/extendr/extendr#74afddcbbe5a441ec187ce1d4010ba9
 [[package]]
 name = "extendr-macros"
 version = "0.9.0"
-source = "git+https://github.com/extendr/extendr#74afddcbbe5a441ec187ce1d4010ba95e466ed2a"
+source = "git+https://github.com/extendr/extendr#60c58531e9549223a191298ee3b9eb38792998e8"
 dependencies = [
  "lazy_static",
  "proc-macro2",
@@ -841,6 +841,7 @@ dependencies = [
  "anyhow",
  "arrow",
  "arrow_extendr",
+ "bytemuck",
  "extendr-api",
  "flatgeobuf",
  "geo",
@@ -852,6 +853,7 @@ dependencies = [
  "geoarrow-flatgeobuf",
  "geoarrow-geojson",
  "geojson",
+ "memmap2",
  "rayon",
  "serde_json",
  "shapefile",
@@ -1216,6 +1218,15 @@ name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+
+[[package]]
+name = "memmap2"
+version = "0.9.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6b0ca1155a9ecc25aa12e8313a119f32edf0255fea2f44839c4ac0a12b2ac157"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "num-bigint"

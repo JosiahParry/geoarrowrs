@@ -13,11 +13,55 @@ a \code{KDTree} object
 \description{
 Finds which points sit in a box, or near another point.
 }
+\details{
+\code{write()} saves the index to a file and \code{KDTree$read()} opens it again, so
+you build it once and reuse it across sessions. With \code{mmap = TRUE},
+\code{read()} maps the file instead of reading it, so the index opens at once
+and each query loads only the parts of the tree it visits.
+}
 \section{Methods}{
 
 \subsection{Method \code{new}}{
 Build the index. With a bigger \code{node_size} you build quicker but search
 slower.
+}
+
+\subsection{Method \code{read}}{
+Read an index that \code{write()} saved
+
+\subsection{Arguments}{
+\describe{
+\item{\code{path}}{the file \code{write()} saved}
+\item{\code{mmap}}{whether to map the file rather than read it into memory}
+}}
+\subsection{details}{
+With \code{mmap = TRUE}, \code{read()} maps the file instead of reading it into
+memory, so it opens at once whatever the file's size and each query
+loads only the parts of the tree it visits. Do not change or delete
+the file while you use a mapped index, or R may crash.
+
+}
+\subsection{returns}{
+a \code{KDTree} object
+}
+}
+
+\subsection{Method \code{write}}{
+Save the index to a file
+
+\subsection{Arguments}{
+\describe{
+\item{\code{path}}{the file to write}
+}}
+\subsection{details}{
+\code{write()} saves the tree with the row each point came from, so
+\code{KDTree$read()} restores an index that answers every query the same
+way. The tree keeps the layout of the JavaScript kdbush library.
+
+}
+\subsection{returns}{
+\code{NULL}
+}
 }
 
 \subsection{Method \code{range}}{
@@ -76,6 +120,12 @@ head(as.vector(idx$within(pts, 0.5)), 3)
 
 # for a single lookup, pass an array of one
 as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+
+# save the index and open it again without reading the whole file
+path <- tempfile(fileext = ".gaix")
+idx$write(path)
+saved <- KDTree$read(path, mmap = TRUE)
+as.vector(saved$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
 \dontshow{\}) # examplesIf}
 }
 \references{

@@ -1043,7 +1043,7 @@ ga_sparse_dwithin_impl <- function(x, y, distance, metric) .Call(wrap__ga_sparse
 
 #' Rows of `y` nearest each row of `x`, validated in R
 #' @noRd
-ga_sparse_knn_impl <- function(x, y, k, max_distance, metric) .Call(wrap__ga_sparse_knn_impl, x, y, k, max_distance, metric)
+ga_sparse_knn_impl <- function(x, y, k, max_distance = NULL, metric) .Call(wrap__ga_sparse_knn_impl, x, y, k, max_distance, metric)
 
 #' Expand a sparse predicate into the row pairs a join needs
 #'
@@ -2826,6 +2826,11 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #' them out of the tree and a query never returns them. Row numbers always
 #' refer to positions in the original array.
 #'
+#' `write()` saves the index to a file and `RTree$read()` opens it again, so
+#' you build it once and reuse it across sessions. With `mmap = TRUE`,
+#' `read()` maps the file instead of reading it, so the index opens at once
+#' and each query loads only the parts of the tree it visits.
+#'
 #' @returns an `RTree` object
 #' @export
 #' @family index
@@ -2841,11 +2846,55 @@ ga_is_cw <- function(geometry) .Call(wrap__ga_is_cw, geometry)
 #'
 #' # the three counties nearest each centroid
 #' head(as.vector(idx$neighbors(ga_centroid(nc$geometry), k = 3)), 3)
+#'
+#' # save the index and open it again without reading the whole file
+#' path <- tempfile(fileext = ".gaix")
+#' idx$write(path)
+#' saved <- RTree$read(path, mmap = TRUE)
+#' head(as.vector(saved$search(nc$geometry)), 3)
 #' @section Methods:
 #'\subsection{Method `new`}{
 #'Build the index. Use `node_size` to set how many entries share a tree
 #'node; with larger values you build faster and query slower. Use `sort`
 #'to pick the packing order, either `"hilbert"` or `"str"`.
+#'}
+#'
+#'\subsection{Method `read`}{
+#'Read an index that `write()` saved
+#'
+#' \subsection{Arguments}{
+#'\describe{
+#'\item{`path`}{the file `write()` saved}
+#'\item{`mmap`}{whether to map the file rather than read it into memory}
+#'}}
+#' \subsection{details}{
+#'With `mmap = TRUE`, `read()` maps the file instead of reading it into
+#'memory, so it opens at once whatever the file's size and each query
+#'loads only the parts of the tree it visits. Do not change or delete
+#'the file while you use a mapped index, or R may crash.
+#'
+#'}
+#' \subsection{returns}{
+#'an `RTree` object
+#'}
+#'}
+#'
+#'\subsection{Method `write`}{
+#'Save the index to a file
+#'
+#' \subsection{Arguments}{
+#'\describe{
+#'\item{`path`}{the file to write}
+#'}}
+#' \subsection{details}{
+#'`write()` saves the tree with the row each entry came from, so
+#'`RTree$read()` restores an index that answers every query the same
+#'way. The tree keeps the layout of the JavaScript flatbush library.
+#'
+#'}
+#' \subsection{returns}{
+#'`NULL`
+#'}
 #'}
 #'
 #'\subsection{Method `search`}{
@@ -2927,6 +2976,10 @@ RTree <- new.env(parent = emptyenv())
 
 RTree$new <- function(geometry, node_size = 16, sort = "hilbert") .Call(wrap__RTree__new, geometry, node_size, sort)
 
+RTree$read <- function(path, mmap = FALSE) .Call(wrap__RTree__read, path, mmap)
+
+RTree$write <- function(path) .Call(wrap__RTree__write, self, path)
+
 RTree$search <- function(geometry) .Call(wrap__RTree__search, self, geometry)
 
 RTree$neighbors <- function(geometry, k = NULL, max_distance = NULL) .Call(wrap__RTree__neighbors, self, geometry, k, max_distance)
@@ -2947,6 +3000,12 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 #'
 #' Finds which points sit in a box, or near another point.
 #'
+#' @details
+#' `write()` saves the index to a file and `KDTree$read()` opens it again, so
+#' you build it once and reuse it across sessions. With `mmap = TRUE`,
+#' `read()` maps the file instead of reading it, so the index opens at once
+#' and each query loads only the parts of the tree it visits.
+#'
 #' @returns a `KDTree` object
 #' @export
 #' @family index
@@ -2962,10 +3021,54 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 #'
 #' # for a single lookup, pass an array of one
 #' as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+#'
+#' # save the index and open it again without reading the whole file
+#' path <- tempfile(fileext = ".gaix")
+#' idx$write(path)
+#' saved <- KDTree$read(path, mmap = TRUE)
+#' as.vector(saved$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
 #' @section Methods:
 #'\subsection{Method `new`}{
 #'Build the index. With a bigger `node_size` you build quicker but search
 #'slower.
+#'}
+#'
+#'\subsection{Method `read`}{
+#'Read an index that `write()` saved
+#'
+#' \subsection{Arguments}{
+#'\describe{
+#'\item{`path`}{the file `write()` saved}
+#'\item{`mmap`}{whether to map the file rather than read it into memory}
+#'}}
+#' \subsection{details}{
+#'With `mmap = TRUE`, `read()` maps the file instead of reading it into
+#'memory, so it opens at once whatever the file's size and each query
+#'loads only the parts of the tree it visits. Do not change or delete
+#'the file while you use a mapped index, or R may crash.
+#'
+#'}
+#' \subsection{returns}{
+#'a `KDTree` object
+#'}
+#'}
+#'
+#'\subsection{Method `write`}{
+#'Save the index to a file
+#'
+#' \subsection{Arguments}{
+#'\describe{
+#'\item{`path`}{the file to write}
+#'}}
+#' \subsection{details}{
+#'`write()` saves the tree with the row each point came from, so
+#'`KDTree$read()` restores an index that answers every query the same
+#'way. The tree keeps the layout of the JavaScript kdbush library.
+#'
+#'}
+#' \subsection{returns}{
+#'`NULL`
+#'}
 #'}
 #'
 #'\subsection{Method `range`}{
@@ -3014,6 +3117,10 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 KDTree <- new.env(parent = emptyenv())
 
 KDTree$new <- function(geometry, node_size = 64) .Call(wrap__KDTree__new, geometry, node_size)
+
+KDTree$read <- function(path, mmap = FALSE) .Call(wrap__KDTree__read, path, mmap)
+
+KDTree$write <- function(path) .Call(wrap__KDTree__write, self, path)
 
 KDTree$range <- function(geometry) .Call(wrap__KDTree__range, self, geometry)
 
