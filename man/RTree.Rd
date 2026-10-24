@@ -187,6 +187,7 @@ Other index:
 \code{\link[=ga_knn_join]{ga_knn_join()}},
 \code{\link[=ga_set_thread_pool]{ga_set_thread_pool()}},
 \code{\link[=ga_sparse_dwithin]{ga_sparse_dwithin()}},
-\code{\link[=ga_sparse_knn]{ga_sparse_knn()}}
+\code{\link[=ga_sparse_knn]{ga_sparse_knn()}},
+\code{\link[=ga_str_order]{ga_str_order()}}
 }
 \concept{index}

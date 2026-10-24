@@ -32,6 +32,7 @@ Other index:
 \code{\link[=ga_hilbert_order]{ga_hilbert_order()}},
 \code{\link[=ga_knn_join]{ga_knn_join()}},
 \code{\link[=ga_sparse_dwithin]{ga_sparse_dwithin()}},
-\code{\link[=ga_sparse_knn]{ga_sparse_knn()}}
+\code{\link[=ga_sparse_knn]{ga_sparse_knn()}},
+\code{\link[=ga_str_order]{ga_str_order()}}
 }
 \concept{index}

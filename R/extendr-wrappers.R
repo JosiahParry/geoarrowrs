@@ -983,6 +983,38 @@ ga_simplify_vw_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_vw_idx
 #' head(nc[ord, "NAME"])
 ga_hilbert_order <- function(geometry) .Call(wrap__ga_hilbert_order, geometry)
 
+#' Order rows by sort-tile-recursive packing
+#'
+#' Returns the row order that sort-tile-recursive (STR) packing gives the
+#' bounding box centres of `geometry`. Pass it to `[` to sort an array or a
+#' data frame so that nearby rows sit together.
+#'
+#' @details
+#' `ga_str_order()` sorts the rows by the x of their centres, cuts them into
+#' vertical slices of `node_size` times the square root of the number of
+#' leaves, and sorts each slice by y. That is the leaf order an STR packed
+#' R-tree with `node_size` entries per node uses, the same packing
+#' `RTree$new(sort = "str")` builds.
+#'
+#' `ga_str_order()` breaks ties by the original row order, and puts rows with
+#' a null or empty geometry last, in their original order.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @param node_size how many rows share a leaf
+#' @returns an integer array of 1 based row numbers, the same length as
+#'   `geometry`
+#' @export
+#' @family index
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' ord <- as.vector(ga_str_order(nc$geometry, node_size = 4))
+#'
+#' # the first slice runs south to north along the west of the state
+#' head(nc[ord, "NAME"])
+ga_str_order <- function(geometry, node_size = 16) .Call(wrap__ga_str_order, geometry, node_size)
+
 #' Find which rows of `y` relate to each row of `x`
 #'
 #' Each function compares every row of `x` against every row of `y` and returns

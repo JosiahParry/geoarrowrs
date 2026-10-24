@@ -1,6 +1,7 @@
 use arrow::array::{Array, Int32Array};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
+use geo::Coord;
 
 use crate::as_geometry_chunks;
 use crate::envelope::as_rects;
@@ -106,58 +107,139 @@ impl Hilbert for (u32, u32) {
 /// head(nc[ord, "NAME"])
 #[extendr]
 fn ga_hilbert_order(geometry: Robj) -> extendr_api::Result<Robj> {
-    let chunks = as_geometry_chunks(geometry)?;
-    let rects = as_rects(Threads::get(), &chunks)?;
+    Centres::of(geometry)?.hilbert_order()
+}
 
-    let centres = rects
-        .iter()
-        .map(|r| r.map(|r| r.center()))
-        .collect::<Vec<_>>();
-    let (min_x, min_y, max_x, max_y) = centres.iter().flatten().fold(
-        (
-            f64::INFINITY,
-            f64::INFINITY,
-            f64::NEG_INFINITY,
-            f64::NEG_INFINITY,
-        ),
-        |(x0, y0, x1, y1), c| (x0.min(c.x), y0.min(c.y), x1.max(c.x), y1.max(c.y)),
-    );
-    let (width, height) = (max_x - min_x, max_y - min_y);
-
-    // a zero span maps every centre to the first cell rather than dividing by zero
-    let cell = |v: f64, lo: f64, span: f64| {
-        if span > 0.0 {
-            (HILBERT_MAX * (v - lo) / span).floor() as u32
-        } else {
-            0
-        }
-    };
-
-    let mut keyed = Vec::with_capacity(centres.len());
-    let mut nulls = Vec::new();
-    for (row, centre) in centres.iter().enumerate() {
-        match centre {
-            Some(c) => keyed.push((
-                (cell(c.x, min_x, width), cell(c.y, min_y, height)).hilbert(),
-                row,
-            )),
-            None => nulls.push(row),
-        }
+/// Order rows by sort-tile-recursive packing
+///
+/// Returns the row order that sort-tile-recursive (STR) packing gives the
+/// bounding box centres of `geometry`. Pass it to `[` to sort an array or a
+/// data frame so that nearby rows sit together.
+///
+/// @details
+/// `ga_str_order()` sorts the rows by the x of their centres, cuts them into
+/// vertical slices of `node_size` times the square root of the number of
+/// leaves, and sorts each slice by y. That is the leaf order an STR packed
+/// R-tree with `node_size` entries per node uses, the same packing
+/// `RTree$new(sort = "str")` builds.
+///
+/// `ga_str_order()` breaks ties by the original row order, and puts rows with
+/// a null or empty geometry last, in their original order.
+///
+/// @param geometry a GeoArrow geometry array
+/// @param node_size how many rows share a leaf
+/// @returns an integer array of 1 based row numbers, the same length as
+///   `geometry`
+/// @export
+/// @family index
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// nc <- as.data.frame(read_shapefile(
+///   system.file("shape/nc.shp", package = "sf")
+/// ))
+/// ord <- as.vector(ga_str_order(nc$geometry, node_size = 4))
+///
+/// # the first slice runs south to north along the west of the state
+/// head(nc[ord, "NAME"])
+#[extendr]
+fn ga_str_order(
+    geometry: Robj,
+    #[extendr(default = "16")] node_size: i32,
+) -> extendr_api::Result<Robj> {
+    if node_size < 2 {
+        return Err(Error::Other("`node_size` must be at least 2".to_string()));
     }
-    // a stable sort keeps the original order among rows in the same cell
-    keyed.sort_by_key(|(h, _)| *h);
+    Centres::of(geometry)?.str_order(node_size as usize)
+}
 
-    let order = keyed
-        .into_iter()
-        .map(|(_, row)| row)
-        .chain(nulls)
-        .map(|row| row as i32 + 1)
-        .collect::<Vec<_>>();
+/// The bounding box centre of every row that has one, and the rows that do not.
+struct Centres {
+    points: Vec<(usize, Coord<f64>)>,
+    nulls: Vec<usize>,
+}
 
-    Int32Array::from(order).into_data().into_arrow_robj()
+impl Centres {
+    /// Read the centre of each row's bounding box, setting aside null and empty rows.
+    fn of(geometry: Robj) -> extendr_api::Result<Self> {
+        let chunks = as_geometry_chunks(geometry)?;
+        let rects = as_rects(Threads::get(), &chunks)?;
+
+        let mut points = Vec::with_capacity(rects.len());
+        let mut nulls = Vec::new();
+        for (row, rect) in rects.into_iter().enumerate() {
+            match rect {
+                Some(r) => points.push((row, r.center())),
+                None => nulls.push(row),
+            }
+        }
+        Ok(Self { points, nulls })
+    }
+
+    /// Rows along a Hilbert curve through the extent of every centre.
+    fn hilbert_order(self) -> extendr_api::Result<Robj> {
+        let (min_x, min_y, max_x, max_y) = self.points.iter().fold(
+            (
+                f64::INFINITY,
+                f64::INFINITY,
+                f64::NEG_INFINITY,
+                f64::NEG_INFINITY,
+            ),
+            |(x0, y0, x1, y1), (_, c)| (x0.min(c.x), y0.min(c.y), x1.max(c.x), y1.max(c.y)),
+        );
+        let (width, height) = (max_x - min_x, max_y - min_y);
+
+        // a zero span maps every centre to the first cell rather than dividing by zero
+        let cell = |v: f64, lo: f64, span: f64| {
+            if span > 0.0 {
+                (HILBERT_MAX * (v - lo) / span).floor() as u32
+            } else {
+                0
+            }
+        };
+
+        let mut keyed = self
+            .points
+            .iter()
+            .map(|(row, c)| {
+                let h = (cell(c.x, min_x, width), cell(c.y, min_y, height)).hilbert();
+                (h, *row)
+            })
+            .collect::<Vec<_>>();
+        // a stable sort keeps the original order among rows in the same cell
+        keyed.sort_by_key(|(h, _)| *h);
+
+        Self::finish(keyed.into_iter().map(|(_, row)| row), self.nulls)
+    }
+
+    /// Rows in sort-tile-recursive leaf order for `node_size` entries per leaf.
+    fn str_order(mut self, node_size: usize) -> extendr_api::Result<Robj> {
+        let leaves = self.points.len().div_ceil(node_size);
+        let slices = (leaves as f64).sqrt().ceil() as usize;
+        let per_slice = node_size * slices.max(1);
+
+        // both sorts are stable, so ties keep the original row order
+        self.points.sort_by(|a, b| a.1.x.total_cmp(&b.1.x));
+        for slice in self.points.chunks_mut(per_slice) {
+            slice.sort_by(|a, b| a.1.y.total_cmp(&b.1.y));
+        }
+
+        Self::finish(self.points.into_iter().map(|(row, _)| row), self.nulls)
+    }
+
+    /// 1 based rows in the given order with the null rows last, as an integer array.
+    fn finish(
+        ordered: impl Iterator<Item = usize>,
+        nulls: Vec<usize>,
+    ) -> extendr_api::Result<Robj> {
+        let order = ordered
+            .chain(nulls)
+            .map(|row| row as i32 + 1)
+            .collect::<Vec<_>>();
+        Int32Array::from(order).into_data().into_arrow_robj()
+    }
 }
 
 extendr_module! {
     mod sort;
     fn ga_hilbert_order;
+    fn ga_str_order;
 }
