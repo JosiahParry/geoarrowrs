@@ -34,6 +34,7 @@ pub(crate) mod length;
 pub(crate) mod misc;
 pub(crate) mod query;
 pub(crate) mod simplify;
+pub(crate) mod sort;
 pub(crate) mod sparse;
 pub(crate) mod threads;
 pub(crate) mod topology;
@@ -390,6 +391,7 @@ extendr_module! {
     use destination;
     use query;
     use simplify;
+    use sort;
     use sparse;
     use threads;
     use topology;

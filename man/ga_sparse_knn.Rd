@@ -65,6 +65,7 @@ Other index:
 \code{\link{KDTree}},
 \code{\link{RTree}},
 \code{\link[=ga_envelope]{ga_envelope()}},
+\code{\link[=ga_hilbert_order]{ga_hilbert_order()}},
 \code{\link[=ga_knn_join]{ga_knn_join()}},
 \code{\link[=ga_set_thread_pool]{ga_set_thread_pool()}},
 \code{\link[=ga_sparse_dwithin]{ga_sparse_dwithin()}}

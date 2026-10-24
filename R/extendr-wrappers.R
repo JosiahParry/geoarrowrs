@@ -951,6 +951,38 @@ ga_simplify_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_idx, geom
 #' @references [SimplifyVwIdx](https://docs.rs/geo/latest/geo/algorithm/simplify_vw/trait.SimplifyVwIdx.html)
 ga_simplify_vw_idx <- function(geometry, epsilon) .Call(wrap__ga_simplify_vw_idx, geometry, epsilon)
 
+#' Order rows along a Hilbert curve
+#'
+#' Returns the row order that puts geometries whose bounding box centres lie
+#' close together next to each other. Pass it to `[` to sort an array or a
+#' data frame so that nearby rows sit together.
+#'
+#' @details
+#' `ga_hilbert_order()` maps each centre onto a 65536 by 65536 grid over the
+#' extent of every row and orders the rows by their position along a Hilbert
+#' curve through that grid, the same curve [RTree] packs its tree with. If you
+#' sort a table this way before you write GeoParquet, each row group covers a
+#' small area, so a reader can skip the row groups that cannot match a query.
+#'
+#' `ga_hilbert_order()` breaks ties by the original row order, and puts rows
+#' with a null or empty geometry last, in their original order.
+#'
+#' @param geometry a GeoArrow geometry array
+#' @returns an integer array of 1 based row numbers, the same length as
+#'   `geometry`
+#' @export
+#' @family index
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' ord <- as.vector(ga_hilbert_order(nc$geometry))
+#' head(ord)
+#'
+#' # neighbouring counties now sit next to each other
+#' head(nc[ord, "NAME"])
+ga_hilbert_order <- function(geometry) .Call(wrap__ga_hilbert_order, geometry)
+
 #' Find which rows of `y` relate to each row of `x`
 #'
 #' Each function compares every row of `x` against every row of `y` and returns
