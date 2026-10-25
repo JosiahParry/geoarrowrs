@@ -32,20 +32,36 @@ test_that("every geometry result is a geoarrow_vctr", {
   expect_s3_class(sf::st_voronoi(cent[1:10]), "geoarrow_vctr")
 })
 
-test_that("a geometrycollection result is still a geoarrow_vctr", {
-  # geoarrow does not know the extension name, so this one goes through WKB
+test_that("st_combine returns sf's multi type for one kind of geometry", {
   mask_sf()
   on.exit(detach("geoarrowrs:sf"), add = TRUE)
 
   combined <- st_combine(geom)
   expect_s3_class(combined, "geoarrow_vctr")
   expect_identical(length(combined), 1L)
+  expect_equal(
+    as.vector(ga_geometry_type(combined)),
+    as.character(sf::st_geometry_type(sf::st_combine(sf::st_as_sfc(geom))))
+  )
 
   # and the result feeds the next call rather than dead ending
   expect_equal(
     as.vector(ga_unsigned_area(sf::st_convex_hull(combined))),
     as.vector(ga_unsigned_area(ga_convex_hull(ga_collect_agg(geom))))
   )
+})
+
+test_that("a geometrycollection result is still a geoarrow_vctr", {
+  # geoarrow does not know the extension name, so this one goes through WKB
+  mask_sf()
+  on.exit(detach("geoarrowrs:sf"), add = TRUE)
+  mixed <- geoarrow::as_geoarrow_vctr(
+    wk::wkt(c("POINT (0 0)", "LINESTRING (0 0, 1 1)"))
+  )
+
+  combined <- st_combine(mixed)
+  expect_s3_class(combined, "geoarrow_vctr")
+  expect_equal(as.vector(ga_geometry_type(combined)), "GEOMETRYCOLLECTION")
 })
 
 test_that("st_union is unary with one argument and binary with two", {

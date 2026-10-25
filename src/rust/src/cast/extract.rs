@@ -1,8 +1,7 @@
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::{Geometry, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon};
-use geoarrow::datatypes::{
-    Dimension, GeoArrowType, MultiLineStringType, MultiPointType, MultiPolygonType,
+use geo::{
+    Geometry, HasDimensions, LineString, MultiLineString, MultiPoint, MultiPolygon, Point, Polygon,
 };
 use geoarrow_array::GeoArrowArray;
 use geoarrow_cast::downcast::NativeType;
@@ -14,7 +13,7 @@ use crate::{as_geo_geometries_par, as_geometry_chunks};
 
 /// The single parts of a geometry, sorted by family.
 #[derive(Default)]
-struct Parts {
+pub(crate) struct Parts {
     points: Vec<Point<f64>>,
     lines: Vec<LineString<f64>>,
     polygons: Vec<Polygon<f64>>,
@@ -41,18 +40,12 @@ impl Extend<Geometry<f64>> for Parts {
 }
 
 impl Parts {
-    /// The parts of one single type as the multi geometry of that type, or None when there are none.
-    fn into_multi(self, kind: NativeType) -> Option<Geometry<f64>> {
+    /// The parts of one single type as the multi geometry of that type, empty when there are none, or None for any other type.
+    pub(crate) fn into_multi(self, kind: NativeType) -> Option<Geometry<f64>> {
         match kind {
-            NativeType::Point if !self.points.is_empty() => {
-                Some(Geometry::MultiPoint(MultiPoint(self.points)))
-            }
-            NativeType::LineString if !self.lines.is_empty() => {
-                Some(Geometry::MultiLineString(MultiLineString(self.lines)))
-            }
-            NativeType::Polygon if !self.polygons.is_empty() => {
-                Some(Geometry::MultiPolygon(MultiPolygon(self.polygons)))
-            }
+            NativeType::Point => Some(Geometry::MultiPoint(MultiPoint(self.points))),
+            NativeType::LineString => Some(Geometry::MultiLineString(MultiLineString(self.lines))),
+            NativeType::Polygon => Some(Geometry::MultiPolygon(MultiPolygon(self.polygons))),
             _ => None,
         }
     }
@@ -95,21 +88,12 @@ fn ga_collection_extract(
         .map_err(|e| Error::Other(format!("`geometry_type` {e}")))?;
     let chunks = as_geometry_chunks(geometry)?;
     let metadata = chunks[0].data_type().metadata().clone();
-    let to_type = match kind.0 {
-        NativeType::Point => GeoArrowType::MultiPoint(MultiPointType::new(Dimension::XY, metadata)),
-        NativeType::LineString => {
-            GeoArrowType::MultiLineString(MultiLineStringType::new(Dimension::XY, metadata))
-        }
-        NativeType::Polygon => {
-            GeoArrowType::MultiPolygon(MultiPolygonType::new(Dimension::XY, metadata))
-        }
-        _ => {
-            return Err(Error::Other(format!(
-                "`geometry_type` must be one of \"POLYGON\", \"LINESTRING\", or \"POINT\", got \"{}\"",
-                kind.as_ref()
-            )));
-        }
-    };
+    let to_type = kind.multi_type(metadata).ok_or_else(|| {
+        Error::Other(format!(
+            "`geometry_type` must be one of \"POLYGON\", \"LINESTRING\", or \"POINT\", got \"{}\"",
+            kind.as_ref()
+        ))
+    })?;
 
     let geoms = as_geo_geometries_par(Threads::get(), &chunks)?
         .into_iter()
@@ -117,7 +101,8 @@ fn ga_collection_extract(
             g.and_then(|g| {
                 let mut parts = Parts::default();
                 parts.extend([g]);
-                parts.into_multi(kind.0)
+                // a geometry with no parts of the kind has no answer
+                parts.into_multi(kind.0).filter(|multi| !multi.is_empty())
             })
         })
         .collect::<Vec<_>>();

@@ -1,9 +1,13 @@
 use std::str::FromStr;
+use std::sync::Arc;
 
 use arrow::array::{Array, BooleanBuilder, StringBuilder};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::Geometry;
+use geoarrow::datatypes::{
+    Dimension, GeoArrowType, Metadata, MultiLineStringType, MultiPointType, MultiPolygonType,
+};
 use geoarrow_array::GeoArrowArray;
 use geoarrow_cast::downcast::NativeType;
 
@@ -24,6 +28,24 @@ impl TypeName {
         NativeType::MultiPolygon,
         NativeType::GeometryCollection,
     ];
+
+    /// The multi type that gathers parts of this single type, or None for any other type.
+    pub(crate) fn multi_type(&self, metadata: Arc<Metadata>) -> Option<GeoArrowType> {
+        match self.0 {
+            NativeType::Point => Some(GeoArrowType::MultiPoint(MultiPointType::new(
+                Dimension::XY,
+                metadata,
+            ))),
+            NativeType::LineString => Some(GeoArrowType::MultiLineString(
+                MultiLineStringType::new(Dimension::XY, metadata),
+            )),
+            NativeType::Polygon => Some(GeoArrowType::MultiPolygon(MultiPolygonType::new(
+                Dimension::XY,
+                metadata,
+            ))),
+            _ => None,
+        }
+    }
 }
 
 impl AsRef<str> for TypeName {

@@ -1,5 +1,5 @@
 mod explode;
-mod extract;
+pub(crate) mod extract;
 
 use std::sync::Arc;
 

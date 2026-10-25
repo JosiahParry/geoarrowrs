@@ -15,20 +15,28 @@ ga_collect_agg(geometry, sizes = NULL, by = NULL)
 per row of \code{geometry}, or \code{NULL} to use \code{sizes} instead}
 }
 \value{
-a GeoArrow geometry collection array, of length 1 or of one element
-per group
+a GeoArrow multipoint, multilinestring, multipolygon, or geometry
+collection array, of length 1 or of one element per group
 }
 \description{
-Gathers the geometries into a single geometry collection, returning an array
-of length 1, or one collection per group when you group the rows with
-\code{sizes} or \code{by}. This is the aggregate a \code{summarise()} wants, not a row by
-row operation.
+Gathers the geometries into a single multi geometry or geometry collection,
+returning an array of length 1, or one per group when you group the rows
+with \code{sizes} or \code{by}. This is the aggregate a \code{summarise()} wants, not a row
+by row operation.
 }
 \details{
+\code{ga_collect_agg()} picks the result type from the type of \code{geometry}, as
+PostGIS \code{ST_Collect()} and \code{sf::st_combine()} do. It gathers a point or
+multipoint array into multipoints, a linestring or multilinestring array
+into multilinestrings, and a polygon, multipolygon, or box array into
+multipolygons. It gathers a mixed geometry, WKB, or WKT array into geometry
+collections, since those types can hold any geometry; call
+\code{\link[=ga_downcast_geometry]{ga_downcast_geometry()}} first to get the multi type when every row has one
+kind.
+
 \code{ga_collect_agg()} neither dissolves nor reorders, so it keeps overlapping
-parts overlapping and adds one member to the collection per non null input
-row. Use \code{\link[=ga_unary_union]{ga_unary_union()}} to merge overlapping polygons into one outline
-instead.
+parts overlapping and keeps every part of every non null input row. Use
+\code{\link[=ga_unary_union]{ga_unary_union()}} to merge overlapping polygons into one outline instead.
 
 \code{ga_collect_agg()} reads \code{sizes} as the number of rows in each group, in
 order, which you get from a \code{group_by()} and \code{summarise(n = n())} over the
@@ -39,7 +47,7 @@ so keep the keys from the same \code{summarise()} to say what each row is.
 
 With \code{by}, \code{ga_collect_agg()} groups the rows itself, from an unsorted key
 of one label per row, so you need no \code{arrange()} first. It returns one
-collection per distinct label, in the order each label first appears in
+geometry per distinct label, in the order each label first appears in
 \code{by}; get the matching keys back with \code{vctrs::vec_unique(by)}.
 \code{ga_collect_agg()} groups rows with \code{NA} in \code{by} together like any other
 label. Give at most one of \code{sizes} or \code{by}; with \code{NULL} for both, it

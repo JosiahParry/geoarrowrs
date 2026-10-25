@@ -177,16 +177,24 @@ ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate,
 
 #' Collect an array into one geometry, or one per group
 #'
-#' Gathers the geometries into a single geometry collection, returning an array
-#' of length 1, or one collection per group when you group the rows with
-#' `sizes` or `by`. This is the aggregate a `summarise()` wants, not a row by
-#' row operation.
+#' Gathers the geometries into a single multi geometry or geometry collection,
+#' returning an array of length 1, or one per group when you group the rows
+#' with `sizes` or `by`. This is the aggregate a `summarise()` wants, not a row
+#' by row operation.
 #'
 #' @details
+#' `ga_collect_agg()` picks the result type from the type of `geometry`, as
+#' PostGIS `ST_Collect()` and `sf::st_combine()` do. It gathers a point or
+#' multipoint array into multipoints, a linestring or multilinestring array
+#' into multilinestrings, and a polygon, multipolygon, or box array into
+#' multipolygons. It gathers a mixed geometry, WKB, or WKT array into geometry
+#' collections, since those types can hold any geometry; call
+#' [ga_downcast_geometry()] first to get the multi type when every row has one
+#' kind.
+#'
 #' `ga_collect_agg()` neither dissolves nor reorders, so it keeps overlapping
-#' parts overlapping and adds one member to the collection per non null input
-#' row. Use [ga_unary_union()] to merge overlapping polygons into one outline
-#' instead.
+#' parts overlapping and keeps every part of every non null input row. Use
+#' [ga_unary_union()] to merge overlapping polygons into one outline instead.
 #'
 #' `ga_collect_agg()` reads `sizes` as the number of rows in each group, in
 #' order, which you get from a `group_by()` and `summarise(n = n())` over the
@@ -197,7 +205,7 @@ ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate,
 #'
 #' With `by`, `ga_collect_agg()` groups the rows itself, from an unsorted key
 #' of one label per row, so you need no `arrange()` first. It returns one
-#' collection per distinct label, in the order each label first appears in
+#' geometry per distinct label, in the order each label first appears in
 #' `by`; get the matching keys back with `vctrs::vec_unique(by)`.
 #' `ga_collect_agg()` groups rows with `NA` in `by` together like any other
 #' label. Give at most one of `sizes` or `by`; with `NULL` for both, it
@@ -211,8 +219,8 @@ ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate,
 #' @param sizes the rows in each group, in order, or `NULL` for one group
 #' @param by a character vector, numeric vector, or Arrow array with one label
 #'   per row of `geometry`, or `NULL` to use `sizes` instead
-#' @returns a GeoArrow geometry collection array, of length 1 or of one element
-#'   per group
+#' @returns a GeoArrow multipoint, multilinestring, multipolygon, or geometry
+#'   collection array, of length 1 or of one element per group
 #' @export
 #' @family aggregate
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)

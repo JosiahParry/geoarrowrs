@@ -9,6 +9,62 @@ test_that("ga_collect_agg returns a single geometry", {
   expect_identical(res$length, 1L)
 })
 
+as_wkt <- function(x) {
+  sf::st_as_text(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x)))
+}
+
+combine_by <- function(x, key) {
+  sfc <- sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x))
+  unname(vapply(
+    unique(key),
+    function(l) sf::st_as_text(sf::st_combine(sfc[key == l])),
+    character(1)
+  ))
+}
+
+test_that("each kind gathers into its multi type, matching sf::st_combine per group", {
+  key <- rep(c("b", "a"), length.out = 10)
+  pts <- ga_centroid(nc$geometry[1:10])
+  lines <- ga_make_line_agg(
+    ga_point(c(0, 1, 2, 3, 4, 5), c(0, 1, 0, 1, 0, 1)),
+    by = c(1, 1, 2, 2, 3, 3)
+  )
+  polys <- nc$geometry[1:10]
+
+  expect_equal(as_wkt(ga_collect_agg(pts, by = key)), combine_by(pts, key))
+  expect_equal(
+    as_wkt(ga_collect_agg(lines, by = c("x", "y", "x"))),
+    combine_by(lines, c("x", "y", "x"))
+  )
+  expect_equal(as_wkt(ga_collect_agg(polys, by = key)), combine_by(polys, key))
+  expect_equal(
+    as.vector(ga_geometry_type(ga_collect_agg(polys, by = key))),
+    c("MULTIPOLYGON", "MULTIPOLYGON")
+  )
+})
+
+test_that("a multi array gathers every part into one multi geometry", {
+  mp <- geoarrow::as_geoarrow_array(
+    wk::wkt(c("MULTIPOINT ((0 0), (1 1))", "MULTIPOINT ((2 2))")),
+    schema = geoarrow::geoarrow_multipoint()
+  )
+
+  expect_equal(as_wkt(ga_collect_agg(mp)), "MULTIPOINT ((0 0), (1 1), (2 2))")
+})
+
+test_that("an untyped array gathers into a collection unless downcast first", {
+  w <- geoarrow::as_geoarrow_array(wk::wkt(c("POINT (0 0)", "POINT (1 1)")))
+
+  expect_equal(
+    as.vector(ga_geometry_type(ga_collect_agg(w))),
+    "GEOMETRYCOLLECTION"
+  )
+  expect_equal(
+    as_wkt(ga_collect_agg(ga_downcast_geometry(w))),
+    "MULTIPOINT ((0 0), (1 1))"
+  )
+})
+
 test_that("the collected hull matches sf", {
   nc_sf <- sf::st_read(nc_path, quiet = TRUE)
   cent <- suppressWarnings(sf::st_centroid(sf::st_set_crs(nc_sf, NA)))
@@ -97,11 +153,13 @@ test_that("one group of everything matches the ungrouped form", {
   )
 })
 
-test_that("a group of zero rows is an empty collection", {
+test_that("a group of zero rows is an empty geometry, not a null", {
   pts <- ga_centroid(nc$geometry)
   res <- ga_collect_agg(pts, sizes = c(50, 0, 50))
 
   expect_identical(res$length, 3L)
+  expect_identical(res$null_count, 0L)
+  expect_equal(as.vector(ga_is_empty(res)), c(FALSE, TRUE, FALSE))
   expect_equal(as.vector(ga_unsigned_area(ga_convex_hull(res)))[2], 0)
 })
 

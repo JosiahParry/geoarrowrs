@@ -8,9 +8,13 @@ use arrow_extendr::{FromArrowRobj, IntoArrowRobj};
 use extendr_api::prelude::*;
 use geo::GeometryCollection;
 use geoarrow::array::GeometryCollectionBuilder;
-use geoarrow::datatypes::{Dimension, GeometryCollectionType};
+use geoarrow::datatypes::{Dimension, GeoArrowType, GeometryCollectionType};
 use geoarrow_array::GeoArrowArray;
+use geoarrow_cast::downcast::NativeType;
 
+use crate::cast::CastGeoArrow;
+use crate::cast::extract::Parts;
+use crate::geometry_type::TypeName;
 use crate::{as_geo_geometries_par, as_geometry_chunks, try_float_array};
 
 /// Read `sizes` as the run lengths they have to be, covering the whole array.
@@ -106,16 +110,24 @@ pub(crate) fn group_by_codes<T>(
 
 /// Collect an array into one geometry, or one per group
 ///
-/// Gathers the geometries into a single geometry collection, returning an array
-/// of length 1, or one collection per group when you group the rows with
-/// `sizes` or `by`. This is the aggregate a `summarise()` wants, not a row by
-/// row operation.
+/// Gathers the geometries into a single multi geometry or geometry collection,
+/// returning an array of length 1, or one per group when you group the rows
+/// with `sizes` or `by`. This is the aggregate a `summarise()` wants, not a row
+/// by row operation.
 ///
 /// @details
+/// `ga_collect_agg()` picks the result type from the type of `geometry`, as
+/// PostGIS `ST_Collect()` and `sf::st_combine()` do. It gathers a point or
+/// multipoint array into multipoints, a linestring or multilinestring array
+/// into multilinestrings, and a polygon, multipolygon, or box array into
+/// multipolygons. It gathers a mixed geometry, WKB, or WKT array into geometry
+/// collections, since those types can hold any geometry; call
+/// [ga_downcast_geometry()] first to get the multi type when every row has one
+/// kind.
+///
 /// `ga_collect_agg()` neither dissolves nor reorders, so it keeps overlapping
-/// parts overlapping and adds one member to the collection per non null input
-/// row. Use [ga_unary_union()] to merge overlapping polygons into one outline
-/// instead.
+/// parts overlapping and keeps every part of every non null input row. Use
+/// [ga_unary_union()] to merge overlapping polygons into one outline instead.
 ///
 /// `ga_collect_agg()` reads `sizes` as the number of rows in each group, in
 /// order, which you get from a `group_by()` and `summarise(n = n())` over the
@@ -126,7 +138,7 @@ pub(crate) fn group_by_codes<T>(
 ///
 /// With `by`, `ga_collect_agg()` groups the rows itself, from an unsorted key
 /// of one label per row, so you need no `arrange()` first. It returns one
-/// collection per distinct label, in the order each label first appears in
+/// geometry per distinct label, in the order each label first appears in
 /// `by`; get the matching keys back with `vctrs::vec_unique(by)`.
 /// `ga_collect_agg()` groups rows with `NA` in `by` together like any other
 /// label. Give at most one of `sizes` or `by`; with `NULL` for both, it
@@ -140,8 +152,8 @@ pub(crate) fn group_by_codes<T>(
 /// @param sizes the rows in each group, in order, or `NULL` for one group
 /// @param by a character vector, numeric vector, or Arrow array with one label
 ///   per row of `geometry`, or `NULL` to use `sizes` instead
-/// @returns a GeoArrow geometry collection array, of length 1 or of one element
-///   per group
+/// @returns a GeoArrow multipoint, multilinestring, multipolygon, or geometry
+///   collection array, of length 1 or of one element per group
 /// @export
 /// @family aggregate
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
@@ -176,32 +188,54 @@ fn ga_collect_agg(
 
     let chunks = as_geometry_chunks(geometry)?;
     let metadata = chunks[0].data_type().metadata().clone();
+    // a point, line, or polygon array gathers into the multi type of its kind, anything else into a collection
+    let kind = match chunks[0].data_type() {
+        GeoArrowType::Point(_) | GeoArrowType::MultiPoint(_) => Some(NativeType::Point),
+        GeoArrowType::LineString(_) | GeoArrowType::MultiLineString(_) => {
+            Some(NativeType::LineString)
+        }
+        GeoArrowType::Polygon(_) | GeoArrowType::MultiPolygon(_) | GeoArrowType::Rect(_) => {
+            Some(NativeType::Polygon)
+        }
+        _ => None,
+    };
     let geoms = as_geo_geometries_par(crate::threads::Threads::get(), &chunks)?;
 
-    let mut bldr =
-        GeometryCollectionBuilder::new(GeometryCollectionType::new(Dimension::XY, metadata));
-
-    if by.is_null() {
-        let groups = if sizes.is_null() {
+    let groups = if by.is_null() {
+        let sizes = if sizes.is_null() {
             vec![geoms.len()]
         } else {
             as_group_sizes(sizes, geoms.len())?
         };
-
         let mut rows = geoms.into_iter();
-        for n in groups {
-            let parts = rows.by_ref().take(n).flatten().collect::<Vec<_>>();
-            bldr.push_geometry_collection(Some(&GeometryCollection(parts)))
-                .map_err(|e| Error::Other(e.to_string()))?;
-        }
+        sizes
+            .into_iter()
+            .map(|n| rows.by_ref().take(n).flatten().collect::<Vec<_>>())
+            .collect::<Vec<_>>()
     } else {
-        let codes = try_group_codes(by, "by")?;
-        for parts in group_by_codes(geoms, codes, "geometry")? {
-            bldr.push_geometry_collection(Some(&GeometryCollection(parts)))
-                .map_err(|e| Error::Other(e.to_string()))?;
-        }
+        group_by_codes(geoms, try_group_codes(by, "by")?, "geometry")?
+    };
+
+    if let Some((kind, to_type)) =
+        kind.and_then(|kind| Some((kind, TypeName(kind).multi_type(metadata.clone())?)))
+    {
+        let multis = groups
+            .into_iter()
+            .map(|group| {
+                let mut parts = Parts::default();
+                parts.extend(group);
+                parts.into_multi(kind)
+            })
+            .collect::<Vec<_>>();
+        return multis.cast_geoarrow(&to_type)?.into_arrow_robj();
     }
 
+    let mut bldr =
+        GeometryCollectionBuilder::new(GeometryCollectionType::new(Dimension::XY, metadata));
+    for parts in groups {
+        bldr.push_geometry_collection(Some(&GeometryCollection(parts)))
+            .map_err(|e| Error::Other(e.to_string()))?;
+    }
     bldr.finish().into_arrow_robj()
 }
 
