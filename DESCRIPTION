@@ -24,6 +24,7 @@ Suggests:
     arrow,
     dplyr,
     geoarrow,
+    jsonlite,
     nanoarrow,
     sdf,
     sf,
