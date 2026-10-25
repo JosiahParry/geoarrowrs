@@ -31,6 +31,8 @@ Suggests:
     wk,
     testthat (>= 3.0.0),
     withr
+Remotes:
+    JosiahParry/sdf
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0.9000
 URL: https://josiahparry.github.io/geoarrowrs/
