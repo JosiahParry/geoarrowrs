@@ -854,6 +854,8 @@ dependencies = [
  "geoarrow-geojson",
  "geojson",
  "memmap2",
+ "rand",
+ "rand_pcg",
  "rayon",
  "serde_json",
  "shapefile",

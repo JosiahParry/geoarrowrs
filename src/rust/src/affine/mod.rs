@@ -1,3 +1,4 @@
+mod jitter;
 mod matrix;
 mod rotate;
 mod scale;
@@ -7,6 +8,7 @@ use extendr_api::prelude::*;
 
 extendr_module! {
     mod affine;
+    use jitter;
     use matrix;
     use rotate;
     use scale;

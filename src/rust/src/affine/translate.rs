@@ -1,3 +1,4 @@
+use arrow::array::Float64Array;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::{LineString, MultiLineString, MultiPolygon, Point, Polygon, Translate};
@@ -48,7 +49,15 @@ use crate::{
 fn ga_translate(geometry: Robj, x_offset: Robj, y_offset: Robj) -> extendr_api::Result<Robj> {
     let xs = try_float_array(x_offset, "x_offset")?;
     let ys = try_float_array(y_offset, "y_offset")?;
+    translate_by(geometry, &xs, &ys)
+}
 
+/// Shift each geometry by its row's offsets, keeping the geometry type and giving null for a null offset.
+pub(super) fn translate_by(
+    geometry: Robj,
+    xs: &Float64Array,
+    ys: &Float64Array,
+) -> extendr_api::Result<Robj> {
     if let Ok(chunks) = as_point_chunks(geometry.clone()) {
         let n: usize = chunks.iter().map(|c| c.len()).sum();
         check_recycle_len(xs.len(), n, "x_offset")?;

@@ -7,7 +7,7 @@ use geoarrow_cast::downcast::NativeType;
 
 use super::CoordArgs;
 use super::columns::Runs;
-use crate::envelope::as_rects;
+use crate::envelope::{as_rects, extent_of};
 use crate::threads::Threads;
 use crate::{as_geometry_chunks, try_float_array};
 
@@ -109,28 +109,12 @@ fn ga_make_grid(
             } else {
                 chunks[0].data_type().metadata().clone()
             };
-            let bb = as_rects(Threads::get(), &chunks)?
-                .into_iter()
-                .flatten()
-                .fold(
-                    [
-                        f64::INFINITY,
-                        f64::INFINITY,
-                        f64::NEG_INFINITY,
-                        f64::NEG_INFINITY,
-                    ],
-                    |[x0, y0, x1, y1], r| {
-                        [
-                            x0.min(r.min().x),
-                            y0.min(r.min().y),
-                            x1.max(r.max().x),
-                            y1.max(r.max().y),
-                        ]
-                    },
-                );
-            if !bb.iter().all(|v| v.is_finite()) {
+            let bb = extent_of(&as_rects(Threads::get(), &chunks)?)
+                .map(|r| [r.min().x, r.min().y, r.max().x, r.max().y])
+                .filter(|bb| bb.iter().all(|v| v.is_finite()));
+            let Some(bb) = bb else {
                 return Err(Error::Other("`x` has no extent to cover".to_string()));
-            }
+            };
             (bb, metadata)
         }
     };

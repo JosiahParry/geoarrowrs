@@ -31,6 +31,16 @@ pub(crate) fn as_rects(
     ))
 }
 
+/// The box around every box that exists, or `None` when none does.
+pub(crate) fn extent_of(rects: &[Option<geo::Rect<f64>>]) -> Option<geo::Rect<f64>> {
+    rects.iter().flatten().copied().reduce(|a, b| {
+        geo::Rect::new(
+            geo::coord! { x: a.min().x.min(b.min().x), y: a.min().y.min(b.min().y) },
+            geo::coord! { x: a.max().x.max(b.max().x), y: a.max().y.max(b.max().y) },
+        )
+    })
+}
+
 /// The box of every geometry, one rayon task per slice.
 pub(crate) fn rects_of(
     threads: crate::threads::Threads,

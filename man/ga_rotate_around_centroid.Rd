@@ -34,6 +34,7 @@ geoarrow::as_geoarrow_vctr(ga_rotate_around_centroid(tri, 90))
 \seealso{
 Other affine:
 \code{\link[=ga_affine_transform]{ga_affine_transform()}},
+\code{\link[=ga_jitter]{ga_jitter()}},
 \code{\link[=ga_rotate_around_center]{ga_rotate_around_center()}},
 \code{\link[=ga_scale_xy]{ga_scale_xy()}},
 \code{\link[=ga_skew]{ga_skew()}},

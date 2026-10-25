@@ -38,6 +38,7 @@ as.vector(ga_unsigned_area(ga_scale_xy(sq, 2, 1)))
 \seealso{
 Other affine:
 \code{\link[=ga_affine_transform]{ga_affine_transform()}},
+\code{\link[=ga_jitter]{ga_jitter()}},
 \code{\link[=ga_rotate_around_center]{ga_rotate_around_center()}},
 \code{\link[=ga_rotate_around_centroid]{ga_rotate_around_centroid()}},
 \code{\link[=ga_skew]{ga_skew()}},

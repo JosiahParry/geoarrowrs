@@ -40,6 +40,9 @@ geo-index = "0.3.4"
 bytemuck = "1.25"
 # open a saved index without reading it all into memory
 memmap2 = "0.9"
+# seeded offsets for ga_jitter(), with the features geo already turns on so nothing new is vendored
+rand = { version = "0.10.0", default-features = false, features = ["alloc"] }
+rand_pcg = "0.10.1"
 
 [profile.release]
 lto = true
