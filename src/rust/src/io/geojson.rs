@@ -20,7 +20,7 @@ use geoarrow_array::GeoArrowArray;
 
 use crate::crs::crs_metadata;
 
-// GeoJSON is always OGC:CRS84 (RFC 7946), as sf::st_crs("OGC:CRS84")$ProjJson writes it
+// RFC 7946 GeoJSON is always OGC:CRS84, as sf::st_crs("OGC:CRS84")$ProjJson writes it
 const OGC_CRS84: &str = r#"{"$schema":"https://proj.org/schemas/v0.7/projjson.schema.json","type":"GeographicCRS","name":"WGS 84 (CRS84)","datum":{"type":"GeodeticReferenceFrame","name":"World Geodetic System 1984","ellipsoid":{"name":"WGS 84","semi_major_axis":6378137,"inverse_flattening":298.257223563}},"coordinate_system":{"subtype":"ellipsoidal","axis":[{"name":"Geodetic longitude","abbreviation":"Lon","direction":"east","unit":"degree"},{"name":"Geodetic latitude","abbreviation":"Lat","direction":"north","unit":"degree"}]},"scope":"unknown","area":"World","bbox":{"south_latitude":-90,"west_longitude":-180,"north_latitude":90,"east_longitude":180},"id":{"authority":"OGC","code":"CRS84"}}"#;
 
 /// The widest arrow type a GeoJSON property needs, widened across all features.
@@ -329,9 +329,13 @@ fn build_geometry(
 /// `read_geojson()` keeps nested arrays and objects, which have no arrow
 /// analogue, as their raw JSON text.
 ///
-/// Per RFC 7946 the coordinate reference system is always `OGC:CRS84`, so
-/// `read_geojson()` sets that on the geometry column without reading anything
-/// from the file.
+/// `read_geojson()` reads the coordinate reference system from the `crs`
+/// member that GeoJSON allowed before RFC 7946, and that [sf::st_write()]
+/// writes for data outside WGS 84, such as `urn:ogc:def:crs:EPSG::32617`. It
+/// stores an authority code such as `EPSG:32617`, keeps any other name as
+/// given, and falls back to `OGC:CRS84`, the RFC 7946 default, as GDAL does
+/// when the member is missing or `null`. It errors for a linked `crs` member,
+/// which GDAL downloads.
 ///
 /// @param path path to a `.geojson` file holding a `FeatureCollection`.
 /// @returns a `nanoarrow_array_stream` of a single record batch, holding the
@@ -357,12 +361,49 @@ fn build_geometry(
 #[extendr]
 fn read_geojson(path: &str) -> extendr_api::Result<Robj> {
     let file = File::open(path).map_err(|e| Error::Other(format!("failed to open {path}: {e}")))?;
-    let reader = ::geojson::FeatureReader::from_reader(BufReader::new(file));
-
-    let features = reader
-        .features()
-        .collect::<std::result::Result<Vec<_>, _>>()
+    let ::geojson::FeatureCollection {
+        features,
+        foreign_members,
+        ..
+    } = serde_json::from_reader::<_, ::geojson::FeatureCollection>(BufReader::new(file))
         .map_err(|e| Error::Other(e.to_string()))?;
+
+    // the crs member GeoJSON allowed before RFC 7946, read the way GDAL reads it
+    let member = foreign_members
+        .and_then(|members| members.get("crs").cloned())
+        .unwrap_or_default();
+    let properties = &member["properties"];
+    let crs_name = match member["type"].as_str() {
+        Some("name") => properties["name"].as_str().map(str::to_string),
+        Some("OGC") => properties["urn"].as_str().map(str::to_string),
+        Some("EPSG") => properties["code"]
+            .as_i64()
+            .map(|code| code.to_string())
+            .or_else(|| properties["code"].as_str().map(str::to_string))
+            .map(|code| format!("EPSG:{code}")),
+        Some("link") => {
+            return Err(Error::Other(format!(
+                "`read_geojson()` cannot follow the linked `crs` member of {path}"
+            )));
+        }
+        _ => None,
+    };
+    // an OGC URN, such as urn:ogc:def:crs:EPSG::32617, holds the authority, an optional version, and the code
+    let crs_name = crs_name.map(|name| {
+        match name
+            .strip_prefix("urn:ogc:def:crs:")
+            .and_then(|urn| urn.split_once(':'))
+        {
+            Some((authority, rest)) => {
+                let code = rest.rsplit_once(':').map_or(rest, |(_, code)| code);
+                format!("{authority}:{code}")
+            }
+            None => name,
+        }
+    });
+    let crs = crs_name
+        .filter(|name| name != "OGC:CRS84")
+        .unwrap_or_else(|| OGC_CRS84.to_string());
 
     // first-seen key order, since serde_json's map does not preserve the document order
     let mut names: Vec<String> = Vec::new();
@@ -381,7 +422,7 @@ fn read_geojson(path: &str) -> extendr_api::Result<Robj> {
         }
     }
 
-    let metadata = crs_metadata(Some(OGC_CRS84.to_string()));
+    let metadata = crs_metadata(Some(crs));
 
     let mut builders: Vec<ColBuilder> = types.iter().map(|t| ColBuilder::new(*t)).collect();
     for feature in &features {

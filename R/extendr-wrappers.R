@@ -3184,9 +3184,13 @@ read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path
 #' `read_geojson()` keeps nested arrays and objects, which have no arrow
 #' analogue, as their raw JSON text.
 #'
-#' Per RFC 7946 the coordinate reference system is always `OGC:CRS84`, so
-#' `read_geojson()` sets that on the geometry column without reading anything
-#' from the file.
+#' `read_geojson()` reads the coordinate reference system from the `crs`
+#' member that GeoJSON allowed before RFC 7946, and that [sf::st_write()]
+#' writes for data outside WGS 84, such as `urn:ogc:def:crs:EPSG::32617`. It
+#' stores an authority code such as `EPSG:32617`, keeps any other name as
+#' given, and falls back to `OGC:CRS84`, the RFC 7946 default, as GDAL does
+#' when the member is missing or `null`. It errors for a linked `crs` member,
+#' which GDAL downloads.
 #'
 #' @param path path to a `.geojson` file holding a `FeatureCollection`.
 #' @returns a `nanoarrow_array_stream` of a single record batch, holding the

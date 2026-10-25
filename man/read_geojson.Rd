@@ -51,9 +51,13 @@ features:\tabular{ll}{
 \code{read_geojson()} keeps nested arrays and objects, which have no arrow
 analogue, as their raw JSON text.
 
-Per RFC 7946 the coordinate reference system is always \code{OGC:CRS84}, so
-\code{read_geojson()} sets that on the geometry column without reading anything
-from the file.
+\code{read_geojson()} reads the coordinate reference system from the \code{crs}
+member that GeoJSON allowed before RFC 7946, and that \code{\link[sf:st_write]{sf::st_write()}}
+writes for data outside WGS 84, such as \verb{urn:ogc:def:crs:EPSG::32617}. It
+stores an authority code such as \code{EPSG:32617}, keeps any other name as
+given, and falls back to \code{OGC:CRS84}, the RFC 7946 default, as GDAL does
+when the member is missing or \code{null}. It errors for a linked \code{crs} member,
+which GDAL downloads.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}

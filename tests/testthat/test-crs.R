@@ -172,3 +172,61 @@ test_that("read_geojson() stores OGC:CRS84 as PROJJSON", {
   expect_true(sf::st_crs(as_sfc(geometry)) == sf::st_crs("OGC:CRS84"))
   expect_true(ga_is_longlat(geometry))
 })
+
+test_that("read_geojson() reads the crs member that sf::st_write() writes", {
+  path <- withr::local_tempfile(fileext = ".geojson")
+  utm <- sf::st_sfc(
+    sf::st_point(c(5e5, 4e6)),
+    sf::st_point(c(5.1e5, 4.01e6)),
+    crs = 32617
+  )
+  sf::st_write(sf::st_sf(id = 1:2, geometry = utm), path, quiet = TRUE)
+  geometry <- as.data.frame(read_geojson(path))$geometry
+
+  expect_identical(metadata_of(geometry)$crs, "EPSG:32617")
+  expect_identical(metadata_of(geometry)$crs_type, "authority_code")
+  expect_true(
+    sf::st_crs(as_sfc(geometry)) == sf::st_crs(sf::st_read(path, quiet = TRUE))
+  )
+})
+
+test_that("read_geojson() reads each form of crs member as sf does", {
+  members <- c(
+    '{"type":"name","properties":{"name":"urn:ogc:def:crs:EPSG::32617"}}',
+    '{"type":"name","properties":{"name":"urn:ogc:def:crs:EPSG:6.6:32617"}}',
+    '{"type":"name","properties":{"name":"urn:ogc:def:crs:EPSG:32617"}}',
+    '{"type":"name","properties":{"name":"EPSG:3857"}}',
+    '{"type":"name","properties":{"name":"ESRI:102003"}}',
+    '{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}}',
+    '{"type":"name","properties":{"name":"OGC:CRS84"}}',
+    '{"type":"name","properties":{"name":"+proj=utm +zone=17 +datum=WGS84"}}',
+    '{"type":"EPSG","properties":{"code":32617}}',
+    '{"type":"OGC","properties":{"urn":"urn:ogc:def:crs:EPSG::32617"}}',
+    "null"
+  )
+  for (member in members) {
+    path <- withr::local_tempfile(fileext = ".geojson")
+    writeLines(
+      paste0(
+        '{"type":"FeatureCollection","crs":',
+        member,
+        ',"features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[5e5,4e6]}}]}'
+      ),
+      path
+    )
+    geometry <- as.data.frame(read_geojson(path))$geometry
+    theirs <- sf::st_crs(sf::st_read(path, quiet = TRUE))
+
+    expect_true(sf::st_crs(as_sfc(geometry)) == theirs, label = member)
+  }
+})
+
+test_that("read_geojson() errors for a linked crs member", {
+  path <- withr::local_tempfile(fileext = ".geojson")
+  writeLines(
+    '{"type":"FeatureCollection","crs":{"type":"link","properties":{"href":"https://example.com/crs","type":"proj4"}},"features":[]}',
+    path
+  )
+
+  expect_error(read_geojson(path), "linked `crs` member", fixed = TRUE)
+})
