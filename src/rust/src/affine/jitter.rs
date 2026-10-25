@@ -16,10 +16,8 @@ use crate::{as_geometry_chunks, check_recycle_len, try_float_array};
 ///
 /// @details
 /// Without `amount`, `ga_jitter()` uses `factor` times the length of the
-/// diagonal of the box around all of `x`, as sf does. With `longlat = TRUE`,
-/// it narrows the x offsets by the cosine of the mean latitude of that box, as
-/// sf does for geographic coordinates, so the jitter covers about the same
-/// ground in both directions.
+/// diagonal of the box around all of `x`, as sf does. `ga_jitter()` treats
+/// coordinates as planar.
 ///
 /// `ga_jitter()` draws the offsets from its own generator, seeded by `seed`,
 /// two for every row in order. The default seed comes from R's generator, so
@@ -34,7 +32,6 @@ use crate::{as_geometry_chunks, check_recycle_len, try_float_array};
 ///   same length as `x`, or `NULL` to take it from `factor`
 /// @param factor the fraction of the diagonal of the box around `x` to move a
 ///   geometry by at most when you give no `amount`
-/// @param longlat whether `x` holds longitude and latitude
 /// @param seed a whole number that seeds the offsets
 /// @returns a GeoArrow array of the same geometry type and length as `x`
 /// @export
@@ -56,32 +53,20 @@ fn ga_jitter(
     x: Robj,
     #[extendr(default = "NULL")] amount: Robj,
     #[extendr(default = "0.002")] factor: f64,
-    #[extendr(default = "FALSE")] longlat: bool,
     #[extendr(default = "sample.int(.Machine$integer.max, 1L)")] seed: u64,
 ) -> extendr_api::Result<Robj> {
     let chunks = as_geometry_chunks(x.clone())?;
     let n = chunks.iter().map(|c| c.len()).sum::<usize>();
 
-    // the box around every row sizes the default amount and the longlat correction
-    let extent = if amount.is_null() || longlat {
-        extent_of(&as_rects(Threads::get(), &chunks)?)
-    } else {
-        None
-    };
-
     let amounts = if amount.is_null() {
         // an array with no coordinates has nothing to move
-        let diagonal = extent.map_or(0.0, |r| r.width().hypot(r.height()));
+        let diagonal = extent_of(&as_rects(Threads::get(), &chunks)?)
+            .map_or(0.0, |r| r.width().hypot(r.height()));
         Float64Array::from(vec![factor * diagonal])
     } else {
         try_float_array(amount, "amount")?
     };
     check_recycle_len(amounts.len(), n, "amount")?;
-
-    let x_scale = match extent {
-        Some(r) if longlat => r.center().y.to_radians().cos(),
-        _ => 1.0,
-    };
 
     let mut rng = Pcg64::seed_from_u64(seed);
     let (xs, ys) = amounts
@@ -92,10 +77,7 @@ fn ga_jitter(
             // every row draws its pair, so a row's offsets depend only on the seed and its position
             let (u, v) = (rng.random::<f64>(), rng.random::<f64>());
             match a.filter(|a| a.is_finite() && *a >= 0.0) {
-                Some(a) => (
-                    Some((2.0 * u - 1.0) * a * x_scale),
-                    Some((2.0 * v - 1.0) * a),
-                ),
+                Some(a) => (Some((2.0 * u - 1.0) * a), Some((2.0 * v - 1.0) * a)),
                 None => (None, None),
             }
         })

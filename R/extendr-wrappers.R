@@ -13,10 +13,8 @@ NULL
 #'
 #' @details
 #' Without `amount`, `ga_jitter()` uses `factor` times the length of the
-#' diagonal of the box around all of `x`, as sf does. With `longlat = TRUE`,
-#' it narrows the x offsets by the cosine of the mean latitude of that box, as
-#' sf does for geographic coordinates, so the jitter covers about the same
-#' ground in both directions.
+#' diagonal of the box around all of `x`, as sf does. `ga_jitter()` treats
+#' coordinates as planar.
 #'
 #' `ga_jitter()` draws the offsets from its own generator, seeded by `seed`,
 #' two for every row in order. The default seed comes from R's generator, so
@@ -31,7 +29,6 @@ NULL
 #'   same length as `x`, or `NULL` to take it from `factor`
 #' @param factor the fraction of the diagonal of the box around `x` to move a
 #'   geometry by at most when you give no `amount`
-#' @param longlat whether `x` holds longitude and latitude
 #' @param seed a whole number that seeds the offsets
 #' @returns a GeoArrow array of the same geometry type and length as `x`
 #' @export
@@ -48,7 +45,7 @@ NULL
 #'   as.vector(ga_x(ga_jitter(pts, seed = 42))),
 #'   as.vector(ga_x(ga_jitter(pts, seed = 42)))
 #' )
-ga_jitter <- function(x, amount = NULL, factor = 0.002, longlat = FALSE, seed = sample.int(.Machine$integer.max, 1L)) .Call(wrap__ga_jitter, x, amount, factor, longlat, seed)
+ga_jitter <- function(x, amount = NULL, factor = 0.002, seed = sample.int(.Machine$integer.max, 1L)) .Call(wrap__ga_jitter, x, amount, factor, seed)
 
 #' Apply an arbitrary affine transform
 #'

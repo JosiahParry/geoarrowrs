@@ -6,6 +6,8 @@ nc_sfc <- sf::st_geometry(sf::read_sf(system.file(
   package = "sf"
 )))
 nc <- geoarrow::as_geoarrow_array(nc_sfc)
+planar_sfc <- sf::st_transform(nc_sfc, 32119)
+planar <- geoarrow::as_geoarrow_array(planar_sfc)
 
 as_sfc <- function(x) sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x))
 
@@ -15,12 +17,10 @@ offsets <- function(moved, from) {
   t(mapply(function(a, b) first(a) - first(b), as_sfc(moved), from))
 }
 
-# sf's own amounts for the whole of x
-sf_amounts <- function(x, factor = 0.002, longlat = FALSE) {
+# sf's own default amount for planar coordinates
+sf_amount <- function(x, factor = 0.002) {
   bb <- sf::st_bbox(x)
-  amount <- factor * sqrt(diff(bb[c(3, 1)])^2 + diff(bb[c(4, 2)])^2)
-  ax <- if (longlat) amount * cos(pi * mean(bb[c(2, 4)]) / 180) else amount
-  unname(c(ax, amount))
+  unname(factor * sqrt(diff(bb[c(3, 1)])^2 + diff(bb[c(4, 2)])^2))
 }
 
 test_that("ga_jitter moves each point by at most amount along each axis", {
@@ -57,21 +57,16 @@ test_that("ga_jitter moves a polygon as a whole and keeps its type", {
   )
 })
 
-test_that("ga_jitter takes sf's default amount, narrowed along x for longlat", {
-  planar <- sf_amounts(nc_sfc)
-  shift <- offsets(ga_jitter(nc, seed = 1), nc_sfc)
-  expect_true(all(abs(shift[, 1]) <= planar[1]))
-  expect_true(all(abs(shift[, 2]) <= planar[2]))
-  expect_gt(max(abs(shift[, 1])), 0.9 * planar[1])
+test_that("ga_jitter takes sf's default amount", {
+  amount <- sf_amount(planar_sfc)
+  shift <- offsets(ga_jitter(planar, seed = 1), planar_sfc)
+  expect_true(all(abs(shift) <= amount))
+  expect_gt(min(apply(abs(shift), 2, max)), 0.9 * amount)
 
-  geographic <- sf_amounts(nc_sfc, longlat = TRUE)
-  shift <- offsets(ga_jitter(nc, longlat = TRUE, seed = 1), nc_sfc)
-  expect_true(all(abs(shift[, 1]) <= geographic[1]))
-  expect_gt(max(abs(shift[, 1])), 0.9 * geographic[1])
-  expect_true(all(abs(shift[, 2]) <= geographic[2]))
-
-  shift <- offsets(ga_jitter(nc, factor = 0.01, seed = 1), nc_sfc)
-  expect_true(all(abs(shift) <= sf_amounts(nc_sfc, factor = 0.01)[1]))
+  amount <- sf_amount(planar_sfc, factor = 0.01)
+  shift <- offsets(ga_jitter(planar, factor = 0.01, seed = 1), planar_sfc)
+  expect_true(all(abs(shift) <= amount))
+  expect_gt(min(apply(abs(shift), 2, max)), 0.9 * amount)
 })
 
 test_that("a seed repeats the offsets, and set.seed() repeats the default seed", {
@@ -121,21 +116,17 @@ test_that("ga_jitter keeps an empty polygon empty", {
   expect_true(as.vector(ga_is_empty(ga_jitter(empty, seed = 1))))
 })
 
-test_that("the masked st_jitter reads longlat from the crs", {
+test_that("the masked st_jitter calls ga_jitter", {
   mask_sf()
   on.exit(detach("geoarrowrs:sf"), add = TRUE)
+  geom <- geoarrow::as_geoarrow_vctr(planar)
 
-  geographic <- geoarrow::as_geoarrow_vctr(nc)
-  projected <- geoarrow::as_geoarrow_vctr(geoarrow::as_geoarrow_array(
-    sf::st_transform(nc_sfc, 32119)
-  ))
-
-  got <- withr::with_seed(5, st_jitter(geographic))
-  want <- withr::with_seed(5, ga_jitter(nc, longlat = TRUE))
+  got <- withr::with_seed(5, st_jitter(geom))
+  want <- withr::with_seed(5, ga_jitter(planar))
   expect_s3_class(got, "geoarrow_vctr")
   expect_identical(as.vector(ga_x(got)), as.vector(ga_x(want)))
 
-  got <- withr::with_seed(5, st_jitter(projected, amount = 100))
-  want <- withr::with_seed(5, ga_jitter(projected, amount = 100))
+  got <- withr::with_seed(5, st_jitter(geom, amount = 100))
+  want <- withr::with_seed(5, ga_jitter(planar, amount = 100))
   expect_identical(as.vector(ga_x(got)), as.vector(ga_x(want)))
 })

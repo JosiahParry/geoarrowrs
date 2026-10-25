@@ -8,7 +8,6 @@ ga_jitter(
   x,
   amount = NULL,
   factor = 0.002,
-  longlat = FALSE,
   seed = sample.int(.Machine$integer.max, 1L)
 )
 }
@@ -20,8 +19,6 @@ same length as \code{x}, or \code{NULL} to take it from \code{factor}}
 
 \item{factor}{the fraction of the diagonal of the box around \code{x} to move a
 geometry by at most when you give no \code{amount}}
-
-\item{longlat}{whether \code{x} holds longitude and latitude}
 
 \item{seed}{a whole number that seeds the offsets}
 }
@@ -35,10 +32,8 @@ along y, each drawn uniformly between \code{-amount} and \code{amount}. This mat
 }
 \details{
 Without \code{amount}, \code{ga_jitter()} uses \code{factor} times the length of the
-diagonal of the box around all of \code{x}, as sf does. With \code{longlat = TRUE},
-it narrows the x offsets by the cosine of the mean latitude of that box, as
-sf does for geographic coordinates, so the jitter covers about the same
-ground in both directions.
+diagonal of the box around all of \code{x}, as sf does. \code{ga_jitter()} treats
+coordinates as planar.
 
 \code{ga_jitter()} draws the offsets from its own generator, seeded by \code{seed},
 two for every row in order. The default seed comes from R's generator, so

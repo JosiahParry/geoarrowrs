@@ -580,33 +580,13 @@ st_make_grid <- function(
   ))
 }
 
-#' sf narrows the jitter along x for longitude and latitude
-#'
-#' sf reads that from the CRS, so this asks sf about the CRS the GeoArrow
-#' vector carries. The random numbers are geoarrowrs's own, so `set.seed()`
-#' repeats them but never matches sf's.
-#'
 #' @noRd
 st_jitter <- function(x, amount, factor = 0.002) {
-  x <- as_ga(x)
   ga_out(ga_jitter(
-    x,
+    as_ga(x),
     amount = if (missing(amount)) NULL else amount,
-    factor = factor,
-    longlat = is_longlat(x)
+    factor = factor
   ))
-}
-
-#' Whether sf reads the CRS of a GeoArrow vector as longitude and latitude
-#'
-#' @noRd
-is_longlat <- function(x) {
-  crs <- geoarrow::geoarrow_schema_parse(
-    nanoarrow::infer_nanoarrow_schema(x)
-  )$crs
-  rlang::is_string(crs) &&
-    nzchar(crs) &&
-    isTRUE(sf::st_is_longlat(sf::st_crs(crs)))
 }
 
 #' A geometry is simple when it does not cross itself
