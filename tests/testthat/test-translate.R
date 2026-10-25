@@ -77,3 +77,22 @@ test_that("translate still keeps a concrete polygon array", {
   expect_identical(extension_name(res), extension_name(g))
   expect_equal(as_wkt(res), sf::st_as_text(x + c(1, 1)))
 })
+
+test_that("translate keeps an empty point empty and moves the rest", {
+  skip_deps()
+  g <- geoarrow::as_geoarrow_array(
+    wk::wkt(c("POINT EMPTY", "POINT (1 1)", NA)),
+    schema = geoarrow::geoarrow_point()
+  )
+  # ga_is_empty() reads an empty point through geo, which has none, so read it with wk
+  as_text <- function(x) as.character(wk::as_wkt(geoarrow::as_geoarrow_vctr(x)))
+
+  res <- ga_translate(g, 1, 2)
+  expect_identical(res$null_count, 1L)
+  expect_identical(as_text(res), c("POINT EMPTY", "POINT (2 3)", NA))
+
+  # ga_jitter() shares the same path
+  res <- ga_jitter(g, amount = 1, seed = 1)
+  expect_identical(res$null_count, 1L)
+  expect_identical(as_text(res)[1], "POINT EMPTY")
+})

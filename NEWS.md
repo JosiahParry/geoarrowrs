@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* `ga_translate()` and `ga_jitter()` keep an empty point empty instead of failing.
 * Added `ga_jitter()`, which moves each geometry by a small random offset like `sf::st_jitter()`, and `mask_sf()` attaches `st_jitter()`.
 * Added `ga_interpolate_aw()`, which interpolates extensive and intensive values from one set of polygons onto another by area, and `sf::st_interpolate_aw()` works on a data frame with a GeoArrow geometry column.
 * Added `ga_make_grid()`, which builds a square grid of cells, centres, or corners like `sf::st_make_grid()`, and `mask_sf()` attaches `st_make_grid()`.

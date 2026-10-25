@@ -67,7 +67,11 @@ pub(super) fn translate_by(
         for chunk in &chunks {
             for ((geom, x), y) in chunk.iter().zip(xs.iter().cycle()).zip(ys.iter().cycle()) {
                 if let (Some(Ok(g)), Some(x), Some(y)) = (geom, x, y) {
-                    bldr.push_point(Some(&g.to_point().translate(x, y)));
+                    match g.try_to_point() {
+                        Some(p) => bldr.push_point(Some(&p.translate(x, y))),
+                        // an empty point has nowhere to move, so it stays empty
+                        None => bldr.push_point(Some(&g)),
+                    }
                 } else {
                     bldr.push_point(None::<&Point<f64>>);
                 }
