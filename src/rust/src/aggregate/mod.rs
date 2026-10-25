@@ -45,20 +45,24 @@ fn as_group_sizes(sizes: Robj, n: usize) -> extendr_api::Result<Vec<usize>> {
 /// encoder to assign codes in the order each value first appears. This is one
 /// pass over the array with no per-row Rust allocation, unlike hashing a
 /// materialized `String` per row ourselves.
-fn try_group_codes(robj: Robj, label: &'static str) -> extendr_api::Result<Vec<Option<i32>>> {
+pub(crate) fn try_group_codes(
+    robj: Robj,
+    label: &'static str,
+) -> extendr_api::Result<Vec<Option<i32>>> {
     let array: ArrayRef = if let Ok(arr) = ArrayData::from_arrow_robj(&robj) {
         make_array(arr)
-    } else {
-        let Ok(strings) = Strings::try_from(&robj) else {
-            return Err(Error::Other(format!(
-                "Expected `{label}` to be a character vector or an Arrow array"
-            )));
-        };
+    } else if let Ok(strings) = Strings::try_from(&robj) {
         let values: Vec<Option<String>> = strings
             .iter()
             .map(|s| (!s.is_na()).then(|| s.to_string()))
             .collect();
         Arc::new(StringArray::from(values))
+    } else if let Ok(numbers) = try_float_array(robj, label) {
+        Arc::new(numbers)
+    } else {
+        return Err(Error::Other(format!(
+            "Expected `{label}` to be a character vector, a numeric vector, or an Arrow array"
+        )));
     };
 
     let dict_type = DataType::Dictionary(Box::new(DataType::Int32), Box::new(DataType::Utf8));
@@ -135,8 +139,8 @@ fn group_by_codes(
 ///
 /// @param geometry a GeoArrow geometry array
 /// @param sizes the rows in each group, in order, or `NULL` for one group
-/// @param by a character vector or Arrow array with one label per row of
-///   `geometry`, or `NULL` to use `sizes` instead
+/// @param by a character vector, numeric vector, or Arrow array with one label
+///   per row of `geometry`, or `NULL` to use `sizes` instead
 /// @returns a GeoArrow geometry collection array, of length 1 or of one element
 ///   per group
 /// @export

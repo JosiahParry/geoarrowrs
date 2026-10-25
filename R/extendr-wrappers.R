@@ -209,8 +209,8 @@ ga_translate <- function(geometry, x_offset, y_offset) .Call(wrap__ga_translate,
 #'
 #' @param geometry a GeoArrow geometry array
 #' @param sizes the rows in each group, in order, or `NULL` for one group
-#' @param by a character vector or Arrow array with one label per row of
-#'   `geometry`, or `NULL` to use `sizes` instead
+#' @param by a character vector, numeric vector, or Arrow array with one label
+#'   per row of `geometry`, or `NULL` to use `sizes` instead
 #' @returns a GeoArrow geometry collection array, of length 1 or of one element
 #'   per group
 #' @export

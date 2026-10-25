@@ -166,6 +166,20 @@ test_that("by accepts an Arrow array, matching the plain character vector", {
   )
 })
 
+test_that("by accepts a numeric vector, matching the same labels as text", {
+  pts <- ga_centroid(nc$geometry)
+  key <- rep(c(2L, 1L, 2L), length.out = pts$length)
+
+  from_text <- ga_collect_agg(pts, by = as.character(key))
+  for (numbers in list(key, as.double(key))) {
+    from_numbers <- ga_collect_agg(pts, by = numbers)
+    expect_equal(
+      as.vector(ga_unsigned_area(ga_convex_hull(from_numbers))),
+      as.vector(ga_unsigned_area(ga_convex_hull(from_text)))
+    )
+  }
+})
+
 test_that("sizes and by cannot both be given", {
   pts <- ga_centroid(nc$geometry)
   key <- rep("a", pts$length)

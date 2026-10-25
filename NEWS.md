@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* `ga_collect_agg()` accepts a numeric vector for `by`.
 * Added `ga_str_order()`, which orders rows by sort-tile-recursive packing so that nearby geometries sit together.
 * Added `ga_hilbert_order()`, which orders rows along a Hilbert curve so that nearby geometries sit together.
 * `RTree` and `KDTree` gain `write()` and `read()`, which save an index to a file and open it again, optionally memory mapped.

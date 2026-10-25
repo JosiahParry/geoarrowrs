@@ -11,8 +11,8 @@ ga_collect_agg(geometry, sizes = NULL, by = NULL)
 
 \item{sizes}{the rows in each group, in order, or \code{NULL} for one group}
 
-\item{by}{a character vector or Arrow array with one label per row of
-\code{geometry}, or \code{NULL} to use \code{sizes} instead}
+\item{by}{a character vector, numeric vector, or Arrow array with one label
+per row of \code{geometry}, or \code{NULL} to use \code{sizes} instead}
 }
 \value{
 a GeoArrow geometry collection array, of length 1 or of one element
