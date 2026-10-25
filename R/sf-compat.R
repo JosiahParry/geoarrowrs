@@ -479,6 +479,30 @@ st_combine <- function(x) {
   ga_out(ga_collect_agg(as_ga(x)))
 }
 
+#' @noRd
+st_make_grid <- function(
+  x,
+  cellsize,
+  offset,
+  n,
+  crs,
+  what = "polygons",
+  square = TRUE,
+  flat_topped = FALSE
+) {
+  if (!isTRUE(square)) {
+    cli::cli_abort("{.fn ga_make_grid} builds only square grids.")
+  }
+  ga_out(ga_make_grid(
+    if (missing(x)) NULL else as_ga(x),
+    cellsize = if (missing(cellsize)) NULL else cellsize,
+    offset = if (missing(offset)) NULL else offset,
+    n = if (missing(n)) NULL else n,
+    crs = if (missing(crs)) NULL else sf::st_crs(crs)$wkt,
+    what = rlang::arg_match(what, c("polygons", "centers", "corners"))
+  ))
+}
+
 #' A geometry is simple when it does not cross itself
 #'
 #' `ga_self_intersections()` gives the crossing points, so an empty result is
@@ -527,6 +551,7 @@ sf_masked <- c(
   "st_length",
   "st_line_interpolate",
   "st_line_project",
+  "st_make_grid",
   "st_nearest_feature",
   "st_overlaps",
   "st_perimeter",

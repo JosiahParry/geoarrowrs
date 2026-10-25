@@ -2437,6 +2437,53 @@ ga_polygon <- function(x, y, z = NULL, m = NULL, polygon_id = NULL, linestring_i
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(polys))
 ga_multipolygon <- function(x, y, z = NULL, m = NULL, multipolygon_id = NULL, polygon_id = NULL, linestring_id = NULL, close = TRUE, crs = NULL) .Call(wrap__ga_multipolygon, x, y, z, m, multipolygon_id, polygon_id, linestring_id, close, crs)
 
+#' Build a grid of squares over an extent
+#'
+#' Returns the cells of a square grid covering the bounding box of `x`, as
+#' polygons, as the points at their centres, or as the points at their
+#' corners. This matches `sf::st_make_grid()` for square grids.
+#'
+#' @details
+#' `ga_make_grid()` starts the grid at `offset`, the lower left corner of `x`
+#' unless you give it, and steps `cellsize` across and up. Without `cellsize`,
+#' it divides the extent of `x` into `n` cells each way, `n` being 10 by 10
+#' unless you give it. Without `n`, it adds cells until the grid covers `x`.
+#' With all of `cellsize`, `offset`, and `n`, it needs no `x`, and with none of
+#' them and no `x` it returns the 10 degree grid over the globe that sf does.
+#'
+#' `ga_make_grid()` orders the cells along x first, then up in y, and starts
+#' each square at its lower left corner, as sf does. It records the CRS of `x`
+#' unless you give `crs`.
+#'
+#' `ga_make_grid()` builds only square grids. It has no hexagonal grid, which
+#' `sf::st_make_grid(square = FALSE)` gives.
+#'
+#' @param x a GeoArrow geometry array whose bounding box the grid covers, or
+#'   `NULL` when you give `cellsize`, `offset`, and `n`
+#' @param cellsize the width and height of a cell; length 1 or 2
+#' @param offset the x and y of the lower left corner of the grid; length 2
+#' @param n the number of cells across and up; length 1 or 2
+#' @param crs a coordinate reference system to record, or `NULL` for the CRS
+#'   of `x`
+#' @param what one of `"polygons"`, `"centers"`, or `"corners"`
+#' @returns a GeoArrow polygon array of the cells, or a point array of their
+#'   centres or corners
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#'
+#' # a 4 by 2 grid of cells over the state
+#' cells <- ga_make_grid(nc$geometry, n = c(4, 2))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(cells))
+#'
+#' # half degree cells, and the point at the centre of each
+#' centres <- ga_make_grid(nc$geometry, cellsize = 0.5, what = "centers")
+#' centres$length
+ga_make_grid <- function(x = NULL, cellsize = NULL, offset = NULL, n = NULL, crs = NULL, what = "polygons") .Call(wrap__ga_make_grid, x, cellsize, offset, n, crs, what)
+
 #' Join the points of each group into a line
 #'
 #' Returns one linestring through the points that share each label of `by`,

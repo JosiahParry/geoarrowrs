@@ -1,4 +1,5 @@
 mod columns;
+mod grid;
 mod line;
 mod polygon;
 
@@ -138,15 +139,19 @@ impl CoordArgs {
             }
         }
 
-        let metadata = match crs {
-            Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
-            None => Arc::new(Metadata::default()),
-        };
         Ok(Self {
             columns,
             dim,
-            metadata,
+            metadata: Self::metadata(crs),
         })
+    }
+
+    /// GeoArrow metadata recording `crs` verbatim, or none when it is `NULL`.
+    fn metadata(crs: Option<String>) -> Arc<Metadata> {
+        match crs {
+            Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
+            None => Arc::new(Metadata::default()),
+        }
     }
 }
 
@@ -289,6 +294,7 @@ fn ga_make_envelope(
 extendr_module! {
     mod construct;
     use columns;
+    use grid;
     use line;
     use polygon;
     fn ga_point;

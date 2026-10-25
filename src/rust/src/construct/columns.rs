@@ -8,7 +8,7 @@ use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geoarrow::array::{
     CoordBuffer, GeoArrowArray, LineStringArray, MultiLineStringArray, MultiPointArray,
-    MultiPolygonArray, PolygonArray, SeparatedCoordBuffer,
+    MultiPolygonArray, PointArray, PolygonArray, SeparatedCoordBuffer,
 };
 use geoarrow::datatypes::{Dimension, Metadata};
 use geoarrow_cast::downcast::NativeType;
@@ -487,6 +487,8 @@ impl Runs {
             |lengths: &[usize]| OffsetBuffer::<i32>::from_lengths(lengths.iter().copied());
         let metadata = self.metadata;
         let array = match (kind, self.counts.as_slice()) {
+            (NativeType::Point, []) => PointArray::try_new(coords, nulls, metadata)
+                .map(|a| Arc::new(a) as Arc<dyn GeoArrowArray>),
             (NativeType::LineString, []) => {
                 LineStringArray::try_new(coords, offsets(&lengths), nulls, metadata)
                     .map(|a| Arc::new(a) as Arc<dyn GeoArrowArray>)
