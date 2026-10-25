@@ -13,10 +13,10 @@ use geoarrow::array::{
     CoordBuffer, GeoArrowArray, GeoArrowArrayAccessor, LineStringBuilder, PointArray,
     PolygonBuilder, SeparatedCoordBuffer,
 };
-use geoarrow::datatypes::{Crs, Dimension, LineStringType, Metadata, PolygonType};
+use geoarrow::datatypes::{Dimension, LineStringType, Metadata, PolygonType};
 use std::sync::Arc;
 
-use crate::{as_point_chunks, as_recycled_points, try_float_array};
+use crate::{as_point_chunks, as_recycled_points, crs::crs_metadata, try_float_array};
 
 /// Build a point array from coordinates
 ///
@@ -30,9 +30,11 @@ use crate::{as_point_chunks, as_recycled_points, try_float_array};
 /// same length as the longest input. When every coordinate is full length and
 /// has no `NA`, it reuses the arrays without copying them.
 ///
-/// `ga_point()` stores `crs` verbatim in the array's GeoArrow metadata and never
-/// interprets it, so it never reprojects. It accepts anything a reader would
-/// produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
+/// `ga_point()` records `crs` in the array's GeoArrow metadata and never
+/// reprojects. It stores a valid PROJJSON CRS, such as
+/// `sf::st_crs(x)$ProjJson`, as a compact JSON object, an authority code such
+/// as `"EPSG:4326"` as an authority code, and any other string, such as WKT,
+/// exactly as given.
 /// If you leave it `NULL`, `ga_point()` produces an array with no CRS.
 ///
 /// @param x,y numeric vectors or float64 arrays of x and y coordinates; each
@@ -142,16 +144,8 @@ impl CoordArgs {
         Ok(Self {
             columns,
             dim,
-            metadata: Self::metadata(crs),
+            metadata: crs_metadata(crs),
         })
-    }
-
-    /// GeoArrow metadata recording `crs` verbatim, or none when it is `NULL`.
-    fn metadata(crs: Option<String>) -> Arc<Metadata> {
-        match crs {
-            Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
-            None => Arc::new(Metadata::default()),
-        }
     }
 }
 
@@ -220,9 +214,8 @@ fn ga_make_line(start: Robj, end: Robj) -> extendr_api::Result<Robj> {
 /// It returns a null polygon for a row where any bound is `NA`, so the result
 /// always has the same length as the longest bound.
 ///
-/// `ga_make_envelope()` stores `crs` verbatim in the array's GeoArrow metadata
-/// and never interprets it. If you leave it `NULL`, it produces an array with
-/// no CRS.
+/// `ga_make_envelope()` records `crs` in the array's GeoArrow metadata as
+/// [ga_point()] does. If you leave it `NULL`, it produces an array with no CRS.
 ///
 /// @param xmin,ymin,xmax,ymax numeric vectors or float64 arrays of the bounds;
 ///   each length 1 or the same length as the longest
@@ -262,10 +255,7 @@ fn ga_make_envelope(
         }
     }
 
-    let metadata = match crs {
-        Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
-        None => Arc::new(Metadata::default()),
-    };
+    let metadata = crs_metadata(crs);
 
     let mut bldr = PolygonBuilder::new(PolygonType::new(Dimension::XY, metadata));
     for (((a, b), c), d) in x0

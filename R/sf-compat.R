@@ -423,6 +423,11 @@ st_is_empty <- function(x) {
 }
 
 #' @noRd
+st_is_longlat <- function(x) {
+  ga_is_longlat(as_ga(x))
+}
+
+#' @noRd
 st_geometry_type <- function(x, by_geometry = TRUE) {
   types <- ga_geometry_type(as_ga(x))
   if (isTRUE(by_geometry)) {
@@ -575,7 +580,7 @@ st_make_grid <- function(
     cellsize = if (missing(cellsize)) NULL else cellsize,
     offset = if (missing(offset)) NULL else offset,
     n = if (missing(n)) NULL else n,
-    crs = if (missing(crs)) NULL else sf::st_crs(crs)$wkt,
+    crs = if (missing(crs)) NULL else sf::st_crs(crs)$ProjJson,
     what = rlang::arg_match(what, c("polygons", "centers", "corners"))
   ))
 }
@@ -632,6 +637,7 @@ sf_masked <- c(
   "st_equals_exact",
   "st_geometry_type",
   "st_is_empty",
+  "st_is_longlat",
   "st_is_simple",
   "st_is_within_distance",
   "st_jitter",

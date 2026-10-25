@@ -71,3 +71,82 @@ test_that("every function that returns geometries keeps the crs of its input", {
     expect_gt(checked, 15)
   }
 })
+
+as_sfc <- function(x) sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x))
+
+# the GeoArrow extension metadata of x, parsed
+metadata_of <- function(x) {
+  schema <- nanoarrow::infer_nanoarrow_schema(x)
+  yyjsonr::read_json_str(schema$metadata[["ARROW:extension:metadata"]])
+}
+
+# each function that takes a crs argument, called with that crs
+with_crs <- list(
+  ga_point = function(crs) ga_point(1, 2, crs = crs),
+  ga_make_envelope = function(crs) ga_make_envelope(0, 0, 1, 1, crs = crs),
+  ga_make_grid = function(crs) {
+    ga_make_grid(cellsize = 1, offset = c(0, 0), n = 1, crs = crs)
+  },
+  ga_from_wkb = function(crs) {
+    ga_from_wkb(ga_cast_geometry(ga_point(1, 2), "wkb"), crs = crs)
+  }
+)
+
+test_that("a crs argument stores PROJJSON as a compact, typed JSON object", {
+  projjson <- sf::st_crs(32119)$ProjJson
+  for (name in names(with_crs)) {
+    out <- with_crs[[name]](projjson)
+    schema <- nanoarrow::infer_nanoarrow_schema(out)
+    raw <- schema$metadata[["ARROW:extension:metadata"]]
+
+    expect_identical(metadata_of(out)$crs_type, "projjson", label = name)
+    expect_identical(
+      metadata_of(out)$crs,
+      yyjsonr::read_json_str(projjson),
+      label = name
+    )
+    expect_false(grepl("\n", raw, fixed = TRUE), label = name)
+    expect_true(sf::st_crs(as_sfc(out)) == sf::st_crs(32119), label = name)
+  }
+})
+
+test_that("a crs argument stores AUTHORITY:CODE as an authority code", {
+  for (name in names(with_crs)) {
+    for (code in c("EPSG:4326", "OGC:CRS84", "IAU_2015:30100")) {
+      meta <- metadata_of(with_crs[[name]](code))
+      expect_identical(meta$crs, code, label = name)
+      expect_identical(meta$crs_type, "authority_code", label = name)
+    }
+  }
+})
+
+test_that("a crs argument keeps any other string as given, untyped", {
+  others <- c(
+    sf::st_crs(4326)$wkt,
+    "+proj=longlat +datum=WGS84",
+    "urn:ogc:def:crs:EPSG::4326",
+    '{"not": "projjson"}',
+    # a valid PROJJSON document, but an ellipsoid rather than a CRS
+    '{"type":"Ellipsoid","name":"e","semi_major_axis":1,"inverse_flattening":300}'
+  )
+  for (name in names(with_crs)) {
+    for (crs in others) {
+      meta <- metadata_of(with_crs[[name]](crs))
+      expect_identical(meta$crs, crs, label = name)
+      expect_null(meta$crs_type, label = name)
+    }
+  }
+})
+
+test_that("read_geojson() stores OGC:CRS84 as PROJJSON", {
+  path <- withr::local_tempfile(fileext = ".geojson")
+  writeLines(
+    '{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[1,2]}}]}',
+    path
+  )
+  geometry <- as.data.frame(read_geojson(path))$geometry
+
+  expect_identical(metadata_of(geometry)$crs_type, "projjson")
+  expect_true(sf::st_crs(as_sfc(geometry)) == sf::st_crs("OGC:CRS84"))
+  expect_true(ga_is_longlat(geometry))
+})

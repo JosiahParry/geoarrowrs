@@ -29,8 +29,8 @@ geometry type, such as \code{\link[=ga_dist_euclidean_pairwise]{ga_dist_euclidea
 in it. If you convert once up front, you settle the type for everything
 downstream.
 
-\code{ga_from_wkb()} stores \code{crs} verbatim in the array's metadata and never
-interprets it, so it never reprojects. If you leave it \code{NULL},
+\code{ga_from_wkb()} records \code{crs} in the array's metadata as \code{\link[=ga_point]{ga_point()}} does,
+so it never reprojects. If you leave it \code{NULL},
 \code{ga_from_wkb()} keeps whatever the input carried, which for a bare binary
 column is no CRS at all.
 

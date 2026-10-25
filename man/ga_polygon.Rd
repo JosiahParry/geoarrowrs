@@ -58,9 +58,9 @@ errors on a ring with fewer than four coordinates once closed. When no ring
 needs closing, it reuses the coordinate arrays without copying them.
 
 \code{ga_polygon()} adds the z and m dimensions when you supply \code{z} and \code{m}. It
-errors on \code{NA} in any coordinate or id. It stores \code{crs} verbatim in the
-array's GeoArrow metadata and never interprets it. If you leave it \code{NULL},
-it produces an array with no CRS.
+errors on \code{NA} in any coordinate or id. It records \code{crs} in the array's
+GeoArrow metadata as \code{\link[=ga_point]{ga_point()}} does. If you leave it \code{NULL}, it produces
+an array with no CRS.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)) withAutoprint(\{ # examplesIf}

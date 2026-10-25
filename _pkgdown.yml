@@ -94,6 +94,7 @@ reference:
       - has_concept("iteration")
       - has_concept("validation")
       - has_concept("geometry type")
+      - has_concept("crs")
 
   - title: Cast
     contents:

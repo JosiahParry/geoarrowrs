@@ -2004,8 +2004,8 @@ ga_downcast_geometry <- function(x) .Call(wrap__ga_downcast_geometry, x)
 #' in it. If you convert once up front, you settle the type for everything
 #' downstream.
 #'
-#' `ga_from_wkb()` stores `crs` verbatim in the array's metadata and never
-#' interprets it, so it never reprojects. If you leave it `NULL`,
+#' `ga_from_wkb()` records `crs` in the array's metadata as [ga_point()] does,
+#' so it never reprojects. If you leave it `NULL`,
 #' `ga_from_wkb()` keeps whatever the input carried, which for a bare binary
 #' column is no CRS at all.
 #'
@@ -2298,9 +2298,11 @@ ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_sco
 #' same length as the longest input. When every coordinate is full length and
 #' has no `NA`, it reuses the arrays without copying them.
 #'
-#' `ga_point()` stores `crs` verbatim in the array's GeoArrow metadata and never
-#' interprets it, so it never reprojects. It accepts anything a reader would
-#' produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
+#' `ga_point()` records `crs` in the array's GeoArrow metadata and never
+#' reprojects. It stores a valid PROJJSON CRS, such as
+#' `sf::st_crs(x)$ProjJson`, as a compact JSON object, an authority code such
+#' as `"EPSG:4326"` as an authority code, and any other string, such as WKT,
+#' exactly as given.
 #' If you leave it `NULL`, `ga_point()` produces an array with no CRS.
 #'
 #' @param x,y numeric vectors or float64 arrays of x and y coordinates; each
@@ -2361,9 +2363,8 @@ ga_make_line <- function(start, end) .Call(wrap__ga_make_line, start, end)
 #' It returns a null polygon for a row where any bound is `NA`, so the result
 #' always has the same length as the longest bound.
 #'
-#' `ga_make_envelope()` stores `crs` verbatim in the array's GeoArrow metadata
-#' and never interprets it. If you leave it `NULL`, it produces an array with
-#' no CRS.
+#' `ga_make_envelope()` records `crs` in the array's GeoArrow metadata as
+#' [ga_point()] does. If you leave it `NULL`, it produces an array with no CRS.
 #'
 #' @param xmin,ymin,xmax,ymax numeric vectors or float64 arrays of the bounds;
 #'   each length 1 or the same length as the longest
@@ -2497,9 +2498,9 @@ ga_multilinestring <- function(x, y, z = NULL, m = NULL, multilinestring_id = NU
 #' needs closing, it reuses the coordinate arrays without copying them.
 #'
 #' `ga_polygon()` adds the z and m dimensions when you supply `z` and `m`. It
-#' errors on `NA` in any coordinate or id. It stores `crs` verbatim in the
-#' array's GeoArrow metadata and never interprets it. If you leave it `NULL`,
-#' it produces an array with no CRS.
+#' errors on `NA` in any coordinate or id. It records `crs` in the array's
+#' GeoArrow metadata as [ga_point()] does. If you leave it `NULL`, it produces
+#' an array with no CRS.
 #'
 #' @param x,y numeric vectors or float64 arrays of coordinates, one row per
 #'   vertex
@@ -2728,6 +2729,31 @@ ga_to_degrees <- function(geometry) .Call(wrap__ga_to_degrees, geometry)
 #'
 #' geoarrow::as_geoarrow_vctr(ga_to_radians(deg))
 ga_to_radians <- function(geometry) .Call(wrap__ga_to_radians, geometry)
+
+#' Check whether geometries are in longitude and latitude
+#'
+#' Reports whether the coordinate reference system of `x` is geographic, with
+#' coordinates in longitude and latitude rather than on a plane.
+#'
+#' @details
+#' `ga_is_longlat()` reads the PROJJSON CRS in the GeoArrow metadata of `x` and
+#' decides as GDAL's `IsGeographic()` does, which [sf::st_is_longlat()] calls:
+#' `TRUE` for a geographic CRS on its own, as the source of a bound CRS, or as
+#' the first component of a compound CRS. It returns `NA` when `x` has no CRS,
+#' and when its CRS is not PROJJSON, such as an authority code or WKT, because
+#' reading those takes a CRS database that geoarrowrs does not ship.
+#'
+#' @param x a GeoArrow geometry array
+#' @returns `TRUE`, `FALSE`, or `NA`, once for the whole array
+#' @export
+#' @family crs
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' raleigh <- sf::st_sfc(sf::st_point(c(-78.64, 35.78)), crs = 4326)
+#' ga_is_longlat(geoarrow::as_geoarrow_array(raleigh))
+#'
+#' # North Carolina's state plane, in metres
+#' ga_is_longlat(geoarrow::as_geoarrow_array(sf::st_transform(raleigh, 32119)))
+ga_is_longlat <- function(x) .Call(wrap__ga_is_longlat, x)
 
 #' Add points so no segment exceeds a length
 #'

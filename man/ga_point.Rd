@@ -29,9 +29,11 @@ rather than a point at an arbitrary location, so the result always has the
 same length as the longest input. When every coordinate is full length and
 has no \code{NA}, it reuses the arrays without copying them.
 
-\code{ga_point()} stores \code{crs} verbatim in the array's GeoArrow metadata and never
-interprets it, so it never reprojects. It accepts anything a reader would
-produce, whether an authority code such as \code{"EPSG:4326"}, WKT, or PROJJSON.
+\code{ga_point()} records \code{crs} in the array's GeoArrow metadata and never
+reprojects. It stores a valid PROJJSON CRS, such as
+\code{sf::st_crs(x)$ProjJson}, as a compact JSON object, an authority code such
+as \code{"EPSG:4326"} as an authority code, and any other string, such as WKT,
+exactly as given.
 If you leave it \code{NULL}, \code{ga_point()} produces an array with no CRS.
 }
 \examples{

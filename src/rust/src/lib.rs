@@ -19,6 +19,7 @@ pub(crate) mod cast;
 pub(crate) mod cluster;
 pub(crate) mod construct;
 pub(crate) mod convert;
+pub(crate) mod crs;
 pub(crate) mod densify;
 pub(crate) mod destination;
 pub(crate) mod distance;
@@ -406,6 +407,7 @@ extendr_module! {
     use cluster;
     use construct;
     use convert;
+    use crs;
     use densify;
     use envelope;
     use geometry_type;

@@ -43,6 +43,9 @@ memmap2 = "0.9"
 # seeded offsets for ga_jitter(), with the features geo already turns on so nothing new is vendored
 rand = { version = "0.10.0", default-features = false, features = ["alloc"] }
 rand_pcg = "0.10.1"
+# reads and validates PROJJSON. The crs inspection it adds is not on crates.io yet, so this
+# points at a local checkout until projjson publishes it
+projjson = { path = "../../../projjson-rs" }
 
 [profile.release]
 lto = true

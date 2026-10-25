@@ -26,9 +26,8 @@ pair of bounds, so a row with \code{xmin} above \code{xmax} gives the same recta
 It returns a null polygon for a row where any bound is \code{NA}, so the result
 always has the same length as the longest bound.
 
-\code{ga_make_envelope()} stores \code{crs} verbatim in the array's GeoArrow metadata
-and never interprets it. If you leave it \code{NULL}, it produces an array with
-no CRS.
+\code{ga_make_envelope()} records \code{crs} in the array's GeoArrow metadata as
+\code{\link[=ga_point]{ga_point()}} does. If you leave it \code{NULL}, it produces an array with no CRS.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)) withAutoprint(\{ # examplesIf}

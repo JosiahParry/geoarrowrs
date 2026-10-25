@@ -5,8 +5,8 @@ use extendr_api::prelude::*;
 use geoarrow::datatypes::Dimension;
 use geoarrow_cast::downcast::NativeType;
 
-use super::CoordArgs;
 use super::columns::Runs;
+use crate::crs::crs_metadata;
 use crate::envelope::{as_rects, extent_of};
 use crate::threads::Threads;
 use crate::{as_geometry_chunks, try_float_array};
@@ -83,13 +83,13 @@ fn ga_make_grid(
     let mut offset = pair(offset, "offset", &[2])?;
     let mut n = pair(n, "n", &[1, 2])?;
 
-    let mut metadata = CoordArgs::metadata(crs.clone());
+    let mut metadata = crs_metadata(crs.clone());
     if x.is_null() && cellsize.is_none() && offset.is_none() && n.is_none() {
         // sf's grid when given nothing: 10 degree cells over the globe
         cellsize = Some([10.0, 10.0]);
         offset = Some([-180.0, -90.0]);
         n = Some([36.0, 18.0]);
-        metadata = CoordArgs::metadata(crs.or(Some("EPSG:4326".to_string())));
+        metadata = crs_metadata(crs.or(Some("EPSG:4326".to_string())));
     }
 
     let (bb, metadata) = match (cellsize, offset, n) {

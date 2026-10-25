@@ -12,11 +12,16 @@ use geoarrow::array::{
     MultiPolygonBuilder, PointBuilder, PolygonBuilder,
 };
 use geoarrow::datatypes::{
-    Crs, Dimension, GeometryType, LineStringType, Metadata, MultiLineStringType, MultiPointType,
+    Dimension, GeometryType, LineStringType, Metadata, MultiLineStringType, MultiPointType,
     MultiPolygonType, PointType, PolygonType,
 };
 use geoarrow::error::GeoArrowError;
 use geoarrow_array::GeoArrowArray;
+
+use crate::crs::crs_metadata;
+
+// GeoJSON is always OGC:CRS84 (RFC 7946), as sf::st_crs("OGC:CRS84")$ProjJson writes it
+const OGC_CRS84: &str = r#"{"$schema":"https://proj.org/schemas/v0.7/projjson.schema.json","type":"GeographicCRS","name":"WGS 84 (CRS84)","datum":{"type":"GeodeticReferenceFrame","name":"World Geodetic System 1984","ellipsoid":{"name":"WGS 84","semi_major_axis":6378137,"inverse_flattening":298.257223563}},"coordinate_system":{"subtype":"ellipsoidal","axis":[{"name":"Geodetic longitude","abbreviation":"Lon","direction":"east","unit":"degree"},{"name":"Geodetic latitude","abbreviation":"Lat","direction":"north","unit":"degree"}]},"scope":"unknown","area":"World","bbox":{"south_latitude":-90,"west_longitude":-180,"north_latitude":90,"east_longitude":180},"id":{"authority":"OGC","code":"CRS84"}}"#;
 
 /// The widest arrow type a GeoJSON property needs, widened across all features.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -376,10 +381,7 @@ fn read_geojson(path: &str) -> extendr_api::Result<Robj> {
         }
     }
 
-    let metadata = Arc::new(Metadata::new(
-        Crs::from_authority_code("OGC:CRS84".to_string()),
-        None,
-    ));
+    let metadata = crs_metadata(Some(OGC_CRS84.to_string()));
 
     let mut builders: Vec<ColBuilder> = types.iter().map(|t| ColBuilder::new(*t)).collect();
     for feature in &features {

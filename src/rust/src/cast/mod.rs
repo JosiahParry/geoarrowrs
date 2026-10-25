@@ -9,7 +9,7 @@ use geo::{Geometry, MultiLineString, MultiPolygon};
 use geoarrow::array::from_arrow_array;
 use geoarrow::array::{MultiLineStringBuilder, MultiPolygonBuilder};
 use geoarrow::datatypes::{
-    BoxType, Crs, Dimension, GeoArrowType, GeometryCollectionType, GeometryType, LineStringType,
+    BoxType, Dimension, GeoArrowType, GeometryCollectionType, GeometryType, LineStringType,
     Metadata, MultiLineStringType, MultiPointType, MultiPolygonType, PointType, PolygonType,
     WkbType, WktType,
 };
@@ -20,6 +20,7 @@ use geoarrow_cast::downcast::{NativeType, infer_downcast_type};
 use rayon::prelude::*;
 
 use crate::as_geometry_chunks;
+use crate::crs::crs_metadata;
 
 /// Build the requested target type, reusing the source's dimension and metadata since `cast` requires the metadata to match.
 fn target_type(to: &str, from: &GeoArrowType) -> extendr_api::Result<GeoArrowType> {
@@ -259,8 +260,8 @@ fn ga_downcast_geometry(x: Robj) -> extendr_api::Result<Robj> {
 /// in it. If you convert once up front, you settle the type for everything
 /// downstream.
 ///
-/// `ga_from_wkb()` stores `crs` verbatim in the array's metadata and never
-/// interprets it, so it never reprojects. If you leave it `NULL`,
+/// `ga_from_wkb()` records `crs` in the array's metadata as [ga_point()] does,
+/// so it never reprojects. If you leave it `NULL`,
 /// `ga_from_wkb()` keeps whatever the input carried, which for a bare binary
 /// column is no CRS at all.
 ///
@@ -291,7 +292,7 @@ fn ga_from_wkb(
     // cast refuses to change metadata, so the crs goes on before the downcast rather than after
     let chunks = match crs {
         Some(value) => {
-            let metadata = Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None));
+            let metadata = crs_metadata(Some(value));
             chunks
                 .into_iter()
                 .map(|chunk| chunk.with_metadata(metadata.clone()))

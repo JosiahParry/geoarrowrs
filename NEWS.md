@@ -1,5 +1,8 @@
 # geoarrowrs (development version)
 
+* Added `ga_is_longlat()`, which reports whether the PROJJSON CRS of an array is geographic like `sf::st_is_longlat()`, and `mask_sf()` attaches `st_is_longlat()`.
+* A `crs` argument stores a valid PROJJSON CRS as a compact JSON object typed `projjson`, and an `AUTHORITY:CODE` typed `authority_code`.
+* `read_geojson()` records OGC:CRS84 as PROJJSON.
 * `ga_translate()` and `ga_jitter()` keep an empty point empty instead of failing.
 * Added `ga_jitter()`, which moves each geometry by a small random offset like `sf::st_jitter()`, and `mask_sf()` attaches `st_jitter()`.
 * Added `ga_interpolate_aw()`, which interpolates extensive and intensive values from one set of polygons onto another by area, and `sf::st_interpolate_aw()` works on a data frame with a GeoArrow geometry column.

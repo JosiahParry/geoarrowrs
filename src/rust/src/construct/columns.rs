@@ -177,9 +177,9 @@ fn ga_multilinestring(
 /// needs closing, it reuses the coordinate arrays without copying them.
 ///
 /// `ga_polygon()` adds the z and m dimensions when you supply `z` and `m`. It
-/// errors on `NA` in any coordinate or id. It stores `crs` verbatim in the
-/// array's GeoArrow metadata and never interprets it. If you leave it `NULL`,
-/// it produces an array with no CRS.
+/// errors on `NA` in any coordinate or id. It records `crs` in the array's
+/// GeoArrow metadata as [ga_point()] does. If you leave it `NULL`, it produces
+/// an array with no CRS.
 ///
 /// @param x,y numeric vectors or float64 arrays of coordinates, one row per
 ///   vertex
