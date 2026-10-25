@@ -12,6 +12,7 @@ use geo_index::rtree::{DEFAULT_RTREE_NODE_SIZE, RTree as GeoRTree, RTreeBuilder,
 use rayon::prelude::*;
 use std::borrow::Cow;
 mod dwithin;
+mod equals_exact;
 mod knn;
 mod metric;
 mod pairs;
@@ -417,6 +418,7 @@ extendr_module! {
     fn ga_sparse_overlaps;
     fn ga_sparse_equals_topo;
     use dwithin;
+    use equals_exact;
     use knn;
     use pairs;
 }

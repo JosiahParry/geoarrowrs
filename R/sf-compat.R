@@ -387,6 +387,18 @@ st_equals <- function(x, y, sparse = TRUE, ...) {
 }
 
 #' @noRd
+st_equals_exact <- function(x, y, par, sparse = TRUE, ...) {
+  x <- as_ga(x)
+  y <- as_ga(y)
+  predicate_out(
+    ga_sparse_equals_exact(x, y, par),
+    length(x),
+    length(y),
+    sparse
+  )
+}
+
+#' @noRd
 st_overlaps <- function(x, y, sparse = TRUE, ...) {
   sparse_predicate(x, y, sparse, ga_sparse_overlaps)
 }
@@ -507,6 +519,7 @@ sf_masked <- c(
   "st_disjoint",
   "st_distance",
   "st_equals",
+  "st_equals_exact",
   "st_geometry_type",
   "st_is_empty",
   "st_is_simple",

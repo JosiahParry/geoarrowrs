@@ -1113,6 +1113,41 @@ ga_sparse_equals_topo <- function(x, y) .Call(wrap__ga_sparse_equals_topo, x, y)
 #' @noRd
 ga_sparse_dwithin_impl <- function(x, y, distance, metric) .Call(wrap__ga_sparse_dwithin_impl, x, y, distance, metric)
 
+#' Find which rows of `y` are identical to each row of `x` within a tolerance
+#'
+#' Returns the row numbers of `y` that have the same type and structure as
+#' each row of `x`, with every coordinate within `tolerance` of its
+#' counterpart. This is the sparse form of [ga_equals_exact()], and matches
+#' `sf::st_equals_exact()`.
+#'
+#' @details
+#' `ga_sparse_equals_exact()` indexes `y` in a packed Hilbert R-tree and
+#' compares only the rows whose bounding boxes come within `tolerance` of the
+#' box of the row of `x`. It compares coordinates in order, so it does not
+#' match a line to its reverse; use [ga_sparse_equals_topo()] for that.
+#'
+#' `ga_sparse_equals_exact()` returns a zero length element for a row of `x`
+#' that matches nothing. It returns a null element for a null or empty
+#' geometry in `x`, and for a `tolerance` that is `NA` or negative.
+#'
+#' @param x a GeoArrow geometry array
+#' @param y a GeoArrow geometry array
+#' @param tolerance the largest planar distance allowed between matching
+#'   coordinates; length 1 or the same length as `x`
+#' @returns a list array of 1 based row numbers into `y`, the same length as `x`
+#' @export
+#' @family topology
+#' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+#' nc <- as.data.frame(read_shapefile(
+#'   system.file("shape/nc.shp", package = "sf")
+#' ))
+#' shifted <- ga_translate(nc$geometry, 0.001, 0)
+#'
+#' # each county matches its shifted copy once the tolerance covers the shift
+#' as.vector(ga_sparse_equals_exact(nc$geometry, shifted, 0))[1:3]
+#' as.vector(ga_sparse_equals_exact(nc$geometry, shifted, 0.01))[1:3]
+ga_sparse_equals_exact <- function(x, y, tolerance = 0) .Call(wrap__ga_sparse_equals_exact, x, y, tolerance)
+
 #' Rows of `y` nearest each row of `x`, validated in R
 #' @noRd
 ga_sparse_knn_impl <- function(x, y, k, max_distance = NULL, metric) .Call(wrap__ga_sparse_knn_impl, x, y, k, max_distance, metric)

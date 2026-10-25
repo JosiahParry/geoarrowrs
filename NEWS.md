@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_sparse_equals_exact()`, the sparse form of `ga_equals_exact()`, and `mask_sf()` attaches `st_equals_exact()`.
 * Added `ga_make_valid()`, which repairs invalid polygons and multipolygons, and `sf::st_make_valid()` and `sdf::st_make_valid()` work on a `geoarrow_vctr`.
 * Added `ga_linestring()`, `ga_multipoint()`, `ga_multilinestring()`, and `ga_multipolygon()`, which build geometries from coordinate columns and ids like `ga_polygon()`.
 * `ga_point()` takes `z` and `m`, which add those dimensions to the points.

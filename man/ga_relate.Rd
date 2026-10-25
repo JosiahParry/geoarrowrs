@@ -47,6 +47,7 @@ Other topology:
 \code{\link[=ga_filter]{ga_filter()}},
 \code{\link[=ga_is_empty]{ga_is_empty()}},
 \code{\link[=ga_join]{ga_join()}},
+\code{\link[=ga_sparse_equals_exact]{ga_sparse_equals_exact()}},
 \code{\link[=ga_sparse_intersects]{ga_sparse_intersects()}},
 \code{\link[=ga_sparse_pairs]{ga_sparse_pairs()}}
 }

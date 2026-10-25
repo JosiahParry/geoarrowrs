@@ -90,3 +90,65 @@ test_that("equals_exact is null propagating", {
   expect_equal(res$length, 2L)
   expect_equal(as.vector(res), c(TRUE, NA))
 })
+
+# sf's sparse answer as plain integer vectors, one per row of x
+sf_sparse_equals_exact <- function(x, y, tol) {
+  lapply(sf::st_equals_exact(x, y, par = tol), as.integer)
+}
+
+ga_sparse <- function(x, y, tol) {
+  lapply(as.vector(ga_sparse_equals_exact(ga(x), ga(y), tol)), as.integer)
+}
+
+test_that("the sparse form matches sf across every pair", {
+  p <- pairs()
+  for (tol in c(0, 1e-6, 1.5)) {
+    expect_equal(
+      ga_sparse(p$x, p$y, tol),
+      sf_sparse_equals_exact(p$x, p$y, tol)
+    )
+  }
+})
+
+test_that("the sparse form matches sf on the nc counties and a shifted copy", {
+  nc <- sf::st_geometry(sf::st_read(
+    system.file("shape/nc.shp", package = "sf"),
+    quiet = TRUE
+  ))
+  sf::st_crs(nc) <- NA
+  shifted <- nc + c(0.001, 0)
+  both <- c(nc, shifted)
+
+  for (tol in c(0, 0.0005, 0.002)) {
+    expect_equal(
+      ga_sparse(nc, both, tol),
+      sf_sparse_equals_exact(nc, both, tol)
+    )
+  }
+})
+
+test_that("the sparse form gives a null for a null x or an NA tolerance", {
+  x <- ga(sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point()))
+  res <- ga_sparse_equals_exact(x, x, 0)
+  expect_identical(res$null_count, 1L)
+
+  res <- ga_sparse_equals_exact(x, x, c(NA, 0))
+  expect_identical(res$null_count, 2L)
+})
+
+test_that("the masked st_equals_exact matches sf, sparse and dense", {
+  p <- pairs()
+  mask_sf()
+  on.exit(detach("geoarrowrs:sf"), add = TRUE)
+  x <- geoarrow::as_geoarrow_vctr(ga(p$x))
+  y <- geoarrow::as_geoarrow_vctr(ga(p$y))
+
+  expect_equal(
+    lapply(as.vector(st_equals_exact(x, y, par = 1e-6)), as.integer),
+    sf_sparse_equals_exact(p$x, p$y, 1e-6)
+  )
+  expect_identical(
+    st_equals_exact(x, y, par = 1e-6, sparse = FALSE),
+    sf::st_equals_exact(p$x, p$y, par = 1e-6, sparse = FALSE)
+  )
+})

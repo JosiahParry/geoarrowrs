@@ -243,7 +243,7 @@ fn ga_relate(x: Robj, y: Robj) -> extendr_api::Result<Robj> {
 }
 
 /// Exact equality as GEOS defines it: same type, same structure, and every coordinate within `tol` in planar distance.
-trait EqualsExact {
+pub(crate) trait EqualsExact {
     fn equals_exact(&self, other: &Self, tol: f64) -> bool;
 }
 
