@@ -47,6 +47,7 @@ ga_xy(c(0, NA), c(0, 1))$null_count
 Other construct:
 \code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_make_line]{ga_make_line()}},
+\code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
 \code{\link[=ga_polygon]{ga_polygon()}}
 }
 \concept{construct}

@@ -83,6 +83,7 @@ sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
 Other construct:
 \code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_make_line]{ga_make_line()}},
+\code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
 \code{\link[=ga_xy]{ga_xy()}}
 }
 \concept{construct}

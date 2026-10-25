@@ -2194,6 +2194,37 @@ ga_make_line <- function(start, end) .Call(wrap__ga_make_line, start, end)
 #' as.vector(ga_unsigned_area(boxes))
 ga_make_envelope <- function(xmin, ymin, xmax, ymax, crs = NULL) .Call(wrap__ga_make_envelope, xmin, ymin, xmax, ymax, crs)
 
+#' Join the points of each group into a line
+#'
+#' Returns one linestring through the points that share each label of `by`,
+#' taking the points in row order. With `by = NULL`, `ga_make_line_agg()`
+#' joins every point into a single line.
+#'
+#' @details
+#' `ga_make_line_agg()` groups the rows the way [ga_collect_agg()] does. It
+#' accepts an unsorted `by`, treats `NA` as a label like any other, and orders
+#' the lines by where each label first appears, so you can name the lines with
+#' `unique(by)`.
+#'
+#' `ga_make_line_agg()` skips null and empty points, and returns a null line
+#' for a group with fewer than two points left. It keeps the z and m values
+#' and the CRS of `points`. This is the aggregate form of PostGIS
+#' `ST_MakeLine()`; use [ga_make_line()] to join pairs of points instead.
+#'
+#' @param points a GeoArrow point array
+#' @param by a character vector, numeric vector, or Arrow array with one label
+#'   per point, or `NULL` for a single line
+#' @returns a GeoArrow linestring array with one element per label of `by`
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' pts <- ga_xy(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
+#' lines <- ga_make_line_agg(pts, by = c("a", "a", "a", "b", "b"))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines))
+#'
+#' as.vector(ga_length_euclidean(lines))
+ga_make_line_agg <- function(points, by = NULL) .Call(wrap__ga_make_line_agg, points, by)
+
 #' Build polygons from coordinate columns
 #'
 #' Returns one polygon per run of `polygon_id`, with one ring per run of

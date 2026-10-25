@@ -6,7 +6,7 @@ use arrow::compute::cast;
 use arrow::datatypes::{DataType, Int32Type};
 use arrow_extendr::{FromArrowRobj, IntoArrowRobj};
 use extendr_api::prelude::*;
-use geo::{Geometry, GeometryCollection};
+use geo::GeometryCollection;
 use geoarrow::array::GeometryCollectionBuilder;
 use geoarrow::datatypes::{Dimension, GeometryCollectionType};
 use geoarrow_array::GeoArrowArray;
@@ -75,31 +75,30 @@ pub(crate) fn try_group_codes(
     Ok(dict.keys().iter().collect())
 }
 
-/// Split geometries into groups by code, in the order each code (including a
-/// null code, treated as its own group) first appears. Null geometries are
-/// dropped, matching the ungrouped path.
-fn group_by_codes(
-    geoms: Vec<Option<Geometry<f64>>>,
+/// Split items into groups by code in order of first appearance, with a null code as its own group and null items dropped.
+pub(crate) fn group_by_codes<T>(
+    items: Vec<Option<T>>,
     codes: Vec<Option<i32>>,
-) -> extendr_api::Result<Vec<Vec<Geometry<f64>>>> {
-    if codes.len() != geoms.len() {
+    label: &str,
+) -> extendr_api::Result<Vec<Vec<T>>> {
+    if codes.len() != items.len() {
         return Err(Error::Other(format!(
-            "`by` must have one label per row of `geometry` ({}), got {}",
-            geoms.len(),
+            "`by` must have one label per row of `{label}` ({}), got {}",
+            items.len(),
             codes.len()
         )));
     }
 
-    let mut index: HashMap<Option<i32>, usize> = HashMap::new();
-    let mut groups: Vec<Vec<Geometry<f64>>> = Vec::new();
+    let mut index = HashMap::<Option<i32>, usize>::new();
+    let mut groups = Vec::<Vec<T>>::new();
 
-    for (geom, code) in geoms.into_iter().zip(codes) {
-        let Some(geom) = geom else { continue };
+    for (item, code) in items.into_iter().zip(codes) {
+        let Some(item) = item else { continue };
         let idx = *index.entry(code).or_insert_with(|| {
             groups.push(Vec::new());
             groups.len() - 1
         });
-        groups[idx].push(geom);
+        groups[idx].push(item);
     }
 
     Ok(groups)
@@ -197,7 +196,7 @@ fn ga_collect_agg(
         }
     } else {
         let codes = try_group_codes(by, "by")?;
-        for parts in group_by_codes(geoms, codes)? {
+        for parts in group_by_codes(geoms, codes, "geometry")? {
             bldr.push_geometry_collection(Some(&GeometryCollection(parts)))
                 .map_err(|e| Error::Other(e.to_string()))?;
         }

@@ -41,6 +41,7 @@ as.vector(ga_unsigned_area(boxes))
 \seealso{
 Other construct:
 \code{\link[=ga_make_line]{ga_make_line()}},
+\code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
 \code{\link[=ga_polygon]{ga_polygon()}},
 \code{\link[=ga_xy]{ga_xy()}}
 }
