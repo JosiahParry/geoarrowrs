@@ -93,6 +93,7 @@ reference:
     contents:
       - has_concept("iteration")
       - has_concept("validation")
+      - has_concept("geometry type")
 
   - title: Cast
     contents:
@@ -102,3 +103,4 @@ reference:
     contents:
       - has_concept("misc")
       - register_geoarrow_udfs
+      - mask_sf
