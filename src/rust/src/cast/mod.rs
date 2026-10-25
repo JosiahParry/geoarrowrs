@@ -149,7 +149,7 @@ fn cast_chunks(
 /// @export
 /// @family cast
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// pts <- ga_xy(c(0, 1), c(0, 1))
+/// pts <- ga_point(c(0, 1), c(0, 1))
 ///
 /// # you can always widen
 /// ga_cast_geometry(pts, "multipoint")
@@ -233,7 +233,7 @@ fn promote_to_multi(
 /// @export
 /// @family cast
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// pts <- ga_xy(c(0, 1), c(0, 1))
+/// pts <- ga_point(c(0, 1), c(0, 1))
 /// wide <- ga_cast_geometry(pts, "geometry")
 ///
 /// # only points in there, so you get a point array back

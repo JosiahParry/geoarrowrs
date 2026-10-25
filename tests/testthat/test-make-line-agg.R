@@ -14,7 +14,7 @@ test_that("ga_make_line_agg joins every point into one line, matching sf", {
   x <- c(0, 1, 2, 10, 11)
   y <- c(0, 1, 0, 5, 5)
 
-  expect_equal(as_wkt(ga_make_line_agg(ga_xy(x, y))), sf_line_wkt(x, y))
+  expect_equal(as_wkt(ga_make_line_agg(ga_point(x, y))), sf_line_wkt(x, y))
 })
 
 test_that("by groups an unsorted key by first appearance, matching sf per group", {
@@ -46,7 +46,7 @@ test_that("by groups an unsorted key by first appearance, matching sf per group"
 
 test_that("a group with fewer than two points is a null line", {
   skip_deps()
-  pts <- ga_xy(c(0, 1, 5), c(0, 1, 5))
+  pts <- ga_point(c(0, 1, 5), c(0, 1, 5))
   res <- ga_make_line_agg(pts, by = c("a", "a", "b"))
 
   expect_identical(res$length, 2L)
@@ -88,7 +88,7 @@ test_that("ga_make_line_agg keeps m", {
 
 test_that("a numeric or Arrow by matches the same labels as text", {
   skip_deps()
-  pts <- ga_xy(c(0, 1, 2, 3, 4), c(0, 1, 0, 1, 0))
+  pts <- ga_point(c(0, 1, 2, 3, 4), c(0, 1, 0, 1, 0))
   key <- c(2L, 1L, 2L, 1L, 2L)
   from_text <- as_wkt(ga_make_line_agg(pts, by = as.character(key)))
 
@@ -101,7 +101,7 @@ test_that("a numeric or Arrow by matches the same labels as text", {
 
 test_that("ga_make_line_agg keeps crs", {
   skip_deps()
-  res <- ga_make_line_agg(ga_xy(c(0, 1), c(0, 1), crs = "EPSG:4326"))
+  res <- ga_make_line_agg(ga_point(c(0, 1), c(0, 1), crs = "EPSG:4326"))
 
   expect_equal(
     sf::st_crs(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(res))),
@@ -112,7 +112,7 @@ test_that("ga_make_line_agg keeps crs", {
 test_that("by has to have one label per point", {
   skip_deps()
   expect_error(
-    ga_make_line_agg(ga_xy(c(0, 1, 2), c(0, 1, 0)), by = 1:2),
+    ga_make_line_agg(ga_point(c(0, 1, 2), c(0, 1, 0)), by = 1:2),
     "one label per row of `points`"
   )
 })

@@ -33,7 +33,7 @@ and the CRS of \code{points}. This is the aggregate form of PostGIS
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-pts <- ga_xy(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
+pts <- ga_point(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
 lines <- ga_make_line_agg(pts, by = c("a", "a", "a", "b", "b"))
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines))
 
@@ -45,7 +45,7 @@ Other construct:
 \code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_make_line]{ga_make_line()}},
 \code{\link[=ga_make_polygon]{ga_make_polygon()}},
-\code{\link[=ga_polygon]{ga_polygon()}},
-\code{\link[=ga_xy]{ga_xy()}}
+\code{\link[=ga_point]{ga_point()}},
+\code{\link[=ga_polygon]{ga_polygon()}}
 }
 \concept{construct}

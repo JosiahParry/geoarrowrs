@@ -157,13 +157,13 @@ fn ga_polygon(
 /// @family construct
 /// @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
 /// # join points into rings, then rings into polygons
-/// pts <- ga_xy(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
+/// pts <- ga_point(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
 /// rings <- ga_make_line_agg(pts, by = c(1, 1, 1, 1, 2, 2, 2))
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_make_polygon(rings)))
 ///
 /// # a square with a square hole
-/// shell <- ga_make_line_agg(ga_xy(c(0, 10, 10, 0), c(0, 0, 10, 10)))
-/// hole <- ga_make_line_agg(ga_xy(c(2, 4, 4, 2), c(2, 2, 4, 4)))
+/// shell <- ga_make_line_agg(ga_point(c(0, 10, 10, 0), c(0, 0, 10, 10)))
+/// hole <- ga_make_line_agg(ga_point(c(2, 4, 4, 2), c(2, 2, 4, 4)))
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
 ///   ga_make_polygon(shell, ga_as_multilinestring(hole))
 /// ))

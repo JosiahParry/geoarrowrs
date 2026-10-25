@@ -85,6 +85,6 @@ Other construct:
 \code{\link[=ga_make_line]{ga_make_line()}},
 \code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
 \code{\link[=ga_make_polygon]{ga_make_polygon()}},
-\code{\link[=ga_xy]{ga_xy()}}
+\code{\link[=ga_point]{ga_point()}}
 }
 \concept{construct}

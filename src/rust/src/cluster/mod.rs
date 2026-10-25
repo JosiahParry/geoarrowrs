@@ -72,7 +72,7 @@ fn as_scalar(x: Robj, label: &'static str) -> extendr_api::Result<f64> {
 /// @family cluster
 /// @references [Dbscan](https://docs.rs/geo/latest/geo/algorithm/dbscan/trait.Dbscan.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// g <- ga_xy(
+/// g <- ga_point(
 ///   c(0, 0.1, 0.2, 5, 5.1, 5.2),
 ///   c(0, 0.1, 0.2, 5, 5.1, 5.2)
 /// )
@@ -127,7 +127,7 @@ fn ga_dbscan(geometry: Robj, eps: Robj, min_points: Robj) -> anyhow::Result<Robj
 /// @family cluster
 /// @references [KMeans](https://docs.rs/geo/latest/geo/algorithm/kmeans/trait.KMeans.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// g <- ga_xy(
+/// g <- ga_point(
 ///   c(0, 0.1, 0.2, 5, 5.1, 5.2),
 ///   c(0, 0.1, 0.2, 5, 5.1, 5.2)
 /// )
@@ -190,7 +190,7 @@ fn ga_kmeans(
 /// @family cluster
 /// @references [OutlierDetection](https://docs.rs/geo/latest/geo/algorithm/outlier_detection/trait.OutlierDetection.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// g <- ga_xy(
+/// g <- ga_point(
 ///   c(0, 0.1, 0.2, 0.3, 9),
 ///   c(0, 0.1, 0.2, 0.3, 9)
 /// )

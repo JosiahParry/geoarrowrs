@@ -27,7 +27,7 @@ null offset.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-pts <- ga_xy(c(0, 1), c(0, 1))
+pts <- ga_point(c(0, 1), c(0, 1))
 
 # ga_translate() shifts each point by its own row's offsets
 geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))

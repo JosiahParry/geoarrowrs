@@ -46,7 +46,7 @@
 * Added `ga_dbscan()`, `ga_kmeans()`, `ga_outlier_scores()`, `ga_simplify_idx()`, and `ga_simplify_vw_idx()`.
 * Added `ga_as_point()`, `ga_as_linestring()`, `ga_as_polygon()`, `ga_as_multipoint()`, `ga_as_multilinestring()`, and `ga_as_multipolygon()`.
 * Added `ga_from_wkb()`, which reads a bare `binary` WKB column into the narrowest GeoArrow type that fits it.
-* Added `ga_xy()`, which pairs two numeric vectors or float64 arrays into a GeoArrow point array.
+* Added `ga_point()`, which pairs two numeric vectors or float64 arrays into a GeoArrow point array.
 * Added `register_geoarrow_udfs()`, which registers geoarrowrs functions as Arrow scalar kernels.
 * Loading the package registers the Arrow kernels for CRS-less data automatically.
 * Registered Arrow kernels accept a bare `binary` or `large_binary` WKB column.

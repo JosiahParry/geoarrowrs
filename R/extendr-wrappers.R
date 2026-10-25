@@ -169,7 +169,7 @@ ga_skew_xy <- function(geometry, degrees_x, degrees_y) .Call(wrap__ga_skew_xy, g
 #' @family affine
 #' @references [Translate](https://docs.rs/geo/latest/geo/algorithm/translate/trait.Translate.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' pts <- ga_xy(c(0, 1), c(0, 1))
+#' pts <- ga_point(c(0, 1), c(0, 1))
 #'
 #' # ga_translate() shifts each point by its own row's offsets
 #' geoarrow::as_geoarrow_vctr(ga_translate(pts, c(10, 100), c(0, 5)))
@@ -377,8 +377,8 @@ ga_perimeter_euclidean <- function(x) .Call(wrap__ga_perimeter_euclidean, x)
 #'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' # Raleigh to Charlotte, and Raleigh to Wilmington
-#' origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
-#' dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+#' origin <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#' dest <- ga_point(c(-80.8431, -77.9447), c(35.2271, 34.2257))
 #'
 #' # degrees, then meters
 #' as.vector(ga_dist_euclidean_pairwise(origin, dest))
@@ -433,8 +433,8 @@ ga_dist_hausdorff_pairwise <- function(origin, dest) .Call(wrap__ga_dist_hausdor
 #' @references [VincentyDistance](https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' # Raleigh to Charlotte, and Raleigh to Wilmington
-#' origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
-#' dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+#' origin <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#' dest <- ga_point(c(-80.8431, -77.9447), c(35.2271, 34.2257))
 #'
 #' as.vector(ga_dist_vincenty_pairwise(origin, dest))
 ga_dist_vincenty_pairwise <- function(origin, dest) .Call(wrap__ga_dist_vincenty_pairwise, origin, dest)
@@ -494,8 +494,8 @@ ga_dist_frechet_pairwise <- function(origin, dest) .Call(wrap__ga_dist_frechet_p
 #' @export
 #' @family distance
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
-#' x <- ga_xy(c(-78.6382, -80.8431), c(35.7796, 35.2271))
-#' y <- ga_xy(c(-77.9447, -78.6382, -80.8431), c(34.2257, 35.7796, 35.2271))
+#' x <- ga_point(c(-78.6382, -80.8431), c(35.7796, 35.2271))
+#' y <- ga_point(c(-77.9447, -78.6382, -80.8431), c(34.2257, 35.7796, 35.2271))
 #'
 #' # two elements of three distances each, in meters
 #' ga_cross_distance(x, y, "haversine")
@@ -594,7 +594,7 @@ ga_lines <- function(geometry) .Call(wrap__ga_lines, geometry)
 #' @rdname ga_x
 #' @family iteration
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
-#' pts <- ga_xy(c(-111.76, -112.07), c(34.87, 33.45))
+#' pts <- ga_point(c(-111.76, -112.07), c(34.87, 33.45))
 #'
 #' as.vector(ga_x(pts))
 #' as.vector(ga_y(pts))
@@ -684,8 +684,8 @@ ga_length_vincenty <- function(x) .Call(wrap__ga_length_vincenty, x)
 #'   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' # Raleigh to Charlotte, and Raleigh to Wilmington
-#' origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
-#' dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+#' origin <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#' dest <- ga_point(c(-80.8431, -77.9447), c(35.2271, 34.2257))
 #'
 #' # west-southwest, then south-southeast
 #' as.vector(ga_bearing_haversine(origin, dest))
@@ -725,7 +725,7 @@ ga_bearing_rhumb <- function(origin, dest) .Call(wrap__ga_bearing_rhumb, origin,
 #' @references [Destination](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.Destination.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 #' # 100km due north and due east of Raleigh
-#' raleigh <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+#' raleigh <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
 #'
 #' geoarrow::as_geoarrow_vctr(
 #'   ga_dest_geodesic(raleigh, bearing = c(0, 90), distance = c(1e5, 1e5))
@@ -1131,8 +1131,8 @@ ga_sparse_knn_impl <- function(x, y, k, max_distance = NULL, metric) .Call(wrap_
 #' @export
 #' @family topology
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
-#' x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
-#' y <- ga_xy(c(0, 1), c(0, 1))
+#' x <- ga_point(c(0, 5, 1), c(0, 5, 1))
+#' y <- ga_point(c(0, 1), c(0, 1))
 #'
 #' # the middle row of x matches nothing, so you see it only with left = TRUE
 #' ga_sparse_pairs(ga_sparse_intersects(x, y))
@@ -1379,7 +1379,7 @@ ga_is_empty <- function(geometry) .Call(wrap__ga_is_empty, geometry)
 #' g <- geoarrow::as_geoarrow_array(sf::st_sfc(square, square, square))
 #'
 #' # inside, on the edge, and outside
-#' p <- ga_xy(c(2, 0, 9), c(2, 2, 9))
+#' p <- ga_point(c(2, 0, 9), c(2, 2, 9))
 #' as.vector(ga_coordinate_position(g, p))
 ga_coordinate_position <- function(geometry, point) .Call(wrap__ga_coordinate_position, geometry, point)
 
@@ -1781,7 +1781,7 @@ ga_extremes <- function(x) .Call(wrap__ga_extremes, x)
 #' @export
 #' @family cast
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' pts <- ga_xy(c(0, 1), c(0, 1))
+#' pts <- ga_point(c(0, 1), c(0, 1))
 #'
 #' # you can always widen
 #' ga_cast_geometry(pts, "multipoint")
@@ -1805,7 +1805,7 @@ ga_cast_geometry <- function(x, to) .Call(wrap__ga_cast_geometry, x, to)
 #' @export
 #' @family cast
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' pts <- ga_xy(c(0, 1), c(0, 1))
+#' pts <- ga_point(c(0, 1), c(0, 1))
 #' wide <- ga_cast_geometry(pts, "geometry")
 #'
 #' # only points in there, so you get a point array back
@@ -2036,7 +2036,7 @@ ga_collection_extract <- function(geometry, geometry_type = "POLYGON") .Call(wra
 #' @family cluster
 #' @references [Dbscan](https://docs.rs/geo/latest/geo/algorithm/dbscan/trait.Dbscan.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' g <- ga_xy(
+#' g <- ga_point(
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2),
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2)
 #' )
@@ -2068,7 +2068,7 @@ ga_dbscan <- function(geometry, eps, min_points) .Call(wrap__ga_dbscan, geometry
 #' @family cluster
 #' @references [KMeans](https://docs.rs/geo/latest/geo/algorithm/kmeans/trait.KMeans.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' g <- ga_xy(
+#' g <- ga_point(
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2),
 #'   c(0, 0.1, 0.2, 5, 5.1, 5.2)
 #' )
@@ -2100,7 +2100,7 @@ ga_kmeans <- function(geometry, k, seed = NULL) .Call(wrap__ga_kmeans, geometry,
 #' @family cluster
 #' @references [OutlierDetection](https://docs.rs/geo/latest/geo/algorithm/outlier_detection/trait.OutlierDetection.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' g <- ga_xy(
+#' g <- ga_point(
 #'   c(0, 0.1, 0.2, 0.3, 9),
 #'   c(0, 0.1, 0.2, 0.3, 9)
 #' )
@@ -2110,18 +2110,18 @@ ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_sco
 
 #' Build a point array from x and y coordinates
 #'
-#' Pairs two numeric vectors into a GeoArrow point array. `ga_xy()` recycles
+#' Pairs two numeric vectors into a GeoArrow point array. `ga_point()` recycles
 #' the shorter of the two when it is length 1.
 #'
 #' @details
-#' `ga_xy()` returns a null point for a row where either coordinate is `NA`,
+#' `ga_point()` returns a null point for a row where either coordinate is `NA`,
 #' rather than a point at an arbitrary location, so the result always has the
 #' same length as the longer input.
 #'
-#' `ga_xy()` stores `crs` verbatim in the array's GeoArrow metadata and never
+#' `ga_point()` stores `crs` verbatim in the array's GeoArrow metadata and never
 #' interprets it, so it never reprojects. It accepts anything a reader would
 #' produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
-#' If you leave it `NULL`, `ga_xy()` produces an array with no CRS.
+#' If you leave it `NULL`, `ga_point()` produces an array with no CRS.
 #'
 #' @param x a numeric vector or float64 array of x coordinates
 #' @param y a numeric vector or float64 array of y coordinates; length 1 or
@@ -2131,15 +2131,15 @@ ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_sco
 #' @export
 #' @family construct
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
-#' pts <- ga_xy(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
+#' pts <- ga_point(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
 #'
-#' # ga_xy() recycles a length 1 coordinate
-#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_xy(c(0, 1, 2), 0)))
+#' # ga_point() recycles a length 1 coordinate
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1, 2), 0)))
 #'
-#' # ga_xy() returns a null point for NA in either coordinate
-#' ga_xy(c(0, NA), c(0, 1))$null_count
-ga_xy <- function(x, y, crs = NULL) .Call(wrap__ga_xy, x, y, crs)
+#' # ga_point() returns a null point for NA in either coordinate
+#' ga_point(c(0, NA), c(0, 1))$null_count
+ga_point <- function(x, y, crs = NULL) .Call(wrap__ga_point, x, y, crs)
 
 #' Build a line between pairs of points
 #'
@@ -2159,8 +2159,8 @@ ga_xy <- function(x, y, crs = NULL) .Call(wrap__ga_xy, x, y, crs)
 #' @export
 #' @family construct
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE)
-#' start <- ga_xy(c(0, 0), c(0, 3))
-#' end <- ga_xy(c(4, 4), c(0, 3))
+#' start <- ga_point(c(0, 0), c(0, 3))
+#' end <- ga_point(c(4, 4), c(0, 3))
 #'
 #' as.vector(ga_length_euclidean(ga_make_line(start, end)))
 ga_make_line <- function(start, end) .Call(wrap__ga_make_line, start, end)
@@ -2218,7 +2218,7 @@ ga_make_envelope <- function(xmin, ymin, xmax, ymax, crs = NULL) .Call(wrap__ga_
 #' @export
 #' @family construct
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
-#' pts <- ga_xy(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
+#' pts <- ga_point(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
 #' lines <- ga_make_line_agg(pts, by = c("a", "a", "a", "b", "b"))
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines))
 #'
@@ -2309,13 +2309,13 @@ ga_polygon <- function(x, y, z = NULL, m = NULL, polygon_id = NULL, linestring_i
 #' @family construct
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
 #' # join points into rings, then rings into polygons
-#' pts <- ga_xy(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
+#' pts <- ga_point(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
 #' rings <- ga_make_line_agg(pts, by = c(1, 1, 1, 1, 2, 2, 2))
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_make_polygon(rings)))
 #'
 #' # a square with a square hole
-#' shell <- ga_make_line_agg(ga_xy(c(0, 10, 10, 0), c(0, 0, 10, 10)))
-#' hole <- ga_make_line_agg(ga_xy(c(2, 4, 4, 2), c(2, 2, 4, 4)))
+#' shell <- ga_make_line_agg(ga_point(c(0, 10, 10, 0), c(0, 0, 10, 10)))
+#' hole <- ga_make_line_agg(ga_point(c(2, 4, 4, 2), c(2, 2, 4, 4)))
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
 #'   ga_make_polygon(shell, ga_as_multilinestring(hole))
 #' ))
@@ -2336,7 +2336,7 @@ ga_make_polygon <- function(shell, holes = NULL, close = TRUE) .Call(wrap__ga_ma
 #' @family convert
 #' @references [ToDegrees](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToDegrees.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' rad <- ga_xy(c(0, pi / 4), c(0, pi / 2))
+#' rad <- ga_point(c(0, pi / 4), c(0, pi / 2))
 #'
 #' geoarrow::as_geoarrow_vctr(ga_to_degrees(rad))
 ga_to_degrees <- function(geometry) .Call(wrap__ga_to_degrees, geometry)
@@ -2356,7 +2356,7 @@ ga_to_degrees <- function(geometry) .Call(wrap__ga_to_degrees, geometry)
 #' @family convert
 #' @references [ToRadians](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToRadians.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' deg <- ga_xy(c(0, 45), c(0, 90))
+#' deg <- ga_point(c(0, 45), c(0, 90))
 #'
 #' geoarrow::as_geoarrow_vctr(ga_to_radians(deg))
 ga_to_radians <- function(geometry) .Call(wrap__ga_to_radians, geometry)
@@ -2573,8 +2573,8 @@ ga_interpolate_point <- function(line, value, metric, measure, from) .Call(wrap_
 #' @family interpolate
 #' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' start <- ga_xy(c(0, 0), c(0, 0))
-#' end <- ga_xy(c(10, 10), c(0, 0))
+#' start <- ga_point(c(0, 0), c(0, 0))
+#' end <- ga_point(c(10, 10), c(0, 0))
 #'
 #' # three units along, then a third of the way along
 #' geoarrow::as_geoarrow_vctr(
@@ -2616,8 +2616,8 @@ ga_point_at_ratio_between <- function(start, end, ratio, metric) .Call(wrap__ga_
 #' @family interpolate
 #' @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 #' @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-#' start <- ga_xy(0, 0)
-#' end <- ga_xy(10, 0)
+#' start <- ga_point(0, 0)
+#' end <- ga_point(10, 0)
 #'
 #' # one multipoint row, spaced at most 3 units apart
 #' geoarrow::as_geoarrow_vctr(
@@ -3211,13 +3211,13 @@ RTree$n_indexed <- function() .Call(wrap__RTree__n_indexed, self)
 #' head(as.vector(idx$within(pts, 0.5)), 3)
 #'
 #' # for a single lookup, pass an array of one
-#' as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+#' as.vector(idx$within(ga_point(-78.6, 35.8), 0.5))[[1]]
 #'
 #' # save the index and open it again without reading the whole file
 #' path <- tempfile(fileext = ".gaix")
 #' idx$write(path)
 #' saved <- KDTree$read(path, mmap = TRUE)
-#' as.vector(saved$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+#' as.vector(saved$within(ga_point(-78.6, 35.8), 0.5))[[1]]
 #' @section Methods:
 #'\subsection{Method `new`}{
 #'Build the index. With a bigger `node_size` you build quicker but search

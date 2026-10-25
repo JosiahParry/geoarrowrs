@@ -31,7 +31,7 @@ use crate::as_point_chunks;
 /// @export
 /// @family construct
 /// @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
-/// pts <- ga_xy(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
+/// pts <- ga_point(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
 /// lines <- ga_make_line_agg(pts, by = c("a", "a", "a", "b", "b"))
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines))
 ///

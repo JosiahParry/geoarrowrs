@@ -26,8 +26,8 @@ at most \code{max_distance} apart along the path from \code{start} to \code{end}
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-start <- ga_xy(0, 0)
-end <- ga_xy(10, 0)
+start <- ga_point(0, 0)
+end <- ga_point(10, 0)
 
 # one multipoint row, spaced at most 3 units apart
 geoarrow::as_geoarrow_vctr(

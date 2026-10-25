@@ -1,6 +1,6 @@
 test_that("ga_sparse_pairs expands matches to one row per pair", {
-  x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
-  y <- ga_xy(c(0, 1), c(0, 1))
+  x <- ga_point(c(0, 5, 1), c(0, 5, 1))
+  y <- ga_point(c(0, 1), c(0, 1))
   hits <- ga_sparse_intersects(x, y)
 
   pairs <- as.data.frame(arrow::as_arrow_array(ga_sparse_pairs(hits)))
@@ -9,8 +9,8 @@ test_that("ga_sparse_pairs expands matches to one row per pair", {
 })
 
 test_that("left keeps the rows that matched nothing, with a null y", {
-  x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
-  y <- ga_xy(c(0, 1), c(0, 1))
+  x <- ga_point(c(0, 5, 1), c(0, 5, 1))
+  y <- ga_point(c(0, 1), c(0, 1))
   hits <- ga_sparse_intersects(x, y)
 
   pairs <- as.data.frame(
@@ -41,7 +41,7 @@ test_that("ga_sparse_pairs agrees with Arrow's own flatten on the inner case", {
 
 test_that("a row of x with no geometry gives a null y under left", {
   x <- geoarrow::as_geoarrow_array(wk::wkt(c("POINT (0 0)", NA)))
-  y <- ga_xy(0, 0)
+  y <- ga_point(0, 0)
   hits <- ga_sparse_intersects(x, y)
 
   pairs <- as.data.frame(

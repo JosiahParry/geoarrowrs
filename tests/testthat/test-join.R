@@ -9,7 +9,7 @@ counties <- nc[c("NAME", "geometry")]
 sites <- data.frame(
   site = c("a", "b", "z"),
   geometry = geoarrow::as_geoarrow_vctr(
-    ga_xy(c(-78.6, -80.8, 0), c(35.8, 35.2, 0))
+    ga_point(c(-78.6, -80.8, 0), c(35.8, 35.2, 0))
   )
 )
 

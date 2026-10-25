@@ -12,12 +12,12 @@ ga <- function(sfc) {
 
 two_blobs <- function() {
   skip_deps()
-  ga_xy(c(0, 0.1, 0.2, 5, 5.1, 5.2), c(0, 0.1, 0.2, 5, 5.1, 5.2))
+  ga_point(c(0, 0.1, 0.2, 5, 5.1, 5.2), c(0, 0.1, 0.2, 5, 5.1, 5.2))
 }
 
 blob_and_stray <- function() {
   skip_deps()
-  ga_xy(c(0, 0.1, 0.2, 0.3, 9), c(0, 0.1, 0.2, 0.3, 9))
+  ga_point(c(0, 0.1, 0.2, 0.3, 9), c(0, 0.1, 0.2, 0.3, 9))
 }
 
 test_that("dbscan separates two blobs", {

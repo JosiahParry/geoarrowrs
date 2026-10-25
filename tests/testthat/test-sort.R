@@ -26,7 +26,7 @@ test_that("hilbert order steps between adjacent cells of the grid", {
   x <- c(grid$x, 65535)
   y <- c(grid$y, 65535)
 
-  ord <- as.vector(ga_hilbert_order(ga_xy(x, y)))
+  ord <- as.vector(ga_hilbert_order(ga_point(x, y)))
   walk <- ord[ord <= 16]
   steps <- sqrt(diff(x[walk])^2 + diff(y[walk])^2)
 
@@ -58,7 +58,7 @@ test_that("str order cuts x sorted slices and sorts each by y", {
   set.seed(1)
   x <- runif(1000)
   y <- runif(1000)
-  ord <- as.vector(ga_str_order(ga_xy(x, y), node_size = 16))
+  ord <- as.vector(ga_str_order(ga_point(x, y), node_size = 16))
 
   # 1000 rows in leaves of 16 make 63 leaves, so 8 slices of 128 rows
   slice <- (seq_along(ord) - 1) %/% 128

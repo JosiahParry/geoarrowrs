@@ -33,7 +33,7 @@ nc <- as.data.frame(read_shapefile(
 sites <- data.frame(
   site = c("a", "b", "c"),
   geometry = geoarrow::as_geoarrow_vctr(
-    ga_xy(c(-78.6, -80.8, 0), c(35.8, 35.2, 0))
+    ga_point(c(-78.6, -80.8, 0), c(35.8, 35.2, 0))
   )
 )
 

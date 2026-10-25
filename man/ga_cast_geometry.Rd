@@ -46,7 +46,7 @@ support casting between different dimensions.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-pts <- ga_xy(c(0, 1), c(0, 1))
+pts <- ga_point(c(0, 1), c(0, 1))
 
 # you can always widen
 ga_cast_geometry(pts, "multipoint")

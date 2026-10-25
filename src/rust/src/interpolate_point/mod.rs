@@ -28,8 +28,8 @@ use crate::{as_point_chunks, check_pair_len, check_recycle_len, try_float_array}
 /// @family interpolate
 /// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// start <- ga_xy(c(0, 0), c(0, 0))
-/// end <- ga_xy(c(10, 10), c(0, 0))
+/// start <- ga_point(c(0, 0), c(0, 0))
+/// end <- ga_point(c(10, 10), c(0, 0))
 ///
 /// # three units along, then a third of the way along
 /// geoarrow::as_geoarrow_vctr(
@@ -172,8 +172,8 @@ fn ga_point_at_ratio_between(
 /// @family interpolate
 /// @references [InterpolatePoint](https://docs.rs/geo/latest/geo/algorithm/line_measures/trait.InterpolatePoint.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// start <- ga_xy(0, 0)
-/// end <- ga_xy(10, 0)
+/// start <- ga_point(0, 0)
+/// end <- ga_point(10, 0)
 ///
 /// # one multipoint row, spaced at most 3 units apart
 /// geoarrow::as_geoarrow_vctr(

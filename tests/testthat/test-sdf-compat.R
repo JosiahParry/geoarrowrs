@@ -6,7 +6,7 @@ nc <- as.data.frame(read_shapefile(
   system.file("shape/nc.shp", package = "sf")
 ))
 geom <- geoarrow::as_geoarrow_vctr(nc$geometry)
-sites <- geoarrow::as_geoarrow_vctr(ga_xy(c(-78.6, -80.8), c(35.8, 35.2)))
+sites <- geoarrow::as_geoarrow_vctr(ga_point(c(-78.6, -80.8), c(35.8, 35.2)))
 
 counties <- tibble::tibble(
   name = as.character(nc$NAME),

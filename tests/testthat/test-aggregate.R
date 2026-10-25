@@ -21,7 +21,7 @@ test_that("the collected hull matches sf", {
 })
 
 test_that("ga_collect_agg keeps every non null row", {
-  pts <- ga_xy(c(1, NA, 3), c(4, NA, 6))
+  pts <- ga_point(c(1, NA, 3), c(4, NA, 6))
   hull <- ga_convex_hull(ga_collect_agg(pts))
   expect_identical(hull$length, 1L)
   expect_identical(ga_collect_agg(pts)$null_count, 0L)

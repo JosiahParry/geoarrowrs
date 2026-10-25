@@ -76,13 +76,13 @@ fn add_points(chunks: &[PointArray], node_size: u16) -> anyhow::Result<(GeoKDTre
 /// head(as.vector(idx$within(pts, 0.5)), 3)
 ///
 /// # for a single lookup, pass an array of one
-/// as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+/// as.vector(idx$within(ga_point(-78.6, 35.8), 0.5))[[1]]
 ///
 /// # save the index and open it again without reading the whole file
 /// path <- tempfile(fileext = ".gaix")
 /// idx$write(path)
 /// saved <- KDTree$read(path, mmap = TRUE)
-/// as.vector(saved$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+/// as.vector(saved$within(ga_point(-78.6, 35.8), 0.5))[[1]]
 #[extendr]
 impl KDTree {
     /// Build the index. With a bigger `node_size` you build quicker but search

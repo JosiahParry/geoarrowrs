@@ -16,18 +16,18 @@ use crate::{as_point_chunks, as_recycled_points, try_float_array};
 
 /// Build a point array from x and y coordinates
 ///
-/// Pairs two numeric vectors into a GeoArrow point array. `ga_xy()` recycles
+/// Pairs two numeric vectors into a GeoArrow point array. `ga_point()` recycles
 /// the shorter of the two when it is length 1.
 ///
 /// @details
-/// `ga_xy()` returns a null point for a row where either coordinate is `NA`,
+/// `ga_point()` returns a null point for a row where either coordinate is `NA`,
 /// rather than a point at an arbitrary location, so the result always has the
 /// same length as the longer input.
 ///
-/// `ga_xy()` stores `crs` verbatim in the array's GeoArrow metadata and never
+/// `ga_point()` stores `crs` verbatim in the array's GeoArrow metadata and never
 /// interprets it, so it never reprojects. It accepts anything a reader would
 /// produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
-/// If you leave it `NULL`, `ga_xy()` produces an array with no CRS.
+/// If you leave it `NULL`, `ga_point()` produces an array with no CRS.
 ///
 /// @param x a numeric vector or float64 array of x coordinates
 /// @param y a numeric vector or float64 array of y coordinates; length 1 or
@@ -37,16 +37,16 @@ use crate::{as_point_chunks, as_recycled_points, try_float_array};
 /// @export
 /// @family construct
 /// @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
-/// pts <- ga_xy(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
+/// pts <- ga_point(c(0, 1, 2), c(0, 1, 4), crs = "EPSG:4326")
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
 ///
-/// # ga_xy() recycles a length 1 coordinate
-/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_xy(c(0, 1, 2), 0)))
+/// # ga_point() recycles a length 1 coordinate
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1, 2), 0)))
 ///
-/// # ga_xy() returns a null point for NA in either coordinate
-/// ga_xy(c(0, NA), c(0, 1))$null_count
+/// # ga_point() returns a null point for NA in either coordinate
+/// ga_point(c(0, NA), c(0, 1))$null_count
 #[extendr]
-fn ga_xy(
+fn ga_point(
     x: Robj,
     y: Robj,
     #[extendr(default = "NULL")] crs: Option<String>,
@@ -104,8 +104,8 @@ fn ga_xy(
 /// @export
 /// @family construct
 /// @examplesIf requireNamespace("geoarrow", quietly = TRUE)
-/// start <- ga_xy(c(0, 0), c(0, 3))
-/// end <- ga_xy(c(4, 4), c(0, 3))
+/// start <- ga_point(c(0, 0), c(0, 3))
+/// end <- ga_point(c(4, 4), c(0, 3))
 ///
 /// as.vector(ga_length_euclidean(ga_make_line(start, end)))
 #[extendr]
@@ -226,7 +226,7 @@ extendr_module! {
     mod construct;
     use line;
     use polygon;
-    fn ga_xy;
+    fn ga_point;
     fn ga_make_line;
     fn ga_make_envelope;
 }

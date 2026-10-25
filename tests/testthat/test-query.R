@@ -232,7 +232,7 @@ test_that("equal lengths still work", {
 })
 
 test_that("ga_x() and ga_y() read a point's ordinates", {
-  pts <- ga_xy(c(-111.76, -112.07), c(34.87, 33.45))
+  pts <- ga_point(c(-111.76, -112.07), c(34.87, 33.45))
   expect_equal(as.vector(ga_x(pts)), c(-111.76, -112.07))
   expect_equal(as.vector(ga_y(pts)), c(34.87, 33.45))
 })
@@ -248,7 +248,7 @@ test_that("ga_x() is NA for anything that is not a single point", {
 })
 
 test_that("ga_x() is length preserving with nulls", {
-  pts <- ga_xy(c(1, NA, 3), c(4, NA, 6))
+  pts <- ga_point(c(1, NA, 3), c(4, NA, 6))
   expect_equal(as.vector(ga_x(pts)), c(1, NA, 3))
 })
 
@@ -264,8 +264,8 @@ test_that("euclidean distance works between mixed geometry types", {
 })
 
 test_that("ga_make_line joins point pairs", {
-  start <- ga_xy(c(0, 0), c(0, 3))
-  end <- ga_xy(c(4, 4), c(0, 3))
+  start <- ga_point(c(0, 0), c(0, 3))
+  end <- ga_point(c(4, 4), c(0, 3))
   expect_equal(
     as.vector(ga_length_euclidean(ga_make_line(start, end))),
     c(4, 4)
@@ -273,23 +273,23 @@ test_that("ga_make_line joins point pairs", {
 })
 
 test_that("ga_make_line recycles the end point and preserves length", {
-  start <- ga_xy(c(0, 3, 6), c(0, 4, 8))
+  start <- ga_point(c(0, 3, 6), c(0, 4, 8))
   expect_equal(
-    as.vector(ga_length_euclidean(ga_make_line(start, ga_xy(0, 0)))),
+    as.vector(ga_length_euclidean(ga_make_line(start, ga_point(0, 0)))),
     c(0, 5, 10)
   )
 })
 
 test_that("ga_make_line nulls a row with a null point", {
-  start <- ga_xy(c(0, NA), c(0, NA))
-  res <- ga_make_line(start, ga_xy(3, 4))
+  start <- ga_point(c(0, NA), c(0, NA))
+  res <- ga_make_line(start, ga_point(3, 4))
   expect_identical(res$length, 2L)
   expect_identical(res$null_count, 1L)
 })
 
 test_that("a made line has the length of the distance between its ends", {
-  start <- ga_xy(c(0, 1, 2), c(0, 1, 2))
-  end <- ga_xy(c(3, 5, 9), c(4, 6, 7))
+  start <- ga_point(c(0, 1, 2), c(0, 1, 2))
+  end <- ga_point(c(3, 5, 9), c(4, 6, 7))
   expect_equal(
     as.vector(ga_length_euclidean(ga_make_line(start, end))),
     as.vector(ga_dist_euclidean_pairwise(start, end))

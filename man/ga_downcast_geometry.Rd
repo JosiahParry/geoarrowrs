@@ -24,7 +24,7 @@ a format that does not record a single geometry type.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-pts <- ga_xy(c(0, 1), c(0, 1))
+pts <- ga_point(c(0, 1), c(0, 1))
 wide <- ga_cast_geometry(pts, "geometry")
 
 # only points in there, so you get a point array back

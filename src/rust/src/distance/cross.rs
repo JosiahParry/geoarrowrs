@@ -97,8 +97,8 @@ where
 /// @export
 /// @family distance
 /// @examplesIf requireNamespace("geoarrow", quietly = TRUE)
-/// x <- ga_xy(c(-78.6382, -80.8431), c(35.7796, 35.2271))
-/// y <- ga_xy(c(-77.9447, -78.6382, -80.8431), c(34.2257, 35.7796, 35.2271))
+/// x <- ga_point(c(-78.6382, -80.8431), c(35.7796, 35.2271))
+/// y <- ga_point(c(-77.9447, -78.6382, -80.8431), c(34.2257, 35.7796, 35.2271))
 ///
 /// # two elements of three distances each, in meters
 /// ga_cross_distance(x, y, "haversine")

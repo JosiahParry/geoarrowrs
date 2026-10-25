@@ -37,13 +37,13 @@ skips null and empty holes.
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 # join points into rings, then rings into polygons
-pts <- ga_xy(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
+pts <- ga_point(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
 rings <- ga_make_line_agg(pts, by = c(1, 1, 1, 1, 2, 2, 2))
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_make_polygon(rings)))
 
 # a square with a square hole
-shell <- ga_make_line_agg(ga_xy(c(0, 10, 10, 0), c(0, 0, 10, 10)))
-hole <- ga_make_line_agg(ga_xy(c(2, 4, 4, 2), c(2, 2, 4, 4)))
+shell <- ga_make_line_agg(ga_point(c(0, 10, 10, 0), c(0, 0, 10, 10)))
+hole <- ga_make_line_agg(ga_point(c(2, 4, 4, 2), c(2, 2, 4, 4)))
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
   ga_make_polygon(shell, ga_as_multilinestring(hole))
 ))
@@ -54,7 +54,7 @@ Other construct:
 \code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_make_line]{ga_make_line()}},
 \code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
-\code{\link[=ga_polygon]{ga_polygon()}},
-\code{\link[=ga_xy]{ga_xy()}}
+\code{\link[=ga_point]{ga_point()}},
+\code{\link[=ga_polygon]{ga_polygon()}}
 }
 \concept{construct}

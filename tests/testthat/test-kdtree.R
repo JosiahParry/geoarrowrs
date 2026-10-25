@@ -28,7 +28,7 @@ test_that("within agrees with a brute force radius test", {
 
   d <- sqrt((xy[, 1] + 78.6)^2 + (xy[, 2] - 35.8)^2)
   expect_equal(
-    as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]],
+    as.vector(idx$within(ga_point(-78.6, 35.8), 0.5))[[1]],
     unname(which(d <= 0.5))
   )
 })
@@ -92,32 +92,32 @@ test_that("the radius recycles", {
 })
 
 test_that("a zero radius finds only a point sitting on the query", {
-  idx <- KDTree$new(ga_xy(c(0, 1, 2), c(0, 1, 2)))
+  idx <- KDTree$new(ga_point(c(0, 1, 2), c(0, 1, 2)))
 
-  expect_equal(as.vector(idx$within(ga_xy(1, 1), 0))[[1]], 2L)
-  expect_length(as.vector(idx$within(ga_xy(9, 9), 0))[[1]], 0L)
+  expect_equal(as.vector(idx$within(ga_point(1, 1), 0))[[1]], 2L)
+  expect_length(as.vector(idx$within(ga_point(9, 9), 0))[[1]], 0L)
 })
 
 test_that("a null point is left out of the tree and never returned", {
-  idx <- KDTree$new(ga_xy(c(0, NA, 2), c(0, NA, 2)))
+  idx <- KDTree$new(ga_point(c(0, NA, 2), c(0, NA, 2)))
 
   expect_equal(idx$size(), 3L)
   expect_equal(idx$n_indexed(), 2L)
-  expect_equal(as.vector(idx$within(ga_xy(1, 1), 5))[[1]], c(1L, 3L))
+  expect_equal(as.vector(idx$within(ga_point(1, 1), 5))[[1]], c(1L, 3L))
 })
 
 test_that("a null query point gives a null row", {
-  idx <- KDTree$new(ga_xy(c(0, 2), c(0, 2)))
-  res <- idx$within(ga_xy(c(0, NA), c(0, NA)), 1)
+  idx <- KDTree$new(ga_point(c(0, 2), c(0, 2)))
+  res <- idx$within(ga_point(c(0, NA), c(0, NA)), 1)
 
   expect_equal(res$length, 2L)
   expect_equal(res$null_count, 1L)
 })
 
 test_that("an array with no finite point cannot be indexed", {
-  expect_error(KDTree$new(ga_xy(NA_real_, NA_real_)), "no finite points")
+  expect_error(KDTree$new(ga_point(NA_real_, NA_real_)), "no finite points")
 })
 
 test_that("node_size must be at least 2", {
-  expect_error(KDTree$new(ga_xy(0, 0), node_size = 1), "at least 2")
+  expect_error(KDTree$new(ga_point(0, 0), node_size = 1), "at least 2")
 })

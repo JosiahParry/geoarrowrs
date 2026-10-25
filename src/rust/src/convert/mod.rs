@@ -144,7 +144,7 @@ macro_rules! convert_angle {
 /// @family convert
 /// @references [ToDegrees](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToDegrees.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// rad <- ga_xy(c(0, pi / 4), c(0, pi / 2))
+/// rad <- ga_point(c(0, pi / 4), c(0, pi / 2))
 ///
 /// geoarrow::as_geoarrow_vctr(ga_to_degrees(rad))
 #[extendr]
@@ -167,7 +167,7 @@ fn ga_to_degrees(geometry: Robj) -> extendr_api::Result<Robj> {
 /// @family convert
 /// @references [ToRadians](https://docs.rs/geo/latest/geo/algorithm/convert_angle_unit/trait.ToRadians.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
-/// deg <- ga_xy(c(0, 45), c(0, 90))
+/// deg <- ga_point(c(0, 45), c(0, 90))
 ///
 /// geoarrow::as_geoarrow_vctr(ga_to_radians(deg))
 #[extendr]

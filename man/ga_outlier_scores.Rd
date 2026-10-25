@@ -32,7 +32,7 @@ value. It returns null for a row that is not a single point, or is null.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-g <- ga_xy(
+g <- ga_point(
   c(0, 0.1, 0.2, 0.3, 9),
   c(0, 0.1, 0.2, 0.3, 9)
 )

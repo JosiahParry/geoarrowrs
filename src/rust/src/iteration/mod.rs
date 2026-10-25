@@ -216,7 +216,7 @@ fn ordinate_impl(geometry: Robj, y_axis: bool) -> anyhow::Result<Robj> {
 /// @rdname ga_x
 /// @family iteration
 /// @examplesIf requireNamespace("geoarrow", quietly = TRUE)
-/// pts <- ga_xy(c(-111.76, -112.07), c(34.87, 33.45))
+/// pts <- ga_point(c(-111.76, -112.07), c(34.87, 33.45))
 ///
 /// as.vector(ga_x(pts))
 /// as.vector(ga_y(pts))

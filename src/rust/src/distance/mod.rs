@@ -59,8 +59,8 @@ fn as_recycled_linestrings(
 ///   [Rhumb](https://docs.rs/geo/latest/geo/algorithm/line_measures/metric_spaces/struct.Rhumb.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// # Raleigh to Charlotte, and Raleigh to Wilmington
-/// origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
-/// dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+/// origin <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+/// dest <- ga_point(c(-80.8431, -77.9447), c(35.2271, 34.2257))
 ///
 /// # degrees, then meters
 /// as.vector(ga_dist_euclidean_pairwise(origin, dest))
@@ -131,8 +131,8 @@ fn ga_dist_hausdorff_pairwise(origin: Robj, dest: Robj) -> extendr_api::Result<R
 /// @references [VincentyDistance](https://docs.rs/geo/latest/geo/algorithm/vincenty_distance/trait.VincentyDistance.html)
 /// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
 /// # Raleigh to Charlotte, and Raleigh to Wilmington
-/// origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
-/// dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+/// origin <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+/// dest <- ga_point(c(-80.8431, -77.9447), c(35.2271, 34.2257))
 ///
 /// as.vector(ga_dist_vincenty_pairwise(origin, dest))
 #[extendr]

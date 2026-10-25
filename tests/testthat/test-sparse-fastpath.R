@@ -53,7 +53,7 @@ test_that("a point y agrees with the matrix it replaces", {
   xv <- geoarrow::as_geoarrow_vctr(geoarrow::as_geoarrow_array(
     sf::st_sfc(sq(0, 0), sq(1, 0), sq(0, 1), sq(1, 1), sq(3, 3))
   ))
-  yv <- geoarrow::as_geoarrow_vctr(ga_xy(
+  yv <- geoarrow::as_geoarrow_vctr(ga_point(
     c(0, 1, 2, 0.5, 1, 1.5, 0.5, 1.5, 3, 9, 0, 1),
     c(0, 0, 0, 0, 0.5, 0.5, 0.5, 1.5, 3, 9, 1, 1)
   ))
@@ -73,7 +73,7 @@ test_that("a point x agrees with the matrix it replaces", {
   polys <- geoarrow::as_geoarrow_vctr(geoarrow::as_geoarrow_array(
     sf::st_sfc(sq(0, 0), sq(1, 0), sq(0, 1), sq(1, 1), sq(3, 3))
   ))
-  points <- geoarrow::as_geoarrow_vctr(ga_xy(
+  points <- geoarrow::as_geoarrow_vctr(ga_point(
     c(0, 1, 2, 0.5, 1, 1.5, 0.5, 1.5, 3, 9, 0, 1),
     c(0, 0, 0, 0, 0.5, 0.5, 0.5, 1.5, 3, 9, 1, 1)
   ))
@@ -91,7 +91,7 @@ test_that("multipolygons with boundary points agree with the matrix", {
   # the counties' own vertices, so many of the points land exactly on an edge
   co <- sf::st_coordinates(sf::st_as_sfc(g[1:12]))
   keep <- seq(1, nrow(co), by = 7)
-  yv <- geoarrow::as_geoarrow_vctr(ga_xy(co[keep, "X"], co[keep, "Y"]))
+  yv <- geoarrow::as_geoarrow_vctr(ga_point(co[keep, "X"], co[keep, "Y"]))
 
   expect_agrees_with_relate(xv, yv)
 })
@@ -103,7 +103,7 @@ test_that("a point against a line agrees with the matrix", {
     sf::st_linestring(matrix(c(0, 2, 2, 0), ncol = 2, byrow = TRUE))
   )))
   # an endpoint, the crossing, a midpoint, and a miss
-  pts <- geoarrow::as_geoarrow_vctr(ga_xy(
+  pts <- geoarrow::as_geoarrow_vctr(ga_point(
     c(0, 1, 0.5, 5),
     c(0, 1, 0.5, 5)
   ))
@@ -134,7 +134,7 @@ test_that("many candidates take the indexed path and still agree", {
 
   # a grid that lands inside, in the hole, on edges, on vertices and outside
   grid <- expand.grid(x = seq(-1, 5, by = 0.5), y = seq(-1, 5, by = 0.5))
-  yv <- geoarrow::as_geoarrow_vctr(ga_xy(grid$x, grid$y))
+  yv <- geoarrow::as_geoarrow_vctr(ga_point(grid$x, grid$y))
   expect_gt(length(yv), 100L)
 
   expect_agrees_with_relate(xv, yv)
@@ -150,7 +150,7 @@ test_that("the indexed path handles a hole and a point in it", {
   ))))
 
   # enough points to index: in the ring, in the hole, and on the hole's edge
-  pts <- ga_xy(
+  pts <- ga_point(
     c(0.5, 2, 1, seq(0.1, 3.9, length.out = 20)),
     c(0.5, 2, 1, rep(0.5, 20))
   )
@@ -173,14 +173,14 @@ test_that("a canonically wound hole takes the index and agrees", {
   xv <- geoarrow::as_geoarrow_vctr(donut)
 
   grid <- expand.grid(x = seq(-1, 5, by = 0.4), y = seq(-1, 5, by = 0.4))
-  yv <- geoarrow::as_geoarrow_vctr(ga_xy(grid$x, grid$y))
+  yv <- geoarrow::as_geoarrow_vctr(ga_point(grid$x, grid$y))
 
   expect_agrees_with_relate(xv, yv)
 
   # and the hole really is excluded
   got <- as.integer(as.vector(ga_sparse_contains(
     xv,
-    ga_xy(
+    ga_point(
       c(0.5, 2),
       c(
         0.5,
@@ -201,7 +201,7 @@ test_that("a null on either side still gives a null row", {
     ))),
     sf::st_polygon()
   ))
-  pts <- ga_xy(c(0.5, NA), c(0.5, NA))
+  pts <- ga_point(c(0.5, NA), c(0.5, NA))
 
   got <- ga_sparse_contains(polys, pts)
   expect_equal(got$length, 2L)

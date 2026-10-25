@@ -24,7 +24,7 @@ hits1 <- function(idx, xmin, ymin, xmax, ymax) {
 
 #' The rows nearest a single point, now that the index takes an array
 near1 <- function(idx, x, y, ...) {
-  as.integer(as.vector(idx$neighbors(ga_xy(x, y), ...))[[1]])
+  as.integer(as.vector(idx$neighbors(ga_point(x, y), ...))[[1]])
 }
 
 box <- function(xmin, ymin, xmax, ymax) {
@@ -129,7 +129,7 @@ test_that("node_size is validated", {
 
 test_that("k is validated", {
   idx <- RTree$new(ga(grid3()))
-  expect_error(idx$neighbors(ga_xy(0, 0), k = 0), "`k` must be at least 1")
+  expect_error(idx$neighbors(ga_point(0, 0), k = 0), "`k` must be at least 1")
 })
 
 test_that("an array with no bounding box is rejected", {
@@ -287,7 +287,7 @@ test_that("neighbors ranks by distance to the box", {
 test_that("a null query row gives a null neighbour list", {
   g <- ga(grid3())
   idx <- RTree$new(g)
-  res <- idx$neighbors(ga_xy(c(0, NA), c(0, NA)), k = 1)
+  res <- idx$neighbors(ga_point(c(0, NA), c(0, NA)), k = 1)
 
   expect_equal(res$length, 2L)
   expect_equal(res$null_count, 1L)

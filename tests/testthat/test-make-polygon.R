@@ -117,7 +117,7 @@ test_that("ga_make_polygon over ga_make_line_agg matches ga_polygon", {
   id <- c(1, 1, 1, 1, 2, 2, 2)
 
   expect_equal(
-    as_wkt(ga_make_polygon(ga_make_line_agg(ga_xy(x, y), by = id))),
+    as_wkt(ga_make_polygon(ga_make_line_agg(ga_point(x, y), by = id))),
     as_wkt(ga_polygon(x, y, polygon_id = id))
   )
 })
@@ -131,7 +131,7 @@ test_that("ga_make_polygon keeps z and crs", {
   )
 
   res <- ga_make_polygon(ga_make_line_agg(
-    ga_xy(c(0, 1, 1), c(0, 0, 1), crs = "EPSG:4326")
+    ga_point(c(0, 1, 1), c(0, 0, 1), crs = "EPSG:4326")
   ))
   expect_equal(
     sf::st_crs(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(res))),

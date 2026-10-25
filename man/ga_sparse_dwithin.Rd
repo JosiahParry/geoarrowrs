@@ -56,13 +56,13 @@ in \code{x} or a null \code{distance}, and never returns a null geometry from \c
 nc <- as.data.frame(read_shapefile(
   system.file("shape/nc.shp", package = "sf")
 ))
-sites <- ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+sites <- ga_point(c(-78.6, -80.8), c(35.8, 35.2))
 
 # the counties within a quarter degree of each site
 as.vector(ga_sparse_dwithin(sites, nc$geometry, 0.25))
 
 # between points, within 50km of each other on the ellipsoid
-other <- ga_xy(c(-78.7, -79.9), c(35.9, 35.4))
+other <- ga_point(c(-78.7, -79.9), c(35.9, 35.4))
 as.vector(ga_sparse_dwithin(sites, other, 50000, metric = "geodesic"))
 \dontshow{\}) # examplesIf}
 }

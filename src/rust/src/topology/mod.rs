@@ -486,7 +486,7 @@ fn ga_is_empty(geometry: Robj) -> extendr_api::Result<Robj> {
 /// g <- geoarrow::as_geoarrow_array(sf::st_sfc(square, square, square))
 ///
 /// # inside, on the edge, and outside
-/// p <- ga_xy(c(2, 0, 9), c(2, 2, 9))
+/// p <- ga_point(c(2, 0, 9), c(2, 2, 9))
 /// as.vector(ga_coordinate_position(g, p))
 #[extendr]
 fn ga_coordinate_position(geometry: Robj, point: Robj) -> extendr_api::Result<Robj> {

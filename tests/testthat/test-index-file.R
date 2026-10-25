@@ -63,7 +63,7 @@ test_that("a read index still returns the original rows around null rows", {
 
   expect_equal(saved$size(), 3L)
   expect_equal(saved$n_indexed(), 2L)
-  expect_equal(as.vector(saved$search(ga_xy(5, 5)))[[1]], 3L)
+  expect_equal(as.vector(saved$search(ga_point(5, 5)))[[1]], 3L)
 })
 
 test_that("the file keeps the tree in flatbush layout on an 8 byte boundary", {

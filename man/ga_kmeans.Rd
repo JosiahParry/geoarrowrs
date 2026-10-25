@@ -33,7 +33,7 @@ the clustering and returns null for it.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-g <- ga_xy(
+g <- ga_point(
   c(0, 0.1, 0.2, 5, 5.1, 5.2),
   c(0, 0.1, 0.2, 5, 5.1, 5.2)
 )

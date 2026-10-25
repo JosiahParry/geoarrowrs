@@ -35,8 +35,8 @@ uses \code{metric} to compute the interpolation.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-start <- ga_xy(c(0, 0), c(0, 0))
-end <- ga_xy(c(10, 10), c(0, 0))
+start <- ga_point(c(0, 0), c(0, 0))
+end <- ga_point(c(10, 10), c(0, 0))
 
 # three units along, then a third of the way along
 geoarrow::as_geoarrow_vctr(

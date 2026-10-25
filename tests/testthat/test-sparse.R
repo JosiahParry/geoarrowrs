@@ -44,28 +44,28 @@ test_that("within and contains are transposes", {
 })
 
 test_that("a row that matches nothing is empty, not null", {
-  far <- geoarrow::as_geoarrow_vctr(ga_xy(0, 0))
+  far <- geoarrow::as_geoarrow_vctr(ga_point(0, 0))
   res <- as.vector(ga_sparse_intersects(far, nc$geometry))
   expect_length(res, 1L)
   expect_length(res[[1L]], 0L)
 })
 
 test_that("a null query row gives a null element", {
-  g <- geoarrow::as_geoarrow_vctr(ga_xy(c(-78.6, NA), c(35.8, NA)))
+  g <- geoarrow::as_geoarrow_vctr(ga_point(c(-78.6, NA), c(35.8, NA)))
   res <- as.vector(ga_sparse_within(g, nc$geometry))
   expect_length(res[[1L]], 1L)
   expect_null(res[[2L]])
 })
 
 test_that("a target with no boxes matches nothing", {
-  empty <- geoarrow::as_geoarrow_vctr(ga_xy(NA_real_, NA_real_))
+  empty <- geoarrow::as_geoarrow_vctr(ga_point(NA_real_, NA_real_))
   res <- as.vector(ga_sparse_intersects(nc$geometry, empty))
   expect_length(res, length(nc$geometry))
   expect_true(all(lengths(res) == 0L))
 })
 
 test_that("x and y need not be the same length", {
-  pts <- ga_xy(c(-78.6, -80.8, 0), c(35.8, 35.2, 0))
+  pts <- ga_point(c(-78.6, -80.8, 0), c(35.8, 35.2, 0))
   res <- ga_sparse_within(pts, nc$geometry)
   expect_identical(res$length, 3L)
 })

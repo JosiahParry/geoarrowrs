@@ -35,7 +35,7 @@ bearing.
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 # 100km due north and due east of Raleigh
-raleigh <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+raleigh <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
 
 geoarrow::as_geoarrow_vctr(
   ga_dest_geodesic(raleigh, bearing = c(0, 90), distance = c(1e5, 1e5))

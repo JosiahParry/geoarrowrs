@@ -54,7 +54,7 @@ null element for a null or empty geometry in \code{x}, and never returns one fro
 nc <- as.data.frame(read_shapefile(
   system.file("shape/nc.shp", package = "sf")
 ))
-sites <- ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+sites <- ga_point(c(-78.6, -80.8), c(35.8, 35.2))
 
 # the three counties nearest each site, with their distances
 as.vector(ga_sparse_knn(sites, nc$geometry, k = 3))

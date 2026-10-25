@@ -32,7 +32,7 @@ test_that("dwithin measures to the geometry, not to its box", {
     ncol = 2,
     byrow = TRUE
   )))))
-  pt <- ga_xy(9, 9)
+  pt <- ga_point(9, 9)
 
   expect_length(as.vector(ga_sparse_dwithin(pt, el, 7))[[1]], 0L)
   expect_equal(as.integer(as.vector(ga_sparse_dwithin(pt, el, 8))[[1]]), 1L)
@@ -44,7 +44,7 @@ test_that("dwithin agrees with measuring every pair", {
   skip_if(path == "")
 
   g <- as.data.frame(read_shapefile(path))$geometry
-  xv <- geoarrow::as_geoarrow_vctr(ga_xy(
+  xv <- geoarrow::as_geoarrow_vctr(ga_point(
     c(-78.6, -80.8, -77.0),
     c(35.8, 35.2, 34.9)
   ))
@@ -93,7 +93,7 @@ test_that("dwithin is not the same as buffering and intersecting", {
   # a buffer approximates its arcs with segments, so the two disagree just
   # inside the radius; the distance test is the one that matches ST_DWithin
   g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_point(c(0, 0))))
-  ring <- ga_xy(
+  ring <- ga_point(
     cos(seq(0, 2 * pi, length.out = 64)),
     sin(seq(
       0,

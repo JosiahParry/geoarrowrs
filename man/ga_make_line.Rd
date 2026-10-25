@@ -27,8 +27,8 @@ on the same pair.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-start <- ga_xy(c(0, 0), c(0, 3))
-end <- ga_xy(c(4, 4), c(0, 3))
+start <- ga_point(c(0, 0), c(0, 3))
+end <- ga_point(c(4, 4), c(0, 3))
 
 as.vector(ga_length_euclidean(ga_make_line(start, end)))
 \dontshow{\}) # examplesIf}
@@ -38,7 +38,7 @@ Other construct:
 \code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
 \code{\link[=ga_make_polygon]{ga_make_polygon()}},
-\code{\link[=ga_polygon]{ga_polygon()}},
-\code{\link[=ga_xy]{ga_xy()}}
+\code{\link[=ga_point]{ga_point()}},
+\code{\link[=ga_polygon]{ga_polygon()}}
 }
 \concept{construct}

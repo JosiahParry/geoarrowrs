@@ -22,7 +22,7 @@ values, since it goes through a two dimensional representation.
 }
 \examples{
 \dontshow{if (requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-deg <- ga_xy(c(0, 45), c(0, 90))
+deg <- ga_point(c(0, 45), c(0, 90))
 
 geoarrow::as_geoarrow_vctr(ga_to_radians(deg))
 \dontshow{\}) # examplesIf}

@@ -104,7 +104,7 @@ test_that("round_angle is an angle, so a smaller step is smoother", {
 })
 
 test_that("a point buffers to a disc", {
-  res <- ga_buffer(ga_xy(0, 0), 1)
+  res <- ga_buffer(ga_point(0, 0), 1)
 
   expect_equal(res$length, 1L)
   expect_equal(as.vector(ga_unsigned_area(res)), pi, tolerance = 0.01)

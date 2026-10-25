@@ -1,6 +1,6 @@
 test_that("ga_cross_distance() returns one list of length(y) per row of x", {
-  x <- ga_xy(c(0, 3), c(0, 4))
-  y <- ga_xy(c(0, 3, 0), c(0, 4, 10))
+  x <- ga_point(c(0, 3), c(0, 4))
+  y <- ga_point(c(0, 3, 0), c(0, 4, 10))
 
   got <- as.vector(ga_cross_distance(x, y, "euclidean"))
 
@@ -11,8 +11,8 @@ test_that("ga_cross_distance() returns one list of length(y) per row of x", {
 })
 
 test_that("ga_cross_distance() agrees with the pairwise form", {
-  x <- ga_xy(c(-78.6382, -80.8431, -77.9447), c(35.7796, 35.2271, 34.2257))
-  y <- ga_xy(c(-77.9447, -78.6382), c(34.2257, 35.7796))
+  x <- ga_point(c(-78.6382, -80.8431, -77.9447), c(35.7796, 35.2271, 34.2257))
+  y <- ga_point(c(-77.9447, -78.6382), c(34.2257, 35.7796))
 
   for (metric in c("haversine", "geodesic", "rhumb", "vincenty")) {
     cross <- as.vector(ga_cross_distance(x, y, metric))
@@ -22,7 +22,7 @@ test_that("ga_cross_distance() agrees with the pairwise form", {
         as.vector(rlang::inject(
           (!!rlang::sym(paste0("ga_dist_", metric, "_pairwise")))(
             x,
-            ga_xy(c(-77.9447, -78.6382)[j], c(34.2257, 35.7796)[j])
+            ga_point(c(-77.9447, -78.6382)[j], c(34.2257, 35.7796)[j])
           )
         ))
       },
@@ -70,14 +70,14 @@ test_that("ga_cross_distance() carries nulls through both sides", {
 })
 
 test_that("ga_cross_distance() handles an empty side", {
-  x <- ga_xy(c(0, 3), c(0, 4))
-  empty <- ga_xy(numeric(0), numeric(0))
+  x <- ga_point(c(0, 3), c(0, 4))
+  empty <- ga_point(numeric(0), numeric(0))
 
   expect_equal(lengths(as.vector(ga_cross_distance(x, empty))), c(0L, 0L))
   expect_length(as.vector(ga_cross_distance(empty, x)), 0L)
 })
 
 test_that("ga_cross_distance() rejects an unknown metric", {
-  x <- ga_xy(0, 0)
+  x <- ga_point(0, 0)
   expect_error(ga_cross_distance(x, x, "great-circle"), "great-circle")
 })

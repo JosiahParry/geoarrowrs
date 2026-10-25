@@ -63,7 +63,7 @@ test_that("knn measures to the geometry, not to its bounding box", {
     ncol = 2,
     byrow = TRUE
   )))))
-  pt <- ga_xy(9, 9)
+  pt <- ga_point(9, 9)
 
   got <- as.vector(ga_sparse_knn(pt, el, k = 1))
   # the point sits inside the bounding box, so a box test would say 0
@@ -73,7 +73,7 @@ test_that("knn measures to the geometry, not to its bounding box", {
 
 test_that("knn agrees with comparing every pair", {
   g <- nc_geometry()
-  sites <- geoarrow::as_geoarrow_vctr(ga_xy(
+  sites <- geoarrow::as_geoarrow_vctr(ga_point(
     c(-78.6, -80.8, -77.0),
     c(35.8, 35.2, 34.9)
   ))
@@ -118,7 +118,7 @@ test_that("a null row of y is never returned", {
     sf::st_polygon(),
     sq(2, 0)
   ))
-  got <- as.vector(ga_sparse_knn(ga_xy(0.5, 0.5), y, k = 3))
+  got <- as.vector(ga_sparse_knn(ga_point(0.5, 0.5), y, k = 3))
 
   expect_equal(as.integer(got[[1]]$row), c(1L, 3L))
 })
@@ -138,7 +138,10 @@ test_that("ga_knn_join attaches k rows per row of x with their distance", {
   counties <- data.frame(name = as.character(seq_along(g)), geometry = g)
   sites <- data.frame(
     site = c("a", "b"),
-    geometry = geoarrow::as_geoarrow_vctr(ga_xy(c(-78.6, -80.8), c(35.8, 35.2)))
+    geometry = geoarrow::as_geoarrow_vctr(ga_point(
+      c(-78.6, -80.8),
+      c(35.8, 35.2)
+    ))
   )
 
   out <- as.data.frame(ga_knn_join(sites, counties, k = 3))
@@ -159,7 +162,7 @@ test_that("ga_knn_join keeps unmatched rows only when left", {
   )
   x <- data.frame(
     id = 1:2,
-    geometry = geoarrow::as_geoarrow_vctr(ga_xy(c(0.5, 100), c(0.5, 100)))
+    geometry = geoarrow::as_geoarrow_vctr(ga_point(c(0.5, 100), c(0.5, 100)))
   )
 
   left <- as.data.frame(ga_knn_join(x, y, max_distance = 1))
@@ -176,7 +179,7 @@ test_that("ga_knn_join suffixes shared names and can drop the distance", {
   frame <- function(id) {
     data.frame(
       id = id,
-      geometry = geoarrow::as_geoarrow_vctr(ga_xy(id, id))
+      geometry = geoarrow::as_geoarrow_vctr(ga_point(id, id))
     )
   }
 

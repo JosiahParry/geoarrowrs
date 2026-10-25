@@ -186,7 +186,10 @@ test_that("euclidean distance reads a bare WKB column without casting", {
   sfc <- sf::st_sfc(sf::st_point(c(0, 0)), sf::st_point(c(3, 4)))
   bin <- wkb_array(sfc)
 
-  expect_equal(as.vector(ga_dist_euclidean_pairwise(bin, ga_xy(0, 0))), c(0, 5))
+  expect_equal(
+    as.vector(ga_dist_euclidean_pairwise(bin, ga_point(0, 0))),
+    c(0, 5)
+  )
 })
 
 test_that("ga_from_wkb records a crs", {
@@ -278,7 +281,7 @@ test_that("ga_as_point keeps the geometries intact", {
   pts <- ga_as_point(wkb_array(sfc))
 
   expect_equal(
-    as.vector(ga_dist_euclidean_pairwise(pts, ga_xy(c(0, 0), c(0, 0)))),
+    as.vector(ga_dist_euclidean_pairwise(pts, ga_point(c(0, 0), c(0, 0)))),
     c(0, 5)
   )
 })

@@ -31,8 +31,8 @@ when \code{left = TRUE}, and drops it otherwise.
 }
 \examples{
 \dontshow{if (requireNamespace("geoarrow", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
-y <- ga_xy(c(0, 1), c(0, 1))
+x <- ga_point(c(0, 5, 1), c(0, 5, 1))
+y <- ga_point(c(0, 1), c(0, 1))
 
 # the middle row of x matches nothing, so you see it only with left = TRUE
 ga_sparse_pairs(ga_sparse_intersects(x, y))
