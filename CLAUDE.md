@@ -57,6 +57,8 @@ Rust's error strings.
   the condition is caught deliberately rather than turned into a sentinel
   object that has to be sniffed with `inherits()`.
 - Never use `do.call()`. Splice with rlang instead: `rlang::inject(f(!!!args))`.
+- Never use jsonlite anywhere in this repository: not in DESCRIPTION, package
+  code, tests, benchmarks, or vignettes. Use yyjsonr for JSON.
 
 ## Tests
 
