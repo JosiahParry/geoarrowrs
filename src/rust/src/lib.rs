@@ -39,6 +39,7 @@ pub(crate) mod sort;
 pub(crate) mod sparse;
 pub(crate) mod threads;
 pub(crate) mod topology;
+pub(crate) mod transform;
 pub(crate) mod triangulate;
 pub(crate) mod validation;
 pub(crate) mod voronoi;
@@ -396,6 +397,7 @@ extendr_module! {
     use sparse;
     use threads;
     use topology;
+    use transform;
     use triangulate;
     use misc;
     use boolean;

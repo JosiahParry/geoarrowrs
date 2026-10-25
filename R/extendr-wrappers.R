@@ -1468,6 +1468,8 @@ ga_is_empty <- function(geometry) .Call(wrap__ga_is_empty, geometry)
 #' as.vector(ga_coordinate_position(g, p))
 ga_coordinate_position <- function(geometry, point) .Call(wrap__ga_coordinate_position, geometry, point)
 
+ga_transform <- function(x, crs) .Call(wrap__ga_transform, x, crs)
+
 #' Triangulate polygons with the earcut algorithm
 #'
 #' Returns one multipolygon per input geometry, whose parts are that
