@@ -1,15 +1,10 @@
 skip_deps <- function() {
   skip_if_not_installed("sf")
   skip_if_not_installed("geoarrow")
-  skip_if_not_installed("sfheaders")
 }
 
 as_wkt <- function(x) {
   sf::st_as_text(sf::st_as_sfc(geoarrow::as_geoarrow_vctr(x)))
-}
-
-sfheaders_wkt <- function(df, ...) {
-  sf::st_as_text(sf::st_geometry(sfheaders::sf_polygon(df, ...)))
 }
 
 square <- data.frame(x = c(0, 1, 1, 0), y = c(0, 0, 1, 1))
@@ -22,25 +17,25 @@ shapes <- data.frame(
   l = c(1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1)
 )
 
-test_that("ga_polygon closes open rings, matching sfheaders", {
+test_that("ga_polygon closes open rings", {
   skip_deps()
   closed <- rbind(square, square[1, ])
 
   expect_equal(
     as_wkt(ga_polygon(square$x, square$y)),
-    sfheaders_wkt(square, x = "x", y = "y")
+    "POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))"
   )
   expect_equal(
     as_wkt(ga_polygon(closed$x, closed$y)),
-    sfheaders_wkt(closed, x = "x", y = "y")
+    "POLYGON ((0 0, 1 0, 1 1, 0 1, 0 0))"
   )
   expect_equal(
     as_wkt(ga_polygon(square$x, square$y, close = FALSE)),
-    sfheaders_wkt(square, x = "x", y = "y", close = FALSE)
+    "POLYGON ((0 0, 1 0, 1 1, 0 1))"
   )
 })
 
-test_that("polygon_id and linestring_id split polygons and holes, matching sfheaders", {
+test_that("polygon_id and linestring_id split polygons and holes", {
   skip_deps()
 
   expect_equal(
@@ -50,25 +45,31 @@ test_that("polygon_id and linestring_id split polygons and holes, matching sfhea
       polygon_id = shapes$p,
       linestring_id = shapes$l
     )),
-    sfheaders_wkt(
-      shapes,
-      x = "x",
-      y = "y",
-      polygon_id = "p",
-      linestring_id = "l"
+    c(
+      "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2))",
+      "POLYGON ((20 0, 30 0, 20 10, 20 0))"
     )
-  )
-
-  # without polygon_id, every ring belongs to one polygon
-  expect_equal(
-    as_wkt(ga_polygon(shapes$x, shapes$y, linestring_id = shapes$l)),
-    sfheaders_wkt(shapes, x = "x", y = "y", linestring_id = "l")
   )
 
   # without linestring_id, each polygon is one ring
   expect_equal(
     as_wkt(ga_polygon(shapes$x, shapes$y, polygon_id = shapes$p)),
-    sfheaders_wkt(shapes, x = "x", y = "y", polygon_id = "p")
+    c(
+      "POLYGON ((0 0, 10 0, 10 10, 0 10, 2 2, 4 2, 4 4, 2 4, 0 0))",
+      "POLYGON ((20 0, 30 0, 20 10, 20 0))"
+    )
+  )
+})
+
+test_that("a linestring_id that returns starts a new ring", {
+  skip_deps()
+  # without polygon_id, every ring belongs to one polygon
+  expect_equal(
+    as_wkt(ga_polygon(shapes$x, shapes$y, linestring_id = shapes$l)),
+    paste0(
+      "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2), ",
+      "(20 0, 30 0, 20 10, 20 0))"
+    )
   )
 })
 
@@ -83,53 +84,59 @@ test_that("linestring_id only has to be unique within its polygon", {
       polygon_id = two$p,
       linestring_id = two$l
     )),
-    sfheaders_wkt(two, x = "x", y = "y", polygon_id = "p", linestring_id = "l")
+    c(
+      "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0), (2 2, 4 2, 4 4, 2 4, 2 2))",
+      "POLYGON ((50 0, 60 0, 60 10, 50 10, 50 0), (52 2, 54 2, 54 4, 52 4, 52 2))"
+    )
   )
 })
 
 test_that("ga_polygon orders polygons by where each id first appears", {
   skip_deps()
-  flipped <- transform(
-    shapes[c(9:11, 1:4), ],
-    p = c("b", "b", "b", rep("a", 4))
-  )
+  flipped <- shapes[c(9:11, 1:4), ]
 
   expect_equal(
-    as_wkt(ga_polygon(flipped$x, flipped$y, polygon_id = flipped$p)),
-    sfheaders_wkt(flipped, x = "x", y = "y", polygon_id = "p")
+    as_wkt(ga_polygon(
+      flipped$x,
+      flipped$y,
+      polygon_id = c("b", "b", "b", rep("a", 4))
+    )),
+    c(
+      "POLYGON ((20 0, 30 0, 20 10, 20 0))",
+      "POLYGON ((0 0, 10 0, 10 10, 0 10, 0 0))"
+    )
   )
 })
 
-test_that("z and m add dimensions, matching sfheaders", {
+test_that("z and m add dimensions", {
   skip_deps()
-  zm <- transform(square, z = c(1, 2, 3, 4), m = c(5, 6, 7, 8))
+  z <- c(1, 2, 3, 4)
+  m <- c(5, 6, 7, 8)
 
   expect_equal(
-    as_wkt(ga_polygon(zm$x, zm$y, z = zm$z)),
-    sfheaders_wkt(zm, x = "x", y = "y", z = "z")
+    as_wkt(ga_polygon(square$x, square$y, z = z)),
+    "POLYGON Z ((0 0 1, 1 0 2, 1 1 3, 0 1 4, 0 0 1))"
   )
   expect_equal(
-    as_wkt(ga_polygon(zm$x, zm$y, m = zm$m)),
-    sfheaders_wkt(zm, x = "x", y = "y", m = "m")
+    as_wkt(ga_polygon(square$x, square$y, m = m)),
+    "POLYGON M ((0 0 5, 1 0 6, 1 1 7, 0 1 8, 0 0 5))"
   )
   expect_equal(
-    as_wkt(ga_polygon(zm$x, zm$y, z = zm$z, m = zm$m)),
-    sfheaders_wkt(zm, x = "x", y = "y", z = "z", m = "m")
+    as_wkt(ga_polygon(square$x, square$y, z = z, m = m)),
+    "POLYGON ZM ((0 0 1 5, 1 0 2 6, 1 1 3 7, 0 1 4 8, 0 0 1 5))"
   )
 })
 
-test_that("closing compares every dimension, matching sfheaders", {
+test_that("closing compares every dimension", {
   skip_deps()
   # the last row repeats the first in x and y but not z
-  ring <- data.frame(
-    x = c(0, 1, 1, 0, 0),
-    y = c(0, 0, 1, 1, 0),
-    z = c(1, 2, 3, 9, 5)
-  )
-
   expect_equal(
-    as_wkt(ga_polygon(ring$x, ring$y, z = ring$z)),
-    sfheaders_wkt(ring, x = "x", y = "y", z = "z")
+    as_wkt(ga_polygon(
+      c(0, 1, 1, 0, 0),
+      c(0, 0, 1, 1, 0),
+      z = c(1, 2, 3, 9, 5)
+    )),
+    "POLYGON Z ((0 0 1, 1 0 2, 1 1 3, 0 1 9, 0 0 5, 0 0 1))"
   )
 })
 
@@ -173,27 +180,6 @@ test_that("ga_polygon records crs", {
 test_that("ga_polygon returns an empty array for no rows", {
   skip_deps()
   expect_identical(ga_polygon(numeric(0), numeric(0))$length, 0L)
-})
-
-test_that("a linestring_id that returns starts a new ring, matching sfheaders", {
-  skip_deps()
-  again <- transform(shapes, p = 1, l = rep(c(1, 2, 1), c(4, 4, 3)))
-
-  expect_equal(
-    as_wkt(ga_polygon(
-      again$x,
-      again$y,
-      polygon_id = again$p,
-      linestring_id = again$l
-    )),
-    sfheaders_wkt(
-      again,
-      x = "x",
-      y = "y",
-      polygon_id = "p",
-      linestring_id = "l"
-    )
-  )
 })
 
 test_that("ga_polygon rejects a polygon_id that returns to an earlier polygon", {
