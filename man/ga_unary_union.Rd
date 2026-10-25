@@ -44,7 +44,8 @@ Other boolean:
 \code{\link[=ga_boolean_intersection]{ga_boolean_intersection()}}
 
 Other aggregate:
-\code{\link[=ga_collect_agg]{ga_collect_agg()}}
+\code{\link[=ga_collect_agg]{ga_collect_agg()}},
+\code{\link[=ga_interpolate_aw]{ga_interpolate_aw()}}
 }
 \concept{aggregate}
 \concept{boolean}

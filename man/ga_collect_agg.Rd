@@ -80,6 +80,7 @@ vctrs::vec_unique(key)
 }
 \seealso{
 Other aggregate:
+\code{\link[=ga_interpolate_aw]{ga_interpolate_aw()}},
 \code{\link[=ga_unary_union]{ga_unary_union()}}
 }
 \concept{aggregate}

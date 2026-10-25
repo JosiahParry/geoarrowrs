@@ -22,10 +22,10 @@ use crate::threads::with_pool;
 use crate::{as_geo_geometries_par, as_geometry_chunks};
 
 /// One side of a sparse predicate: the geometries, and the boxes an index query needs.
-type GeomsAndRects = (Vec<Option<Geometry<f64>>>, Vec<Option<geo::Rect<f64>>>);
+pub(crate) type GeomsAndRects = (Vec<Option<Geometry<f64>>>, Vec<Option<geo::Rect<f64>>>);
 
 /// Read a geometry argument as geometries alongside the boxes an index query needs.
-fn as_geoms_and_rects(
+pub(crate) fn as_geoms_and_rects(
     threads: crate::threads::Threads,
     robj: Robj,
 ) -> extendr_api::Result<GeomsAndRects> {
@@ -35,7 +35,7 @@ fn as_geoms_and_rects(
 }
 
 /// Index the boxes that exist, keeping the row each one came from.
-fn index_rects(rects: &[Option<geo::Rect<f64>>]) -> Option<(GeoRTree<f64>, Vec<u32>)> {
+pub(crate) fn index_rects(rects: &[Option<geo::Rect<f64>>]) -> Option<(GeoRTree<f64>, Vec<u32>)> {
     let mut boxes = Vec::with_capacity(rects.len());
     let mut positions = Vec::with_capacity(rects.len());
     for (row, rect) in rects.iter().enumerate() {
@@ -135,10 +135,11 @@ fn as_point(geom: &Geometry<f64>) -> Option<Coord<f64>> {
 }
 
 /// The surface a geometry is, borrowed when it is already a multipolygon.
-fn as_multipolygon(geom: &Geometry<f64>) -> Option<Cow<'_, MultiPolygon<f64>>> {
+pub(crate) fn as_multipolygon(geom: &Geometry<f64>) -> Option<Cow<'_, MultiPolygon<f64>>> {
     match geom {
         Geometry::MultiPolygon(mp) => Some(Cow::Borrowed(mp)),
         Geometry::Polygon(p) => Some(Cow::Owned(MultiPolygon::new(vec![p.clone()]))),
+        Geometry::Rect(r) => Some(Cow::Owned(MultiPolygon::new(vec![r.to_polygon()]))),
         _ => None,
     }
 }

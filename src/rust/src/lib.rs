@@ -25,6 +25,7 @@ pub(crate) mod distance;
 pub(crate) mod envelope;
 pub(crate) mod geometry_type;
 pub(crate) mod index;
+pub(crate) mod interpolate_area;
 pub(crate) mod interpolate_line;
 pub(crate) mod interpolate_point;
 pub(crate) mod intersection;
@@ -408,6 +409,7 @@ extendr_module! {
     use geometry_type;
     use index;
     use intersection;
+    use interpolate_area;
     use interpolate_line;
     use interpolate_point;
     use io;

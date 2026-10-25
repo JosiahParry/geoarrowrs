@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_interpolate_aw()`, which interpolates extensive and intensive values from one set of polygons onto another by area, and `sf::st_interpolate_aw()` works on a data frame with a GeoArrow geometry column.
 * Added `ga_make_grid()`, which builds a square grid of cells, centres, or corners like `sf::st_make_grid()`, and `mask_sf()` attaches `st_make_grid()`.
 * Added `ga_sparse_equals_exact()`, the sparse form of `ga_equals_exact()`, and `mask_sf()` attaches `st_equals_exact()`.
 * Added `ga_make_valid()`, which repairs invalid polygons and multipolygons, and `sf::st_make_valid()` and `sdf::st_make_valid()` work on a `geoarrow_vctr`.

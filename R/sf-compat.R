@@ -300,6 +300,83 @@ st_is.geoarrow_vctr <- function(x, type) {
   ga_is(as_ga(x), type)
 }
 
+#' sf's areal interpolation, for a data frame with a GeoArrow geometry column
+#'
+#' sf dispatches `st_interpolate_aw()` on `x` and has a method only for `sf`
+#' itself, so a plain data frame reaches this one without shadowing sf. Like
+#' sf, it returns only the rows of `to` that some row of `x` overlaps, named
+#' after their row in `to`, unless `keep_NA = TRUE`.
+#'
+#' @noRd
+#' @exportS3Method sf::st_interpolate_aw
+st_interpolate_aw.data.frame <- function(
+  x,
+  to,
+  extensive,
+  ...,
+  keep_NA = FALSE,
+  na.rm = FALSE,
+  include_non_intersected = FALSE,
+  weights = character(0)
+) {
+  geo_col <- geometry_column(x)
+  values <- x[-geo_col]
+  is_num <- vapply(values, is.numeric, logical(1))
+  if (!all(is_num)) {
+    cli::cli_abort(
+      "{.arg x} has non-numeric columns: {.field {names(values)[!is_num]}}."
+    )
+  }
+
+  to_geom <- if (is.data.frame(to)) to[[geometry_column(to)]] else as_ga(to)
+  by_weight <- NULL
+  if (length(weights) > 0L) {
+    if (
+      !rlang::is_string(weights) ||
+        !is.data.frame(to) ||
+        !weights %in% names(to)
+    ) {
+      cli::cli_abort("{.arg weights} must name one column of {.arg to}.")
+    }
+    if (isTRUE(keep_NA)) {
+      cli::cli_abort("{.arg weights} needs {.code keep_NA = FALSE}.")
+    }
+    by_weight <- to[[weights]]
+  }
+
+  out <- ga_interpolate_aw(
+    x[[geo_col]],
+    values,
+    to_geom,
+    extensive = extensive,
+    include_non_intersected = include_non_intersected,
+    na_rm = isTRUE(na.rm),
+    weights = by_weight
+  )
+
+  res <- as.data.frame(out)
+  res$geometry <- to_geom
+  if (isTRUE(keep_NA)) {
+    return(res)
+  }
+  res[which(struct_rows(out)), , drop = FALSE]
+}
+
+#' The rows of a struct array that are not null
+#'
+#' nanoarrow drops a struct's own validity when it converts the struct to a
+#' data frame, so this reads the bitmap itself.
+#'
+#' @noRd
+struct_rows <- function(array) {
+  n <- array$length
+  if (identical(as.integer(array$null_count), 0L)) {
+    return(rep(TRUE, n))
+  }
+  bits <- nanoarrow::convert_buffer(array$buffers[[1]])
+  bits[array$offset + seq_len(n)]
+}
+
 # sf non-generics, installed by mask_sf() --------------------------------------
 
 #' @noRd
