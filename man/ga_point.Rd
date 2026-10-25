@@ -51,10 +51,14 @@ ga_point(c(0, NA), c(0, 1))$null_count
 }
 \seealso{
 Other construct:
+\code{\link[=ga_linestring]{ga_linestring()}},
 \code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_make_line]{ga_make_line()}},
 \code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
 \code{\link[=ga_make_polygon]{ga_make_polygon()}},
+\code{\link[=ga_multilinestring]{ga_multilinestring()}},
+\code{\link[=ga_multipoint]{ga_multipoint()}},
+\code{\link[=ga_multipolygon]{ga_multipolygon()}},
 \code{\link[=ga_polygon]{ga_polygon()}}
 }
 \concept{construct}

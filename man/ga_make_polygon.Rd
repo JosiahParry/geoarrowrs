@@ -51,9 +51,13 @@ sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
 }
 \seealso{
 Other construct:
+\code{\link[=ga_linestring]{ga_linestring()}},
 \code{\link[=ga_make_envelope]{ga_make_envelope()}},
 \code{\link[=ga_make_line]{ga_make_line()}},
 \code{\link[=ga_make_line_agg]{ga_make_line_agg()}},
+\code{\link[=ga_multilinestring]{ga_multilinestring()}},
+\code{\link[=ga_multipoint]{ga_multipoint()}},
+\code{\link[=ga_multipolygon]{ga_multipolygon()}},
 \code{\link[=ga_point]{ga_point()}},
 \code{\link[=ga_polygon]{ga_polygon()}}
 }

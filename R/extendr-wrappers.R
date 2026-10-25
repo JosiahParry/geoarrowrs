@@ -2208,36 +2208,102 @@ ga_make_line <- function(start, end) .Call(wrap__ga_make_line, start, end)
 #' as.vector(ga_unsigned_area(boxes))
 ga_make_envelope <- function(xmin, ymin, xmax, ymax, crs = NULL) .Call(wrap__ga_make_envelope, xmin, ymin, xmax, ymax, crs)
 
-#' Join the points of each group into a line
+#' Build linestrings from coordinate columns
 #'
-#' Returns one linestring through the points that share each label of `by`,
-#' taking the points in row order. With `by = NULL`, `ga_make_line_agg()`
-#' joins every point into a single line.
+#' Returns one linestring per run of `linestring_id`, through its rows in
+#' order.
 #'
 #' @details
-#' `ga_make_line_agg()` groups the rows the way [ga_collect_agg()] does. It
-#' accepts an unsorted `by`, treats `NA` as a label like any other, and orders
-#' the lines by where each label first appears, so you can name the lines with
-#' `unique(by)`.
+#' `ga_linestring()` matches `sfheaders::sf_linestring()`, taking the columns
+#' themselves rather than a data frame and their names. It reads the rows in
+#' order, so you must keep the rows of each linestring together:
+#' `ga_linestring()` errors when a `linestring_id` returns after a different
+#' one, and orders the linestrings by where each id first appears.
 #'
-#' `ga_make_line_agg()` skips null and empty points, and returns a null line
-#' for a group with fewer than two points left. It keeps the z and m values
-#' and the CRS of `points`. This is the aggregate form of PostGIS
-#' `ST_MakeLine()`; use [ga_make_line()] to join pairs of points instead.
+#' `ga_linestring()` adds the z and m dimensions when you supply `z` and `m`.
+#' It errors on `NA` in any coordinate or id, and reuses the coordinate arrays
+#' without copying them.
 #'
-#' @param points a GeoArrow point array
-#' @param by a character vector, numeric vector, or Arrow array with one label
-#'   per point, or `NULL` for a single line
-#' @returns a GeoArrow linestring array with one element per label of `by`
+#' @inheritParams ga_polygon
+#' @param linestring_id a numeric vector, character vector, or Arrow array
+#'   naming the linestring of each row, or `NULL` for a single linestring
+#' @returns a GeoArrow linestring array with one element per linestring
 #' @export
 #' @family construct
 #' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
-#' pts <- ga_point(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
-#' lines <- ga_make_line_agg(pts, by = c("a", "a", "a", "b", "b"))
+#' lines <- ga_linestring(
+#'   c(0, 1, 2, 10, 11),
+#'   c(0, 1, 0, 5, 5),
+#'   linestring_id = c(1, 1, 1, 2, 2)
+#' )
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines))
+ga_linestring <- function(x, y, z = NULL, m = NULL, linestring_id = NULL, crs = NULL) .Call(wrap__ga_linestring, x, y, z, m, linestring_id, crs)
+
+#' Build multipoints from coordinate columns
 #'
-#' as.vector(ga_length_euclidean(lines))
-ga_make_line_agg <- function(points, by = NULL) .Call(wrap__ga_make_line_agg, points, by)
+#' Returns one multipoint per run of `multipoint_id`, holding its rows in
+#' order.
+#'
+#' @details
+#' `ga_multipoint()` matches `sfheaders::sf_multipoint()`, taking the columns
+#' themselves rather than a data frame and their names. You must keep the rows
+#' of each multipoint together: `ga_multipoint()` errors when a
+#' `multipoint_id` returns after a different one, and orders the multipoints
+#' by where each id first appears.
+#'
+#' `ga_multipoint()` adds the z and m dimensions when you supply `z` and `m`.
+#' It errors on `NA` in any coordinate or id, and reuses the coordinate arrays
+#' without copying them.
+#'
+#' @inheritParams ga_polygon
+#' @param multipoint_id a numeric vector, character vector, or Arrow array
+#'   naming the multipoint of each row, or `NULL` for a single multipoint
+#' @returns a GeoArrow multipoint array with one element per multipoint
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' pts <- ga_multipoint(c(0, 1, 5), c(0, 1, 5), multipoint_id = c("a", "a", "b"))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
+ga_multipoint <- function(x, y, z = NULL, m = NULL, multipoint_id = NULL, crs = NULL) .Call(wrap__ga_multipoint, x, y, z, m, multipoint_id, crs)
+
+#' Build multilinestrings from coordinate columns
+#'
+#' Returns one multilinestring per run of `multilinestring_id`, with one line
+#' per run of `linestring_id` inside it.
+#'
+#' @details
+#' `ga_multilinestring()` matches `sfheaders::sf_multilinestring()`, taking the
+#' columns themselves rather than a data frame and their names. You must keep
+#' the rows of each multilinestring together: `ga_multilinestring()` errors
+#' when a `multilinestring_id` returns after a different one, and orders the
+#' multilinestrings by where each id first appears. It starts a new line at
+#' the start of each multilinestring and wherever `linestring_id` changes, so
+#' you can number the lines of every multilinestring from 1.
+#'
+#' `ga_multilinestring()` adds the z and m dimensions when you supply `z` and
+#' `m`. It errors on `NA` in any coordinate or id, and reuses the coordinate
+#' arrays without copying them.
+#'
+#' @inheritParams ga_polygon
+#' @param multilinestring_id a numeric vector, character vector, or Arrow
+#'   array naming the multilinestring of each row, or `NULL` for a single
+#'   multilinestring
+#' @param linestring_id a numeric vector, character vector, or Arrow array
+#'   naming the line of each row within its multilinestring, or `NULL` for one
+#'   line per multilinestring
+#' @returns a GeoArrow multilinestring array with one element per
+#'   multilinestring
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' lines <- ga_multilinestring(
+#'   c(0, 1, 5, 6, 10, 11),
+#'   c(0, 1, 5, 6, 0, 1),
+#'   multilinestring_id = c(1, 1, 1, 1, 2, 2),
+#'   linestring_id = c(1, 1, 2, 2, 1, 1)
+#' )
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines))
+ga_multilinestring <- function(x, y, z = NULL, m = NULL, multilinestring_id = NULL, linestring_id = NULL, crs = NULL) .Call(wrap__ga_multilinestring, x, y, z, m, multilinestring_id, linestring_id, crs)
 
 #' Build polygons from coordinate columns
 #'
@@ -2295,6 +2361,77 @@ ga_make_line_agg <- function(points, by = NULL) .Call(wrap__ga_make_line_agg, po
 #'   ga_polygon(c(0, 1, 1), c(0, 0, 1), z = c(5, 5, 6))
 #' ))
 ga_polygon <- function(x, y, z = NULL, m = NULL, polygon_id = NULL, linestring_id = NULL, close = TRUE, crs = NULL) .Call(wrap__ga_polygon, x, y, z, m, polygon_id, linestring_id, close, crs)
+
+#' Build multipolygons from coordinate columns
+#'
+#' Returns one multipolygon per run of `multipolygon_id`, with one polygon per
+#' run of `polygon_id` inside it and one ring per run of `linestring_id`
+#' inside each polygon.
+#'
+#' @details
+#' `ga_multipolygon()` matches `sfheaders::sf_multipolygon()`, taking the
+#' columns themselves rather than a data frame and their names. You must keep
+#' the rows of each multipolygon together: `ga_multipolygon()` errors when a
+#' `multipolygon_id` returns after a different one, and orders the
+#' multipolygons by where each id first appears. It starts a new polygon at
+#' the start of each multipolygon and wherever `polygon_id` changes, and a new
+#' ring at the start of each polygon and wherever `linestring_id` changes. It
+#' takes the first ring of each polygon as its exterior and the rest as holes.
+#'
+#' `ga_multipolygon()` closes rings the way [ga_polygon()] does, and adds the z
+#' and m dimensions when you supply `z` and `m`. It errors on `NA` in any
+#' coordinate or id.
+#'
+#' @inheritParams ga_polygon
+#' @param multipolygon_id a numeric vector, character vector, or Arrow array
+#'   naming the multipolygon of each row, or `NULL` for a single multipolygon
+#' @param polygon_id a numeric vector, character vector, or Arrow array naming
+#'   the polygon of each row within its multipolygon, or `NULL` for one polygon
+#'   per multipolygon
+#' @returns a GeoArrow multipolygon array with one element per multipolygon
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' # two squares in one multipolygon, then a triangle on its own
+#' polys <- ga_multipolygon(
+#'   c(0, 1, 1, 0, 5, 6, 6, 5, 20, 30, 20),
+#'   c(0, 0, 1, 1, 5, 5, 6, 6, 0, 0, 10),
+#'   multipolygon_id = c(1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2),
+#'   polygon_id = c(1, 1, 1, 1, 2, 2, 2, 2, 1, 1, 1)
+#' )
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(polys))
+ga_multipolygon <- function(x, y, z = NULL, m = NULL, multipolygon_id = NULL, polygon_id = NULL, linestring_id = NULL, close = TRUE, crs = NULL) .Call(wrap__ga_multipolygon, x, y, z, m, multipolygon_id, polygon_id, linestring_id, close, crs)
+
+#' Join the points of each group into a line
+#'
+#' Returns one linestring through the points that share each label of `by`,
+#' taking the points in row order. With `by = NULL`, `ga_make_line_agg()`
+#' joins every point into a single line.
+#'
+#' @details
+#' `ga_make_line_agg()` groups the rows the way [ga_collect_agg()] does. It
+#' accepts an unsorted `by`, treats `NA` as a label like any other, and orders
+#' the lines by where each label first appears, so you can name the lines with
+#' `unique(by)`.
+#'
+#' `ga_make_line_agg()` skips null and empty points, and returns a null line
+#' for a group with fewer than two points left. It keeps the z and m values
+#' and the CRS of `points`. This is the aggregate form of PostGIS
+#' `ST_MakeLine()`; use [ga_make_line()] to join pairs of points instead.
+#'
+#' @param points a GeoArrow point array
+#' @param by a character vector, numeric vector, or Arrow array with one label
+#'   per point, or `NULL` for a single line
+#' @returns a GeoArrow linestring array with one element per label of `by`
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' pts <- ga_point(c(0, 1, 2, 10, 11), c(0, 1, 0, 5, 5))
+#' lines <- ga_make_line_agg(pts, by = c("a", "a", "a", "b", "b"))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(lines))
+#'
+#' as.vector(ga_length_euclidean(lines))
+ga_make_line_agg <- function(points, by = NULL) .Call(wrap__ga_make_line_agg, points, by)
 
 #' Build polygons from rings
 #'

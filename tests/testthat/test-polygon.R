@@ -189,7 +189,7 @@ test_that("ga_polygon rejects a polygon_id that returns to an earlier polygon", 
 
   expect_error(
     ga_polygon(x, y, polygon_id = rep(c(1, 2, 1), each = 4)),
-    "row 9 returns to an earlier polygon"
+    "row 9 returns to an earlier id"
   )
 })
 

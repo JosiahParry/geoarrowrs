@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_linestring()`, `ga_multipoint()`, `ga_multilinestring()`, and `ga_multipolygon()`, which build geometries from coordinate columns and ids like `ga_polygon()`.
 * `ga_point()` takes `z` and `m`, which add those dimensions to the points.
 * `ga_collect_agg()` gathers a point, line, or polygon array into multipoints, multilinestrings, or multipolygons, and only gathers mixed or untyped arrays into geometry collections.
 * Added `ga_make_polygon()`, which builds a polygon from each shell linestring and the holes on its row.

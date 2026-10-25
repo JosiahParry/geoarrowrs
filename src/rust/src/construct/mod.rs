@@ -1,3 +1,4 @@
+mod columns;
 mod line;
 mod polygon;
 
@@ -287,6 +288,7 @@ fn ga_make_envelope(
 
 extendr_module! {
     mod construct;
+    use columns;
     use line;
     use polygon;
     fn ga_point;
