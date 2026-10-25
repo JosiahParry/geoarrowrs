@@ -277,6 +277,13 @@ st_reverse.geoarrow_vctr <- function(x) {
   ga_out(ga_reverse(as_ga(x)))
 }
 
+#' @exportS3Method sf::st_make_valid
+#' @exportS3Method sdf::st_make_valid
+#' @noRd
+st_make_valid.geoarrow_vctr <- function(x, ...) {
+  ga_out(ga_make_valid(as_ga(x)))
+}
+
 #' @exportS3Method sf::st_collection_extract
 #' @noRd
 st_collection_extract.geoarrow_vctr <- function(

@@ -50,4 +50,8 @@ as.vector(ga_validation_error(g))
 \references{
 \href{https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html}{Validation}
 }
+\seealso{
+Other validation:
+\code{\link[=ga_make_valid]{ga_make_valid()}}
+}
 \concept{validation}

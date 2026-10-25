@@ -218,5 +218,7 @@ st_relate.geoarrow_vctr <- function(x, y, ...) {
 # st_perimeter() is not registered on purpose: ga_perimeter_geodesic() measures
 # on the sphere and PostGIS ST_Perimeter is planar. It stays available under
 # sf's name through mask_sf(), where the geodesic reading is what was asked
-# for. Nor are st_geometry_type(), st_boundary(), st_num_geometries(),
-# st_make_valid() or st_reverse(), which have no binding here yet.
+# for. st_boundary() and st_num_geometries() have no binding here yet, and
+# st_geometry_type() and st_reverse() are not registered for sdf yet.
+# st_make_valid() serves both generics from R/sf-compat.R, since both return
+# geometry.

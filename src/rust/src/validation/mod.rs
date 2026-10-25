@@ -2,9 +2,14 @@ use arrow::array::{Array, BooleanBuilder, StringBuilder};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
 use geo::algorithm::validation::Validation;
+use geo::{Geometry, MakeValid};
+use geoarrow::datatypes::{Dimension, GeoArrowType, MultiPolygonType};
 use geoarrow_array::GeoArrowArray;
+use rayon::prelude::*;
 
-use crate::{as_geo_geometries, as_geometry_chunks};
+use crate::cast::CastGeoArrow;
+use crate::threads::{Threads, with_pool};
+use crate::{as_geo_geometries, as_geo_geometries_par, as_geometry_chunks};
 
 /// Test whether geometries are well formed
 ///
@@ -92,8 +97,75 @@ fn ga_validation_error(geometry: Robj) -> anyhow::Result<Robj> {
         .map_err(|e| anyhow::anyhow!("{e}"))
 }
 
+/// Repair invalid polygons
+///
+/// Returns a valid multipolygon for each polygon, multipolygon, or box,
+/// splitting a self intersecting ring at its crossings and removing dangling
+/// edges and holes that cancel out. Use [ga_is_valid()] to find the rows that
+/// need it.
+///
+/// @details
+/// `ga_make_valid()` uses the prepair algorithm of Ledoux, Arroyo Ohori, and
+/// Meijers (2014): it triangulates the rings and keeps each triangle that an
+/// odd number of ring edges separates from the outside. It always returns a
+/// multipolygon, since one invalid polygon can split into several valid
+/// parts.
+///
+/// The odd-even rule gives the same shape as `sf::st_make_valid()` for a
+/// self intersecting ring, a dangling spike, and a hole that touches or leaves
+/// its shell, but not where rings overlap. sf's default GEOS method subtracts
+/// the union of the holes and unions overlapping parts, while
+/// `ga_make_valid()` keeps the overlap of two holes and a hole inside a hole as
+/// islands, and drops the overlap of two parts.
+///
+/// `ga_make_valid()` returns an empty multipolygon for an empty polygon. It
+/// returns a null for a null geometry, for a geometry that is not polygonal,
+/// and for a polygon it cannot repair, such as one with a `NaN` or infinite
+/// coordinate.
+///
+/// @param geometry a GeoArrow geometry array
+/// @returns a GeoArrow multipolygon array of the same length as `geometry`
+/// @export
+/// @family validation
+/// @references [MakeValid](https://docs.rs/geo/latest/geo/algorithm/repair_polygon/trait.MakeValid.html)
+/// @examplesIf requireNamespace("sf", quietly = TRUE) && requireNamespace("geoarrow", quietly = TRUE)
+/// bowtie <- rbind(c(0, 0), c(2, 2), c(2, 0), c(0, 2), c(0, 0))
+/// g <- geoarrow::as_geoarrow_array(sf::st_sfc(sf::st_polygon(list(bowtie))))
+/// as.vector(ga_is_valid(g))
+///
+/// # the crossing splits the bowtie into two triangles
+/// fixed <- ga_make_valid(g)
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(fixed))
+/// as.vector(ga_is_valid(fixed))
+#[extendr]
+fn ga_make_valid(geometry: Robj) -> extendr_api::Result<Robj> {
+    let chunks = as_geometry_chunks(geometry)?;
+    let metadata = chunks[0].data_type().metadata().clone();
+    let geoms = as_geo_geometries_par(Threads::get(), &chunks)?;
+
+    let repaired = with_pool(Threads::get(), || {
+        geoms
+            .par_iter()
+            .map(|geom| {
+                // a geometry that is not polygonal, or that the repair rejects, has no answer
+                let fixed = match geom {
+                    Some(Geometry::Polygon(p)) => p.make_valid().ok(),
+                    Some(Geometry::MultiPolygon(mp)) => mp.make_valid().ok(),
+                    Some(Geometry::Rect(r)) => r.to_polygon().make_valid().ok(),
+                    _ => None,
+                };
+                fixed.map(Geometry::MultiPolygon)
+            })
+            .collect::<Vec<_>>()
+    });
+
+    let to_type = GeoArrowType::MultiPolygon(MultiPolygonType::new(Dimension::XY, metadata));
+    repaired.cast_geoarrow(&to_type)?.into_arrow_robj()
+}
+
 extendr_module! {
     mod validation;
     fn ga_is_valid;
     fn ga_validation_error;
+    fn ga_make_valid;
 }
