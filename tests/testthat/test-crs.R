@@ -110,6 +110,28 @@ test_that("a crs argument stores PROJJSON as a compact, typed JSON object", {
   }
 })
 
+test_that("a PROJJSON crs argument reads back in sf as the same crs", {
+  crs <- c(
+    "EPSG:4326",
+    "EPSG:4979",
+    "OGC:CRS84",
+    "EPSG:4267",
+    "EPSG:3857",
+    "ESRI:54009",
+    "EPSG:4978",
+    "EPSG:5972",
+    "EPSG:9518",
+    "IAU_2015:30100",
+    "+proj=longlat +ellps=intl +towgs84=-87,-98,-121 +no_defs",
+    "+proj=ob_tran +o_proj=longlat +o_lon_p=0 +o_lat_p=30 +lon_0=0 +datum=WGS84 +no_defs"
+  )
+  for (x in crs) {
+    out <- ga_point(1, 1, crs = sf::st_crs(x)$ProjJson)
+    expect_identical(metadata_of(out)$crs_type, "projjson", label = x)
+    expect_true(sf::st_crs(as_sfc(out)) == sf::st_crs(x), label = x)
+  }
+})
+
 test_that("a crs argument stores AUTHORITY:CODE as an authority code", {
   for (name in names(with_crs)) {
     for (code in c("EPSG:4326", "OGC:CRS84", "IAU_2015:30100")) {
