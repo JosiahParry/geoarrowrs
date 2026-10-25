@@ -27,6 +27,7 @@ Suggests:
     nanoarrow,
     sdf,
     sf,
+    sfheaders,
     wk,
     testthat (>= 3.0.0),
     withr

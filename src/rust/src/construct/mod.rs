@@ -1,3 +1,5 @@
+mod polygon;
+
 use arrow::array::Array;
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
@@ -221,6 +223,7 @@ fn ga_make_envelope(
 
 extendr_module! {
     mod construct;
+    use polygon;
     fn ga_xy;
     fn ga_make_line;
     fn ga_make_envelope;
