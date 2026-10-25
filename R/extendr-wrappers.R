@@ -2116,24 +2116,27 @@ ga_kmeans <- function(geometry, k, seed = NULL) .Call(wrap__ga_kmeans, geometry,
 #' round(as.vector(ga_outlier_scores(g, k_neighbours = 2)), 2)
 ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_scores, geometry, k_neighbours)
 
-#' Build a point array from x and y coordinates
+#' Build a point array from coordinates
 #'
-#' Pairs two numeric vectors into a GeoArrow point array. `ga_point()` recycles
-#' the shorter of the two when it is length 1.
+#' Pairs numeric vectors of coordinates into a GeoArrow point array, adding
+#' the z and m dimensions when you supply `z` and `m`. `ga_point()` recycles
+#' any coordinate of length 1.
 #'
 #' @details
-#' `ga_point()` returns a null point for a row where either coordinate is `NA`,
+#' `ga_point()` returns a null point for a row where any coordinate is `NA`,
 #' rather than a point at an arbitrary location, so the result always has the
-#' same length as the longer input.
+#' same length as the longest input. When every coordinate is full length and
+#' has no `NA`, it reuses the arrays without copying them.
 #'
 #' `ga_point()` stores `crs` verbatim in the array's GeoArrow metadata and never
 #' interprets it, so it never reprojects. It accepts anything a reader would
 #' produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
 #' If you leave it `NULL`, `ga_point()` produces an array with no CRS.
 #'
-#' @param x a numeric vector or float64 array of x coordinates
-#' @param y a numeric vector or float64 array of y coordinates; length 1 or
-#'   the same length as `x`
+#' @param x,y numeric vectors or float64 arrays of x and y coordinates; each
+#'   length 1 or the same length as the longest coordinate
+#' @param z,m numeric vectors or float64 arrays of z and m values, or `NULL`
+#'   to leave out that dimension
 #' @param crs a coordinate reference system to record, or `NULL` for none
 #' @returns a GeoArrow point array
 #' @export
@@ -2145,9 +2148,12 @@ ga_outlier_scores <- function(geometry, k_neighbours) .Call(wrap__ga_outlier_sco
 #' # ga_point() recycles a length 1 coordinate
 #' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1, 2), 0)))
 #'
-#' # ga_point() returns a null point for NA in either coordinate
+#' # supplying z gives a POINT Z
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1), c(0, 1), z = c(5, 6))))
+#'
+#' # ga_point() returns a null point for NA in any coordinate
 #' ga_point(c(0, NA), c(0, 1))$null_count
-ga_point <- function(x, y, crs = NULL) .Call(wrap__ga_point, x, y, crs)
+ga_point <- function(x, y, z = NULL, m = NULL, crs = NULL) .Call(wrap__ga_point, x, y, z, m, crs)
 
 #' Build a line between pairs of points
 #'

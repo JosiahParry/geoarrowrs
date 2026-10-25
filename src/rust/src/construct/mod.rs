@@ -1,37 +1,42 @@
 mod line;
 mod polygon;
 
-use arrow::array::Array;
+use arrow::array::{Array, Float64Array};
+use arrow::buffer::{NullBuffer, ScalarBuffer};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geo::{Coord, LineString, Point, Rect};
+use geo::{Coord, LineString, Rect};
 use geo_traits::to_geo::ToGeoPoint;
 use geoarrow::array::{
-    GeoArrowArray, GeoArrowArrayAccessor, LineStringBuilder, PointBuilder, PolygonBuilder,
+    CoordBuffer, GeoArrowArray, GeoArrowArrayAccessor, LineStringBuilder, PointArray,
+    PolygonBuilder, SeparatedCoordBuffer,
 };
-use geoarrow::datatypes::{Crs, Dimension, LineStringType, Metadata, PointType, PolygonType};
+use geoarrow::datatypes::{Crs, Dimension, LineStringType, Metadata, PolygonType};
 use std::sync::Arc;
 
 use crate::{as_point_chunks, as_recycled_points, try_float_array};
 
-/// Build a point array from x and y coordinates
+/// Build a point array from coordinates
 ///
-/// Pairs two numeric vectors into a GeoArrow point array. `ga_point()` recycles
-/// the shorter of the two when it is length 1.
+/// Pairs numeric vectors of coordinates into a GeoArrow point array, adding
+/// the z and m dimensions when you supply `z` and `m`. `ga_point()` recycles
+/// any coordinate of length 1.
 ///
 /// @details
-/// `ga_point()` returns a null point for a row where either coordinate is `NA`,
+/// `ga_point()` returns a null point for a row where any coordinate is `NA`,
 /// rather than a point at an arbitrary location, so the result always has the
-/// same length as the longer input.
+/// same length as the longest input. When every coordinate is full length and
+/// has no `NA`, it reuses the arrays without copying them.
 ///
 /// `ga_point()` stores `crs` verbatim in the array's GeoArrow metadata and never
 /// interprets it, so it never reprojects. It accepts anything a reader would
 /// produce, whether an authority code such as `"EPSG:4326"`, WKT, or PROJJSON.
 /// If you leave it `NULL`, `ga_point()` produces an array with no CRS.
 ///
-/// @param x a numeric vector or float64 array of x coordinates
-/// @param y a numeric vector or float64 array of y coordinates; length 1 or
-///   the same length as `x`
+/// @param x,y numeric vectors or float64 arrays of x and y coordinates; each
+///   length 1 or the same length as the longest coordinate
+/// @param z,m numeric vectors or float64 arrays of z and m values, or `NULL`
+///   to leave out that dimension
 /// @param crs a coordinate reference system to record, or `NULL` for none
 /// @returns a GeoArrow point array
 /// @export
@@ -43,47 +48,105 @@ use crate::{as_point_chunks, as_recycled_points, try_float_array};
 /// # ga_point() recycles a length 1 coordinate
 /// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1, 2), 0)))
 ///
-/// # ga_point() returns a null point for NA in either coordinate
+/// # supplying z gives a POINT Z
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1), c(0, 1), z = c(5, 6))))
+///
+/// # ga_point() returns a null point for NA in any coordinate
 /// ga_point(c(0, NA), c(0, 1))$null_count
 #[extendr]
 fn ga_point(
     x: Robj,
     y: Robj,
+    #[extendr(default = "NULL")] z: Robj,
+    #[extendr(default = "NULL")] m: Robj,
     #[extendr(default = "NULL")] crs: Option<String>,
-) -> anyhow::Result<Robj> {
-    let xs = try_float_array(x, "x").map_err(|e| anyhow::anyhow!("{e}"))?;
-    let ys = try_float_array(y, "y").map_err(|e| anyhow::anyhow!("{e}"))?;
+) -> extendr_api::Result<Robj> {
+    let CoordArgs {
+        columns,
+        dim,
+        metadata,
+    } = CoordArgs::read(x, y, z, m, crs)?;
 
-    let n = xs.len().max(ys.len());
-    for (label, len) in [("x", xs.len()), ("y", ys.len())] {
-        if len != n && len != 1 {
-            return Err(anyhow::anyhow!(
-                "`{label}` must be length 1 or the same length as the longest argument ({n}), got {len}"
-            ));
+    let n = columns.iter().map(|(_, c)| c.len()).max().unwrap_or(0);
+    for (label, c) in &columns {
+        if c.len() != n && c.len() != 1 {
+            return Err(Error::Other(format!(
+                "`{label}` must be length 1 or the same length as the longest argument ({n}), got {}",
+                c.len()
+            )));
         }
     }
 
-    let metadata = match crs {
-        Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
-        None => Arc::new(Metadata::default()),
-    };
+    // a row with NA in any coordinate is a null point
+    let at = |c: &Float64Array, i: usize| if c.len() == 1 { 0 } else { i };
+    let valid = (0..n)
+        .map(|i| columns.iter().all(|(_, c)| c.is_valid(at(c, i))))
+        .collect::<Vec<_>>();
 
-    let mut bldr = PointBuilder::new(PointType::new(Dimension::XY, metadata));
-    bldr.reserve(n);
+    let buffers = columns
+        .iter()
+        .map(|(_, c)| {
+            // a full length column with no NA is reused as is
+            if c.len() == n && c.null_count() == 0 {
+                return c.values().clone();
+            }
+            (0..n)
+                .map(|i| {
+                    if valid[i] {
+                        c.value(at(c, i))
+                    } else {
+                        f64::NAN
+                    }
+                })
+                .collect::<ScalarBuffer<f64>>()
+        })
+        .collect::<Vec<_>>();
 
-    for i in 0..n {
-        let xi = if xs.len() == 1 { 0 } else { i };
-        let yi = if ys.len() == 1 { 0 } else { i };
-        if xs.is_null(xi) || ys.is_null(yi) {
-            bldr.push_point(None::<&Point<f64>>);
-        } else {
-            bldr.push_point(Some(&Point::new(xs.value(xi), ys.value(yi))));
-        }
-    }
-
-    bldr.finish()
+    let coords =
+        SeparatedCoordBuffer::from_vec(buffers, dim).map_err(|e| Error::Other(e.to_string()))?;
+    let nulls = valid.contains(&false).then(|| NullBuffer::from(valid));
+    PointArray::try_new(CoordBuffer::Separated(coords), nulls, metadata)
+        .map_err(|e| Error::Other(e.to_string()))?
         .into_arrow_robj()
-        .map_err(|e| anyhow::anyhow!("{e}"))
+}
+
+/// The coordinate arguments of a constructor, `x` and `y` then `z` and `m` when given, with their dimension and CRS.
+struct CoordArgs {
+    columns: Vec<(&'static str, Float64Array)>,
+    dim: Dimension,
+    metadata: Arc<Metadata>,
+}
+
+impl CoordArgs {
+    /// Read each coordinate argument as a float64 array, leaving out a `NULL` `z` or `m`.
+    fn read(x: Robj, y: Robj, z: Robj, m: Robj, crs: Option<String>) -> extendr_api::Result<Self> {
+        let dim = match (z.is_null(), m.is_null()) {
+            (true, true) => Dimension::XY,
+            (false, true) => Dimension::XYZ,
+            (true, false) => Dimension::XYM,
+            (false, false) => Dimension::XYZM,
+        };
+
+        let mut columns = vec![
+            ("x", try_float_array(x, "x")?),
+            ("y", try_float_array(y, "y")?),
+        ];
+        for (label, values) in [("z", z), ("m", m)] {
+            if !values.is_null() {
+                columns.push((label, try_float_array(values, label)?));
+            }
+        }
+
+        let metadata = match crs {
+            Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
+            None => Arc::new(Metadata::default()),
+        };
+        Ok(Self {
+            columns,
+            dim,
+            metadata,
+        })
+    }
 }
 
 /// Build a line between pairs of points

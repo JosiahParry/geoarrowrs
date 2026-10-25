@@ -2,15 +2,16 @@
 % Please edit documentation in R/extendr-wrappers.R
 \name{ga_point}
 \alias{ga_point}
-\title{Build a point array from x and y coordinates}
+\title{Build a point array from coordinates}
 \usage{
-ga_point(x, y, crs = NULL)
+ga_point(x, y, z = NULL, m = NULL, crs = NULL)
 }
 \arguments{
-\item{x}{a numeric vector or float64 array of x coordinates}
+\item{x, y}{numeric vectors or float64 arrays of x and y coordinates; each
+length 1 or the same length as the longest coordinate}
 
-\item{y}{a numeric vector or float64 array of y coordinates; length 1 or
-the same length as \code{x}}
+\item{z, m}{numeric vectors or float64 arrays of z and m values, or \code{NULL}
+to leave out that dimension}
 
 \item{crs}{a coordinate reference system to record, or \code{NULL} for none}
 }
@@ -18,13 +19,15 @@ the same length as \code{x}}
 a GeoArrow point array
 }
 \description{
-Pairs two numeric vectors into a GeoArrow point array. \code{ga_point()} recycles
-the shorter of the two when it is length 1.
+Pairs numeric vectors of coordinates into a GeoArrow point array, adding
+the z and m dimensions when you supply \code{z} and \code{m}. \code{ga_point()} recycles
+any coordinate of length 1.
 }
 \details{
-\code{ga_point()} returns a null point for a row where either coordinate is \code{NA},
+\code{ga_point()} returns a null point for a row where any coordinate is \code{NA},
 rather than a point at an arbitrary location, so the result always has the
-same length as the longer input.
+same length as the longest input. When every coordinate is full length and
+has no \code{NA}, it reuses the arrays without copying them.
 
 \code{ga_point()} stores \code{crs} verbatim in the array's GeoArrow metadata and never
 interprets it, so it never reprojects. It accepts anything a reader would
@@ -39,7 +42,10 @@ sf::st_as_sfc(geoarrow::as_geoarrow_vctr(pts))
 # ga_point() recycles a length 1 coordinate
 sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1, 2), 0)))
 
-# ga_point() returns a null point for NA in either coordinate
+# supplying z gives a POINT Z
+sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_point(c(0, 1), c(0, 1), z = c(5, 6))))
+
+# ga_point() returns a null point for NA in any coordinate
 ga_point(c(0, NA), c(0, 1))$null_count
 \dontshow{\}) # examplesIf}
 }

@@ -98,6 +98,74 @@ test_that("ga_point handles a zero length input", {
   expect_equal(ga_point(numeric(0), numeric(0))$length, 0L)
 })
 
+test_that("z and m add dimensions, matching sf", {
+  skip_deps()
+  x <- c(0, 1)
+  y <- c(2, 3)
+  z <- c(4, 5)
+  m <- c(6, 7)
+
+  expect_equal(
+    sf::st_as_text(tosfc(ga_point(x, y, z = z))),
+    c(
+      sf::st_as_text(sf::st_point(c(0, 2, 4))),
+      sf::st_as_text(sf::st_point(c(1, 3, 5)))
+    )
+  )
+  expect_equal(
+    sf::st_as_text(tosfc(ga_point(x, y, m = m))),
+    c(
+      sf::st_as_text(sf::st_point(c(0, 2, 6), dim = "XYM")),
+      sf::st_as_text(sf::st_point(c(1, 3, 7), dim = "XYM"))
+    )
+  )
+  expect_equal(
+    sf::st_as_text(tosfc(ga_point(x, y, z = z, m = m))),
+    c(
+      sf::st_as_text(sf::st_point(c(0, 2, 4, 6))),
+      sf::st_as_text(sf::st_point(c(1, 3, 5, 7)))
+    )
+  )
+})
+
+test_that("ga_point recycles a length 1 z", {
+  skip_deps()
+  expect_equal(
+    sf::st_as_text(tosfc(ga_point(c(0, 1), c(2, 3), z = 9))),
+    c("POINT Z (0 2 9)", "POINT Z (1 3 9)")
+  )
+})
+
+test_that("NA in z or m gives a null point", {
+  skip_deps()
+  res <- ga_point(c(0, 1, 2), c(0, 1, 2), z = c(1, NA, 3), m = c(1, 2, NA))
+
+  expect_identical(res$null_count, 2L)
+  expect_equal(as.vector(ga_geometry_type(res)), c("POINT", NA, NA))
+})
+
+test_that("z and m take Arrow arrays", {
+  skip_deps()
+  from_arrow <- ga_point(
+    nanoarrow::as_nanoarrow_array(c(0, 1)),
+    nanoarrow::as_nanoarrow_array(c(2, 3)),
+    z = nanoarrow::as_nanoarrow_array(c(4, 5))
+  )
+
+  expect_equal(
+    sf::st_as_text(tosfc(from_arrow)),
+    sf::st_as_text(tosfc(ga_point(c(0, 1), c(2, 3), z = c(4, 5))))
+  )
+})
+
+test_that("z has to recycle against x and y", {
+  skip_deps()
+  expect_error(
+    ga_point(c(0, 1, 2), c(0, 1, 2), z = c(1, 2)),
+    "`z` must be length 1"
+  )
+})
+
 sf_envelope <- function(xmin, ymin, xmax, ymax) {
   boxes <- Map(
     function(a, b, c, d) {
