@@ -2,15 +2,15 @@ use std::collections::HashSet;
 use std::ops::Range;
 use std::sync::Arc;
 
-use arrow::array::{Array, Float64Array};
-use arrow::buffer::{OffsetBuffer, ScalarBuffer};
+use arrow::array::Array;
+use arrow::buffer::{NullBuffer, OffsetBuffer, ScalarBuffer};
 use arrow_extendr::IntoArrowRobj;
 use extendr_api::prelude::*;
-use geoarrow::array::{CoordBuffer, PolygonArray, SeparatedCoordBuffer};
-use geoarrow::datatypes::{Crs, Dimension, Metadata};
+use geoarrow::array::{CoordBuffer, GeoArrowArray, PolygonArray, SeparatedCoordBuffer};
+use geoarrow::datatypes::{CoordType, Crs, Dimension, Metadata};
 
 use crate::aggregate::try_group_codes;
-use crate::{check_pair_len, try_float_array};
+use crate::{as_linestring_chunks, as_multilinestring_chunks, check_pair_len, try_float_array};
 
 /// Build polygons from coordinate columns
 ///
@@ -104,30 +104,161 @@ fn ga_polygon(
         }
     }
 
-    let vertices = Vertices {
-        coords: columns.into_iter().map(|(_, values)| values).collect(),
+    let coords = columns
+        .into_iter()
+        .map(|(_, values)| values.values().clone())
+        .collect();
+    let rings = Rings::from_ids(
+        coords,
         dim,
-        polygons: Vertices::ids(polygon_id, "polygon_id", n)?,
-        rings: Vertices::ids(linestring_id, "linestring_id", n)?,
-    };
+        &Rings::ids(polygon_id, "polygon_id", n)?,
+        &Rings::ids(linestring_id, "linestring_id", n)?,
+    )?;
+    if let Some((polygon, ring, len)) = rings.short_rings(close).first() {
+        return Err(Error::Other(format!(
+            "ring {} of polygon {} has {len} coordinates once closed, but a closed ring needs at least 4",
+            ring + 1,
+            polygon + 1
+        )));
+    }
 
     let metadata = match crs {
         Some(value) => Arc::new(Metadata::new(Crs::from_unknown_crs_type(value), None)),
         None => Arc::new(Metadata::default()),
     };
 
-    vertices.into_polygons(close, metadata)?.into_arrow_robj()
+    rings.into_polygons(close, metadata)?.into_arrow_robj()
 }
 
-/// Polygon vertices as coordinate columns, with the polygon and ring code of each row.
-struct Vertices {
-    coords: Vec<Float64Array>,
+/// Build polygons from rings
+///
+/// Returns one polygon per row of `shell`, with `shell` as its exterior ring
+/// and the lines on the same row of `holes` as its holes. This matches PostGIS
+/// `ST_MakePolygon()`.
+///
+/// @details
+/// With `close = TRUE`, `ga_make_polygon()` repeats the first coordinate at
+/// the end of any ring whose last coordinate differs from it, as [ga_polygon()]
+/// does. It returns a null polygon for a null shell and for a row with a ring
+/// of fewer than four coordinates once closed, so the result always has the
+/// same length as `shell`. It returns an empty polygon for an empty shell, and
+/// skips null and empty holes.
+///
+/// `ga_make_polygon()` keeps the z and m values and the CRS of `shell`. Use
+/// [ga_make_line_agg()] to join points into the rings first.
+///
+/// @param shell a GeoArrow linestring array of exterior rings
+/// @param holes a GeoArrow multilinestring array the same length as `shell`,
+///   holding the holes of each polygon, or `NULL` for none
+/// @param close whether to close each open ring by repeating its first
+///   coordinate
+/// @returns a GeoArrow polygon array the same length as `shell`
+/// @export
+/// @family construct
+/// @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+/// # join points into rings, then rings into polygons
+/// pts <- ga_xy(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
+/// rings <- ga_make_line_agg(pts, by = c(1, 1, 1, 1, 2, 2, 2))
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_make_polygon(rings)))
+///
+/// # a square with a square hole
+/// shell <- ga_make_line_agg(ga_xy(c(0, 10, 10, 0), c(0, 0, 10, 10)))
+/// hole <- ga_make_line_agg(ga_xy(c(2, 4, 4, 2), c(2, 2, 4, 4)))
+/// sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
+///   ga_make_polygon(shell, ga_as_multilinestring(hole))
+/// ))
+#[extendr]
+fn ga_make_polygon(
+    shell: Robj,
+    #[extendr(default = "NULL")] holes: Robj,
+    #[extendr(default = "TRUE")] close: bool,
+) -> extendr_api::Result<Robj> {
+    let shells = as_linestring_chunks(shell)?
+        .into_iter()
+        .map(|chunk| chunk.into_coord_type(CoordType::Separated))
+        .collect::<Vec<_>>();
+    let Some(first) = shells.first() else {
+        return Err(Error::Other("`shell` has no chunks".to_string()));
+    };
+    let dim = first.coords().dim();
+    let metadata = first.data_type().metadata().clone();
+
+    let mut columns = vec![Vec::<f64>::new(); dim.size()];
+    let mut exteriors = Vec::new();
+    for chunk in &shells {
+        let base = Rings::append(&mut columns, chunk.coords())?;
+        let offsets = chunk.geom_offsets();
+        exteriors.extend((0..chunk.len()).map(|i| {
+            (!chunk.is_null(i)).then(|| base + offsets[i] as usize..base + offsets[i + 1] as usize)
+        }));
+    }
+
+    let n = exteriors.len();
+    let mut interiors = vec![Vec::new(); n];
+    if !holes.is_null() {
+        let mut row = 0;
+        for chunk in as_multilinestring_chunks(holes)? {
+            let chunk = chunk.into_coord_type(CoordType::Separated);
+            if chunk.coords().dim() != dim {
+                return Err(Error::Other(
+                    "`holes` must have the same dimensions as `shell`".to_string(),
+                ));
+            }
+            let base = Rings::append(&mut columns, chunk.coords())?;
+            let (lines, coords) = (chunk.geom_offsets(), chunk.ring_offsets());
+            for i in 0..chunk.len() {
+                if row < n && !chunk.is_null(i) {
+                    interiors[row] = (lines[i] as usize..lines[i + 1] as usize)
+                        .map(|line| base + coords[line] as usize..base + coords[line + 1] as usize)
+                        .collect();
+                }
+                row += 1;
+            }
+        }
+        check_pair_len(n, row, "shell", "holes")?;
+    }
+
+    let mut ranges = Vec::new();
+    let mut counts = Vec::with_capacity(n);
+    let mut valid = Vec::with_capacity(n);
+    for (exterior, holes) in exteriors.into_iter().zip(interiors) {
+        valid.push(exterior.is_some());
+        // an empty shell gives an empty polygon, so it adds no rings
+        let rings = exterior
+            .filter(|rows| !rows.is_empty())
+            .map(|rows| std::iter::once(rows).chain(holes.into_iter().filter(|h| !h.is_empty())))
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>();
+        counts.push(rings.len());
+        ranges.extend(rings);
+    }
+
+    let coords = columns.into_iter().map(ScalarBuffer::from).collect();
+    let mut rings = Rings {
+        coords,
+        dim,
+        ranges,
+        counts,
+        valid,
+    };
+    for (polygon, _, _) in rings.short_rings(close) {
+        rings.valid[polygon] = false;
+    }
+
+    rings.into_polygons(close, metadata)?.into_arrow_robj()
+}
+
+/// Rings as row ranges over coordinate columns, with how many rings each polygon has and whether it is valid.
+struct Rings {
+    coords: Vec<ScalarBuffer<f64>>,
     dim: Dimension,
-    polygons: Vec<i32>,
-    rings: Vec<i32>,
+    ranges: Vec<Range<usize>>,
+    counts: Vec<usize>,
+    valid: Vec<bool>,
 }
 
-impl Vertices {
+impl Rings {
     /// Read an id column as one code per row, or the same code for every row when it is `NULL`.
     fn ids(robj: Robj, label: &'static str, n: usize) -> extendr_api::Result<Vec<i32>> {
         if robj.is_null() {
@@ -141,14 +272,19 @@ impl Vertices {
             .collect()
     }
 
-    /// The rows of each ring, and how many rings each polygon has.
-    fn rings(&self) -> extendr_api::Result<(Vec<Range<usize>>, Vec<usize>)> {
-        let mut rings = Vec::<Range<usize>>::new();
+    /// Split rows into a polygon per run of `polygons` and a ring per run of `rings` within it.
+    fn from_ids(
+        coords: Vec<ScalarBuffer<f64>>,
+        dim: Dimension,
+        polygons: &[i32],
+        rings: &[i32],
+    ) -> extendr_api::Result<Self> {
+        let mut ranges = Vec::<Range<usize>>::new();
         let mut counts = Vec::new();
         let mut seen = HashSet::new();
 
-        for (row, (&polygon, &ring)) in self.polygons.iter().zip(&self.rings).enumerate() {
-            let new_polygon = row == 0 || polygon != self.polygons[row - 1];
+        for (row, (&polygon, &ring)) in polygons.iter().zip(rings).enumerate() {
+            let new_polygon = row == 0 || polygon != polygons[row - 1];
             if new_polygon {
                 if !seen.insert(polygon) {
                     return Err(Error::Other(format!(
@@ -159,77 +295,121 @@ impl Vertices {
                 counts.push(0);
             }
 
-            if new_polygon || ring != self.rings[row - 1] {
-                rings.push(row..row);
+            if new_polygon || ring != rings[row - 1] {
+                ranges.push(row..row);
                 if let Some(count) = counts.last_mut() {
                     *count += 1;
                 }
             }
 
-            if let Some(rows) = rings.last_mut() {
+            if let Some(rows) = ranges.last_mut() {
                 rows.end = row + 1;
             }
         }
 
-        Ok((rings, counts))
+        let valid = vec![true; counts.len()];
+        Ok(Self {
+            coords,
+            dim,
+            ranges,
+            counts,
+            valid,
+        })
     }
 
-    /// Assemble the polygon array, closing each open ring when `close` is true.
+    /// Append a coordinate buffer to the columns, returning the row it starts at.
+    fn append(columns: &mut [Vec<f64>], coords: &CoordBuffer) -> extendr_api::Result<usize> {
+        let CoordBuffer::Separated(coords) = coords else {
+            return Err(Error::Other("expected separated coordinates".to_string()));
+        };
+        let base = columns.first().map_or(0, |column| column.len());
+        for (column, buffer) in columns.iter_mut().zip(coords.raw_buffers()) {
+            column.extend_from_slice(&buffer[..coords.len()]);
+        }
+        Ok(base)
+    }
+
+    /// How many coordinates a ring has once closed, when `close` is true.
+    fn closed_len(&self, rows: &Range<usize>, close: bool) -> usize {
+        let open = close
+            && !rows.is_empty()
+            && self.coords.iter().any(|c| c[rows.start] != c[rows.end - 1]);
+        rows.len() + usize::from(open)
+    }
+
+    /// Each ring of a valid polygon too short to close, as its polygon, its place in that polygon, and its length once closed.
+    fn short_rings(&self, close: bool) -> Vec<(usize, usize, usize)> {
+        let mut short = Vec::new();
+        if !close {
+            return short;
+        }
+        let mut ranges = self.ranges.iter();
+        for (polygon, (&count, &valid)) in self.counts.iter().zip(&self.valid).enumerate() {
+            for (ring, rows) in ranges.by_ref().take(count).enumerate() {
+                let len = self.closed_len(rows, close);
+                if valid && len < 4 {
+                    short.push((polygon, ring, len));
+                }
+            }
+        }
+        short
+    }
+
+    /// Assemble the polygon array, closing each open ring when `close` is true and leaving invalid polygons null.
     fn into_polygons(
         self,
         close: bool,
         metadata: Arc<Metadata>,
     ) -> extendr_api::Result<PolygonArray> {
-        let (rings, counts) = self.rings()?;
-
-        let mut lengths = Vec::with_capacity(rings.len());
-        let mut open = Vec::with_capacity(rings.len());
-        let mut remaining = rings.iter();
-        for (polygon, &count) in counts.iter().enumerate() {
-            for (ring, rows) in remaining.by_ref().take(count).enumerate() {
-                let is_open = close
-                    && self
-                        .coords
-                        .iter()
-                        .any(|c| c.value(rows.start) != c.value(rows.end - 1));
-                let len = rows.len() + usize::from(is_open);
-                if close && len < 4 {
-                    return Err(Error::Other(format!(
-                        "ring {} of polygon {} has {len} coordinates once closed, but a closed ring needs at least 4",
-                        ring + 1,
-                        polygon + 1
-                    )));
+        let mut counts = Vec::with_capacity(self.counts.len());
+        let mut lengths = Vec::with_capacity(self.ranges.len());
+        let mut kept = Vec::with_capacity(self.ranges.len());
+        let mut ranges = self.ranges.iter();
+        for (&count, &valid) in self.counts.iter().zip(&self.valid) {
+            counts.push(if valid { count } else { 0 });
+            for rows in ranges.by_ref().take(count) {
+                if valid {
+                    let len = self.closed_len(rows, close);
+                    lengths.push(len);
+                    kept.push((rows.clone(), len > rows.len()));
                 }
-                lengths.push(len);
-                open.push(is_open);
             }
         }
 
-        // reuse the input buffers when no ring gains a closing coordinate
-        let copy = open.contains(&true);
+        // reuse the input buffers when the kept rings cover them in order with nothing to close
+        let mut next = 0;
+        let in_order = kept.iter().all(|(rows, open)| {
+            let follows = !open && rows.start == next;
+            next = rows.end;
+            follows
+        });
+        let as_given = in_order && next == self.coords.first().map_or(0, |c| c.len());
+
         let buffers = self
             .coords
             .iter()
             .map(|c| {
-                if !copy {
-                    return c.values().clone();
+                if as_given {
+                    return c.clone();
                 }
-                rings
-                    .iter()
-                    .zip(&open)
-                    .flat_map(|(rows, &is_open)| rows.clone().chain(is_open.then_some(rows.start)))
-                    .map(|row| c.value(row))
+                kept.iter()
+                    .flat_map(|(rows, open)| rows.clone().chain(open.then_some(rows.start)))
+                    .map(|row| c[row])
                     .collect::<ScalarBuffer<f64>>()
             })
             .collect::<Vec<_>>();
 
         let coords = SeparatedCoordBuffer::from_vec(buffers, self.dim)
             .map_err(|e| Error::Other(e.to_string()))?;
+        let nulls = self
+            .valid
+            .contains(&false)
+            .then(|| NullBuffer::from(self.valid));
         PolygonArray::try_new(
             CoordBuffer::Separated(coords),
             OffsetBuffer::from_lengths(counts),
             OffsetBuffer::from_lengths(lengths),
-            None,
+            nulls,
             metadata,
         )
         .map_err(|e| Error::Other(e.to_string()))
@@ -239,4 +419,5 @@ impl Vertices {
 extendr_module! {
     mod polygon;
     fn ga_polygon;
+    fn ga_make_polygon;
 }

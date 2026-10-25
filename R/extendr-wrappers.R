@@ -2282,6 +2282,45 @@ ga_make_line_agg <- function(points, by = NULL) .Call(wrap__ga_make_line_agg, po
 #' ))
 ga_polygon <- function(x, y, z = NULL, m = NULL, polygon_id = NULL, linestring_id = NULL, close = TRUE, crs = NULL) .Call(wrap__ga_polygon, x, y, z, m, polygon_id, linestring_id, close, crs)
 
+#' Build polygons from rings
+#'
+#' Returns one polygon per row of `shell`, with `shell` as its exterior ring
+#' and the lines on the same row of `holes` as its holes. This matches PostGIS
+#' `ST_MakePolygon()`.
+#'
+#' @details
+#' With `close = TRUE`, `ga_make_polygon()` repeats the first coordinate at
+#' the end of any ring whose last coordinate differs from it, as [ga_polygon()]
+#' does. It returns a null polygon for a null shell and for a row with a ring
+#' of fewer than four coordinates once closed, so the result always has the
+#' same length as `shell`. It returns an empty polygon for an empty shell, and
+#' skips null and empty holes.
+#'
+#' `ga_make_polygon()` keeps the z and m values and the CRS of `shell`. Use
+#' [ga_make_line_agg()] to join points into the rings first.
+#'
+#' @param shell a GeoArrow linestring array of exterior rings
+#' @param holes a GeoArrow multilinestring array the same length as `shell`,
+#'   holding the holes of each polygon, or `NULL` for none
+#' @param close whether to close each open ring by repeating its first
+#'   coordinate
+#' @returns a GeoArrow polygon array the same length as `shell`
+#' @export
+#' @family construct
+#' @examplesIf requireNamespace("geoarrow", quietly = TRUE) && requireNamespace("sf", quietly = TRUE)
+#' # join points into rings, then rings into polygons
+#' pts <- ga_xy(c(0, 10, 10, 0, 20, 30, 20), c(0, 0, 10, 10, 0, 0, 10))
+#' rings <- ga_make_line_agg(pts, by = c(1, 1, 1, 1, 2, 2, 2))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(ga_make_polygon(rings)))
+#'
+#' # a square with a square hole
+#' shell <- ga_make_line_agg(ga_xy(c(0, 10, 10, 0), c(0, 0, 10, 10)))
+#' hole <- ga_make_line_agg(ga_xy(c(2, 4, 4, 2), c(2, 2, 4, 4)))
+#' sf::st_as_sfc(geoarrow::as_geoarrow_vctr(
+#'   ga_make_polygon(shell, ga_as_multilinestring(hole))
+#' ))
+ga_make_polygon <- function(shell, holes = NULL, close = TRUE) .Call(wrap__ga_make_polygon, shell, holes, close)
+
 #' Convert coordinates from radians to degrees
 #'
 #' Multiplies every x and y coordinate by `180 / pi`. `ga_to_degrees()` keeps

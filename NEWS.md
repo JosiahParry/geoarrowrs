@@ -1,5 +1,6 @@
 # geoarrowrs (development version)
 
+* Added `ga_make_polygon()`, which builds a polygon from each shell linestring and the holes on its row.
 * Added `ga_make_line_agg()`, which joins the points that share each label of `by` into a linestring.
 * Added `ga_polygon()`, which builds polygons from coordinate columns and polygon and ring ids, like `sfheaders::sf_polygon()`.
 * `ga_collect_agg()` accepts a numeric vector for `by`.
