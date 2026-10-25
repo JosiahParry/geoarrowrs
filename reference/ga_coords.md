@@ -1,7 +1,7 @@
 # Collect a geometry's coordinates as points
 
 Returns one multipoint per input geometry, holding that geometry's
-vertices in order. The output has the same length as the input.
+vertices in order. Each function keeps the input's length.
 
 ## Usage
 
@@ -24,10 +24,10 @@ a GeoArrow multipoint array of the same length as `geometry`
 ## Details
 
 `ga_exterior_coords()` skips the interior rings of a polygon, so it
-gives the outline only. Both preserve the order the coordinates are
-stored in, so a closed ring repeats its first vertex at the end.
+gives the outline only. Both preserve the coordinates' storage order, so
+they keep a closed ring's repeated first vertex at the end.
 
-A null geometry stays null.
+Each function returns null for a null geometry.
 
 ## References
 

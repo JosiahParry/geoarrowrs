@@ -25,10 +25,10 @@ a double array of the same length as `geometry`
 
 ## Details
 
-0 is the start of the line and 1 its end, so the value multiplied by the
-line's length gives a distance. Only lines and linestrings can be
-located along; any other geometry type, a null geometry, a null point,
-or a zero length line becomes `NA`.
+0 is the start of the line and 1 its end, so you can multiply the value
+by the line's length to get a distance. `ga_line_locate_point()` locates
+along lines and linestrings only, and returns `NA` for any other
+geometry type, a null geometry, a null point, or a zero length line.
 
 ## References
 

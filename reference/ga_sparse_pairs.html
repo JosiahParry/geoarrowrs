@@ -77,13 +77,13 @@ database returns a spatial join in.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Everything but the padding is expressible with Arrow's own <code>list_flatten()</code>
-and <code>list_parent_indices()</code>. What they cannot do is <code>left = TRUE</code>, which has
-to put back a row for each row of <code>x</code> that matched nothing, so the whole
-expansion happens here rather than half here and half in R.</p>
-<p>Rows are 1 based, matching what the sparse predicates return. A row of <code>x</code>
-that matched nothing appears once with a null <code>y</code> when <code>left = TRUE</code>, and
-not at all otherwise.</p>
+    <p>You can express everything but the padding with Arrow's own <code>list_flatten()</code>
+and <code>list_parent_indices()</code>. What they cannot do is <code>left = TRUE</code>, where
+<code>ga_sparse_pairs()</code> has to put back a row for each row of <code>x</code> that matched
+nothing, so it does the whole expansion itself rather than leaving half to R.</p>
+<p><code>ga_sparse_pairs()</code> numbers rows from 1, matching what the sparse predicates
+return. It returns a row of <code>x</code> that matched nothing once with a null <code>y</code>
+when <code>left = TRUE</code>, and drops it otherwise.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -91,19 +91,21 @@ not at all otherwise.</p>
 <code><a href="topology.html">ga_contains()</a></code>,
 <code><a href="ga_coordinate_position.html">ga_coordinate_position()</a></code>,
 <code><a href="ga_dimension.html">ga_dimension()</a></code>,
+<code><a href="ga_equals_exact.html">ga_equals_exact()</a></code>,
 <code><a href="ga_filter.html">ga_filter()</a></code>,
 <code><a href="ga_is_empty.html">ga_is_empty()</a></code>,
 <code><a href="ga_join.html">ga_join()</a></code>,
 <code><a href="ga_relate.html">ga_relate()</a></code>,
+<code><a href="ga_sparse_equals_exact.html">ga_sparse_equals_exact()</a></code>,
 <code><a href="sparse.html">ga_sparse_intersects()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># the middle row of x matches nothing, so it is only there with left = TRUE</span></span></span>
+<span class="r-in"><span><span class="co"># the middle row of x matches nothing, so you see it only with left = TRUE</span></span></span>
 <span class="r-in"><span><span class="fu">ga_sparse_pairs</span><span class="op">(</span><span class="fu"><a href="sparse.html">ga_sparse_intersects</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;nanoarrow_array struct[2]&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ length    : int 2</span>

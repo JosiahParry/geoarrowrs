@@ -27,7 +27,7 @@ a GeoArrow array of the requested type, the same length as `x`
 
 ## Details
 
-Some casts always succeed:
+`ga_cast_geometry()` always succeeds for these casts:
 
 |              |                          |
 |--------------|--------------------------|
@@ -37,8 +37,9 @@ Some casts always succeed:
 | `polygon`    | `multipolygon`           |
 | any type     | `geometry`, `wkb`, `wkt` |
 
-Others are fallible and error when a geometry does not fit the target
-type, such as a `multipoint` holding two points cast to `point`:
+Others are fallible, and `ga_cast_geometry()` errors when a geometry
+does not fit the target type, such as when you cast a `multipoint`
+holding two points to `point`:
 
 |                   |                   |
 |-------------------|-------------------|
@@ -48,13 +49,14 @@ type, such as a `multipoint` holding two points cast to `point`:
 | `multipolygon`    | `polygon`         |
 | `geometry`        | any concrete type |
 
-The dimension is carried over from the input, and casting between
-different dimensions is not supported.
+`ga_cast_geometry()` carries the dimension over from the input and does
+not support casting between different dimensions.
 
 ## See also
 
 Other cast:
 [`ga_as_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_as_point.md),
+[`ga_collection_extract()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collection_extract.md),
 [`ga_downcast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_downcast_geometry.md),
 [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md),
 [`ga_flatten()`](https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.md),
@@ -63,9 +65,9 @@ Other cast:
 ## Examples
 
 ``` r
-pts <- ga_xy(c(0, 1), c(0, 1))
+pts <- ga_point(c(0, 1), c(0, 1))
 
-# widening always works
+# you can always widen
 ga_cast_geometry(pts, "multipoint")
 #> <nanoarrow_array geoarrow.multipoint{list}[2]>
 #>  $ length    : int 2
@@ -103,7 +105,7 @@ ga_cast_geometry(pts, "multipoint")
 #>   .. ..$ dictionary: NULL
 #>  $ dictionary: NULL
 
-# so does going out to wkb, which is what plain Parquet stores
+# and you can always go out to wkb, which is what plain Parquet stores
 ga_cast_geometry(pts, "wkb")
 #> <nanoarrow_array geoarrow.wkb{binary}[2]>
 #>  $ length    : int 2

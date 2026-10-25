@@ -1,8 +1,8 @@
 # Compute a representative point inside a geometry
 
-Returns a point guaranteed to lie on the geometry, unlike
+Returns a point that always lies on the geometry, unlike
 [`ga_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_centroid.md),
-which can fall outside a concave shape.
+which can return a point outside a concave shape.
 
 ## Usage
 
@@ -22,9 +22,9 @@ a GeoArrow point array of the same length as `geometry`
 
 ## Details
 
-For a polygon this is a point on the interior, chosen from the
-horizontal line closest to the centroid. An empty or null geometry
-becomes a null element.
+For a polygon, `ga_interior_point()` picks a point on the interior from
+the horizontal line closest to the centroid. It returns a null element
+for an empty or null geometry.
 
 ## References
 

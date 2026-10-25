@@ -1,8 +1,7 @@
 # Split geometries into their line segments
 
 Returns one multilinestring per input geometry, whose parts are that
-geometry's two point segments. The output has the same length as the
-input.
+geometry's two point segments. `ga_lines()` keeps the input's length.
 
 ## Usage
 
@@ -22,9 +21,9 @@ a GeoArrow multilinestring array of the same length as `geometry`
 
 ## Details
 
-A polygon contributes the segments of every ring, interior rings
-included. A point has no segments and becomes a null element, as does a
-null geometry.
+For a polygon, `ga_lines()` returns the segments of every ring,
+including interior rings. It returns a null element for a point, which
+has no segments, and for a null geometry.
 
 ## References
 

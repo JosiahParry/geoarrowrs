@@ -1,8 +1,9 @@
 # Compute the concave hull of geometries
 
-Returns a polygon enclosing each geometry, tightened toward the
-geometry's own shape. Smaller `concavity` values produce a tighter, more
-concave hull; larger values approach the convex hull.
+Returns a polygon enclosing each geometry, and tightens that polygon
+toward the geometry's own shape. With smaller `concavity` values,
+`ga_concave_hull()` produces a tighter, more concave hull; with larger
+values, it approaches the convex hull.
 
 ## Usage
 
@@ -24,7 +25,7 @@ ga_concave_hull(geometry, concavity, length_threshold)
 
 - length_threshold:
 
-  edges shorter than this are not considered for further refinement;
+  the length below which `ga_concave_hull()` stops refining an edge;
   length 1 or the same length as `geometry`. `geo` uses 0 by default
 
 ## Value
@@ -43,8 +44,8 @@ multipolygons. `geo` does not define a concave hull for a single point.
 ## See also
 
 Other boundary:
-[`ga_bounding_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_bounding_rect.md),
 [`ga_convex_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_convex_hull.md),
+[`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md),
 [`ga_extremes()`](https://josiahparry.github.io/geoarrowrs/reference/ga_extremes.md),
 [`ga_minimum_rotated_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_minimum_rotated_rect.md)
 
@@ -54,7 +55,7 @@ Other boundary:
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# lower concavity tightens the hull onto the shape
+# with lower concavity, ga_concave_hull() tightens the hull onto the shape
 loose <- ga_concave_hull(nc$geometry, concavity = 2, length_threshold = 0)
 tight <- ga_concave_hull(nc$geometry, concavity = 0.5, length_threshold = 0)
 

@@ -1,7 +1,7 @@
 # Convert coordinates from radians to degrees
 
-Multiplies every x and y coordinate by `180 / pi`. The geometry type of
-the output matches the geometry type of the input.
+Multiplies every x and y coordinate by `180 / pi`. `ga_to_degrees()`
+keeps the geometry type of the input.
 
 ## Usage
 
@@ -21,8 +21,8 @@ a GeoArrow array of the same geometry type as the input
 
 ## Details
 
-Only the x and y coordinates are converted. Z and M values are dropped,
-since the conversion goes through a two dimensional representation.
+`ga_to_degrees()` converts only the x and y coordinates. It drops Z and
+M values, since it goes through a two dimensional representation.
 
 ## References
 
@@ -36,7 +36,7 @@ Other convert:
 ## Examples
 
 ``` r
-rad <- ga_xy(c(0, pi / 4), c(0, pi / 2))
+rad <- ga_point(c(0, pi / 4), c(0, pi / 2))
 
 geoarrow::as_geoarrow_vctr(ga_to_degrees(rad))
 #> <geoarrow_vctr geoarrow.point{struct}[2]>

@@ -70,12 +70,12 @@ boundaries between any that touch or overlap.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This is the one function in the package that is not length-preserving. It
-is an aggregate over the whole array, so it always returns a length 1
-array, in the way <code><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum()</a></code> reduces a vector to a single value.</p>
+    <p>Unlike most functions in the package, <code>ga_unary_union()</code> does not preserve
+length. It aggregates over the whole array, so it always returns a length 1
+array, the way <code><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum()</a></code> reduces a vector to a single value.</p>
 <p>It is far faster than folding <code><a href="boolean_ops.html">ga_boolean_union()</a></code> across the array, since it
-unions all the rings in one pass. Rows that are not polygonal, and null
-rows, are skipped.</p>
+unions all the rings in one pass. It skips rows that are not polygonal, and
+null rows.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -86,7 +86,8 @@ rows, are skipped.</p>
     <div class="dont-index"><p>Other boolean:
 <code><a href="boolean_ops.html">ga_boolean_intersection()</a></code></p>
 <p>Other aggregate:
-<code><a href="ga_collect_agg.html">ga_collect_agg()</a></code></p></div>
+<code><a href="ga_collect_agg.html">ga_collect_agg()</a></code>,
+<code><a href="ga_interpolate_aw.html">ga_interpolate_aw()</a></code></p></div>
     </div>
 
     <div class="section level2">

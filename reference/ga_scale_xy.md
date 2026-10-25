@@ -1,8 +1,8 @@
 # Scale geometries in x and y
 
 Scales each geometry by `x_factor` along the x axis and `y_factor` along
-the y axis, about the geometry's own centroid. The geometry type of the
-output matches the geometry type of the input.
+the y axis, about the geometry's own centroid. `ga_scale_xy()` keeps the
+input's geometry type.
 
 ## Usage
 
@@ -39,6 +39,7 @@ a GeoArrow array of the same geometry type as the input
 
 Other affine:
 [`ga_affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/ga_affine_transform.md),
+[`ga_jitter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_jitter.md),
 [`ga_rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_center.md),
 [`ga_rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.md),
 [`ga_skew()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew.md),
@@ -52,7 +53,7 @@ sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 ))
 
-# twice as wide, same height, so the area doubles
+# twice as wide, same height, so ga_scale_xy() doubles the area
 geoarrow::as_geoarrow_vctr(ga_scale_xy(sq, 2, 1))
 #> <geoarrow_vctr geoarrow.polygon{list}[1]>
 #> [1] <POLYGON ((-1 0, 3 0, 3 2, -1 2, -1 0))>

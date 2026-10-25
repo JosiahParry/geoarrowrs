@@ -1,7 +1,7 @@
 # Assign points to a fixed number of clusters
 
 Splits the points in the array into `k` clusters by nearest centre. One
-label per row, in the order the points were given.
+label per row, in the order you gave the points.
 
 ## Usage
 
@@ -29,16 +29,16 @@ an integer array of cluster labels, the same length as `geometry`
 
 ## Details
 
-k-means always produces exactly `k` clusters and no noise, so every
-point gets a label. It favours round, similarly sized clusters; use
+k-means always produces exactly `k` clusters and no noise, so it labels
+every point. It favours round, similarly sized clusters; use
 [`ga_dbscan()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dbscan.md)
 when the shapes are irregular or the count is unknown.
 
-Clustering is over the whole array, not within each row, so `k` is a
-single value rather than one per row. The algorithm starts from a random
-seed, so results vary between runs unless `seed` is given. A row that is
-not a single point, or is null, takes no part in the clustering and
-comes back null.
+`ga_kmeans()` clusters over the whole array, not within each row, so `k`
+is a single value rather than one per row. The algorithm starts from a
+random seed, so `ga_kmeans()` can return different results on each run
+unless you give `seed`. It leaves a row that is not a single point, or
+is null, out of the clustering and returns null for it.
 
 ## References
 
@@ -53,7 +53,7 @@ Other cluster:
 ## Examples
 
 ``` r
-g <- ga_xy(
+g <- ga_point(
   c(0, 0.1, 0.2, 5, 5.1, 5.2),
   c(0, 0.1, 0.2, 5, 5.1, 5.2)
 )

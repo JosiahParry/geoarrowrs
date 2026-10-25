@@ -1,8 +1,8 @@
 # Read a GeoJSON FeatureCollection
 
 Reads the geometries together with the feature properties. Properties
-are untyped in GeoJSON, so each column's arrow type is inferred by
-scanning every feature.
+are untyped in GeoJSON, so `read_geojson()` infers each column's arrow
+type by scanning every feature.
 
 ## Usage
 
@@ -23,10 +23,10 @@ property columns followed by a `geometry` column.
 
 ## Details
 
-The geometry column is narrowed to the most specific type that holds
-every feature, promoting a singular type to its multi form where the two
-are mixed. A feature with a `null` geometry becomes a null element and
-does not affect the choice:
+`read_geojson()` narrows the geometry column to the most specific type
+that holds every feature, promoting a singular type to its multi form
+when it finds both. It turns a feature with a `null` geometry into a
+null element and ignores it when choosing the type:
 
 |                                         |                         |
 |-----------------------------------------|-------------------------|
@@ -38,11 +38,11 @@ does not affect the choice:
 | more than one family, or any collection | `geoarrow.geometry`     |
 
 Narrowing matters in practice: `geoarrow.geometry` is a dense union that
-geoarrow's R bindings cannot yet convert, so a genuinely mixed
-collection reads back as its raw storage rather than as geometries.
+geoarrow's R bindings cannot yet convert, so they return a genuinely
+mixed collection as its raw storage rather than as geometries.
 
-Property columns appear in the order the keys are first seen. A key
-missing from a given feature is null for that row. Types are widened
+`read_geojson()` adds property columns in the order it first sees their
+keys. It writes a null where a feature lacks a key. It widens types
 across features:
 
 |                                       |                  |
@@ -54,12 +54,12 @@ across features:
 | strings, or any mix that cannot unify | `Utf8`           |
 | only `null`                           | `Utf8`, all null |
 
-Nested arrays and objects have no arrow analogue and are kept as their
-raw JSON text.
+`read_geojson()` keeps nested arrays and objects, which have no arrow
+analogue, as their raw JSON text.
 
 Per RFC 7946 the coordinate reference system is always `OGC:CRS84`, so
-that is set on the geometry column without reading anything from the
-file.
+`read_geojson()` sets that on the geometry column without reading
+anything from the file.
 
 ## See also
 

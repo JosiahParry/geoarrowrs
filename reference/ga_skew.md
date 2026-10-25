@@ -1,8 +1,8 @@
 # Skew geometries uniformly about their centroid
 
 Shears each geometry by `degrees` along both the x and y dimensions,
-about the geometry's own centroid. The geometry type of the output
-matches the geometry type of the input.
+about the geometry's own centroid. `ga_skew()` keeps the input's
+geometry type.
 
 ## Usage
 
@@ -33,6 +33,7 @@ a GeoArrow array of the same geometry type as the input
 
 Other affine:
 [`ga_affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/ga_affine_transform.md),
+[`ga_jitter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_jitter.md),
 [`ga_rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_center.md),
 [`ga_rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.md),
 [`ga_scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.md),
@@ -46,7 +47,7 @@ sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 ))
 
-# a shear leaves the area unchanged
+# ga_skew() leaves the area unchanged
 geoarrow::as_geoarrow_vctr(ga_skew(sq, 30))
 #> <geoarrow_vctr geoarrow.polygon{list}[1]>
 #> [1] <POLYGON ((-0.5773503 -0.5773503, 1.4226497 0.5773503, 2.5773503 2.5773>

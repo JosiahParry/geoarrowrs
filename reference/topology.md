@@ -1,7 +1,8 @@
 # Test a topological relationship
 
 Each function compares `x` and `y` row by row and returns `TRUE` when
-the named DE-9IM relationship holds. `y` is recycled against `x`.
+the named DE-9IM relationship holds. These functions recycle `y` against
+`x`.
 
 ## Usage
 
@@ -57,10 +58,10 @@ requiring `y` to fall entirely within the interior.
 no interior point, `ga_crosses()` when their interiors meet in a lower
 dimension than at least one of them, and `ga_overlaps()` when they meet
 in the same dimension as both. `ga_equals_topo()` compares point sets
-rather than coordinate order, so two geometries wound differently are
-still equal.
+rather than coordinate order, so it still treats two geometries with
+different windings as equal.
 
-A null geometry on either side gives `NA`.
+Each function returns `NA` for a null geometry on either side.
 
 ## References
 
@@ -71,10 +72,12 @@ A null geometry on either side gives `NA`.
 Other topology:
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md),
 [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md),
 [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
 [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 

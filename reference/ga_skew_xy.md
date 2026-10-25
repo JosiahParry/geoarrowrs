@@ -2,7 +2,7 @@
 
 Shears each geometry by `degrees_x` along the x dimension and
 `degrees_y` along the y dimension, about the geometry's own centroid.
-The geometry type of the output matches the geometry type of the input.
+`ga_skew_xy()` keeps the input's geometry type.
 
 ## Usage
 
@@ -39,6 +39,7 @@ a GeoArrow array of the same geometry type as the input
 
 Other affine:
 [`ga_affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/ga_affine_transform.md),
+[`ga_jitter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_jitter.md),
 [`ga_rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_center.md),
 [`ga_rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.md),
 [`ga_scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.md),

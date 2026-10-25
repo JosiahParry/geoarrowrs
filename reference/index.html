@@ -84,6 +84,27 @@
 
       <dl><dt>
 
+          <code><a href="ga_linestring.html">ga_linestring()</a></code>
+
+        </dt>
+        <dd>Build linestrings from coordinate columns</dd>
+
+        <dt>
+
+          <code><a href="ga_make_envelope.html">ga_make_envelope()</a></code>
+
+        </dt>
+        <dd>Build rectangles from their bounds</dd>
+
+        <dt>
+
+          <code><a href="ga_make_grid.html">ga_make_grid()</a></code>
+
+        </dt>
+        <dd>Build a grid of squares over an extent</dd>
+
+        <dt>
+
           <code><a href="ga_make_line.html">ga_make_line()</a></code>
 
         </dt>
@@ -91,10 +112,52 @@
 
         <dt>
 
-          <code><a href="ga_xy.html">ga_xy()</a></code>
+          <code><a href="ga_make_line_agg.html">ga_make_line_agg()</a></code>
 
         </dt>
-        <dd>Build a point array from x and y coordinates</dd>
+        <dd>Join the points of each group into a line</dd>
+
+        <dt>
+
+          <code><a href="ga_make_polygon.html">ga_make_polygon()</a></code>
+
+        </dt>
+        <dd>Build polygons from rings</dd>
+
+        <dt>
+
+          <code><a href="ga_multilinestring.html">ga_multilinestring()</a></code>
+
+        </dt>
+        <dd>Build multilinestrings from coordinate columns</dd>
+
+        <dt>
+
+          <code><a href="ga_multipoint.html">ga_multipoint()</a></code>
+
+        </dt>
+        <dd>Build multipoints from coordinate columns</dd>
+
+        <dt>
+
+          <code><a href="ga_multipolygon.html">ga_multipolygon()</a></code>
+
+        </dt>
+        <dd>Build multipolygons from coordinate columns</dd>
+
+        <dt>
+
+          <code><a href="ga_point.html">ga_point()</a></code>
+
+        </dt>
+        <dd>Build a point array from coordinates</dd>
+
+        <dt>
+
+          <code><a href="ga_polygon.html">ga_polygon()</a></code>
+
+        </dt>
+        <dd>Build polygons from coordinate columns</dd>
       </dl></div><div class="section level2">
       <h2 id="area">Area<a class="anchor" aria-label="anchor" href="#area"></a></h2>
 
@@ -125,6 +188,13 @@
 
         </dt>
         <dd>Geodesic area and perimeter</dd>
+
+        <dt>
+
+          <code><a href="ga_perimeter_euclidean.html">ga_perimeter_euclidean()</a></code>
+
+        </dt>
+        <dd>Planar perimeter of polygons</dd>
       </dl></div><div class="section level2">
       <h2 id="distance">Distance<a class="anchor" aria-label="anchor" href="#distance"></a></h2>
 
@@ -232,6 +302,13 @@
 
         <dt>
 
+          <code><a href="ga_hilbert_order.html">ga_hilbert_order()</a></code>
+
+        </dt>
+        <dd>Order rows along a Hilbert curve</dd>
+
+        <dt>
+
           <code><a href="ga_knn_join.html">ga_knn_join()</a></code>
 
         </dt>
@@ -257,6 +334,13 @@
 
         </dt>
         <dd>Find the rows of <code>y</code> nearest each row of <code>x</code></dd>
+
+        <dt>
+
+          <code><a href="ga_str_order.html">ga_str_order()</a></code>
+
+        </dt>
+        <dd>Order rows by sort-tile-recursive packing</dd>
       </dl></div><div class="section level2">
       <h2 id="relate">Relate<a class="anchor" aria-label="anchor" href="#relate"></a></h2>
 
@@ -280,6 +364,13 @@
 
         </dt>
         <dd>Determine the topological dimension of geometries</dd>
+
+        <dt>
+
+          <code><a href="ga_equals_exact.html">ga_equals_exact()</a></code>
+
+        </dt>
+        <dd>Test whether geometries are identical within a tolerance</dd>
 
         <dt>
 
@@ -308,6 +399,13 @@
 
         </dt>
         <dd>DE-9IM relationship between geometries</dd>
+
+        <dt>
+
+          <code><a href="ga_sparse_equals_exact.html">ga_sparse_equals_exact()</a></code>
+
+        </dt>
+        <dd>Find which rows of <code>y</code> are identical to each row of <code>x</code> within a tolerance</dd>
 
         <dt>
 
@@ -392,13 +490,6 @@
 
       <dl><dt>
 
-          <code><a href="ga_bounding_rect.html">ga_bounding_rect()</a></code>
-
-        </dt>
-        <dd>Axis-aligned bounding rectangle</dd>
-
-        <dt>
-
           <code><a href="ga_concave_hull.html">ga_concave_hull()</a></code>
 
         </dt>
@@ -410,6 +501,13 @@
 
         </dt>
         <dd>Compute the convex hull of geometries</dd>
+
+        <dt>
+
+          <code><a href="ga_envelope.html">ga_envelope()</a></code>
+
+        </dt>
+        <dd>Compute the bounding box of geometries</dd>
 
         <dt>
 
@@ -510,6 +608,13 @@
 
         <dt>
 
+          <code><a href="ga_interpolate_aw.html">ga_interpolate_aw()</a></code>
+
+        </dt>
+        <dd>Interpolate values from one set of polygons onto another by area</dd>
+
+        <dt>
+
           <code><a href="ga_unary_union.html">ga_unary_union()</a></code>
 
         </dt>
@@ -553,6 +658,13 @@
 
         </dt>
         <dd>Apply an arbitrary affine transform</dd>
+
+        <dt>
+
+          <code><a href="ga_jitter.html">ga_jitter()</a></code>
+
+        </dt>
+        <dd>Move each geometry by a small random offset</dd>
 
         <dt>
 
@@ -693,6 +805,13 @@
 
         <dt>
 
+          <code><a href="ga_reverse.html">ga_reverse()</a></code>
+
+        </dt>
+        <dd>Reverse the coordinate order of geometries</dd>
+
+        <dt>
+
           <code><a href="ga_winding_order.html">ga_winding_order()</a></code>
 
         </dt>
@@ -737,10 +856,31 @@
 
         <dt>
 
+          <code><a href="ga_make_valid.html">ga_make_valid()</a></code>
+
+        </dt>
+        <dd>Repair invalid polygons</dd>
+
+        <dt>
+
           <code><a href="validation.html">ga_is_valid()</a></code> <code><a href="validation.html">ga_validation_error()</a></code>
 
         </dt>
         <dd>Test whether geometries are well formed</dd>
+
+        <dt>
+
+          <code><a href="ga_geometry_type.html">ga_geometry_type()</a></code>
+
+        </dt>
+        <dd>Determine the type of each geometry</dd>
+
+        <dt>
+
+          <code><a href="ga_is.html">ga_is()</a></code>
+
+        </dt>
+        <dd>Test whether geometries are of a given type</dd>
       </dl></div><div class="section level2">
       <h2 id="cast">Cast<a class="anchor" aria-label="anchor" href="#cast"></a></h2>
 
@@ -764,6 +904,13 @@
 
         </dt>
         <dd>Cast geometries to another GeoArrow geometry type</dd>
+
+        <dt>
+
+          <code><a href="ga_collection_extract.html">ga_collection_extract()</a></code>
+
+        </dt>
+        <dd>Extract parts of one type from geometry collections</dd>
 
         <dt>
 
@@ -843,6 +990,13 @@
 
         </dt>
         <dd>Register geoarrowrs functions with Arrow</dd>
+
+        <dt>
+
+          <code><a href="mask_sf.html">mask_sf()</a></code>
+
+        </dt>
+        <dd>Put the sf lookalikes on the search path</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

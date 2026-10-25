@@ -1,8 +1,8 @@
 # Cast to one GeoArrow geometry type
 
-Each of these casts to the single type its name gives. Because the
-result type does not depend on the data, these are the casts Arrow can
-run inside a query, which
+Each of these casts to the single type in its name. Because the result
+type does not depend on the data, these are the casts Arrow can run
+inside a query, which
 [`ga_from_wkb()`](https://josiahparry.github.io/geoarrowrs/reference/ga_from_wkb.md)
 cannot.
 
@@ -36,8 +36,8 @@ a GeoArrow array of the named type, the same length as `x`
 
 Parsing WKB is the expensive part of using a plain Parquet geometry
 column, and every function that needs a concrete geometry type pays for
-it on its own. Casting once up front means the rest of the query runs on
-native GeoArrow instead:
+it on its own. If you cast once up front, you run the rest of the query
+on native GeoArrow instead:
 
     trip |>
       mutate(pickup = ga_as_point(t_pickuploc)) |>
@@ -46,14 +46,15 @@ native GeoArrow instead:
         b = ga_bearing_euclidean(pickup, dropoff)
       )
 
-The cast is fallible. A geometry that does not fit the target type, such
-as a two point multipoint cast to `point`, is an error rather than a
-null.
+The cast is fallible. These functions error, rather than return a null,
+when a geometry does not fit the target type, such as when you cast a
+two point multipoint to `point`.
 
 ## See also
 
 Other cast:
 [`ga_cast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cast_geometry.md),
+[`ga_collection_extract()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collection_extract.md),
 [`ga_downcast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_downcast_geometry.md),
 [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md),
 [`ga_flatten()`](https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.md),

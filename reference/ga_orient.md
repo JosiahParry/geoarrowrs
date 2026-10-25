@@ -1,7 +1,8 @@
 # Apply a winding direction to polygon rings
 
 Rewinds each polygon so its exterior and interior rings follow a
-consistent direction. The geometry type of the output matches the input.
+consistent direction. `ga_orient()` keeps the geometry type of the
+input.
 
 ## Usage
 
@@ -25,13 +26,14 @@ a GeoArrow array of the same geometry type as `geometry`
 
 ## Details
 
-`"default"` gives a counter-clockwise exterior ring and clockwise
-interior rings, which is the winding the OGC simple features and GeoJSON
-specifications call for. `"reversed"` gives the opposite. `"ccw"` and
-`"cw"` are accepted as aliases and refer to the exterior ring.
+With `"default"`, `ga_orient()` winds the exterior ring
+counter-clockwise and the interior rings clockwise, which is the winding
+the OGC simple features and GeoJSON specifications call for. With
+`"reversed"` it does the opposite. It accepts `"ccw"` and `"cw"` as
+aliases, which refer to the exterior ring.
 
-Rewinding does not change which points a polygon covers, only the order
-its coordinates are stored in. A null geometry stays null.
+`ga_orient()` does not change which points a polygon covers, only the
+order of its coordinates. It keeps a null geometry null.
 
 ## References
 
@@ -41,6 +43,7 @@ its coordinates are stored in. A null geometry stays null.
 
 Other winding:
 [`ga_is_ccw()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_ccw.md),
+[`ga_reverse()`](https://josiahparry.github.io/geoarrowrs/reference/ga_reverse.md),
 [`ga_winding_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_winding_order.md)
 
 ## Examples

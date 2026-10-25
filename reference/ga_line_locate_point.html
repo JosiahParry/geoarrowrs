@@ -74,10 +74,10 @@ point lies, as a fraction between 0 and 1.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>0 is the start of the line and 1 its end, so the value multiplied by the
-line's length gives a distance. Only lines and linestrings can be located
-along; any other geometry type, a null geometry, a null point, or a
-zero length line becomes <code>NA</code>.</p>
+    <p>0 is the start of the line and 1 its end, so you can multiply the value by
+the line's length to get a distance. <code>ga_line_locate_point()</code> locates along
+lines and linestrings only, and returns <code>NA</code> for any other geometry type, a
+null geometry, a null point, or a zero length line.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

@@ -1,8 +1,8 @@
 # Voronoi edges from geometry vertices
 
 Returns one multilinestring per input geometry, whose parts are the
-boundaries between that geometry's Voronoi cells. The output has the
-same length as the input.
+boundaries between that geometry's Voronoi cells. `ga_voronoi_edges()`
+preserves the input's length.
 
 ## Usage
 
@@ -18,13 +18,13 @@ ga_voronoi_edges(geometry, clip = "padded", tolerance = 0, boundary = NULL)
 
 - clip:
 
-  how to bound the diagram, either `"padded"` or `"envelope"`. Ignored
-  when `boundary` is supplied
+  how to bound the diagram, either `"padded"` or `"envelope"`. Has no
+  effect when you supply `boundary`
 
 - tolerance:
 
-  sites closer together than this are snapped to the same position;
-  length 1 or the same length as `geometry`
+  the distance below which to snap sites to the same position; length 1
+  or the same length as `geometry`
 
 - boundary:
 
@@ -43,8 +43,9 @@ this works on collinear sites, where the edges are the perpendicular
 bisectors between neighbouring points. Prefer it when you want the
 diagram's skeleton rather than closed regions.
 
-A geometry with fewer than two distinct vertices has no edges and comes
-back as an empty multilinestring. A null geometry stays null.
+A geometry with fewer than two distinct vertices has no edges, and
+`ga_voronoi_edges()` returns an empty multilinestring for it. It keeps a
+null geometry null.
 
 ## References
 

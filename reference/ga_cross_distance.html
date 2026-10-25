@@ -81,18 +81,18 @@ or <code>"vincenty"</code></p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This is the shape <code><a href="dist_pairwise.html">ga_dist_euclidean_pairwise()</a></code> cannot express, and it
-costs <code>length(x) * length(y)</code> distances to hold: ten thousand rows against
-ten thousand is a hundred million doubles, or eight hundred megabytes. Where
-the distances are only wanted to pick a nearest row or a threshold,
-<code><a href="ga_sparse_knn.html">ga_sparse_knn()</a></code> and <code><a href="ga_sparse_dwithin.html">ga_sparse_dwithin()</a></code> answer that against an R-tree
-without ever forming the product.</p>
-<p><code>"euclidean"</code> measures between geometries of any type. The spherical and
-ellipsoidal metrics take points only, because <code>geo</code> defines them between
-points alone. <code>"vincenty"</code> gives a null where the algorithm fails to
-converge.</p>
-<p>A null row of <code>x</code> gives a null element. A null row of <code>y</code> gives a null in
-that position of every element.</p>
+    <p><code>ga_cross_distance()</code> returns the shape <code><a href="dist_pairwise.html">ga_dist_euclidean_pairwise()</a></code>
+cannot express, at the cost of holding <code>length(x) * length(y)</code> distances:
+ten thousand rows against ten thousand is a hundred million doubles, or
+eight hundred megabytes. Where you only want the distances to pick a
+nearest row or a threshold, <code><a href="ga_sparse_knn.html">ga_sparse_knn()</a></code> and <code><a href="ga_sparse_dwithin.html">ga_sparse_dwithin()</a></code>
+answer that against an R-tree without ever forming the product.</p>
+<p>With <code>"euclidean"</code>, <code>ga_cross_distance()</code> measures between geometries of
+any type. It takes points only for the spherical and ellipsoidal metrics,
+because <code>geo</code> defines them between points alone. With <code>"vincenty"</code>, it
+returns a null where the algorithm fails to converge.</p>
+<p><code>ga_cross_distance()</code> returns a null element for a null row of <code>x</code>. For a
+null row of <code>y</code>, it returns a null in that position of every element.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -105,8 +105,8 @@ that position of every element.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6382</span>, <span class="op">-</span><span class="fl">80.8431</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">35.7796</span>, <span class="fl">35.2271</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">77.9447</span>, <span class="op">-</span><span class="fl">78.6382</span>, <span class="op">-</span><span class="fl">80.8431</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">34.2257</span>, <span class="fl">35.7796</span>, <span class="fl">35.2271</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6382</span>, <span class="op">-</span><span class="fl">80.8431</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">35.7796</span>, <span class="fl">35.2271</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">77.9447</span>, <span class="op">-</span><span class="fl">78.6382</span>, <span class="op">-</span><span class="fl">80.8431</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">34.2257</span>, <span class="fl">35.7796</span>, <span class="fl">35.2271</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># two elements of three distances each, in meters</span></span></span>
 <span class="r-in"><span><span class="fu">ga_cross_distance</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, <span class="st">"haversine"</span><span class="op">)</span></span></span>

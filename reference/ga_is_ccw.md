@@ -1,8 +1,8 @@
 # Test the winding order of a ring
 
 `ga_is_ccw()` is `TRUE` for counter-clockwise geometries and
-`ga_is_cw()` is `TRUE` for clockwise ones. A polygon is tested on its
-exterior ring.
+`ga_is_cw()` is `TRUE` for clockwise ones. Each function tests a polygon
+on its exterior ring.
 
 ## Usage
 
@@ -24,9 +24,9 @@ a boolean array of the same length as `geometry`
 
 ## Details
 
-Any geometry with no winding order, such as a point or a null geometry,
-becomes `NA` rather than `FALSE`, so the two functions are not simply
-negations of one another.
+Each function returns `NA` rather than `FALSE` for any geometry with no
+winding order, such as a point or a null geometry, so the two functions
+are not simply negations of one another.
 
 ## References
 
@@ -36,6 +36,7 @@ negations of one another.
 
 Other winding:
 [`ga_orient()`](https://josiahparry.github.io/geoarrowrs/reference/ga_orient.md),
+[`ga_reverse()`](https://josiahparry.github.io/geoarrowrs/reference/ga_reverse.md),
 [`ga_winding_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_winding_order.md)
 
 ## Examples

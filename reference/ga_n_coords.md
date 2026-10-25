@@ -22,8 +22,8 @@ an integer array of the same length as `geometry`
 
 Counts every coordinate that
 [`ga_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coords.md)
-would return, so a closed ring counts its repeated final vertex. A null
-geometry gives `NA`.
+would return, so it counts the repeated final vertex of a closed ring.
+`ga_n_coords()` returns `NA` for a null geometry.
 
 ## References
 

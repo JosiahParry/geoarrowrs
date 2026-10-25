@@ -1,11 +1,12 @@
 # Interpolate a point between two points
 
 Returns the point located at `distance` along the path from `start` to
-`end`. The metric determines how distance is measured.
+`end`. `ga_point_at_distance_between()` uses `metric` to measure
+distance.
 
 Returns the point located at `ratio` of the way from `start` to `end`,
-where 0.0 is the start and 1.0 is the end. The metric determines how the
-interpolation is computed.
+where 0.0 is the start and 1.0 is the end. `ga_point_at_ratio_between()`
+uses `metric` to compute the interpolation.
 
 ## Usage
 
@@ -57,8 +58,8 @@ Other interpolate:
 ## Examples
 
 ``` r
-start <- ga_xy(c(0, 0), c(0, 0))
-end <- ga_xy(c(10, 10), c(0, 0))
+start <- ga_point(c(0, 0), c(0, 0))
+end <- ga_point(c(10, 10), c(0, 0))
 
 # three units along, then a third of the way along
 geoarrow::as_geoarrow_vctr(

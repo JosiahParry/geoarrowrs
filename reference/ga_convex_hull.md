@@ -25,8 +25,8 @@ a GeoArrow polygon array
 ## See also
 
 Other boundary:
-[`ga_bounding_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_bounding_rect.md),
 [`ga_concave_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_concave_hull.md),
+[`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md),
 [`ga_extremes()`](https://josiahparry.github.io/geoarrowrs/reference/ga_extremes.md),
 [`ga_minimum_rotated_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_minimum_rotated_rect.md)
 
@@ -36,7 +36,7 @@ Other boundary:
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# the hull fills in every concavity, so it is never smaller
+# ga_convex_hull() fills in every concavity, so it never shrinks a shape
 head(as.vector(ga_unsigned_area(ga_convex_hull(nc$geometry))), 3)
 #> [1] 0.12484563 0.07437819 0.15586877
 head(as.vector(ga_unsigned_area(nc$geometry)), 3)

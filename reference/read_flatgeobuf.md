@@ -1,8 +1,8 @@
 # Read a FlatGeobuf file into a record batch stream
 
 Reads the geometries together with the feature properties. Unlike the
-shapefile and GeoJSON readers this one streams, so the whole file is
-never held in memory at once.
+shapefile and GeoJSON readers this one streams, so it never holds the
+whole file in memory at once.
 
 ## Usage
 
@@ -19,7 +19,7 @@ read_flatgeobuf(path, bbox = NULL)
 - bbox:
 
   optionally a length 4 numeric vector of `c(xmin, ymin, xmax, ymax)`
-  used to filter features spatially. `NULL` reads every feature.
+  used to filter features spatially. Pass `NULL` to read every feature.
 
 ## Value
 
@@ -28,11 +28,11 @@ columns followed by a `geometry` column.
 
 ## Details
 
-Passing `bbox` uses the file's packed Hilbert R-tree index to skip
-features that fall outside it, so a spatial subset does not read the
-whole file. Features come back in the order the file stores them, which
-for an indexed file is that R-tree order rather than the order they were
-written in.
+When you pass `bbox`, `read_flatgeobuf()` uses the file's packed Hilbert
+R-tree index to skip features that fall outside it, so it does not read
+the whole file for a spatial subset. It returns features in the order
+the file stores them, which for an indexed file is that R-tree order
+rather than their original order.
 
 ## See also
 

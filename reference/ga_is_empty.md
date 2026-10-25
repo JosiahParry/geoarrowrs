@@ -20,8 +20,8 @@ a boolean array of the same length as `geometry`
 
 ## Details
 
-An empty geometry is distinct from a null one. A null geometry gives
-`NA`.
+An empty geometry is distinct from a null one. `ga_is_empty()` returns
+`NA` for a null geometry.
 
 ## References
 
@@ -33,9 +33,11 @@ Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md),
 [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md),
 [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
 [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 

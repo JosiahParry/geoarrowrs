@@ -49,8 +49,8 @@ Other interpolate:
 ## Examples
 
 ``` r
-start <- ga_xy(0, 0)
-end <- ga_xy(10, 0)
+start <- ga_point(0, 0)
+end <- ga_point(10, 0)
 
 # one multipoint row, spaced at most 3 units apart
 geoarrow::as_geoarrow_vctr(

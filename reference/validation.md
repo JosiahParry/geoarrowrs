@@ -2,8 +2,8 @@
 
 `TRUE` when a geometry satisfies the OGC simple features rules.
 
-Returns the first validation problem found, or `NA` when the geometry is
-valid.
+Returns the first validation problem it finds, or `NA` when the geometry
+is valid.
 
 ## Usage
 
@@ -28,19 +28,24 @@ a string array of the same length as `geometry`
 ## Details
 
 Several algorithms give wrong answers on invalid input rather than
-failing, so this is worth checking before trusting a result. Common
-problems are a polygon whose rings self intersect, a ring with too few
-points, and a coordinate that is `NaN` or infinite.
+failing, so check validity before trusting a result. Common problems are
+a polygon whose rings self intersect, a ring with too few points, and a
+coordinate that is `NaN` or infinite.
 
-A null geometry gives `NA`. Use `ga_validation_error()` to see why a
-geometry failed.
+`ga_is_valid()` returns `NA` for a null geometry. Use
+`ga_validation_error()` to see why a geometry is invalid.
 
-A geometry can break more than one rule; only the first is reported,
-since fixing it often resolves the rest.
+A geometry can break more than one rule; `ga_validation_error()` reports
+only the first, since you often resolve the rest by fixing it.
 
 ## References
 
 [Validation](https://docs.rs/geo/latest/geo/algorithm/validation/trait.Validation.html)
+
+## See also
+
+Other validation:
+[`ga_make_valid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_valid.md)
 
 ## Examples
 

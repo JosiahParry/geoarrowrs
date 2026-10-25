@@ -12,12 +12,66 @@ KDTree
 
 a `KDTree` object
 
+## Details
+
+[`write()`](https://rdrr.io/r/base/write.html) saves the index to a file
+and `KDTree$read()` opens it again, so you build it once and reuse it
+across sessions. With `mmap = TRUE`, `read()` maps the file instead of
+reading it, so the index opens at once and each query loads only the
+parts of the tree it visits.
+
 ## Methods
 
 ### Method `new`
 
-Build the index. A bigger `node_size` builds quicker but searches
+Build the index. With a bigger `node_size` you build quicker but search
 slower.
+
+### Method `read`
+
+Read an index that [`write()`](https://rdrr.io/r/base/write.html) saved
+
+#### Arguments
+
+- `path`:
+
+  the file [`write()`](https://rdrr.io/r/base/write.html) saved
+
+- `mmap`:
+
+  whether to map the file rather than read it into memory
+
+#### details
+
+With `mmap = TRUE`, `read()` maps the file instead of reading it into
+memory, so it opens at once whatever the file's size and each query
+loads only the parts of the tree it visits. Do not change or delete the
+file while you use a mapped index, or R may crash.
+
+#### returns
+
+a `KDTree` object
+
+### Method `write`
+
+Save the index to a file
+
+#### Arguments
+
+- `path`:
+
+  the file to write
+
+#### details
+
+[`write()`](https://rdrr.io/r/base/write.html) saves the tree with the
+row each point came from, so `KDTree$read()` restores an index that
+answers every query the same way. The tree keeps the layout of the
+JavaScript kdbush library.
+
+#### returns
+
+`NULL`
 
 ### Method `range`
 
@@ -35,8 +89,7 @@ a list array of 1 based row numbers, the same length as `geometry`
 
 ### Method `within`
 
-Which points are within `r` of each point, measured flat in coordinate
-units
+Which points are within `r` of each point, in flat coordinate units
 
 #### Arguments
 
@@ -54,15 +107,15 @@ a list array of 1 based row numbers, the same length as `geometry`
 
 ### Method `size`
 
-How many rows went in
+How many rows you put in
 
 #### returns
 
-the length of the array the index was built from
+the length of the array you built the index from
 
 ### Method `n_indexed`
 
-How many rows made it into the tree, skipping null and empty points
+How many rows the tree holds, without null and empty points
 
 #### returns
 
@@ -77,10 +130,12 @@ the number of indexed rows
 Other index:
 [`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md),
 [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md),
+[`ga_hilbert_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_hilbert_order.md),
 [`ga_knn_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_knn_join.md),
 [`ga_set_thread_pool()`](https://josiahparry.github.io/geoarrowrs/reference/ga_set_thread_pool.md),
 [`ga_sparse_dwithin()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.md),
-[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md)
+[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md),
+[`ga_str_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_str_order.md)
 
 ## Examples
 
@@ -103,7 +158,15 @@ head(as.vector(idx$within(pts, 0.5)), 3)
 #> [1]  2  3 10 23
 #> 
 
-# a single lookup is an array of one
-as.vector(idx$within(ga_xy(-78.6, 35.8), 0.5))[[1]]
+# for a single lookup, pass an array of one
+as.vector(idx$within(ga_point(-78.6, 35.8), 0.5))[[1]]
+#> [1] 24 30 37 54
+
+# save the index and open it again without reading the whole file
+path <- tempfile(fileext = ".gaix")
+idx$write(path)
+#> NULL
+saved <- KDTree$read(path, mmap = TRUE)
+as.vector(saved$within(ga_point(-78.6, 35.8), 0.5))[[1]]
 #> [1] 24 30 37 54
 ```

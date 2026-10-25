@@ -1,8 +1,8 @@
 # Rotate around the bounding box center
 
 Rotates each geometry counter-clockwise by `degrees` about the center of
-its own axis-aligned bounding rectangle. The geometry type of the output
-matches the geometry type of the input.
+its own axis-aligned bounding rectangle. `ga_rotate_around_center()`
+keeps the input's geometry type.
 
 ## Usage
 
@@ -33,6 +33,7 @@ a GeoArrow array of the same geometry type as the input
 
 Other affine:
 [`ga_affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/ga_affine_transform.md),
+[`ga_jitter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_jitter.md),
 [`ga_rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.md),
 [`ga_scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.md),
 [`ga_skew()`](https://josiahparry.github.io/geoarrowrs/reference/ga_skew.md),
@@ -42,7 +43,7 @@ Other affine:
 ## Examples
 
 ``` r
-# the same triangle, turned about its bounding box center instead
+# turn the same triangle about its bounding box center instead
 tri <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_polygon(list(rbind(c(0, 0), c(4, 0), c(0, 3), c(0, 0))))
 ))

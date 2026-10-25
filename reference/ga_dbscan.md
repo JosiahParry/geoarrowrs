@@ -1,7 +1,7 @@
 # Assign points to clusters by density
 
 Labels every point in the array with a cluster number, or `NA` when the
-point is noise. One label per row, in the order the points were given.
+point is noise. One label per row, in the order you gave the points.
 
 ## Usage
 
@@ -30,15 +30,16 @@ an integer array of cluster labels, the same length as `geometry`
 ## Details
 
 DBSCAN grows a cluster from any point with at least `min_points`
-neighbours within `eps`. Points reachable from that core join the
-cluster, and points that never become reachable are noise. Unlike
+neighbours within `eps`. It adds points reachable from that core to the
+cluster and labels points that never become reachable as noise. Unlike
 k-means it finds clusters of any shape and does not need the count up
 front.
 
-Clustering is over the whole array, not within each row, so `eps` and
-`min_points` are single values rather than one per row. Cluster numbers
-start at 1 and mean nothing beyond grouping. A row that is not a single
-point, or is null, takes no part in the clustering and comes back null.
+`ga_dbscan()` clusters over the whole array, not within each row, so
+`eps` and `min_points` are single values rather than one per row. It
+numbers clusters from 1, and the numbers mean nothing beyond grouping.
+It leaves a row that is not a single point, or is null, out of the
+clustering and returns null for it.
 
 ## References
 
@@ -53,7 +54,7 @@ Other cluster:
 ## Examples
 
 ``` r
-g <- ga_xy(
+g <- ga_point(
   c(0, 0.1, 0.2, 5, 5.1, 5.2),
   c(0, 0.1, 0.2, 5, 5.1, 5.2)
 )

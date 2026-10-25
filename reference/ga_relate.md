@@ -1,7 +1,7 @@
 # DE-9IM relationship between geometries
 
 Returns the nine character DE-9IM matrix describing how each pair of
-geometries relates, from which every named predicate can be derived.
+geometries relates, from which you can derive every named predicate.
 
 ## Usage
 
@@ -25,11 +25,11 @@ a string array of the same length as `x`
 
 ## Details
 
-The string reads as the intersections of the interior, boundary and
+Read the string as the intersections of the interior, boundary and
 exterior of `x` with those of `y`, in that order. Each character is the
 dimension of that intersection: `F` for empty, `0` for a point, `1` for
-a curve, and `2` for a surface. A null geometry on either side gives
-`NA`.
+a curve, and `2` for a surface. `ga_relate()` returns `NA` for a null
+geometry on either side.
 
 ## References
 
@@ -41,9 +41,11 @@ Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md),
 [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
+[`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md),
 [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
 [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 

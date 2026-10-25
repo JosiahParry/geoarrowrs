@@ -1,7 +1,8 @@
 # Chamberlain-Duquette spherical area
 
 These functions use the Chamberlain-Duquette formula, which is suitable
-for geographic coordinates on a sphere. Results are in square meters.
+for geographic coordinates on a sphere. They return area in square
+meters.
 
 ## Usage
 
@@ -28,6 +29,7 @@ a double vector of area values in square meters
 ## See also
 
 Other area:
+[`ga_perimeter_euclidean()`](https://josiahparry.github.io/geoarrowrs/reference/ga_perimeter_euclidean.md),
 [`ga_signed_area()`](https://josiahparry.github.io/geoarrowrs/reference/area.md),
 [`ga_signed_area_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
 

@@ -1,8 +1,8 @@
 # Interpolate a point along a linestring
 
 Returns the point at a given ratio or distance along each linestring,
-measured from either the start or end. The metric determines how
-distance is calculated.
+measuring from either the start or end. `ga_interpolate_point()` uses
+`metric` to calculate distance.
 
 ## Usage
 

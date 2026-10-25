@@ -1,8 +1,8 @@
 # Benchmark: duckdbspatial
 
 The wonderful [`{duckspatial}`](https://cidree.github.io/duckspatial/) R
-package—which delegates operations to [DuckDB](https://duckdb.org/) has
-published bench marks for operations.
+package, which delegates operations to [DuckDB](https://duckdb.org/),
+has published benchmarks for its operations.
 
 This article compares
 [geoarrowrs](https://josiahparry.github.io/geoarrowrs/) implementations
@@ -13,29 +13,29 @@ benchmark but including geoarrow-rs.
 See the original [duckspatial
 benchmark](https://cidree.github.io/duckspatial/articles/benchmark.html).
 
-This version of the benchmark compares the peformance of:
+This version of the benchmark compares the performance of:
 
 - duckspatial
 - [{sedonadb}](https://github.com/apache/sedona-db/tree/main/r/sedonadb)
 - geoarrowrs
 
-### The earth is a sphere note a plane
+### The earth is a sphere not a plane
 
-One of the issues the duckdbspatial benchmark—is that is calculates
+One issue with the duckspatial benchmark is that it calculates
 **incorrect** distances. [sf](https://r-spatial.github.io/sf/) delegates
-to [s2](https://r-spatial.github.io/s2/) to have very accurate spherical
-distance calculations—this comes at the cost of speed.
+to [s2](https://r-spatial.github.io/s2/) for very accurate spherical
+distance calculations, and pays for that accuracy in speed.
 
-Using planar distances for calculating the distance from Jakarta to New
-York calculates the distance *through* the earth.
+If you use planar distance from Jakarta to New York, you measure the
+distance *through* the earth.
 
 ![Five log-log panels, one per operation, of elapsed seconds against
 input size. geoarrowrs is the lowest line in every panel. sf is the
 highest. duckspatial sits between them and is flat from 100,000 to one
-million rows, where its fixed startup cost is most of what is
-measured.](duckspatial_files/figure-html/unnamed-chunk-2-1.png)
+million rows, where its fixed startup cost dominates the
+timing.](duckspatial_files/figure-html/unnamed-chunk-2-1.png)
 
-Elapsed seconds by input size. Both axes are log scaled.
+Elapsed seconds by input size. Both axes are on a log scale.
 
 |             |                         |
 |:------------|:------------------------|
@@ -414,15 +414,10 @@ for (n in SIZES) {
     n,
     "geoarrowrs",
     {
-      tbl <- as_arrow_table(st_drop_geometry(pts))
-      tbl$geometry <- as_arrow_array(wk::as_wkb(st_geometry(pts)))$cast(
-        arrow::binary()
-      )
-      groups <- tbl |> count(category) |> arrange(category) |> compute()
-      rows <- tbl |> arrange(category) |> compute()
+      tbl <- as_arrow_table(as_ga_frame(pts))
       out <- ga_collect_agg(
-        as_nanoarrow_array(rows$geometry),
-        sizes = as.vector(groups$n)
+        as_nanoarrow_array(tbl$geometry),
+        by = as_nanoarrow_array(tbl$category)
       )
     },
     out$length

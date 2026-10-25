@@ -22,9 +22,10 @@ an integer array of the same length as `geometry`
 
 ## Details
 
-An empty geometry has no dimension and gives `NA`, which is distinct
-from a point's 0. `ga_boundary_dimension()` gives the dimension of the
-geometry's boundary instead, so a polygon is 1 and a point is `NA`.
+`ga_dimension()` returns `NA` for an empty geometry, which has no
+dimension, rather than a point's 0. `ga_boundary_dimension()` gives the
+dimension of the geometry's boundary instead, so it returns 1 for a
+polygon and `NA` for a point.
 
 ## References
 
@@ -35,10 +36,12 @@ geometry's boundary instead, so a polygon is 1 and a point is `NA`.
 Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
+[`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md),
 [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md),
 [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
 [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 

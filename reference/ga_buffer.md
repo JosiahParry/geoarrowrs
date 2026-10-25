@@ -1,8 +1,8 @@
 # Buffer geometries by a given distance
 
 Expands each geometry outward by `distance` to produce a multipolygon.
-Line cap and join styles control the shape of the buffer at endpoints
-and corners.
+`ga_buffer()` uses the line cap and join styles to shape the buffer at
+endpoints and corners.
 
 ## Usage
 
@@ -68,11 +68,12 @@ sq <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_polygon(list(rbind(c(0, 0), c(2, 0), c(2, 2), c(0, 2), c(0, 0))))
 ))
 
-# the 2x2 square grows by 8 along its sides plus a unit circle at the corners
+# ga_buffer() grows the 2x2 square by 8 along its sides plus a unit circle
+# at the corners
 as.vector(ga_unsigned_area(ga_buffer(sq, 1)))
 #> [1] 15.12145
 
-# a smaller angular step rounds the corners more finely
+# with a smaller angular step, ga_buffer() rounds the corners more finely
 as.vector(ga_unsigned_area(ga_buffer(sq, 1, round_angle = 0.01)))
 #> [1] 15.14108
 

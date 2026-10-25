@@ -3,8 +3,8 @@
 Attaches the columns of the `k` rows of `y` nearest each row of `x`, the
 way
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md)
-attaches the ones that relate to it. The distance between each pair
-comes along as a column.
+attaches the ones that relate to it. `ga_knn_join()` also adds the
+distance between each pair as a column.
 
 ## Usage
 
@@ -41,7 +41,7 @@ ga_knn_join(
 
 - suffix:
 
-  the pair of suffixes added to column names found in both frames
+  the pair of suffixes to add to the column names both frames share
 
 - left:
 
@@ -54,15 +54,15 @@ and the distance between each pair
 
 ## Details
 
-Each row of `x` is repeated once per neighbour and the neighbours are
-ordered nearest first, so the result is `nrow(x) * k` rows unless
-`max_distance` rules some out. A row left with no neighbour is kept once
-with `NA` when `left = TRUE` and dropped otherwise.
+`ga_knn_join()` repeats each row of `x` once per neighbour and orders
+the neighbours nearest first, so the result has `nrow(x) * k` rows
+unless `max_distance` rules some out. With `left = TRUE` it keeps a row
+with no neighbour once, with `NA`; otherwise it drops that row.
 
-Distance is Euclidean and measured between the geometries themselves, so
-a point joins to the polygon whose edge is nearest rather than to the
-one whose bounding box is. Both frames need exactly one GeoArrow
-geometry column.
+`ga_knn_join()` measures Euclidean distance between the geometries
+themselves, so it joins a point to the polygon whose edge is nearest
+rather than to the one whose bounding box is. Both frames need exactly
+one GeoArrow geometry column.
 
 ## See also
 
@@ -70,9 +70,11 @@ Other index:
 [`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md),
 [`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md),
 [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md),
+[`ga_hilbert_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_hilbert_order.md),
 [`ga_set_thread_pool()`](https://josiahparry.github.io/geoarrowrs/reference/ga_set_thread_pool.md),
 [`ga_sparse_dwithin()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.md),
-[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md)
+[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md),
+[`ga_str_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_str_order.md)
 
 ## Examples
 
@@ -84,7 +86,7 @@ counties <- nc[c("NAME", "geometry")]
 sites <- data.frame(
   site = c("a", "b"),
   geometry = geoarrow::as_geoarrow_vctr(
-    ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+    ga_point(c(-78.6, -80.8), c(35.8, 35.2))
   )
 )
 

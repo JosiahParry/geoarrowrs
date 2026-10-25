@@ -1,7 +1,8 @@
 # Set the thread cap, from `options(geoarrowrs.thread_pool = )`
 
-Called on load and whenever the option changes. `0` returns the parallel
-paths to rayon's own default, which is one thread per core.
+geoarrowrs calls `ga_set_thread_pool()` on load and whenever you change
+the option. With `0`, it returns the parallel paths to rayon's own
+default, which is one thread per core.
 
 ## Usage
 
@@ -25,9 +26,11 @@ Other index:
 [`KDTree`](https://josiahparry.github.io/geoarrowrs/reference/KDTree.md),
 [`RTree`](https://josiahparry.github.io/geoarrowrs/reference/RTree.md),
 [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md),
+[`ga_hilbert_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_hilbert_order.md),
 [`ga_knn_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_knn_join.md),
 [`ga_sparse_dwithin()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.md),
-[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md)
+[`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md),
+[`ga_str_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_str_order.md)
 
 ## Examples
 

@@ -1,7 +1,8 @@
 # Read well known binary as a GeoArrow array
 
 Parses a binary column of WKB into the narrowest GeoArrow type that fits
-every geometry in it. A column of points becomes a `point` array.
+every geometry in it. `ga_from_wkb()` turns a column of points into a
+`point` array.
 
 ## Usage
 
@@ -31,22 +32,23 @@ a bare `binary` column with no GeoArrow extension metadata on it. Most
 geoarrowrs functions read that directly, but the ones that need a
 specific geometry type, such as
 [`ga_dist_euclidean_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md),
-cannot tell what is in it. Converting once up front settles the type for
-everything downstream.
+cannot tell what is in it. If you convert once up front, you settle the
+type for everything downstream.
 
-`crs` is stored verbatim in the array's metadata and is never
-interpreted, so nothing here reprojects. Leaving it `NULL` keeps
-whatever the input carried, which for a bare binary column is no CRS at
-all.
+`ga_from_wkb()` stores `crs` verbatim in the array's metadata and never
+interprets it, so it never reprojects. If you leave it `NULL`,
+`ga_from_wkb()` keeps whatever the input carried, which for a bare
+binary column is no CRS at all.
 
-Mixed geometry types are left as a `geometry` array, since no narrower
-type fits.
+`ga_from_wkb()` leaves mixed geometry types as a `geometry` array, since
+no narrower type fits.
 
 ## See also
 
 Other cast:
 [`ga_as_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_as_point.md),
 [`ga_cast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cast_geometry.md),
+[`ga_collection_extract()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collection_extract.md),
 [`ga_downcast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_downcast_geometry.md),
 [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md),
 [`ga_flatten()`](https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.md)

@@ -1,6 +1,6 @@
 # Destination from origin, bearing, distance
 
-Returns the point reached by travelling `distance` from `origin` along
+Returns the point you reach by travelling `distance` from `origin` along
 `bearing`. Each function uses a different metric space: `dest_euclidean`
 treats coordinates as planar, `dest_haversine` assumes a sphere,
 `dest_geodesic` an ellipsoid, and `dest_rhumb` follows a line of
@@ -45,7 +45,7 @@ a GeoArrow point array
 
 ``` r
 # 100km due north and due east of Raleigh
-raleigh <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+raleigh <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
 
 geoarrow::as_geoarrow_vctr(
   ga_dest_geodesic(raleigh, bearing = c(0, 90), distance = c(1e5, 1e5))

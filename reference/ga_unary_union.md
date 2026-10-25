@@ -21,15 +21,16 @@ a GeoArrow multipolygon array of length 1
 
 ## Details
 
-This is the one function in the package that is not length-preserving.
-It is an aggregate over the whole array, so it always returns a length 1
-array, in the way [`sum()`](https://rdrr.io/r/base/sum.html) reduces a
-vector to a single value.
+Unlike most functions in the package, `ga_unary_union()` does not
+preserve length. It aggregates over the whole array, so it always
+returns a length 1 array, the way
+[`sum()`](https://rdrr.io/r/base/sum.html) reduces a vector to a single
+value.
 
 It is far faster than folding
 [`ga_boolean_union()`](https://josiahparry.github.io/geoarrowrs/reference/boolean_ops.md)
-across the array, since it unions all the rings in one pass. Rows that
-are not polygonal, and null rows, are skipped.
+across the array, since it unions all the rings in one pass. It skips
+rows that are not polygonal, and null rows.
 
 ## References
 
@@ -41,7 +42,8 @@ Other boolean:
 [`ga_boolean_intersection()`](https://josiahparry.github.io/geoarrowrs/reference/boolean_ops.md)
 
 Other aggregate:
-[`ga_collect_agg()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collect_agg.md)
+[`ga_collect_agg()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collect_agg.md),
+[`ga_interpolate_aw()`](https://josiahparry.github.io/geoarrowrs/reference/ga_interpolate_aw.md)
 
 ## Examples
 

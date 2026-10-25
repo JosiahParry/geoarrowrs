@@ -34,7 +34,7 @@ Other misc:
 ## Examples
 
 ``` r
-# the middle vertex is recorded twice
+# record the middle vertex twice
 line <- geoarrow::as_geoarrow_array(sf::st_sfc(
   sf::st_linestring(rbind(c(0, 0), c(1, 1), c(1, 1), c(2, 2)))
 ))

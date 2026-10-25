@@ -1,6 +1,6 @@
 # Find which coordinates simplification would keep
 
-Returns the positions of the coordinates that survive simplification,
+Returns the positions of the coordinates that simplification would keep,
 rather than the simplified geometry itself. One list per input geometry.
 
 ## Usage
@@ -29,19 +29,20 @@ a list array of integer positions, one list per input geometry
 ## Details
 
 Use these when the coordinates carry data of their own, such as a
-timestamp or a sensor reading per vertex. Simplifying the geometry
-discards that alignment; the indices let you subset the other columns
-the same way.
+timestamp or a sensor reading per vertex. If you simplify the geometry
+you lose that alignment; with the indices you can subset the other
+columns the same way.
 
 `ga_simplify_idx()` uses Ramer-Douglas-Peucker and
 `ga_simplify_vw_idx()` uses Visvalingam-Whyatt, matching
 [`ga_simplify()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify.md)
 and
 [`ga_simplify_vw()`](https://josiahparry.github.io/geoarrowrs/reference/ga_simplify_vw.md).
-Indices are 1 based and always include the first and last coordinate.
+Each function returns 1 based indices and always includes the first and
+last coordinate.
 
-Only linestrings can be simplified this way. Any other geometry type, or
-a null geometry, comes back null.
+Each function works on linestrings only and returns null for any other
+geometry type or a null geometry.
 
 ## References
 

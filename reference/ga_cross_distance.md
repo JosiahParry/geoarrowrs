@@ -32,24 +32,24 @@ distances
 
 ## Details
 
-This is the shape
+`ga_cross_distance()` returns the shape
 [`ga_dist_euclidean_pairwise()`](https://josiahparry.github.io/geoarrowrs/reference/dist_pairwise.md)
-cannot express, and it costs `length(x) * length(y)` distances to hold:
-ten thousand rows against ten thousand is a hundred million doubles, or
-eight hundred megabytes. Where the distances are only wanted to pick a
-nearest row or a threshold,
+cannot express, at the cost of holding `length(x) * length(y)`
+distances: ten thousand rows against ten thousand is a hundred million
+doubles, or eight hundred megabytes. Where you only want the distances
+to pick a nearest row or a threshold,
 [`ga_sparse_knn()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_knn.md)
 and
 [`ga_sparse_dwithin()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_dwithin.md)
 answer that against an R-tree without ever forming the product.
 
-`"euclidean"` measures between geometries of any type. The spherical and
-ellipsoidal metrics take points only, because `geo` defines them between
-points alone. `"vincenty"` gives a null where the algorithm fails to
-converge.
+With `"euclidean"`, `ga_cross_distance()` measures between geometries of
+any type. It takes points only for the spherical and ellipsoidal
+metrics, because `geo` defines them between points alone. With
+`"vincenty"`, it returns a null where the algorithm fails to converge.
 
-A null row of `x` gives a null element. A null row of `y` gives a null
-in that position of every element.
+`ga_cross_distance()` returns a null element for a null row of `x`. For
+a null row of `y`, it returns a null in that position of every element.
 
 ## See also
 
@@ -62,8 +62,8 @@ Other distance:
 ## Examples
 
 ``` r
-x <- ga_xy(c(-78.6382, -80.8431), c(35.7796, 35.2271))
-y <- ga_xy(c(-77.9447, -78.6382, -80.8431), c(34.2257, 35.7796, 35.2271))
+x <- ga_point(c(-78.6382, -80.8431), c(35.7796, 35.2271))
+y <- ga_point(c(-77.9447, -78.6382, -80.8431), c(34.2257, 35.7796, 35.2271))
 
 # two elements of three distances each, in meters
 ga_cross_distance(x, y, "haversine")

@@ -71,14 +71,14 @@ multipoint per input geometry.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Uses the Bentley-Ottmann sweep line, which finds all crossings in roughly
-<code>n log n</code> rather than by testing every pair. This is how to locate the
-problem that <code><a href="validation.html">ga_is_valid()</a></code> reports: a self intersecting polygon comes back
-with the offending points.</p>
-<p>Segments that merely share an endpoint, as consecutive segments of a
-linestring always do, are not counted. A geometry with no crossings gives
-an empty multipoint rather than a null, so an empty result is
-distinguishable from an unsupported geometry. Points and null rows come
-back null.</p>
+<code>n log n</code> rather than by testing every pair. Use <code>ga_self_intersections()</code>
+to locate the problem that <code><a href="validation.html">ga_is_valid()</a></code> reports: it returns the
+offending points of a self intersecting polygon.</p>
+<p><code>ga_self_intersections()</code> does not count segments that merely share an
+endpoint, as consecutive segments of a linestring always do. It returns an
+empty multipoint rather than a null for a geometry with no crossings, so you
+can distinguish an empty result from an unsupported geometry. It returns
+null for points and null rows.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

@@ -1,9 +1,9 @@
 # Compute the bearing between pairs of points
 
 Calculate the bearing in degrees from `origin` to `dest` for each pair
-of points. Bearing is measured clockwise from north (0 degrees) to 360
-degrees. These functions differ in the metric space used for the
-calculation.
+of points. These functions measure bearing clockwise from north (0
+degrees) to 360 degrees. They differ in the metric space they use for
+the calculation.
 
 ## Usage
 
@@ -43,8 +43,8 @@ a double vector of bearing values in degrees
 
 ``` r
 # Raleigh to Charlotte, and Raleigh to Wilmington
-origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
-dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+origin <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+dest <- ga_point(c(-80.8431, -77.9447), c(35.2271, 34.2257))
 
 # west-southwest, then south-southeast
 as.vector(ga_bearing_haversine(origin, dest))

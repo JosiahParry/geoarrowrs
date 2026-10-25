@@ -6,7 +6,8 @@ geographic coordinates, and euclidean for projected coordinates.
 
 Calculates the geodesic length of each linestring or multilinestring
 using the Vincenty formula on an ellipsoidal model of the earth. Returns
-`NA` if the algorithm fails to converge. Results are in meters.
+`NA` if the algorithm fails to converge. `ga_length_vincenty()` returns
+lengths in meters.
 
 ## Usage
 

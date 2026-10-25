@@ -98,16 +98,16 @@ shape <code><a href="ga_join.html">ga_join()</a></code> needs.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The comparison is not the full cross product. <code>y</code> is indexed in a packed
-Hilbert R-tree and only the rows whose bounding box overlaps are relate
-tested, so the cost scales with the number of candidates rather than with
-<code>length(x) * length(y)</code>.</p>
-<p>A row of <code>x</code> that matches nothing gives a zero length element, not a null. A
-null or empty geometry in <code>x</code> gives a null element, and one in <code>y</code> is never
-returned.</p>
-<p><code><a href="topology.html">ga_disjoint()</a></code> has no sparse form. Disjointness is the one relationship a
-bounding box cannot narrow, so the answer is almost every row of <code>y</code> and the
-result is denser than the input.</p>
+    <p>These functions do not compare the full cross product. Each function indexes
+<code>y</code> in a packed Hilbert R-tree and runs the relate test only on the rows
+whose bounding boxes overlap, so the cost scales with the number of
+candidates rather than with <code>length(x) * length(y)</code>.</p>
+<p>Each function returns a zero length element, not a null, for a row of <code>x</code>
+that matches nothing. It returns a null element for a null or empty geometry
+in <code>x</code>, and never returns one in <code>y</code>.</p>
+<p><code><a href="topology.html">ga_disjoint()</a></code> has no sparse form. Disjointness is the one relationship you
+cannot narrow with a bounding box, so the answer is almost every row of <code>y</code>
+and the result is denser than the input.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -119,10 +119,12 @@ result is denser than the input.</p>
 <code><a href="topology.html">ga_contains()</a></code>,
 <code><a href="ga_coordinate_position.html">ga_coordinate_position()</a></code>,
 <code><a href="ga_dimension.html">ga_dimension()</a></code>,
+<code><a href="ga_equals_exact.html">ga_equals_exact()</a></code>,
 <code><a href="ga_filter.html">ga_filter()</a></code>,
 <code><a href="ga_is_empty.html">ga_is_empty()</a></code>,
 <code><a href="ga_join.html">ga_join()</a></code>,
 <code><a href="ga_relate.html">ga_relate()</a></code>,
+<code><a href="ga_sparse_equals_exact.html">ga_sparse_equals_exact()</a></code>,
 <code><a href="ga_sparse_pairs.html">ga_sparse_pairs()</a></code></p></div>
     </div>
 

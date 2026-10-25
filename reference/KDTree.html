@@ -58,19 +58,79 @@
     <p>a <code>KDTree</code> object</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p><code><a href="https://rdrr.io/r/base/write.html" class="external-link">write()</a></code> saves the index to a file and <code>KDTree$read()</code> opens it again, so
+you build it once and reuse it across sessions. With <code>mmap = TRUE</code>,
+<code>read()</code> maps the file instead of reading it, so the index opens at once
+and each query loads only the parts of the tree it visits.</p>
+    </div>
+    <div class="section level2">
     <h2 id="methods">Methods<a class="anchor" aria-label="anchor" href="#methods"></a></h2>
 
 
 <div class="section">
 <h3 id="method-new">Method <code>new</code><a class="anchor" aria-label="anchor" href="#method-new"></a></h3>
-<p>Build the index. A bigger <code>node_size</code> builds quicker but searches slower.</p>
+<p>Build the index. With a bigger <code>node_size</code> you build quicker but search
+slower.</p>
+</div>
+
+<div class="section">
+<h3 id="method-read">Method <code>read</code><a class="anchor" aria-label="anchor" href="#method-read"></a></h3>
+<p>Read an index that <code><a href="https://rdrr.io/r/base/write.html" class="external-link">write()</a></code> saved</p>
+<div class="section">
+<h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
+
+<dl><dt><code>path</code></dt>
+<dd><p>the file <code><a href="https://rdrr.io/r/base/write.html" class="external-link">write()</a></code> saved</p></dd>
+
+<dt><code>mmap</code></dt>
+<dd><p>whether to map the file rather than read it into memory</p></dd>
+
+
+</dl></div>
+<div class="section">
+<h4 id="details-1">details<a class="anchor" aria-label="anchor" href="#details-1"></a></h4>
+<p>With <code>mmap = TRUE</code>, <code>read()</code> maps the file instead of reading it into
+memory, so it opens at once whatever the file's size and each query
+loads only the parts of the tree it visits. Do not change or delete
+the file while you use a mapped index, or R may crash.</p>
+</div>
+<div class="section">
+<h4 id="returns">returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<p>a <code>KDTree</code> object</p>
+</div>
+
+</div>
+
+<div class="section">
+<h3 id="method-write">Method <code>write</code><a class="anchor" aria-label="anchor" href="#method-write"></a></h3>
+<p>Save the index to a file</p>
+<div class="section">
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+
+<dl><dt><code>path</code></dt>
+<dd><p>the file to write</p></dd>
+
+
+</dl></div>
+<div class="section">
+<h4 id="details-2">details<a class="anchor" aria-label="anchor" href="#details-2"></a></h4>
+<p><code><a href="https://rdrr.io/r/base/write.html" class="external-link">write()</a></code> saves the tree with the row each point came from, so
+<code>KDTree$read()</code> restores an index that answers every query the same
+way. The tree keeps the layout of the JavaScript kdbush library.</p>
+</div>
+<div class="section">
+<h4 id="returns-1">returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<p><code>NULL</code></p>
+</div>
+
 </div>
 
 <div class="section">
 <h3 id="method-range">Method <code>range</code><a class="anchor" aria-label="anchor" href="#method-range"></a></h3>
 <p>Which points fall inside each geometry's box</p>
 <div class="section">
-<h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
+<h4 id="arguments-2">Arguments<a class="anchor" aria-label="anchor" href="#arguments-2"></a></h4>
 
 <dl><dt><code>geometry</code></dt>
 <dd><p>a GeoArrow array to look up</p></dd>
@@ -78,7 +138,7 @@
 
 </dl></div>
 <div class="section">
-<h4 id="returns">returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
+<h4 id="returns-2">returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
 <p>a list array of 1 based row numbers, the same length as
 <code>geometry</code></p>
 </div>
@@ -87,9 +147,9 @@
 
 <div class="section">
 <h3 id="method-within">Method <code>within</code><a class="anchor" aria-label="anchor" href="#method-within"></a></h3>
-<p>Which points are within <code>r</code> of each point, measured flat in coordinate units</p>
+<p>Which points are within <code>r</code> of each point, in flat coordinate units</p>
 <div class="section">
-<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
+<h4 id="arguments-3">Arguments<a class="anchor" aria-label="anchor" href="#arguments-3"></a></h4>
 
 <dl><dt><code>geometry</code></dt>
 <dd><p>a GeoArrow point array to look up</p></dd>
@@ -100,7 +160,7 @@
 
 </dl></div>
 <div class="section">
-<h4 id="returns-1">returns<a class="anchor" aria-label="anchor" href="#returns-1"></a></h4>
+<h4 id="returns-3">returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
 <p>a list array of 1 based row numbers, the same length as
 <code>geometry</code></p>
 </div>
@@ -109,19 +169,19 @@
 
 <div class="section">
 <h3 id="method-size">Method <code>size</code><a class="anchor" aria-label="anchor" href="#method-size"></a></h3>
-<p>How many rows went in</p>
+<p>How many rows you put in</p>
 <div class="section">
-<h4 id="returns-2">returns<a class="anchor" aria-label="anchor" href="#returns-2"></a></h4>
-<p>the length of the array the index was built from</p>
+<h4 id="returns-4">returns<a class="anchor" aria-label="anchor" href="#returns-4"></a></h4>
+<p>the length of the array you built the index from</p>
 </div>
 
 </div>
 
 <div class="section">
 <h3 id="method-n-indexed">Method <code>n_indexed</code><a class="anchor" aria-label="anchor" href="#method-n-indexed"></a></h3>
-<p>How many rows made it into the tree, skipping null and empty points</p>
+<p>How many rows the tree holds, without null and empty points</p>
 <div class="section">
-<h4 id="returns-3">returns<a class="anchor" aria-label="anchor" href="#returns-3"></a></h4>
+<h4 id="returns-5">returns<a class="anchor" aria-label="anchor" href="#returns-5"></a></h4>
 <p>the number of indexed rows</p>
 </div>
 
@@ -137,10 +197,12 @@
     <div class="dont-index"><p>Other index:
 <code><a href="RTree.html">RTree</a></code>,
 <code><a href="ga_envelope.html">ga_envelope()</a></code>,
+<code><a href="ga_hilbert_order.html">ga_hilbert_order()</a></code>,
 <code><a href="ga_knn_join.html">ga_knn_join()</a></code>,
 <code><a href="ga_set_thread_pool.html">ga_set_thread_pool()</a></code>,
 <code><a href="ga_sparse_dwithin.html">ga_sparse_dwithin()</a></code>,
-<code><a href="ga_sparse_knn.html">ga_sparse_knn()</a></code></p></div>
+<code><a href="ga_sparse_knn.html">ga_sparse_knn()</a></code>,
+<code><a href="ga_str_order.html">ga_str_order()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -163,8 +225,16 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  2  3 10 23</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># a single lookup is an array of one</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">idx</span><span class="op">$</span><span class="fu">within</span><span class="op">(</span><span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6</span>, <span class="fl">35.8</span><span class="op">)</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="co"># for a single lookup, pass an array of one</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">idx</span><span class="op">$</span><span class="fu">within</span><span class="op">(</span><span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6</span>, <span class="fl">35.8</span><span class="op">)</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 24 30 37 54</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># save the index and open it again without reading the whole file</span></span></span>
+<span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">".gaix"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">idx</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-in"><span><span class="va">saved</span> <span class="op">&lt;-</span> <span class="va">KDTree</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="va">path</span>, mmap <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">saved</span><span class="op">$</span><span class="fu">within</span><span class="op">(</span><span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="op">-</span><span class="fl">78.6</span>, <span class="fl">35.8</span><span class="op">)</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 24 30 37 54</span>
 </code></pre></div>
     </div>

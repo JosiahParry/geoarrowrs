@@ -1,8 +1,8 @@
 # Intersect pairs of two point lines
 
 Returns where each pair of lines meets: a point when they cross, and a
-line when they overlap along a shared stretch. `y` is recycled against
-`x`.
+line when they overlap along a shared stretch. `ga_line_intersection()`
+recycles `y` against `x`.
 
 ## Usage
 
@@ -27,16 +27,17 @@ a GeoArrow multipoint array of the same length as `x`
 
 ## Details
 
-The answer is a point when the lines cross and a segment when they
-overlap. Both come back as a multipoint so the column has one type: a
-crossing gives one point, an overlap gives the two endpoints of the
-shared stretch. So
+`ga_line_intersection()` finds a point when the lines cross and a
+segment when they overlap. It returns both as a multipoint to give the
+column one type: one point for a crossing, and the two endpoints of the
+shared stretch for an overlap. So
 [`ga_n_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_n_coords.md)
-tells the two apart, and an overlap can be rebuilt from its endpoints.
+tells the two apart, and you can rebuild an overlap from its endpoints.
 
-Both arguments must hold single segments, that is a `LINE` or a two
-point `LINESTRING`. Longer linestrings, other geometry types, and null
-rows come back null, as do pairs that simply do not meet. Use
+`ga_line_intersection()` needs single segments in both arguments, that
+is a `LINE` or a two point `LINESTRING`. It returns null for longer
+linestrings, other geometry types, and null rows, and for pairs that
+simply do not meet. Use
 [`ga_self_intersections()`](https://josiahparry.github.io/geoarrowrs/reference/ga_self_intersections.md)
 for a geometry with many segments.
 

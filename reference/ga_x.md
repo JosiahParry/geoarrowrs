@@ -1,7 +1,7 @@
 # Read the x or y of a point
 
-Returns one coordinate per row. Any geometry that is not a single point,
-and any null or empty point, gives `NA`.
+Returns one coordinate per row. Each function returns `NA` for any
+geometry that is not a single point, and for any null or empty point.
 
 ## Usage
 
@@ -23,8 +23,9 @@ a double array of the same length as `geometry`
 
 ## Details
 
-Both coordinate encodings work, so a point array stored as a struct of
-two double columns and one stored as interleaved values read the same.
+Both functions accept either coordinate encoding and return the same
+values whether the point array holds a struct of two double columns or
+interleaved values.
 
 Use
 [`ga_coords()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coords.md)
@@ -41,7 +42,7 @@ Other iteration:
 ## Examples
 
 ``` r
-pts <- ga_xy(c(-111.76, -112.07), c(34.87, 33.45))
+pts <- ga_point(c(-111.76, -112.07), c(34.87, 33.45))
 
 as.vector(ga_x(pts))
 #> [1] -111.76 -112.07

@@ -1,9 +1,9 @@
 # Cast to the narrowest geometry type
 
 Inspects the geometries and casts to the most specific type that can
-hold every one of them. A `geometry` array holding only points becomes a
-`point` array; one holding points and polygons is left alone, since no
-narrower type fits.
+hold every one of them. `ga_downcast_geometry()` turns a `geometry`
+array holding only points into a `point` array, and leaves one holding
+points and polygons alone, since no narrower type fits.
 
 ## Usage
 
@@ -23,14 +23,15 @@ a GeoArrow array of the narrowest type that fits, the same length as `x`
 
 ## Details
 
-This is the inverse of casting up to `geometry`, and is useful after
-reading a format that does not record a single geometry type.
+It is the inverse of casting up to `geometry`, and is useful after you
+read a format that does not record a single geometry type.
 
 ## See also
 
 Other cast:
 [`ga_as_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_as_point.md),
 [`ga_cast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cast_geometry.md),
+[`ga_collection_extract()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collection_extract.md),
 [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md),
 [`ga_flatten()`](https://josiahparry.github.io/geoarrowrs/reference/ga_flatten.md),
 [`ga_from_wkb()`](https://josiahparry.github.io/geoarrowrs/reference/ga_from_wkb.md)
@@ -38,10 +39,10 @@ Other cast:
 ## Examples
 
 ``` r
-pts <- ga_xy(c(0, 1), c(0, 1))
+pts <- ga_point(c(0, 1), c(0, 1))
 wide <- ga_cast_geometry(pts, "geometry")
 
-# only points in there, so it narrows back to a point array
+# only points in there, so you get a point array back
 ga_downcast_geometry(wide)
 #> <nanoarrow_array geoarrow.point{struct}[2]>
 #>  $ length    : int 2

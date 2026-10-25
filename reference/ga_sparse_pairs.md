@@ -27,15 +27,15 @@ a struct array of `x` and `y` row numbers
 
 ## Details
 
-Everything but the padding is expressible with Arrow's own
+You can express everything but the padding with Arrow's own
 `list_flatten()` and `list_parent_indices()`. What they cannot do is
-`left = TRUE`, which has to put back a row for each row of `x` that
-matched nothing, so the whole expansion happens here rather than half
-here and half in R.
+`left = TRUE`, where `ga_sparse_pairs()` has to put back a row for each
+row of `x` that matched nothing, so it does the whole expansion itself
+rather than leaving half to R.
 
-Rows are 1 based, matching what the sparse predicates return. A row of
-`x` that matched nothing appears once with a null `y` when
-`left = TRUE`, and not at all otherwise.
+`ga_sparse_pairs()` numbers rows from 1, matching what the sparse
+predicates return. It returns a row of `x` that matched nothing once
+with a null `y` when `left = TRUE`, and drops it otherwise.
 
 ## See also
 
@@ -43,19 +43,21 @@ Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md),
 [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md),
 [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
 
 ## Examples
 
 ``` r
-x <- ga_xy(c(0, 5, 1), c(0, 5, 1))
-y <- ga_xy(c(0, 1), c(0, 1))
+x <- ga_point(c(0, 5, 1), c(0, 5, 1))
+y <- ga_point(c(0, 1), c(0, 1))
 
-# the middle row of x matches nothing, so it is only there with left = TRUE
+# the middle row of x matches nothing, so you see it only with left = TRUE
 ga_sparse_pairs(ga_sparse_intersects(x, y))
 #> <nanoarrow_array struct[2]>
 #>  $ length    : int 2

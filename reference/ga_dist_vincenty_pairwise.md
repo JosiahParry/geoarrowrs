@@ -40,8 +40,8 @@ Other distance:
 
 ``` r
 # Raleigh to Charlotte, and Raleigh to Wilmington
-origin <- ga_xy(c(-78.6382, -78.6382), c(35.7796, 35.7796))
-dest <- ga_xy(c(-80.8431, -77.9447), c(35.2271, 34.2257))
+origin <- ga_point(c(-78.6382, -78.6382), c(35.7796, 35.7796))
+dest <- ga_point(c(-80.8431, -77.9447), c(35.2271, 34.2257))
 
 as.vector(ga_dist_vincenty_pairwise(origin, dest))
 #> [1] 209216.6 183645.3

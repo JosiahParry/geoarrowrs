@@ -48,19 +48,19 @@ a list array of 1 based row numbers into `y`, the same length as `x`
 
 ## Details
 
-The comparison is not the full cross product. `y` is indexed in a packed
-Hilbert R-tree and only the rows whose bounding box overlaps are relate
-tested, so the cost scales with the number of candidates rather than
-with `length(x) * length(y)`.
+These functions do not compare the full cross product. Each function
+indexes `y` in a packed Hilbert R-tree and runs the relate test only on
+the rows whose bounding boxes overlap, so the cost scales with the
+number of candidates rather than with `length(x) * length(y)`.
 
-A row of `x` that matches nothing gives a zero length element, not a
-null. A null or empty geometry in `x` gives a null element, and one in
-`y` is never returned.
+Each function returns a zero length element, not a null, for a row of
+`x` that matches nothing. It returns a null element for a null or empty
+geometry in `x`, and never returns one in `y`.
 
 [`ga_disjoint()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md)
-has no sparse form. Disjointness is the one relationship a bounding box
-cannot narrow, so the answer is almost every row of `y` and the result
-is denser than the input.
+has no sparse form. Disjointness is the one relationship you cannot
+narrow with a bounding box, so the answer is almost every row of `y` and
+the result is denser than the input.
 
 ## References
 
@@ -72,10 +72,12 @@ Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md),
 [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_join.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md),
 [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 
 ## Examples

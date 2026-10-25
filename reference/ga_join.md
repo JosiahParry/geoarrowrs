@@ -2,8 +2,8 @@
 
 Attaches the columns of `y` to each row of `x` that it relates to, the
 way [`merge()`](https://rdrr.io/r/base/merge.html) attaches them on a
-shared key. The geometry of `x` is kept and the geometry of `y` is
-dropped.
+shared key. `ga_join()` keeps the geometry of `x` and drops the geometry
+of `y`.
 
 ## Usage
 
@@ -31,7 +31,7 @@ ga_join(
 
 - suffix:
 
-  the pair of suffixes added to column names found in both frames
+  the pair of suffixes to add to the column names both frames share
 
 - left:
 
@@ -44,23 +44,23 @@ columns of `y`
 
 ## Details
 
-A row of `x` matching several rows of `y` is repeated once per match, so
-the result is usually longer than `x`. With `left = TRUE` a row matching
-nothing is kept once with `NA` in every column from `y`; with
-`left = FALSE` it is dropped.
+`ga_join()` repeats a row of `x` once for each row of `y` it matches, so
+the result is usually longer than `x`. With `left = TRUE` it keeps a row
+that matches nothing once, with `NA` in every column from `y`; with
+`left = FALSE` it drops that row.
 
 `predicate` is any of the sparse predicates, such as
 [`ga_sparse_within()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
 or
 [`ga_sparse_touches()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md).
-It is called once as `predicate(x_geometry, y_geometry)`, so points in
-polygons is
+`ga_join()` calls it once as `predicate(x_geometry, y_geometry)`, so use
 [`ga_sparse_within()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
-and polygons holding points is
-[`ga_sparse_contains()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md).
+for points in polygons and
+[`ga_sparse_contains()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md)
+for polygons holding points.
 
-Columns the two frames share are suffixed rather than overwritten. Both
-frames need exactly one GeoArrow geometry column.
+`ga_join()` suffixes the columns the two frames share rather than
+overwriting them. Both frames need exactly one GeoArrow geometry column.
 
 ## See also
 
@@ -68,9 +68,11 @@ Other topology:
 [`ga_contains()`](https://josiahparry.github.io/geoarrowrs/reference/topology.md),
 [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md),
 [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md),
+[`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md),
 [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md),
 [`ga_is_empty()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is_empty.md),
 [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md),
+[`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md),
 [`ga_sparse_intersects()`](https://josiahparry.github.io/geoarrowrs/reference/sparse.md),
 [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
 
@@ -84,7 +86,7 @@ counties <- nc[c("NAME", "geometry")]
 sites <- data.frame(
   site = c("a", "b"),
   geometry = geoarrow::as_geoarrow_vctr(
-    ga_xy(c(-78.6, -80.8), c(35.8, 35.2))
+    ga_point(c(-78.6, -80.8), c(35.8, 35.2))
   )
 )
 

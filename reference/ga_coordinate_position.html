@@ -72,8 +72,9 @@
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This is the three way form of a point in polygon test, distinguishing a
-point that lies exactly on an edge from one strictly inside. <code>point</code> is
-recycled against <code>geometry</code>. A null geometry or a null point gives <code>NA</code>.</p>
+point that lies exactly on an edge from one strictly inside.
+<code>ga_coordinate_position()</code> recycles <code>point</code> against <code>geometry</code> and returns
+<code>NA</code> for a null geometry or a null point.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -84,10 +85,12 @@ recycled against <code>geometry</code>. A null geometry or a null point gives <c
     <div class="dont-index"><p>Other topology:
 <code><a href="topology.html">ga_contains()</a></code>,
 <code><a href="ga_dimension.html">ga_dimension()</a></code>,
+<code><a href="ga_equals_exact.html">ga_equals_exact()</a></code>,
 <code><a href="ga_filter.html">ga_filter()</a></code>,
 <code><a href="ga_is_empty.html">ga_is_empty()</a></code>,
 <code><a href="ga_join.html">ga_join()</a></code>,
 <code><a href="ga_relate.html">ga_relate()</a></code>,
+<code><a href="ga_sparse_equals_exact.html">ga_sparse_equals_exact()</a></code>,
 <code><a href="sparse.html">ga_sparse_intersects()</a></code>,
 <code><a href="ga_sparse_pairs.html">ga_sparse_pairs()</a></code></p></div>
     </div>
@@ -99,7 +102,7 @@ recycled against <code>geometry</code>. A null geometry or a null point gives <c
 <span class="r-in"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">geoarrow</span><span class="fu">::</span><span class="fu"><a href="https://geoarrow.org/geoarrow-r/reference/as_geoarrow_array.html" class="external-link">as_geoarrow_array</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html" class="external-link">st_sfc</a></span><span class="op">(</span><span class="va">square</span>, <span class="va">square</span>, <span class="va">square</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># inside, on the edge, and outside</span></span></span>
-<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">9</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">9</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="fu">ga_coordinate_position</span><span class="op">(</span><span class="va">g</span>, <span class="va">p</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "inside"   "boundary" "outside" </span>
 </code></pre></div>

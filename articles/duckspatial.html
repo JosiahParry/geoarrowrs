@@ -78,24 +78,24 @@
 
 
 
-    <p>The wonderful <a href="https://cidree.github.io/duckspatial/" class="external-link"><code>{duckspatial}</code></a> R package—which delegates operations to <a href="https://duckdb.org/" class="external-link">DuckDB</a> has published bench marks for operations.</p>
+    <p>The wonderful <a href="https://cidree.github.io/duckspatial/" class="external-link"><code>{duckspatial}</code></a> R package, which delegates operations to <a href="https://duckdb.org/" class="external-link">DuckDB</a>, has published benchmarks for its operations.</p>
 <p>This article compares <a href="https://josiahparry.github.io/geoarrowrs/">geoarrowrs</a> implementations to <a href="https://r-spatial.github.io/sf/" class="external-link">sf</a> and <a href="https://cidree.github.io/duckspatial/" class="external-link">duckspatial</a> by recreating the benchmark but including geoarrow-rs.</p>
 <p>See the original <a href="https://cidree.github.io/duckspatial/articles/benchmark.html" class="external-link">duckspatial benchmark</a>.</p>
-<p>This version of the benchmark compares the peformance of:</p>
+<p>This version of the benchmark compares the performance of:</p>
 <ul>
 <li>duckspatial</li>
 <li><a href="https://github.com/apache/sedona-db/tree/main/r/sedonadb" class="external-link">{sedonadb}</a></li>
 <li>geoarrowrs</li>
 </ul>
-<section class="level3"><h3 id="the-earth-is-a-sphere-note-a-plane">The earth is a sphere note a plane<a class="anchor" aria-label="anchor" href="#the-earth-is-a-sphere-note-a-plane"></a>
+<section class="level3"><h3 id="the-earth-is-a-sphere-not-a-plane">The earth is a sphere not a plane<a class="anchor" aria-label="anchor" href="#the-earth-is-a-sphere-not-a-plane"></a>
 </h3>
-<p>One of the issues the duckdbspatial benchmark—is that is calculates <strong>incorrect</strong> distances. <a href="https://r-spatial.github.io/sf/" class="external-link">sf</a> delegates to <a href="https://r-spatial.github.io/s2/" class="external-link">s2</a> to have very accurate spherical distance calculations—this comes at the cost of speed.</p>
-<p>Using planar distances for calculating the distance from Jakarta to New York calculates the distance <em>through</em> the earth.</p>
+<p>One issue with the duckspatial benchmark is that it calculates <strong>incorrect</strong> distances. <a href="https://r-spatial.github.io/sf/" class="external-link">sf</a> delegates to <a href="https://r-spatial.github.io/s2/" class="external-link">s2</a> for very accurate spherical distance calculations, and pays for that accuracy in speed.</p>
+<p>If you use planar distance from Jakarta to New York, you measure the distance <em>through</em> the earth.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
-<figure><p><img src="duckspatial_files/figure-html/unnamed-chunk-2-1.png" alt="Five log-log panels, one per operation, of elapsed seconds against input size. geoarrowrs is the lowest line in every panel. sf is the highest. duckspatial sits between them and is flat from 100,000 to one million rows, where its fixed startup cost is most of what is measured." width="1056"></p>
-<figcaption>Elapsed seconds by input size. Both axes are log scaled.</figcaption></figure>
+<figure><p><img src="duckspatial_files/figure-html/unnamed-chunk-2-1.png" alt="Five log-log panels, one per operation, of elapsed seconds against input size. geoarrowrs is the lowest line in every panel. sf is the highest. duckspatial sits between them and is flat from 100,000 to one million rows, where its fixed startup cost dominates the timing." width="1056"></p>
+<figcaption>Elapsed seconds by input size. Both axes are on a log scale.</figcaption></figure>
 </div>
 </div>
 </div>
@@ -717,15 +717,10 @@ Dissolve
 <span>    <span class="va">n</span>,</span>
 <span>    <span class="st">"geoarrowrs"</span>,</span>
 <span>    <span class="op">{</span></span>
-<span>      <span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://arrow.apache.org/docs/r/reference/as_arrow_table.html" class="external-link">as_arrow_table</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_drop_geometry</a></span><span class="op">(</span><span class="va">pts</span><span class="op">)</span><span class="op">)</span></span>
-<span>      <span class="va">tbl</span><span class="op">$</span><span class="va">geometry</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://arrow.apache.org/docs/r/reference/as_arrow_array.html" class="external-link">as_arrow_array</a></span><span class="op">(</span><span class="fu">wk</span><span class="fu">::</span><span class="fu"><a href="https://paleolimbot.github.io/wk/reference/wkb.html" class="external-link">as_wkb</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">pts</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="fu">cast</span><span class="op">(</span></span>
-<span>        <span class="fu">arrow</span><span class="fu">::</span><span class="fu"><a href="https://arrow.apache.org/docs/r/reference/data-type.html" class="external-link">binary</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>      <span class="op">)</span></span>
-<span>      <span class="va">groups</span> <span class="op">&lt;-</span> <span class="va">tbl</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">category</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">category</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">compute</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>      <span class="va">rows</span> <span class="op">&lt;-</span> <span class="va">tbl</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">category</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">compute</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>      <span class="va">tbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://arrow.apache.org/docs/r/reference/as_arrow_table.html" class="external-link">as_arrow_table</a></span><span class="op">(</span><span class="fu">as_ga_frame</span><span class="op">(</span><span class="va">pts</span><span class="op">)</span><span class="op">)</span></span>
 <span>      <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ga_collect_agg.html">ga_collect_agg</a></span><span class="op">(</span></span>
-<span>        <span class="fu"><a href="https://arrow.apache.org/nanoarrow/latest/r/reference/as_nanoarrow_array.html" class="external-link">as_nanoarrow_array</a></span><span class="op">(</span><span class="va">rows</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span>,</span>
-<span>        sizes <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/vector.html" class="external-link">as.vector</a></span><span class="op">(</span><span class="va">groups</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
+<span>        <span class="fu"><a href="https://arrow.apache.org/nanoarrow/latest/r/reference/as_nanoarrow_array.html" class="external-link">as_nanoarrow_array</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span>,</span>
+<span>        by <span class="op">=</span> <span class="fu"><a href="https://arrow.apache.org/nanoarrow/latest/r/reference/as_nanoarrow_array.html" class="external-link">as_nanoarrow_array</a></span><span class="op">(</span><span class="va">tbl</span><span class="op">$</span><span class="va">category</span><span class="op">)</span></span>
 <span>      <span class="op">)</span></span>
 <span>    <span class="op">}</span>,</span>
 <span>    <span class="va">out</span><span class="op">$</span><span class="va">length</span></span>

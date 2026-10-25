@@ -1,7 +1,7 @@
 # Test whether a ring is convex
 
-`TRUE` when the geometry's ring turns consistently in one direction. A
-polygon is judged on its exterior ring.
+`TRUE` when the geometry's ring turns consistently in one direction.
+`ga_is_convex()` judges a polygon on its exterior ring.
 
 ## Usage
 
@@ -21,10 +21,11 @@ a boolean array of the same length as `geometry`
 
 ## Details
 
-A linestring must be closed, that is form a ring, to be reported convex;
-an open one is `FALSE`. A polygon's exterior ring is always closed, so
-polygons need no special handling. Any other geometry type, or a null
-geometry, becomes `NA` rather than `FALSE`.
+`ga_is_convex()` reports a linestring as convex only when it is closed,
+that is forms a ring, and returns `FALSE` for an open one. A polygon's
+exterior ring is always closed, so `ga_is_convex()` needs no special
+case for them. `ga_is_convex()` returns `NA` rather than `FALSE` for any
+other geometry type or a null geometry.
 
 ## References
 

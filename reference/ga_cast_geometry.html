@@ -76,14 +76,16 @@ holds.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Some casts always succeed:</p><table class="table table"><tr><td>from</td><td>to</td></tr><tr><td><code>point</code></td><td><code>multipoint</code></td></tr><tr><td><code>linestring</code></td><td><code>multilinestring</code></td></tr><tr><td><code>polygon</code></td><td><code>multipolygon</code></td></tr><tr><td>any type</td><td><code>geometry</code>, <code>wkb</code>, <code>wkt</code></td></tr></table><p>Others are fallible and error when a geometry does not fit the target type,
-such as a <code>multipoint</code> holding two points cast to <code>point</code>:</p><table class="table table"><tr><td>from</td><td>to</td></tr><tr><td><code>multipoint</code></td><td><code>point</code></td></tr><tr><td><code>multilinestring</code></td><td><code>linestring</code></td></tr><tr><td><code>multipolygon</code></td><td><code>polygon</code></td></tr><tr><td><code>geometry</code></td><td>any concrete type</td></tr></table><p>The dimension is carried over from the input, and casting between different
-dimensions is not supported.</p>
+    <p><code>ga_cast_geometry()</code> always succeeds for these casts:</p><table class="table table"><tr><td>from</td><td>to</td></tr><tr><td><code>point</code></td><td><code>multipoint</code></td></tr><tr><td><code>linestring</code></td><td><code>multilinestring</code></td></tr><tr><td><code>polygon</code></td><td><code>multipolygon</code></td></tr><tr><td>any type</td><td><code>geometry</code>, <code>wkb</code>, <code>wkt</code></td></tr></table><p>Others are fallible, and <code>ga_cast_geometry()</code> errors when a geometry does
+not fit the target type, such as when you cast a <code>multipoint</code> holding two
+points to <code>point</code>:</p><table class="table table"><tr><td>from</td><td>to</td></tr><tr><td><code>multipoint</code></td><td><code>point</code></td></tr><tr><td><code>multilinestring</code></td><td><code>linestring</code></td></tr><tr><td><code>multipolygon</code></td><td><code>polygon</code></td></tr><tr><td><code>geometry</code></td><td>any concrete type</td></tr></table><p><code>ga_cast_geometry()</code> carries the dimension over from the input and does not
+support casting between different dimensions.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other cast:
 <code><a href="ga_as_point.html">ga_as_point()</a></code>,
+<code><a href="ga_collection_extract.html">ga_collection_extract()</a></code>,
 <code><a href="ga_downcast_geometry.html">ga_downcast_geometry()</a></code>,
 <code><a href="ga_explode.html">ga_explode()</a></code>,
 <code><a href="ga_flatten.html">ga_flatten()</a></code>,
@@ -92,9 +94,9 @@ dimensions is not supported.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pts</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_xy.html">ga_xy</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pts</span> <span class="op">&lt;-</span> <span class="fu"><a href="ga_point.html">ga_point</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># widening always works</span></span></span>
+<span class="r-in"><span><span class="co"># you can always widen</span></span></span>
 <span class="r-in"><span><span class="fu">ga_cast_geometry</span><span class="op">(</span><span class="va">pts</span>, <span class="st">"multipoint"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;nanoarrow_array geoarrow.multipoint{list}[2]&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ length    : int 2</span>
@@ -132,7 +134,7 @@ dimensions is not supported.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .. ..$ dictionary: NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ dictionary: NULL</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># so does going out to wkb, which is what plain Parquet stores</span></span></span>
+<span class="r-in"><span><span class="co"># and you can always go out to wkb, which is what plain Parquet stores</span></span></span>
 <span class="r-in"><span><span class="fu">ga_cast_geometry</span><span class="op">(</span><span class="va">pts</span>, <span class="st">"wkb"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;nanoarrow_array geoarrow.wkb{binary}[2]&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ length    : int 2</span>

@@ -41,7 +41,7 @@ Other simplify:
 fp <- system.file("shape/nc.shp", package = "sf")
 nc <- as.data.frame(read_shapefile(fp))
 
-# a bigger epsilon drops more vertices
+# ga_simplify() drops more vertices with a bigger epsilon
 head(as.vector(ga_n_coords(nc$geometry)), 3)
 #> [1] 27 26 28
 head(as.vector(ga_n_coords(ga_simplify(nc$geometry, 0.01))), 3)

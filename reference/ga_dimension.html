@@ -69,9 +69,10 @@
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>An empty geometry has no dimension and gives <code>NA</code>, which is distinct from a
-point's 0. <code>ga_boundary_dimension()</code> gives the dimension of the geometry's
-boundary instead, so a polygon is 1 and a point is <code>NA</code>.</p>
+    <p><code>ga_dimension()</code> returns <code>NA</code> for an empty geometry, which has no dimension,
+rather than a point's 0. <code>ga_boundary_dimension()</code> gives the dimension of
+the geometry's boundary instead, so it returns 1 for a polygon and <code>NA</code> for
+a point.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -82,10 +83,12 @@ boundary instead, so a polygon is 1 and a point is <code>NA</code>.</p>
     <div class="dont-index"><p>Other topology:
 <code><a href="topology.html">ga_contains()</a></code>,
 <code><a href="ga_coordinate_position.html">ga_coordinate_position()</a></code>,
+<code><a href="ga_equals_exact.html">ga_equals_exact()</a></code>,
 <code><a href="ga_filter.html">ga_filter()</a></code>,
 <code><a href="ga_is_empty.html">ga_is_empty()</a></code>,
 <code><a href="ga_join.html">ga_join()</a></code>,
 <code><a href="ga_relate.html">ga_relate()</a></code>,
+<code><a href="ga_sparse_equals_exact.html">ga_sparse_equals_exact()</a></code>,
 <code><a href="sparse.html">ga_sparse_intersects()</a></code>,
 <code><a href="ga_sparse_pairs.html">ga_sparse_pairs()</a></code></p></div>
     </div>

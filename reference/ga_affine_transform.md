@@ -1,7 +1,7 @@
 # Apply an arbitrary affine transform
 
 Transforms every coordinate by the six coefficients of an affine matrix.
-The geometry type of the output matches the input.
+`ga_affine_transform()` keeps the input's geometry type.
 
 ## Usage
 
@@ -31,10 +31,10 @@ a GeoArrow array of the same geometry type as `geometry`
 
 ## Details
 
-The coefficients map a coordinate to `x' = a * x + b * y + xoff` and
-`y' = d * x + e * y + yoff`, the same ordering PostGIS `ST_Affine` and
-Shapely use. The identity transform is
-`a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0`.
+`ga_affine_transform()` maps a coordinate to `x' = a * x + b * y + xoff`
+and `y' = d * x + e * y + yoff`, the same ordering PostGIS `ST_Affine`
+and Shapely use. Pass `a = 1, b = 0, xoff = 0, d = 0, e = 1, yoff = 0`
+for the identity transform.
 
 This is the general form behind
 [`ga_translate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_translate.md),
@@ -46,8 +46,8 @@ Reach for those when they fit, since they are clearer at the call site.
 Use this one to apply a matrix you already have, or to compose several
 steps into a single pass over the coordinates.
 
-All six coefficients are recycled against `geometry`, so a different
-transform can be applied to every row.
+`ga_affine_transform()` recycles all six coefficients against
+`geometry`, so you can apply a different transform to every row.
 
 ## References
 
@@ -56,6 +56,7 @@ transform can be applied to every row.
 ## See also
 
 Other affine:
+[`ga_jitter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_jitter.md),
 [`ga_rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_center.md),
 [`ga_rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.md),
 [`ga_scale_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_scale_xy.md),

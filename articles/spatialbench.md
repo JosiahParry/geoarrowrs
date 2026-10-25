@@ -1,8 +1,8 @@
 # SpatialBench
 
-The twelve queries of
-[SpatialBench](https://github.com/apache/sedona-spatialbench), run by
-`bench/run-all.R` and read back here from `bench/last-run/`.
+`bench/run-all.R` runs the twelve queries of
+[SpatialBench](https://github.com/apache/sedona-spatialbench), and this
+page reads the results back from `bench/last-run/`.
 
 |              |                         |
 |:-------------|:------------------------|
@@ -305,7 +305,11 @@ out <- dataset("trip") |>
     )
   ) |>
   select(
-    t_tripkey, pickup_lon, pickup_lat, t_pickuptime, distance_to_center
+    t_tripkey,
+    pickup_lon,
+    pickup_lat,
+    t_pickuptime,
+    distance_to_center
   ) |>
   arrange(distance_to_center, t_tripkey) |>
   head(100) |>
@@ -370,13 +374,24 @@ source("bench/setup.R")
 
 t0 <- Sys.time()
 
-t <- scan_cols("trip", c(
-  "t_tripkey", "t_pickuptime", "t_dropofftime", "t_distance", "t_fare"
-))
-t <- with_column(t, "distance_to_box", ga_dist_euclidean_pairwise(
-  geometry("trip", "t_pickuploc"),
-  literal(BOX_Q3_WKT)
-))
+t <- scan_cols(
+  "trip",
+  c(
+    "t_tripkey",
+    "t_pickuptime",
+    "t_dropofftime",
+    "t_distance",
+    "t_fare"
+  )
+)
+t <- with_column(
+  t,
+  "distance_to_box",
+  ga_dist_euclidean_pairwise(
+    geometry("trip", "t_pickuploc"),
+    literal(BOX_Q3_WKT)
+  )
+)
 
 out <- t |>
   filter(distance_to_box <= 0.045) |>

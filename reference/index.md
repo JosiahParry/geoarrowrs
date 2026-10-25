@@ -11,10 +11,28 @@
 
 ## Construct
 
+- [`ga_linestring()`](https://josiahparry.github.io/geoarrowrs/reference/ga_linestring.md)
+  : Build linestrings from coordinate columns
+- [`ga_make_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_envelope.md)
+  : Build rectangles from their bounds
+- [`ga_make_grid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_grid.md)
+  : Build a grid of squares over an extent
 - [`ga_make_line()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_line.md)
   : Build a line between pairs of points
-- [`ga_xy()`](https://josiahparry.github.io/geoarrowrs/reference/ga_xy.md)
-  : Build a point array from x and y coordinates
+- [`ga_make_line_agg()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_line_agg.md)
+  : Join the points of each group into a line
+- [`ga_make_polygon()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_polygon.md)
+  : Build polygons from rings
+- [`ga_multilinestring()`](https://josiahparry.github.io/geoarrowrs/reference/ga_multilinestring.md)
+  : Build multilinestrings from coordinate columns
+- [`ga_multipoint()`](https://josiahparry.github.io/geoarrowrs/reference/ga_multipoint.md)
+  : Build multipoints from coordinate columns
+- [`ga_multipolygon()`](https://josiahparry.github.io/geoarrowrs/reference/ga_multipolygon.md)
+  : Build multipolygons from coordinate columns
+- [`ga_point()`](https://josiahparry.github.io/geoarrowrs/reference/ga_point.md)
+  : Build a point array from coordinates
+- [`ga_polygon()`](https://josiahparry.github.io/geoarrowrs/reference/ga_polygon.md)
+  : Build polygons from coordinate columns
 
 ## Area
 
@@ -28,6 +46,8 @@
   [`ga_unsigned_area_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
   [`ga_perimeter_geodesic()`](https://josiahparry.github.io/geoarrowrs/reference/area_geodesic.md)
   : Geodesic area and perimeter
+- [`ga_perimeter_euclidean()`](https://josiahparry.github.io/geoarrowrs/reference/ga_perimeter_euclidean.md)
+  : Planar perimeter of polygons
 
 ## Distance
 
@@ -81,6 +101,9 @@
 - [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md)
   : Compute the bounding box of geometries
 
+- [`ga_hilbert_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_hilbert_order.md)
+  : Order rows along a Hilbert curve
+
 - [`ga_knn_join()`](https://josiahparry.github.io/geoarrowrs/reference/ga_knn_join.md)
   : Join two data frames on nearest neighbours
 
@@ -99,6 +122,9 @@
 
   Find the rows of `y` nearest each row of `x`
 
+- [`ga_str_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_str_order.md)
+  : Order rows by sort-tile-recursive packing
+
 ## Relate
 
 - [`ga_coordinate_position()`](https://josiahparry.github.io/geoarrowrs/reference/ga_coordinate_position.md)
@@ -107,6 +133,9 @@
 - [`ga_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md)
   [`ga_boundary_dimension()`](https://josiahparry.github.io/geoarrowrs/reference/ga_dimension.md)
   : Determine the topological dimension of geometries
+
+- [`ga_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_equals_exact.md)
+  : Test whether geometries are identical within a tolerance
 
 - [`ga_filter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_filter.md)
   : Keep the rows of a data frame that relate to another spatially
@@ -119,6 +148,12 @@
 
 - [`ga_relate()`](https://josiahparry.github.io/geoarrowrs/reference/ga_relate.md)
   : DE-9IM relationship between geometries
+
+- [`ga_sparse_equals_exact()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_equals_exact.md)
+  :
+
+  Find which rows of `y` are identical to each row of `x` within a
+  tolerance
 
 - [`ga_sparse_pairs()`](https://josiahparry.github.io/geoarrowrs/reference/ga_sparse_pairs.md)
   : Expand a sparse predicate into the row pairs a join needs
@@ -170,12 +205,12 @@
 
 ## Hulls and bounds
 
-- [`ga_bounding_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_bounding_rect.md)
-  : Axis-aligned bounding rectangle
 - [`ga_concave_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_concave_hull.md)
   : Compute the concave hull of geometries
 - [`ga_convex_hull()`](https://josiahparry.github.io/geoarrowrs/reference/ga_convex_hull.md)
   : Compute the convex hull of geometries
+- [`ga_envelope()`](https://josiahparry.github.io/geoarrowrs/reference/ga_envelope.md)
+  : Compute the bounding box of geometries
 - [`ga_extremes()`](https://josiahparry.github.io/geoarrowrs/reference/ga_extremes.md)
   : Compute the extreme coordinates of geometries
 - [`ga_minimum_rotated_rect()`](https://josiahparry.github.io/geoarrowrs/reference/ga_minimum_rotated_rect.md)
@@ -205,6 +240,8 @@
 
 - [`ga_collect_agg()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collect_agg.md)
   : Collect an array into one geometry, or one per group
+- [`ga_interpolate_aw()`](https://josiahparry.github.io/geoarrowrs/reference/ga_interpolate_aw.md)
+  : Interpolate values from one set of polygons onto another by area
 - [`ga_unary_union()`](https://josiahparry.github.io/geoarrowrs/reference/ga_unary_union.md)
   : Dissolve an entire array of polygons into one
 
@@ -222,6 +259,8 @@
 
 - [`ga_affine_transform()`](https://josiahparry.github.io/geoarrowrs/reference/ga_affine_transform.md)
   : Apply an arbitrary affine transform
+- [`ga_jitter()`](https://josiahparry.github.io/geoarrowrs/reference/ga_jitter.md)
+  : Move each geometry by a small random offset
 - [`ga_rotate_around_center()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_center.md)
   : Rotate around the bounding box center
 - [`ga_rotate_around_centroid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_rotate_around_centroid.md)
@@ -266,6 +305,8 @@
   : Test the winding order of a ring
 - [`ga_orient()`](https://josiahparry.github.io/geoarrowrs/reference/ga_orient.md)
   : Apply a winding direction to polygon rings
+- [`ga_reverse()`](https://josiahparry.github.io/geoarrowrs/reference/ga_reverse.md)
+  : Reverse the coordinate order of geometries
 - [`ga_winding_order()`](https://josiahparry.github.io/geoarrowrs/reference/ga_winding_order.md)
   : Determine the winding order of a ring
 
@@ -281,9 +322,15 @@
 - [`ga_x()`](https://josiahparry.github.io/geoarrowrs/reference/ga_x.md)
   [`ga_y()`](https://josiahparry.github.io/geoarrowrs/reference/ga_x.md)
   : Read the x or y of a point
+- [`ga_make_valid()`](https://josiahparry.github.io/geoarrowrs/reference/ga_make_valid.md)
+  : Repair invalid polygons
 - [`ga_is_valid()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
   [`ga_validation_error()`](https://josiahparry.github.io/geoarrowrs/reference/validation.md)
   : Test whether geometries are well formed
+- [`ga_geometry_type()`](https://josiahparry.github.io/geoarrowrs/reference/ga_geometry_type.md)
+  : Determine the type of each geometry
+- [`ga_is()`](https://josiahparry.github.io/geoarrowrs/reference/ga_is.md)
+  : Test whether geometries are of a given type
 
 ## Cast
 
@@ -296,6 +343,8 @@
   : Cast to one GeoArrow geometry type
 - [`ga_cast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_cast_geometry.md)
   : Cast geometries to another GeoArrow geometry type
+- [`ga_collection_extract()`](https://josiahparry.github.io/geoarrowrs/reference/ga_collection_extract.md)
+  : Extract parts of one type from geometry collections
 - [`ga_downcast_geometry()`](https://josiahparry.github.io/geoarrowrs/reference/ga_downcast_geometry.md)
   : Cast to the narrowest geometry type
 - [`ga_explode()`](https://josiahparry.github.io/geoarrowrs/reference/ga_explode.md)
@@ -320,3 +369,5 @@
   : Remove repeated consecutive points from geometries
 - [`register_geoarrow_udfs()`](https://josiahparry.github.io/geoarrowrs/reference/register_geoarrow_udfs.md)
   : Register geoarrowrs functions with Arrow
+- [`mask_sf()`](https://josiahparry.github.io/geoarrowrs/reference/mask_sf.md)
+  : Put the sf lookalikes on the search path
