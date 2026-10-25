@@ -24,14 +24,14 @@ Suggests:
     arrow,
     dplyr,
     geoarrow,
-    jsonlite,
     nanoarrow,
     sdf,
     sf,
     vctrs,
     wk,
     testthat (>= 3.0.0),
-    withr
+    withr,
+    yyjsonr
 Remotes:
     JosiahParry/sdf
 Config/testthat/edition: 3

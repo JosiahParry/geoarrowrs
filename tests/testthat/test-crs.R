@@ -1,6 +1,6 @@
 skip_if_not_installed("sf")
 skip_if_not_installed("geoarrow")
-skip_if_not_installed("jsonlite")
+skip_if_not_installed("yyjsonr")
 
 # a projected crs written as PROJJSON, the way geoarrow writes it from sf
 nc <- sf::st_geometry(sf::read_sf(system.file("shape/nc.shp", package = "sf")))
@@ -11,14 +11,14 @@ inputs <- list(
   polygons = geoarrow::as_geoarrow_array(nc)
 )
 
-# the crs as parsed JSON, since Rust writes PROJJSON compactly where geoarrow R pretty prints it
+# the crs as parsed JSON, since Rust writes PROJJSON compactly and geoarrow R pretty prints it
 crs_of <- function(x) {
   schema <- nanoarrow::infer_nanoarrow_schema(x)
   parsed <- geoarrow::geoarrow_schema_parse(schema)
+  crs <- parsed$crs
+  # a string crs, such as an authority code, is compared as it is
   list(
-    crs = if (nzchar(parsed$crs)) {
-      jsonlite::fromJSON(parsed$crs, simplifyVector = FALSE)
-    },
+    crs = if (startsWith(crs, "{")) yyjsonr::read_json_str(crs) else crs,
     crs_type = parsed$crs_type
   )
 }
