@@ -221,12 +221,30 @@ test_that("read_geojson() reads each form of crs member as sf does", {
   }
 })
 
-test_that("read_geojson() errors for a linked crs member", {
-  path <- withr::local_tempfile(fileext = ".geojson")
-  writeLines(
-    '{"type":"FeatureCollection","crs":{"type":"link","properties":{"href":"https://example.com/crs","type":"proj4"}},"features":[]}',
-    path
+test_that("read_geojson() keeps a crs member it cannot resolve as given", {
+  members <- c(
+    link = '{"type":"link","properties":{"href":"https://example.com/crs","type":"proj4"}}',
+    unnamed = '{"type":"name","properties":{}}',
+    other = '{"type":"custom","properties":{"id":42}}'
   )
+  expected <- c(
+    link = "https://example.com/crs",
+    unnamed = members[["unnamed"]],
+    other = members[["other"]]
+  )
+  for (kind in names(members)) {
+    path <- withr::local_tempfile(fileext = ".geojson")
+    writeLines(
+      paste0(
+        '{"type":"FeatureCollection","crs":',
+        members[[kind]],
+        ',"features":[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[1,2]}}]}'
+      ),
+      path
+    )
+    meta <- metadata_of(as.data.frame(read_geojson(path))$geometry)
 
-  expect_error(read_geojson(path), "linked `crs` member", fixed = TRUE)
+    expect_identical(meta$crs, expected[[kind]], label = kind)
+    expect_null(meta$crs_type, label = kind)
+  }
 })

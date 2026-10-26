@@ -332,10 +332,10 @@ fn build_geometry(
 /// `read_geojson()` reads the coordinate reference system from the `crs`
 /// member that GeoJSON allowed before RFC 7946, and that [sf::st_write()]
 /// writes for data outside WGS 84, such as `urn:ogc:def:crs:EPSG::32617`. It
-/// stores an authority code such as `EPSG:32617`, keeps any other name as
-/// given, and falls back to `OGC:CRS84`, the RFC 7946 default, as GDAL does
-/// when the member is missing or `null`. It errors for a linked `crs` member,
-/// which GDAL downloads.
+/// stores an authority code such as `EPSG:32617`, and keeps any other name, or
+/// the address of a linked CRS, as given. It keeps a member it cannot read as
+/// its JSON text, and uses `OGC:CRS84`, the RFC 7946 default, as GDAL does when
+/// the member is missing or `null`.
 ///
 /// @param path path to a `.geojson` file holding a `FeatureCollection`.
 /// @returns a `nanoarrow_array_stream` of a single record batch, holding the
@@ -381,11 +381,7 @@ fn read_geojson(path: &str) -> extendr_api::Result<Robj> {
             .map(|code| code.to_string())
             .or_else(|| properties["code"].as_str().map(str::to_string))
             .map(|code| format!("EPSG:{code}")),
-        Some("link") => {
-            return Err(Error::Other(format!(
-                "`read_geojson()` cannot follow the linked `crs` member of {path}"
-            )));
-        }
+        Some("link") => properties["href"].as_str().map(str::to_string),
         _ => None,
     };
     // an OGC URN, such as urn:ogc:def:crs:EPSG::32617, holds the authority, an optional version, and the code
@@ -401,9 +397,12 @@ fn read_geojson(path: &str) -> extendr_api::Result<Robj> {
             None => name,
         }
     });
-    let crs = crs_name
-        .filter(|name| name != "OGC:CRS84")
-        .unwrap_or_else(|| OGC_CRS84.to_string());
+    // a member with no name to read keeps its JSON text, so the file's crs is never dropped
+    let crs = match crs_name {
+        Some(name) if name != "OGC:CRS84" => name,
+        None if !member.is_null() => member.to_string(),
+        _ => OGC_CRS84.to_string(),
+    };
 
     // first-seen key order, since serde_json's map does not preserve the document order
     let mut names: Vec<String> = Vec::new();

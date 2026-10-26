@@ -3187,10 +3187,10 @@ read_flatgeobuf <- function(path, bbox = NULL) .Call(wrap__read_flatgeobuf, path
 #' `read_geojson()` reads the coordinate reference system from the `crs`
 #' member that GeoJSON allowed before RFC 7946, and that [sf::st_write()]
 #' writes for data outside WGS 84, such as `urn:ogc:def:crs:EPSG::32617`. It
-#' stores an authority code such as `EPSG:32617`, keeps any other name as
-#' given, and falls back to `OGC:CRS84`, the RFC 7946 default, as GDAL does
-#' when the member is missing or `null`. It errors for a linked `crs` member,
-#' which GDAL downloads.
+#' stores an authority code such as `EPSG:32617`, and keeps any other name, or
+#' the address of a linked CRS, as given. It keeps a member it cannot read as
+#' its JSON text, and uses `OGC:CRS84`, the RFC 7946 default, as GDAL does when
+#' the member is missing or `null`.
 #'
 #' @param path path to a `.geojson` file holding a `FeatureCollection`.
 #' @returns a `nanoarrow_array_stream` of a single record batch, holding the
