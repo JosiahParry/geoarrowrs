@@ -65,6 +65,8 @@ there rather than surfacing Rust’s error strings.
   [`inherits()`](https://rdrr.io/r/base/class.html).
 - Never use [`do.call()`](https://rdrr.io/r/base/do.call.html). Splice
   with rlang instead: `rlang::inject(f(!!!args))`.
+- Never use jsonlite anywhere in this repository: not in DESCRIPTION,
+  package code, tests, benchmarks, or vignettes. Use yyjsonr for JSON.
 
 ## Tests
 

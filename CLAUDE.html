@@ -70,6 +70,7 @@
 <p><code>R/extendr-wrappers.R</code> is generated and excluded from air and jarl. Any hand-written R goes in a new file under <code>R/</code> and is linted normally. Prefer rlang standalone checks and <code><a href="https://cli.r-lib.org/reference/cli_abort.html" class="external-link">cli::cli_abort()</a></code> there rather than surfacing Rust’s error strings.</p>
 <ul><li>Never use bare <code><a href="https://rdrr.io/r/base/try.html" class="external-link">try()</a></code>. Use <code><a href="https://rlang.r-lib.org/reference/try_fetch.html" class="external-link">rlang::try_fetch()</a></code> with an <code>error</code> handler, so the condition is caught deliberately rather than turned into a sentinel object that has to be sniffed with <code><a href="https://rdrr.io/r/base/class.html" class="external-link">inherits()</a></code>.</li>
 <li>Never use <code><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call()</a></code>. Splice with rlang instead: <code>rlang::inject(f(!!!args))</code>.</li>
+<li>Never use jsonlite anywhere in this repository: not in DESCRIPTION, package code, tests, benchmarks, or vignettes. Use yyjsonr for JSON.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="tests">Tests<a class="anchor" aria-label="anchor" href="#tests"></a></h2>
