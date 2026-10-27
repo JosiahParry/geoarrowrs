@@ -68,7 +68,7 @@ sf::st_as_sfc(geoarrow::as_geoarrow_vctr(fixed))
 #> Dimension:     XY
 #> Bounding box:  xmin: 0 ymin: 0 xmax: 2 ymax: 2
 #> CRS:           NA
-#> MULTIPOLYGON (((0 0, 1 1, 0 2, 0 0)), ((2 2, 1 ...
+#> MULTIPOLYGON (((1 1, 2 0, 2 2, 1 1)), ((0 2, 0 ...
 as.vector(ga_is_valid(fixed))
 #> [1] TRUE
 ```
